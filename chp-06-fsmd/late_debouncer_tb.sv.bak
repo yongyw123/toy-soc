@@ -40,7 +40,7 @@ module late_debouncer_tb();
     * instead, we use N = 3 ==> 2^{N} * 10ns = 80 ns; 
     * for simulation purposes; 
     * note that since N = 3 is in nano scale;
-    * it would be an exact 80 ns; it will be slightly off (?);
+    * it would NOT be an exact 80 ns; it will be slightly off by 5 ns(?);
     */
     localparam N = 3;
     late_debouncer #(.N(N)) uut(.*);

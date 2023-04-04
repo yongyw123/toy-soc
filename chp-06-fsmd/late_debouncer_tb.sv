@@ -77,8 +77,8 @@ module late_debouncer_tb();
     *       1. have a few glitches before stablizing at HIGH;
     * test 02: flip test 01;
     *
-    * recall that the debouncer filter window is 40ms;
-    * so set glitches to < 20ms; this should be enough;
+    * recall that the debouncer filter window is set to around 80 ns;
+    * so set glitches to < 80ms; this should be enough;
     */
     
     initial
