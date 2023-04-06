@@ -32,7 +32,7 @@ module core_gpo_tb();
     logic cs;                       // input; chip select;
     logic write;                    // input;
     logic read;                     // input;
-    logic [OUTPUT_WIDTH-1:0] addr;  // register address;
+    logic [REG_ADDRESS_WIDTH -1:0] addr;  // register address;
     logic [DATA_WIDTH-1:0] wr_data; // input;
     logic [DATA_WIDTH-1:0] rd_data; // input;
     logic [OUTPUT_WIDTH-1:0] dout;
