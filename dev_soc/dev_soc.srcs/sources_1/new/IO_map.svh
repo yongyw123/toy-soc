@@ -1,5 +1,5 @@
-`ifndef _MMIO_MAP_INCLUDED
-`def _MMIO_MAP_INCLUDED
+`ifndef _IO_MAP_SVH
+`define _IO_MAP_SVH
 
 /*
 *  Memory-mapped for MicroBlaze MCS;
@@ -27,14 +27,16 @@
 // IO based address provided by microblaze MSC, as above;
 `define MCS_IO_BUS_BASE_ADDR 0xC0000000
 
+// data size;
+`define G_DATA_WIDTH 32   // MCS uses word (32-bit);
+
 /*
 * IO modules/cores shall be sloted in the IO memory map;
 * module index; each module is allocated with 32 registers;
 */  
-`define S0_SYS_TIMER    0
-`define S1_DEBUG_UART   1   
-`define S2_GPO_LED      2
-`define S3_GPI_SW       3
+`define S0_SYS_TIMER    0   // timer;
+`define S1_DEBUG_UART   1   // uart for serial debugging;
+`define S2_GPO_LED      2   // general purpose output to accommodate LED;
+`define S3_GPI_SW       3   // general purpose input to accommodate switches;
 
-
-`endif //_MMIO_MAP_INCLUDED
+`endif //_IO_MAP_SVH
