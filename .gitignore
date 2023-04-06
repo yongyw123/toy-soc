@@ -6,6 +6,6 @@
 **/*.ip_user_files/
 **/*.runs/
 **/*.sim/
-**/.jou
+**/*.jou
 **/*.xpr
 **/vivado.log
