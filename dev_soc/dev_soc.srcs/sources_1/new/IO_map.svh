@@ -27,8 +27,10 @@
 // IO based address provided by microblaze MSC, as above;
 `define MCS_IO_BUS_BASE_ADDR 0xC0000000
 
-// data size;
-`define G_DATA_WIDTH 32   // MCS uses word (32-bit);
+// size;
+`define G_DATA_WIDTH        32  // MCS uses word (32-bit);
+`define G_REGISTER_ADDR_SIZE 5  // each core has 2^{5} = 32 internal registers;
+`define G_CORE_ADDR_SIZE     6  // tba;
 
 /*
 * IO modules/cores shall be sloted in the IO memory map;
