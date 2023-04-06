@@ -23,6 +23,12 @@ module core_gpo
     /*
     * Purpose: General Purpose Output Core for MicroBlaze MCS IO Module (Core);
     * Construction: Output data at the output port is maintained by a HW register;
+    * 
+    * Structure:
+    *   1. core_gpo is primariliy serves for LED;
+    *   2. by specs, each core is allocated 32 internal registers;
+    *   3. by above, LED only needs only internal register;
+    * 
     * Extra Material on the Construction: 
     * https://www.intel.com/content/www/us/en/docs/programmable/683375/current/output-registers.html
     */
@@ -37,7 +43,7 @@ module core_gpo
         input logic cs,     // chip select;
         input logic write,
         input logic read,   
-        input logic [4:0] addr,         // internal registers; total 32 registers;
+        input logic [4:0] addr,         // only one is used;
         input logic [31:0]  wr_data,    // MCS uses 32-bit;
         output logic [31:0]  rd_data,
         
