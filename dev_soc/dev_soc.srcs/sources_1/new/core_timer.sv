@@ -70,6 +70,8 @@ module core_timer/*
     localparam REG_CNTLOW_OFFSET = 2'b00;
     localparam REG_CNTHIGH_OFFSET = 2'b01;
     localparam REG_CTRL_OFFSET = 2'b10;
+    localparam REG_CTRL_GO_POS = 1'b0;
+    localparam REG_CTRL_CLEAR_POS = 1'b1;
     
     /*
     * note on control signals;
@@ -101,7 +103,7 @@ module core_timer/*
             // only when requested;
             if(wr_en)
                 // bit 0 is for the go signal;
-                ctrl_curr <= wr_data[0];
+                ctrl_curr <= wr_data[REG_CTRL_GO_POS];
    
    /* -------- decoding -----------*/
    
@@ -122,23 +124,17 @@ module core_timer/*
         transits to LOW when wr_en turns LOW;
         this forms a pulse;
    */ 
-   assign clear = wr_en && wr_data[1];
+   assign clear = wr_en && wr_data[REG_CTRL_CLEAR_POS];
    
    // go signal, this is already handled by the register above;
    assign go = ctrl_curr;
    
-   // counter read output request from the interfacce;
+   // counter read output requested from the interfacce;
+   // recall that 64-bit counter is split into two 32-bit register;
    always_comb
-        begin
-            // lowerword count requested;
-            if(addr[1:0] == REG_CNTLOW_OFFSET) 
-                rd_data = count_curr[REGISTER_WIDTH - 1:0];
-            // upperword count requested;
-            else if(addr[1:0] == REG_CNTHIGH_OFFSET)
-                rd_data = count_curr >> REGISTER_WIDTH;
-            // do nothing;
-            else
-                ;
-        end 
-    
+        case(addr[1:0])
+            REG_CNTLOW_OFFSET:  rd_data = count_curr[REGISTER_WIDTH - 1:0]; // lowerword count;
+            REG_CNTHIGH_OFFSET:  rd_data = (count_curr >> REGISTER_WIDTH);  // upperword count;
+            default: ;  // do nothing;    
+        endcase
 endmodule
