@@ -18,6 +18,10 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
+`ifndef _CORE_GPO_SV
+`define _CORE_GPO_SV
+
+`include "IO_map.svh"
 
 module core_gpo
     /*
@@ -43,13 +47,14 @@ module core_gpo
         input logic cs,     // chip select;
         input logic write,
         input logic read,   
-        input logic [4:0] addr,         // only one is used;
-        input logic [31:0]  wr_data,    // MCS uses 32-bit;
-        output logic [31:0]  rd_data,
+        input logic [`REG_ADDR_SIZE_G-1:0] addr,         
+        input logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    
+        output logic [`REG_DATA_WIDTH_G-1:0]  rd_data,
         
         // external signals;
         output logic [W-1:0] dout
     );
+    
     
     // signal declaration
     logic [W-1:0] data_curr;    // not all 32-bit is used;
@@ -69,4 +74,4 @@ module core_gpo
     assign dout = data_curr;
 endmodule
 
-
+`endif // _CORE_GPO_SV;

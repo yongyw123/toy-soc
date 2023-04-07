@@ -18,7 +18,10 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
+`ifndef _CORE_GPI_SV
+`define _CORE_GPI_SV
 
+`include "IO_map.svh"
 
 module core_gpi
     /*
@@ -46,9 +49,9 @@ module core_gpi
         input logic cs,                 // chip select; not needed?
         input logic write,              // not needed;
         input logic read,               // still contemplating whether to use this ...?
-        input logic [4:0] addr,         // only one is used;
-        input logic [31:0]  wr_data,    // MCS uses 32-bit;
-        output logic [31:0]  rd_data,   // sampled din
+        input logic [`REG_ADDR_SIZE_G-1:0] addr,         // only one is used;
+        input logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    // MCS uses 32-bit;
+        output logic [`REG_DATA_WIDTH_G-1:0]  rd_data,   // sampled din
         
         // the external signal at the input port to sample;
         input logic [W-1:0] din
@@ -64,5 +67,7 @@ module core_gpi
    
    // output: only W bit wide;
    assign rd_data[W-1:0] = rd_curr; // sampled;
-   assign rd_data[31:W] = 0;        // zero padded; physical input does not have signed concept;
+   assign rd_data[`REG_DATA_WIDTH_G-1:W] = 0;        // zero padded; physical input does not have signed concept;
 endmodule
+
+`endif // _CORE_GPI_SV

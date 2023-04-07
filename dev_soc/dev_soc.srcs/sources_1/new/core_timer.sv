@@ -18,7 +18,10 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
+`ifndef CORE_TIMER_SV
+`define CORE_TIMER_SV
 
+`include "IO_map.svh"
 
 module core_timer/*
     * Purpose: System Timer Core for MicroBlaze MCS IO Module (Core);
@@ -55,16 +58,18 @@ module core_timer/*
         input logic cs,                 // chip select; not needed?
         input logic write,              
         input logic read,               
-        input logic [4:0] addr,         
-        input logic [31:0]  wr_data,    
-        output logic [31:0]  rd_data           
+        input logic [`REG_ADDR_SIZE_G-1:0] addr,         
+        input logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    
+        output logic [`REG_DATA_WIDTH_G-1:0]  rd_data           
     );
     
     // signal declaration;
     localparam TOTAL_COUNT = 64;            // counter bit length;
     logic [TOTAL_COUNT - 1:0] count_curr;   // for counter;
     
-    localparam REGISTER_WIDTH = 32;         
+    //logic [`G_CORE_ADDR_SIZE:0] test;
+    
+    
     
     // register map as noted above;
     localparam REG_CNTLOW_OFFSET = 2'b00;
@@ -133,8 +138,10 @@ module core_timer/*
    // recall that 64-bit counter is split into two 32-bit register;
    always_comb
         case(addr[1:0])
-            REG_CNTLOW_OFFSET:  rd_data = count_curr[REGISTER_WIDTH - 1:0]; // lowerword count;
-            REG_CNTHIGH_OFFSET:  rd_data = (count_curr >> REGISTER_WIDTH);  // upperword count;
+            REG_CNTLOW_OFFSET:  rd_data = count_curr[`REG_DATA_WIDTH_G- 1:0]; // lowerword count;
+            REG_CNTHIGH_OFFSET:  rd_data = (count_curr >> `REG_DATA_WIDTH_G);  // upperword count;
             default: ;  // do nothing;    
         endcase
 endmodule
+
+`endif // _CORE_TIMER_SV;

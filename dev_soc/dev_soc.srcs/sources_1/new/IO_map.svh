@@ -28,13 +28,14 @@
 `define MCS_IO_BUS_BASE_ADDR 0xC0000000
 
 // size;
-`define G_DATA_WIDTH        32  // MCS uses word (32-bit);
-`define G_REGISTER_ADDR_SIZE 5  // each core has 2^{5} = 32 internal registers;
-`define G_CORE_ADDR_SIZE     6  // tba;
+`define REG_DATA_WIDTH_G    32  // MCS uses word (32-bit);
+`define REG_ADDR_SIZE_G     5   // each core has 2^{5} = 32 internal registers;
+`define CORE_ADDR_SIZE_G    6   // tba;
 
 /*
 * IO modules/cores shall be sloted in the IO memory map;
 * module index; each module is allocated with 32 registers;
+* max number of cores is still undecided yet;
 */  
 `define S0_SYS_TIMER    0   // timer;
 `define S1_DEBUG_UART   1   // uart for serial debugging;
