@@ -56,10 +56,10 @@
 
 `define BUS_MICROBLAZE_SIZE_G       32
 `define BUS_USER_SIZE_G             21  // as above; (word aligned);
-`define BUS_SYSTEM_SELECT_BIT_INDEX 23  // as above, to distinguish two systems;
+`define BUS_SYSTEM_SELECT_BIT_INDEX_G 23  // as above, to distinguish two systems;
 
 // IO based address provided by microblaze MSC, as above;
-`define BUS_MICROBLAZE_IO_BASE_ADDR 32'hC0000000
+`define BUS_MICROBLAZE_IO_BASE_ADDR_G 32'hC0000000
 
 /*---------------------------------------------------- 
 * mmio address space
