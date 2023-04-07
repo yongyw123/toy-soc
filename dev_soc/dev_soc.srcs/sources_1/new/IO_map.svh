@@ -35,9 +35,9 @@
 * Note on Address Space
 *-------------------------------------------
 1. Microblaze MCS bus address is 32-bit-byte-addressable
-2. hwoever, the project only uses 24-bit-byte-addressable;
+2. hwoever, user-space only uses 24-bit-byte-addressable;
 3. on word alignment, this is 22-bit-word-addressable;
-4. As of now, 24-bit address space is intended
+4. As of now, 24-bit-bute address space is intended
     to host one general MMIO system and at least one 
     specialized system;
     where MMIO system includes core such as
@@ -45,7 +45,7 @@
     and the other specialized system is for future
     extensibility;
 
-5. MMIO address space is allocated 11-bit-word;
+5. 21-bit-word-addressable is allocated for user-systems;
 6. for now to distinguish between different spaces (systems)
     bit-23 is used;
     LOW for MMIO system;
@@ -55,11 +55,11 @@
 */
 
 `define BUS_MICROBLAZE_SIZE_G       32
-`define BUS_USER_SIZE_G             24        // as above;
+`define BUS_USER_SIZE_G             21  // as above; (word aligned);
 `define BUS_SYSTEM_SELECT_BIT_INDEX 23  // as above, to distinguish two systems;
 
 // IO based address provided by microblaze MSC, as above;
-`define BUS_MICROBLAZE_IO_BASE_ADDR 0xC0000000
+`define BUS_MICROBLAZE_IO_BASE_ADDR 32'hC0000000
 
 /*---------------------------------------------------- 
 * mmio address space
