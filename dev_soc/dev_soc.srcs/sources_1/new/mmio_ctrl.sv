@@ -24,7 +24,7 @@
 
 `include "IO_map.svh"
 
-module mimo_ctrl
+module mmio_ctrl
     /*
     // Purpose: MMIO controller; 
     //
@@ -62,7 +62,7 @@ module mimo_ctrl
     
     // input, output, and register data for each core;
     output logic [`REG_ADDR_SIZE_G-1:0] core_addr_reg_array[`MIMO_CORE_TOTAL_G-1:0], // register of each core;
-    output logic [`REG_DATA_WIDTH_G-1:0] core_data_rd_array[`MIMO_CORE_TOTAL_G-1:0], // read data from each core;
+    input logic [`REG_DATA_WIDTH_G-1:0] core_data_rd_array[`MIMO_CORE_TOTAL_G-1:0], // read data from each core;
     output logic [`REG_DATA_WIDTH_G-1:0] core_data_wr_array[`MIMO_CORE_TOTAL_G-1:0] // write data from each core;
     );
     
