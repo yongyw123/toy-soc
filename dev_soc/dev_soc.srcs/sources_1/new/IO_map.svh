@@ -28,9 +28,11 @@
 `define MCS_IO_BUS_BASE_ADDR 0xC0000000
 
 // size;
+`define MIMO_ADDR_SIZE_G    6                   // mmio to accommodate 64 cores;
+`define MIMO_CORE_TOTAL     2**MIMO_ADDR_SIZE_G // 64 cores;
+
 `define REG_DATA_WIDTH_G    32  // MCS uses word (32-bit);
 `define REG_ADDR_SIZE_G     5   // each core has 2^{5} = 32 internal registers;
-`define CORE_ADDR_SIZE_G    6   // tba;
 
 /*
 * IO modules/cores shall be sloted in the IO memory map;
