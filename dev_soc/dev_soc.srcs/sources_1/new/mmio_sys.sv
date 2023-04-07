@@ -87,15 +87,13 @@ module mmio_sys
         .mmio_wr_data(mmio_wr_data),
         .mmio_rd_data(mmio_rd_data),
         
-        
         // broadcaster to all io cores;
         .core_ctrl_cs_array(core_ctrl_cs_array),    // chip select for each io;    
         .core_ctrl_wr_array(core_ctrl_wr_array),    // write enable for each io;
         .core_ctrl_rd_array(core_ctrl_rd_array),    // read enable for each io;
         .core_data_wr_array(core_data_wr_array),    // write data;
         .core_data_rd_array(core_data_rd_array),    // data to multiplex
-        .core_addr_reg_array(core_addr_reg_array)    // register address to decode;
-            
+        .core_addr_reg_array(core_addr_reg_array)    // register address to decode;      
     );
     
     // timer core;
@@ -111,6 +109,10 @@ module mmio_sys
         .rd_data(core_data_rd_array[`S0_SYS_TIMER])    
     );
     
+    /* ???
+     UART core is not constructed yet;
+     ???
+     */
     
     // general purpose output core;
     core_gpo #(.W(LED_NUM)) gpo_unit
