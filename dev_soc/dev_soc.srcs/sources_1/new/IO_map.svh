@@ -14,6 +14,13 @@
 * by above, we only need to know the IO bus address;
 * this address region shall host the to-be-constructed IO cores/modules;
 * IO bus address: 0xC0000000 - 0xFFFFFFFF; mapped to IO bus address output;
+*
+
+* MMIO Address Space;
+* 1. MMIO is intended for cores such as system timer, GPIO, UART etc.
+* 2. MMIO to host up to 64 cores; (2^{6})
+* 3. each core has 32 internal registers; (2^{5});
+*
 
 * Reference:
 * Title: MicroBlaze Micro Controller System v3.0/ LogiCORE IP Product Guide;
@@ -28,6 +35,7 @@
 `define MCS_IO_BUS_BASE_ADDR 0xC0000000
 
 // size;
+
 `define MIMO_ADDR_SIZE_G    6                   // mmio to accommodate 64 cores;
 `define MIMO_CORE_TOTAL     2**MIMO_ADDR_SIZE_G // 64 cores;
 
