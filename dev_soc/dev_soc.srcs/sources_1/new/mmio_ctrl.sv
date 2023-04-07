@@ -51,8 +51,8 @@ module mmio_ctrl
     // address;
     input logic [`BUS_USER_SIZE_G-1:0] mmio_addr,       // addr to decode;
     // data;
-    input logic [`REG_ADDR_SIZE_G-1:0] mmio_wr_data,  // 32 bit;
-    output logic [`REG_ADDR_SIZE_G-1:0] mmio_rd_data, // 32-bit;
+    input logic [`REG_DATA_WIDTH_G-1:0] mmio_wr_data,  // 32 bit;
+    output logic [`REG_DATA_WIDTH_G-1:0] mmio_rd_data, // 32-bit;
      
     /* core interface; */
     // individual control signals for each core;
