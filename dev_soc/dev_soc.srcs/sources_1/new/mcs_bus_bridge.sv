@@ -52,9 +52,15 @@ module mcs_bus_bridge
     logic [29:0] addr_word_align;  // to convert to word-alignment: 32->30;
     
     /* mapping between microblaze's and user's */
-    // address mapping 
+    //> address mapping 
     assign addr_word_align = io_address[31:2];  // word alignment;
+    
+    // the given base address should match,
+    // only compare the MSB 8-bit of the address; 
+    // this should be sufficient to ensure uniqueness?
+    // since other bits are used for other identification purposes;
     assign bridge_en = (io_address[31:24] == MCS_BRIDGE_BASE_ADDR[31:24]);
+    
     assign user_mmio_cs = (bridge_en && (io_address[`BUS_SYSTEM_SELECT_BIT_INDEX_G] == 0));
     assign user_addr = addr_word_align[`BUS_USER_SIZE_G-1:0];   
     
