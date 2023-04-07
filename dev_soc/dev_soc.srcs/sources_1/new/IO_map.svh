@@ -31,32 +31,50 @@
 // system clock; fixed at 100MHz;
 `define SYS_CLK_FREQ 100   
 
+/*------------------------------------------
+* Note on Address Space
+*-------------------------------------------
+1. Microblaze MCS bus address is 32-bit-byte-addressable
+2. hwoever, the project only uses 24-bit-byte-addressable;
+3. on word alignment, this is 22-bit-word-addressable;
+4. As of now, 24-bit address space is intended
+    to host one general MMIO system and at least one 
+    specialized system;
+    where MMIO system includes core such as
+    system timer, GPIO, SPI, I2C etc;
+    and the other specialized system is for future
+    extensibility;
 
-/*---------------------------------------------------- 
-* bus info/ (address)
-----------------------------------------------------
-// microblaze mcs bus is 32-bit;
-// after bridging, the user-bus is 2?-bit; (it is still undecided);
-// that said user-bus size is at most 32-bit;
-// and there should be no harm allocating more for the user-bus;
-// one concern is the fpga size; not sure if this will be a limiting factor?
+5. MMIO address space is allocated 11-bit-word;
+6. for now to distinguish between different spaces (systems)
+    bit-23 is used;
+    LOW for MMIO system;
+    HIGH otherwise;
+7. if there are other systems integrated in the future;
+    more bits will be allocated for distinguishing purposes;
 */
-`define BUS_MICROBLAZE_SIZE_G 32
-`define BUS_USER_SIZE_G       21
+
+`define BUS_MICROBLAZE_SIZE_G       32
+`define BUS_USER_SIZE_G             24        // as above;
+`define BUS_SYSTEM_SELECT_BIT_INDEX 23  // as above, to distinguish two systems;
 
 // IO based address provided by microblaze MSC, as above;
 `define BUS_MICROBLAZE_IO_BASE_ADDR 0xC0000000
 
 /*---------------------------------------------------- 
-* mmio address space 
+* mmio address space
+* this address space as above is to store
+* the IO cores;
+* 1. allocated to host 2^{6} = 64 cores;
+* 2. each core has 2^{5} = 32 internal registers 
+*   where each register is 32-bit wide;
 ----------------------------------------------------*/
+
 `define MIMO_ADDR_SIZE_G        6                   // mmio to accommodate 64 cores;
 //`define MIMO_CORE_TOTAL_G       2**MIMO_ADDR_SIZE_G // 64 cores;
 `define MIMO_CORE_TOTAL_G       64 // 64 cores;
 
-/* ----------------------------------------------------
-* register info of each core; 
-----------------------------------------------------*/
+// register info of each core; 
 `define REG_DATA_WIDTH_G    32  // MCS uses word (32-bit);
 `define REG_ADDR_SIZE_G     5   // each core has 2^{5} = 32 internal registers;
 
