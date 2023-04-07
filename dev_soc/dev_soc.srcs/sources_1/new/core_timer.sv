@@ -134,12 +134,14 @@ module core_timer/*
    // go signal, this is already handled by the register above;
    assign go = ctrl_curr;
    
-   // counter read output requested from the interfacce;
+   // counter value is always available;
+   // as long as the register address is matched;
+   // "read" input is not necessary;
    // recall that 64-bit counter is split into two 32-bit register;
    always_comb
         case(addr[1:0])
-            REG_CNTLOW_OFFSET:  rd_data = count_curr[`REG_DATA_WIDTH_G- 1:0]; // lowerword count;
-            REG_CNTHIGH_OFFSET:  rd_data = (count_curr >> `REG_DATA_WIDTH_G);  // upperword count;
+            REG_CNTLOW_OFFSET:  rd_data = count_curr[31:0]; // lowerword count;
+            REG_CNTHIGH_OFFSET:  rd_data = {32'h0000, count_curr[63:32]};  // upperword count;
             default: ;  // do nothing;    
         endcase
 endmodule
