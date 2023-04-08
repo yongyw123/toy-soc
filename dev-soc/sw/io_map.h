@@ -1,6 +1,9 @@
-#ifndef _IO_MAP_SVH
-#define _IO_MAP_SVH
+#ifndef _IO_MAP_H
+#define _IO_MAP_H
 
+
+// c and cpp linkage;
+// reference: https://igl.ethz.ch/teaching/tau/resources/cprog.htm
 #ifdef __cpluscplus
 extern "C" {
 #endif
@@ -96,4 +99,4 @@ extern "C" {
 #endif
 
 
-#endif //_IO_MAP_SVH
+#endif //_IO_MAP_H
