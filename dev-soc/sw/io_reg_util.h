@@ -25,16 +25,16 @@ extern "C" {
 * Constants;
 -------------------*/
 #define REG_WORD_BYTE 4     // each register is 32-bit; hence 4-byte;
-#define TOTAL_REG_NUM 32        // each core is allocated 2^{5} internal registers;
+#define TOTAL_REG_NUM 32    // each core is allocated 2^{5} internal registers;
 
 /* ----------------------------------------------
 * MACROS
 ----------------------------------------------*/
 
 /************* BIT MANIPULATION *****************/
-#define BIT_MASK(X) ((1UL << (X)))  // masking;
-#define BIT_SET(DATA, X) ((DATA) |= BIT_MASK(X))
-#define BIT_CLEAR(DATA, X) ((DATA) &= ~BIT_MASK(X))
+#define BIT_MASK(X)         ((1UL << (X)))  // masking;
+#define BIT_SET(DATA, X)    ((DATA) |= BIT_MASK(X))
+#define BIT_CLEAR(DATA, X)  ((DATA) &= ~BIT_MASK(X))
 #define BIT_TOGGLE(DATA, X) ((DATA) ^= BIT_MASK(X))
 
 
