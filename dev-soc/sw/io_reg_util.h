@@ -47,7 +47,7 @@ extern "C" {
 *   mmio_addr   : base (start) address of the MMIO address space;
 *   core_num    : which io core of the MMIO;
 */
-#define GET_IO_CORE_ADDR(mmio_addr, core_num) ((uint32_t)((mmio_base) + TOTAL_REG_NUM*REG_WORD_BYTE*(core_num)))
+#define GET_IO_CORE_ADDR(mmio_addr, core_num) ((uint32_t)((mmio_addr) + TOTAL_REG_NUM*REG_WORD_BYTE*(core_num)))
 
 
 
@@ -58,7 +58,7 @@ extern "C" {
 *   base_addr   : base address of the register
 *   offset      : offset of the register;
 */
-#define REG_READ(base_addr, offset) (*(volatile uint32_t *)((base_add) + REG_WORD_BYTE*(offset)))
+#define REG_READ(base_addr, offset) (*(volatile uint32_t *)((base_addr) + REG_WORD_BYTE*(offset)))
 
 /*
 * @macro        : REG_WRITE();
@@ -68,7 +68,7 @@ extern "C" {
 *   offset      : offset of the register;
 *   data        : 32-bit data to write;
 */
-#define REG_WRITE(base_addr, offset, wr_data) (*(volatile uint32_t *)((base_add) + REG_WORD_BYTE*(offset)) = (wr_data))
+#define REG_WRITE(base_addr, offset, wr_data) (*(volatile uint32_t *)((base_addr) + REG_WORD_BYTE*(offset)) = (wr_data))
 
 #ifdef __cpluscplus
 } // extern "C";
