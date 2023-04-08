@@ -30,7 +30,7 @@
 
 module mcs_top
     // this is given the datasheet of the microblaze;
-    #(parameter MCS_BRIDGE_BASE_ADDR = `BUS_MICROBLAZE_IO_BASE_ADDR_G)    
+    //#(parameter MCS_BRIDGE_BASE_ADDR = `BUS_MICROBLAZE_IO_BASE_ADDR_G)    
     (
         input logic clk,        // 100 MHz;
         input logic reset_n,     // async, active low;
@@ -87,8 +87,7 @@ module mcs_top
 
     // bridge;
     mcs_bus_bridge 
-    #(.MCS_BRIDGE_BASE_ADDR(MCS_BRIDGE_BASE_ADDR))
-    bridge_unit(.*);
+    bridge_unit(.mcs_bridge_base_addr(BUS_MICROBLAZE_IO_BASE_ADDR_G), .*);
     
     // mmio system;
     mmio_sys #(.SW_N(16), .LED_N(16)) 

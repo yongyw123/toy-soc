@@ -25,10 +25,17 @@
 
 module mcs_bus_bridge
     // this is given the datasheet of the microblaze;
-    #(parameter MCS_BRIDGE_BASE_ADDR = `BUS_MICROBLAZE_IO_BASE_ADDR_G)   
+    //#(parameter MCS_BRIDGE_BASE_ADDR = `BUS_MICROBLAZE_IO_BASE_ADDR_G)   
     (
-        // microblaze mcs io bus signals;
-        // these are fixed; confer the datasheet;
+        /* bus base address
+            this base address comes with the soft processor;
+            could be found in the relevant data sheet;
+            */
+        input logic [31:0] mcs_bridge_base_addr,                
+        /*
+         microblaze mcs io bus signals;
+            these are fixed; confer the datasheet;
+        */
         input logic io_addr_strobe,         // ignored;
         input logic io_read_strobe,         // read enable;
         input logic io_write_strobe,        // write enable;
@@ -38,7 +45,7 @@ module mcs_bus_bridge
         output logic [31:0] io_read_data,
         output logic io_ready,              // for handshaking;
               
-        // on the other side of the bridge; user-own bus;
+        /* on the other side of the bridge; user-own bus; */
         output logic user_mmio_cs,  // chip select for MMIO system;
         output logic user_wr,      
         output logic user_rd,
@@ -59,7 +66,7 @@ module mcs_bus_bridge
     // only compare the MSB 8-bit of the address; 
     // this should be sufficient to ensure uniqueness?
     // since other bits are used for other identification purposes;
-    assign bridge_en = (io_address[31:24] == MCS_BRIDGE_BASE_ADDR[31:24]);
+    assign bridge_en = (io_address[31:24] == mcs_bridge_base_addr[31:24]);
     
     assign user_mmio_cs = (bridge_en && (io_address[`BUS_SYSTEM_SELECT_BIT_INDEX_G] == 0));
     assign user_addr = addr_word_align[`BUS_USER_SIZE_G-1:0];   
