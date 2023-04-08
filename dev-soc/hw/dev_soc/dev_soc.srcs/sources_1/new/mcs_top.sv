@@ -33,7 +33,7 @@ module mcs_top
     //#(parameter MCS_BRIDGE_BASE_ADDR = `BUS_MICROBLAZE_IO_BASE_ADDR_G)    
     (
         input logic clk,        // 100 MHz;
-        input logic reset_n,     // async, active low;
+        input logic RESET_BTN,     // async reset button; active low;
         
         // external mapping from boards;
         input logic [15:0] SW,      // use all switches available on the board;
@@ -62,7 +62,7 @@ module mcs_top
     logic [`BUS_USER_SIZE_G-1:0] user_addr;
     
     // conform the signals;
-    assign reset_sys = !reset_n;    // inverted;
+    assign reset_sys = !RESET_BTN;    // inverted since button is "active LOW";
     
     /* -------------------
     instantiation;
@@ -86,8 +86,7 @@ module mcs_top
     );
 
     // bridge;
-    mcs_bus_bridge 
-    bridge_unit(.mcs_bridge_base_addr(BUS_MICROBLAZE_IO_BASE_ADDR_G), .*);
+    mcs_bus_bridge bridge_unit(.mcs_bridge_base_addr(`BUS_MICROBLAZE_IO_BASE_ADDR_G), .*);
     
     // mmio system;
     mmio_sys #(.SW_NUM(16), .LED_NUM(16)) 

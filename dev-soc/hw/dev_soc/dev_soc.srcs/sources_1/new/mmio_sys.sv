@@ -47,8 +47,8 @@ module mmio_sys
     output logic [`REG_DATA_WIDTH_G-1:0] mmio_rd_data,   // 32-bit;
     
     // HW pin mapping (by the constraint file);
-    input logic [SW_NUM-1:0] SW,
-    output logic [LED_NUM-1:0] LED
+    input logic [SW_NUM-1:0] sw,
+    output logic [LED_NUM-1:0] led
     );
     
     /* ----- broadcasting arrays; */
@@ -125,7 +125,7 @@ module mmio_sys
         .addr(core_addr_reg_array[`S2_GPO_LED]),
         .wr_data(core_data_wr_array[`S2_GPO_LED]),
         .rd_data(core_data_rd_array[`S2_GPO_LED]),
-        .dout(LED)  // mapped with the board leds
+        .dout(led)  // mapped with the board leds
     );
     
     // general purpose input core;
@@ -139,11 +139,9 @@ module mmio_sys
         .addr(core_addr_reg_array[`S3_GPI_SW]),
         .wr_data(core_data_wr_array[`S3_GPI_SW]),
         .rd_data(core_data_rd_array[`S3_GPI_SW]),
-        .din(SW)    // mapped with the board switches;
+        .din(sw)    // mapped with the board switches;
     ); 
-    
-    
-    
+
 endmodule
 
 `endif // _MMIO_SYS_SV;
