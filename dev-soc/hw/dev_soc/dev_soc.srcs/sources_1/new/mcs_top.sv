@@ -104,7 +104,7 @@ module mcs_top
         .mmio_rd_data(user_rd_data),
         .sw(SW),
         .led(LED)    
-    )
+    );
     
 endmodule
 
