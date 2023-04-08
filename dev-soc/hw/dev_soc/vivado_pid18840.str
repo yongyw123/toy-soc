@@ -191,3 +191,289 @@ selectMenuItem(PAResourceCommand.PACommandNames_SET_GLOBAL_INCLUDE, "Set Global 
 // Tcl Message: set_property is_global_include true [get_files  C:/Users/User/projects/digilent-nexys-a7/dev-soc/hw/dev_soc/dev_soc.srcs/sources_1/new/IO_map.svh] 
 // [GUI Memory]: 129 MB (+185kb) [00:03:31]
 expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, Global Include]", 1); // D
+// [GUI Memory]: 138 MB (+2490kb) [00:05:00]
+// Elapsed time: 490 seconds
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Project Manager, IP Catalog]", 4, false); // n
+// Run Command: PAResourceCommand.PACommandNames_CORE_GEN
+// WARNING: HEventQueue.dispatchEvent() is taking  1024 ms.
+dismissDialog("Open IP Catalog"); // bA
+setText("PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE_SEARCH_FIELD", (String) null); // OverlayTextField
+// [GUI Memory]: 169 MB (+24714kb) [00:11:59]
+// Elapsed time: 13 seconds
+floatFrame(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // aA
+// PAResourceOtoP.PAViews_IP_CATALOG: IP Catalog: float view
+// Elapsed time: 20 seconds
+expandTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "Memory and Memory Controller ;  ;  ;  ; ", 26); // L
+collapseTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "Memory and Memory Controller ;  ;  ;  ; ", 26); // L
+expandTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "Processor ;  ;  ;  ; ", 27); // L
+selectTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "MicroBlaze MCS ;  ; Production ; Included ; xilinx.com:ip:microblaze_mcs:3.0", 32, "MicroBlaze MCS", 0, true); // L - Node
+expandTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "MicroBlaze MCS ;  ; Production ; Included ; xilinx.com:ip:microblaze_mcs:3.0", 32); // L
+selectTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "MicroBlaze MCS ;  ; Production ; Included ; xilinx.com:ip:microblaze_mcs:3.0", 32, "MicroBlaze MCS", 0, true, false, false, false, false, true); // L - Double Click - Node
+// Run Command: PAResourceCommand.PACommandNames_CUSTOMIZE_CORE
+// TclEventType: LOAD_FEATURE
+// TclEventType: RSB_CHANGE_CURRENT_DIAGRAM
+// TclEventType: RSB_CLOSE_DIAGRAM
+// WARNING: HEventQueue.dispatchEvent() is taking  1190 ms.
+// Elapsed time: 24 seconds
+setText("Component Name", "microblaze_mcs_cpu"); // B
+// TclEventType: RSB_CHANGE_CURRENT_DIAGRAM
+// TclEventType: RSB_CLOSE_DIAGRAM
+// WARNING: HEventQueue.dispatchEvent() is taking  1234 ms.
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "MCS", 1); // bj
+selectComboBox("Select MicroBlaze Optimization (OPTIMIZATION)", "PERFORMANCE", 1); // E
+// TclEventType: RSB_CHANGE_CURRENT_DIAGRAM
+// TclEventType: RSB_CLOSE_DIAGRAM
+// WARNING: HEventQueue.dispatchEvent() is taking  1051 ms.
+selectComboBox("Memory Size (MEMSIZE)", "128KB", 15); // E
+// TclEventType: RSB_CHANGE_CURRENT_DIAGRAM
+// TclEventType: RSB_CLOSE_DIAGRAM
+// WARNING: HEventQueue.dispatchEvent() is taking  1072 ms.
+selectCheckBox((HResource) null, "Enable IO Bus", true); // g: TRUE
+// TclEventType: RSB_CHANGE_CURRENT_DIAGRAM
+// TclEventType: RSB_CLOSE_DIAGRAM
+// WARNING: HEventQueue.dispatchEvent() is taking  1098 ms.
+// Elapsed time: 10 seconds
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "Software Information", 1); // bj
+// Elapsed time: 10 seconds
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "Vivado Information", 0); // bj
+// Elapsed time: 35 seconds
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "Vivado Information", 0); // bj
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "Software Information", 1); // bj
+// Elapsed time: 19 seconds
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "Vivado Information", 0); // bj
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "Software Information", 1); // bj
+// Elapsed time: 13 seconds
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "UART", 2); // bj
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "FIT", 3); // bj
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "PIT", 4); // bj
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "PIT", 4); // bj
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "GPO", 5); // bj
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "GPI", 6); // bj
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "Interrupts", 7); // bj
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "MCS", 1); // bj
+selectButton(RDIResource.BaseDialog_OK, "OK"); // a
+dismissDialog("Customize IP"); // r
+// TclEventType: CREATE_IP_CORE
+// TclEventType: REPORT_IP_STATUS_STALE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: DG_GRAPH_STALE
+// TclEventType: FILE_SET_CHANGE
+// Tcl Message: create_ip -name microblaze_mcs -vendor xilinx.com -library ip -version 3.0 -module_name microblaze_mcs_cpu 
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: RSB_CHANGE_CURRENT_DIAGRAM
+// Tcl Message: set_property -dict [list CONFIG.OPTIMIZATION {1} CONFIG.MEMSIZE {131072} CONFIG.USE_IO_BUS {1} CONFIG.Component_Name {microblaze_mcs_cpu}] [get_ips microblaze_mcs_cpu] 
+// TclEventType: MSGMGR_REFRESH_MSG
+// TclEventType: REPORT_IP_STATUS_STALE
+// TclEventType: RSB_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: MSGMGR_REFRESH_MSG
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: RSB_CHANGE_CURRENT_DIAGRAM
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: FILESET_UPDATE_IP
+// TclEventType: FILE_SET_CHANGE
+// Tcl Message: generate_target {instantiation_template} [get_files c:/Users/User/projects/digilent-nexys-a7/dev-soc/hw/dev_soc/dev_soc.srcs/sources_1/ip/microblaze_mcs_cpu/microblaze_mcs_cpu.xci] 
+// Tcl Message: INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'microblaze_mcs_cpu'... 
+dismissDialog("Customize IP"); // bA
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: DG_GRAPH_STALE
+// TclEventType: FILE_SET_CHANGE
+// Tcl Message: update_compile_order -fileset sources_1 
+// Elapsed time: 13 seconds
+selectRadioButton(PAResourceQtoS.SimpleOutputProductDialog_SYNTHESIZE_DESIGN_GLOBALLY, "Global"); // a
+selectButton(PAResourceQtoS.SimpleOutputProductDialog_GENERATE_OUTPUT_PRODUCTS_IMMEDIATELY, "Generate"); // a
+// TclEventType: DG_GRAPH_STALE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: FILESET_UPDATE_IP
+// TclEventType: PROJ_DESIGN_MODE_SET
+// Tcl Message: set_property generate_synth_checkpoint false [get_files  c:/Users/User/projects/digilent-nexys-a7/dev-soc/hw/dev_soc/dev_soc.srcs/sources_1/ip/microblaze_mcs_cpu/microblaze_mcs_cpu.xci] 
+// TclEventType: PROJ_DESIGN_MODE_SET
+// TclEventType: FILE_SET_CHANGE
+// Tcl Message: generate_target all [get_files  c:/Users/User/projects/digilent-nexys-a7/dev-soc/hw/dev_soc/dev_soc.srcs/sources_1/ip/microblaze_mcs_cpu/microblaze_mcs_cpu.xci] 
+// Tcl Message: INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'microblaze_mcs_cpu'... INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'microblaze_mcs_cpu'... INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'microblaze_mcs_cpu'... INFO: [IP_Flow 19-1686] Generating 'Implementation' target for IP 'microblaze_mcs_cpu'... INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'microblaze_mcs_cpu'... 
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: PACKAGER_OBJECT_ADD
+// TclEventType: PACKAGER_OBJECT_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// Tcl Message: Exporting to file c:/Users/User/projects/digilent-nexys-a7/dev-soc/hw/dev_soc/dev_soc.gen/sources_1/ip/microblaze_mcs_cpu/bd_0/hw_handoff/microblaze_mcs_cpu.hwh Generated Hardware Definition File c:/Users/User/projects/digilent-nexys-a7/dev-soc/hw/dev_soc/dev_soc.gen/sources_1/ip/microblaze_mcs_cpu/bd_0/synth/microblaze_mcs_cpu.hwdef 
+// Tcl Message: generate_target: Time (s): cpu = 00:00:03 ; elapsed = 00:00:09 . Memory (MB): peak = 1569.949 ; gain = 0.000 
+// Tcl Message: export_ip_user_files -of_objects [get_files c:/Users/User/projects/digilent-nexys-a7/dev-soc/hw/dev_soc/dev_soc.srcs/sources_1/ip/microblaze_mcs_cpu/microblaze_mcs_cpu.xci] -no_script -sync -force -quiet 
+// TclEventType: PROJECT_CHANGE
+// TclEventType: PACKAGER_MESSAGE_RESET
+// TclEventType: PACKAGER_UNLOAD_CORE
+// TclEventType: PACKAGER_MESSAGE_RESET
+// TclEventType: PACKAGER_UNLOAD_CORE
+// TclEventType: PACKAGER_MESSAGE_RESET
+// TclEventType: PACKAGER_UNLOAD_CORE
+// TclEventType: PACKAGER_MESSAGE_RESET
+// TclEventType: PACKAGER_UNLOAD_CORE
+// TclEventType: PACKAGER_MESSAGE_RESET
+// TclEventType: PACKAGER_UNLOAD_CORE
+// TclEventType: PACKAGER_MESSAGE_RESET
+// TclEventType: PACKAGER_UNLOAD_CORE
+// TclEventType: PACKAGER_MESSAGE_RESET
+// TclEventType: PACKAGER_UNLOAD_CORE
+// TclEventType: PACKAGER_MESSAGE_RESET
+// TclEventType: PACKAGER_UNLOAD_CORE
+// TclEventType: PACKAGER_MESSAGE_RESET
+// TclEventType: PACKAGER_UNLOAD_CORE
+// TclEventType: FILE_SET_CHANGE
+// Elapsed time: 20 seconds
+selectButton("OptionPane.button", "OK"); // JButton
+// PAResourceOtoP.PAViews_IP_CATALOG: IP Catalog: close view
+closeFrame(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // aA
+dockFrame(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // aA
+closeView(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // W
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP]", 4); // D
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu]", 6, true); // D - Node
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu]", 6, true, false, false, false, true, false); // D - Popup Trigger - Node
+selectMenuItem(PAResourceCommand.PACommandNames_RECUSTOMIZE_CORE, "Re-customize IP..."); // ao
+// Run Command: PAResourceCommand.PACommandNames_RECUSTOMIZE_CORE
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "MCS", 1); // bj
+selectButton(RDIResource.BaseDialog_CANCEL, "Cancel"); // a
+dismissDialog("Re-customize IP"); // r
+// Elapsed time: 295 seconds
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu]", 6); // D
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu, Verilog]", 7); // D
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu, Verilog, xil_defaultlib, microblaze_mcs_cpu.v]", 9, false); // D
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu, Verilog, xil_defaultlib, microblaze_mcs_cpu.v]", 9, false, false, false, false, false, true); // D - Double Click
+// Elapsed time: 11 seconds
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu, XDC]", 10); // D
+closeView(PAResourceOtoP.PAViews_CODE, "Code"); // D
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu, Block Designs]", 13); // D
+floatFrame(PAResourceOtoP.PAViews_SOURCES, "Sources"); // aA
+// PAResourceOtoP.PAViews_SOURCES: Sources: float view
+maximizeFrame(PAResourceOtoP.PAViews_SOURCES, "Sources"); // aA
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, SystemVerilog]", 3); // D
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, SystemVerilog, xil_defaultlib]", 4); // D
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, SystemVerilog, xil_defaultlib, Unreferenced]", 10); // D
+// Elapsed time: 10 seconds
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu, Block Designs, bd_772d]", 22); // D
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu, Block Designs, bd_772d, IP]", 24); // D
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu, Block Designs, bd_772d, Verilog]", 23); // D
+collapseTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu, Block Designs, bd_772d, IP]", 26); // D
+collapseTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced, microblaze_mcs_cpu, Block Designs, bd_772d, Verilog]", 23); // D
+// Elapsed time: 46 seconds
+collapseTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, IP, Unreferenced]", 13); // D
+selectTab(PAResourceEtoH.FileSetView_TABBED_PANE, (HResource) null, "IP Sources", 1); // i
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP, microblaze_mcs_cpu]", 1); // D
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP, microblaze_mcs_cpu, Instantiation Template]", 2); // D
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP, microblaze_mcs_cpu, Instantiation Template, microblaze_mcs_cpu.veo]", 4, false); // D
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP, microblaze_mcs_cpu, Instantiation Template, microblaze_mcs_cpu.veo]", 4, false, false, false, false, false, true); // D - Double Click
+// HMemoryUtils.trashcanNow. Engine heap size: 732 MB. GUI used memory: 80 MB. Current time: 4/8/23, 3:14:50 PM AEST
+// Elapsed time: 572 seconds
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Project Manager, IP Catalog]", 4, false); // n
+// Run Command: PAResourceCommand.PACommandNames_CORE_GEN
+selectTab("PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "IP Catalog", 4); // m
+selectTab((HResource) null, "PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "IP Catalog", 4, false, true); // m - Double Click
+maximizeView(PAResourceOtoP.PAViews_BASE_WORKSPACE, "BaseWorkspace"); // N
+// Elapsed time: 16 seconds
+expandTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "FPGA Features and Design ;  ;  ;  ; ", 30); // L
+expandTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "Processor ;  ;  ;  ; ", 27); // L
+selectTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "MicroBlaze MCS ;  ; Production ; Included ; xilinx.com:ip:microblaze_mcs:3.0", 32, "MicroBlaze MCS", 0, true); // L - Node
+expandTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "MicroBlaze MCS ;  ; Production ; Included ; xilinx.com:ip:microblaze_mcs:3.0", 32); // L
+selectTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "MicroBlaze MCS ;  ; Production ; Included ; xilinx.com:ip:microblaze_mcs:3.0", 32, "MicroBlaze MCS", 0, true, false, false, false, false, true); // L - Double Click - Node
+// Run Command: PAResourceCommand.PACommandNames_CUSTOMIZE_CORE
+// TclEventType: RSB_CHANGE_CURRENT_DIAGRAM
+// TclEventType: RSB_CLOSE_DIAGRAM
+dismissDialog("Customize IP"); // k
+applyEscape(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, (String) null); // L
+selectButton(RDIResource.BaseDialog_CANCEL, "Cancel"); // a
+dismissDialog("Customize IP"); // r
+// Elapsed time: 31 seconds
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Project Manager, IP Catalog]", 4, false); // n
+// Run Command: PAResourceCommand.PACommandNames_CORE_GEN
+closeView(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // W
+// [GUI Memory]: 184 MB (+7191kb) [00:33:36]
+floatFrame(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // aA
+// PAResourceOtoP.PAViews_IP_CATALOG: IP Catalog: float view
+// PAResourceOtoP.PAViews_IP_CATALOG: IP Catalog: close view
+// Elapsed time: 16 seconds
+closeFrame(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // aA
+dockFrame(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // aA
+closeView(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // W
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Project Manager, IP Catalog]", 4, false, false, false, false, true, false); // n - Popup Trigger
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Project Manager, IP Catalog]", 4, false, false, false, false, true, false); // n - Popup Trigger
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Project Manager, IP Catalog]", 4, false, false, false, false, true, false); // n - Popup Trigger
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Project Manager, IP Catalog]", 4, false); // n
+// Run Command: PAResourceCommand.PACommandNames_CORE_GEN
+floatFrame(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // aA
+// PAResourceOtoP.PAViews_IP_CATALOG: IP Catalog: float view
+selectTab(PAResourceItoN.IPCoreView_TABBED_PANE, PAResourceItoN.IPCoreView_INTERFACES, "Interfaces", 1); // i
+selectTab(PAResourceItoN.IPCoreView_TABBED_PANE, PAResourceItoN.IPCoreView_CORES, "Cores", 0); // i
+// Elapsed time: 20 seconds
+expandTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "Processor ;  ;  ;  ; ", 27); // L
+selectTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "MicroBlaze MCS ;  ; Production ; Included ; xilinx.com:ip:microblaze_mcs:3.0", 32, "MicroBlaze MCS", 0, true, false, false, false, true, false); // L - Popup Trigger - Node
+selectMenuItem(PAResourceCommand.PACommandNames_IP_SETTINGS, "IP Settings..."); // ao
+// Run Command: PAResourceCommand.PACommandNames_IP_SETTINGS
+// Tcl Command: 'rdi::info_commands {device::*}'
+// Tcl Command: 'rdi::info_commands {debug::*}'
+// Tcl Command: 'rdi::info_commands {*}'
+// 'eo' command handler elapsed time: 3 seconds
+// WARNING: HEventQueue.dispatchEvent() is taking  3707 ms.
+selectTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "Utility ;  ;  ;  ; ", 34, "Utility", 0, true); // L - Node
+dismissDialog("Settings"); // d
+// PAResourceOtoP.PAViews_IP_CATALOG: IP Catalog: close view
+closeFrame(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // aA
+dockFrame(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // aA
+closeView(PAResourceOtoP.PAViews_IP_CATALOG, "IP Catalog"); // W
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Project Manager, Settings]", 1, false); // n
+// Run Command: RDIResourceCommand.RDICommands_SETTINGS
+selectTree(PAResourceQtoS.SettingsDialog_OPTIONS_TREE, "[optionsRoot, IP Defaults]", 1, false); // B
+selectTree(PAResourceQtoS.SettingsDialog_OPTIONS_TREE, "[optionsRoot, Project]", 0, false); // B
+expandTree(PAResourceQtoS.SettingsDialog_PROJECT_TREE, "[projectRoot, IP]", 6); // B
+selectTree(PAResourceQtoS.SettingsDialog_PROJECT_TREE, "[projectRoot, IP, Repository]", 7, false); // B
+selectTree(PAResourceQtoS.SettingsDialog_PROJECT_TREE, "[projectRoot, IP, Packager]", 8, false); // B
+expandTree(PAResourceQtoS.SettingsDialog_OPTIONS_TREE, "[optionsRoot, Window Behavior]", 12); // B
+selectTree(PAResourceQtoS.SettingsDialog_PROJECT_TREE, "[projectRoot, Simulation]", 1, false); // B
+dismissDialog("Settings"); // d
+// Elapsed time: 118 seconds
+unMinimizeFrame(RDIResource.RDIViews_PROPERTIES, "Source File Properties"); // aA
+selectButton((HResource) null, "Properties_settings"); // w: TRUE
+collapseTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP]", 0); // D
+expandTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP]", 0); // D
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP]", 0, true); // D - Node
+// [GUI Memory]: 210 MB (+17609kb) [00:37:40]
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP]", 0, true, false, false, false, true, false); // D - Popup Trigger - Node
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP, microblaze_mcs_cpu]", 1, true); // D - Node
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP, microblaze_mcs_cpu]", 1, true, false, false, false, true, false); // D - Popup Trigger - Node
+selectMenu(PAResourceQtoS.SrcMenu_IP_DOCUMENTATION, "IP Documentation"); // al
+// Elapsed time: 10 seconds
+selectMenu(PAResourceQtoS.SrcMenu_IP_DOCUMENTATION, "IP Documentation"); // al
+selectMenuItem(PAResourceCommand.PACommandNames_RECUSTOMIZE_CORE, "Re-customize IP..."); // ao
+// Run Command: PAResourceCommand.PACommandNames_RECUSTOMIZE_CORE
+// WARNING: HEventQueue.dispatchEvent() is taking  1022 ms.
+selectButton(PAResourceAtoD.CustomizeCoreDialog_IP_LOCATION, "IP Location"); // D
+selectButton(PAResourceAtoD.CustomizeCoreDialog_IP_LOCATION, "IP Location"); // D
+selectTab(PAResourceEtoH.HACGCTabbedPane_TABBED_PANE, (HResource) null, "MCS", 1); // bj
+selectButton(RDIResource.BaseDialog_CANCEL, "Cancel"); // a
+dismissDialog("Re-customize IP"); // r
+dockFrame(PAResourceOtoP.PAViews_SOURCES, "Sources"); // aA
+maximizeFrame(PAResourceOtoP.PAViews_SOURCES, "Sources"); // aA
+// PAResourceOtoP.PAViews_SOURCES: Sources: dock view
+// Elapsed time: 23 seconds
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Project Manager, IP Catalog]", 4, false); // n
+// Run Command: PAResourceCommand.PACommandNames_CORE_GEN
+selectButton(PAResourceAtoD.CoreBrowserView_VIEW_PRODUCT_GUIDE_CHANGE_LOG_PRODUCT, "IP Catalog_IP Info"); // z
+expandTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "Processor ;  ;  ;  ; ", 27); // L
+selectTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "MicroBlaze MCS ;  ; Production ; Included ; xilinx.com:ip:microblaze_mcs:3.0", 32, "MicroBlaze MCS", 0, true); // L - Node
+expandTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "MicroBlaze MCS ;  ; Production ; Included ; xilinx.com:ip:microblaze_mcs:3.0", 32); // L
+selectTreeTable(PAResourceAtoD.CoreTreeTablePanel_CORE_TREE_TABLE, "MicroBlaze MCS ;  ; Production ; Included ; xilinx.com:ip:microblaze_mcs:3.0", 32, "MicroBlaze MCS", 0, true, false, false, false, false, true); // L - Double Click - Node
+// Run Command: PAResourceCommand.PACommandNames_CUSTOMIZE_CORE
+// TclEventType: RSB_CHANGE_CURRENT_DIAGRAM
+// TclEventType: RSB_CLOSE_DIAGRAM
+dismissDialog("Customize IP"); // k
+selectButton(RDIResource.BaseDialog_CANCEL, "Cancel"); // a
+dismissDialog("Customize IP"); // r
+// Elapsed time: 11 seconds
+selectButton((HResource) null, "Sources_settings"); // w: TRUE
+selectTab(PAResourceEtoH.FileSetView_TABBED_PANE, (HResource) null, "Libraries", 2); // i
+selectTab(PAResourceEtoH.FileSetView_TABBED_PANE, (HResource) null, "IP Sources", 1); // i
+selectTab(PAResourceEtoH.FileSetView_TABBED_PANE, (HResource) null, "Hierarchy", 0); // i
+selectTab(PAResourceEtoH.FileSetView_TABBED_PANE, (HResource) null, "IP Sources", 1); // i
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP]", 0, true); // D - Node
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, IP]", 0, true, false, false, false, true, false); // D - Popup Trigger - Node
+selectMenuItem(PAResourceCommand.PACommandNames_ADD_SOURCES, "Add Sources..."); // ao
+// Run Command: PAResourceCommand.PACommandNames_ADD_SOURCES
+selectButton("CANCEL", "Cancel"); // JButton
+dismissDialog("Add Sources"); // c
