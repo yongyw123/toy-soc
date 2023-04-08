@@ -36,8 +36,8 @@ module mcs_top
         input logic reset_n,     // async, active low;
         
         // external mapping from boards;
-        input logic [15:0] SW,
-        output logic [15:0] LED
+        input logic [15:0] SW,      // use all switches available on the board;
+        output logic [15:0] LED     // use all leds available on the board;
     );
     
     // general;
@@ -90,7 +90,7 @@ module mcs_top
     bridge_unit(.mcs_bridge_base_addr(BUS_MICROBLAZE_IO_BASE_ADDR_G), .*);
     
     // mmio system;
-    mmio_sys #(.SW_N(16), .LED_N(16)) 
+    mmio_sys #(.SW_NUM(16), .LED_NUM(16)) 
     mmio_unit
     (
         .clk(clk),
