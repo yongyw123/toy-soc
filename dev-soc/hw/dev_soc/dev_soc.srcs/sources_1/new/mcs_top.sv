@@ -32,8 +32,11 @@ module mcs_top
     // this is given the datasheet of the microblaze;
     //#(parameter MCS_BRIDGE_BASE_ADDR = `BUS_MICROBLAZE_IO_BASE_ADDR_G)    
     (
-        input logic clk,        // 100 MHz;
-        input logic RESET_BTN,     // async reset button; active low;
+         // 100 MHz;
+        input logic clk,       
+        
+        // async reset button; active low; this is the board center button;
+        input logic RESET_BTN,     
         
         // external mapping from boards;
         input logic [15:0] SW,      // use all switches available on the board;
