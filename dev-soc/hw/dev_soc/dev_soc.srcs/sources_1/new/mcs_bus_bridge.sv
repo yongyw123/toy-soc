@@ -54,7 +54,7 @@ module mcs_bus_bridge
         input logic [`REG_DATA_WIDTH_G-1:0] user_rd_data    // 32-bit wide;
     );
     
-    // signal;
+    // signal
     logic bridge_en;    // only enable if the given bus base address is a match;
     logic [29:0] addr_word_align;  // to convert to word-alignment: 32->30;
     
