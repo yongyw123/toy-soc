@@ -22,6 +22,7 @@ extern "C" {
 core: general purpose output
 ----------------------------*/
 class core_gpo{
+    // register map;
     enum {
         REG_DATA_OFFSET = 0    // gpo core uses one register only;
     };
