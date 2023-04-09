@@ -3,12 +3,12 @@
 
 ## Task List
 
-### IO Core (inc SW drivers)
+### Construction of Basic IO Core (inc SW drivers)
 
 - [x] General Purpose Output (GPO)
 - [x] General Purpose Input (GPI)
-- [ ] System Timer
-- [ ] GPIO core as a single entity
+- [x] System Timer
+- [ ] GPIO core as a single entity (GPIO)
 - [ ] UART interface for debugging purpose
 - [ ] SPI interface
 - [ ] i2C interface
@@ -18,15 +18,16 @@
 ### Application
 
 - [ ] Test SW Function for each IO cores
-- [ ] IP FIFO dual clock
-- [ ] IP Clock management circuit
-- [ ] IP SDRAM memory interface for Frame Buffers
+- [ ] IP generate FIFO dual clock
+- [ ] IP generate Clock management circuit
+- [ ] IP generate SDRAM memory interface for Frame Buffers
 - [ ] Camera OV7670 via i2C interface
 - [ ] LCD-TFT control via SPI interface
 
 ## Extra (Nice to have)
 
 ### General 
+
 - [ ] Add interrupt system and incorporate into the IO cores. To consider using IP or user-defined.
 
 ### System Timer
