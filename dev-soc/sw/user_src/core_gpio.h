@@ -30,10 +30,13 @@ class core_gpo{
     public:
         core_gpo(uint32_t core_base_addr);  // constructor;
         ~core_gpo();                        // destructor;
+        
+        void write(uint32_t data);                          // write a word
+        void write(uint32_t bit_pos, uint32_t bit_value);   // write one bit;
 
-        // overloaded method;
-        void write(uint32_t data);                          // a word
-        void write(uint32_t bit_pos, uint32_t bit_value);   // one bit;
+        // for convenience;
+        void toggle(uint32_t data);     // toggle the word;
+        void toggle(uint32_t bit_pos);  // toggle a bit;
 
     private:
         uint32_t base_addr;
@@ -52,9 +55,8 @@ class core_gpi{
         core_gpi(uint32_t core_base_addr);  // constructor;
         ~core_gpi();                        // destructor;
 
-        // overloaded method;
-        uint32_t read();                    // a word
-        uint8_t read(uint32_t bit_pos);     // one bit;
+        uint32_t read();                    // read a word
+        uint8_t read(uint32_t bit_pos);     // read one bit;
 
     private:
         uint32_t base_addr;

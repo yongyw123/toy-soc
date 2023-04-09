@@ -27,6 +27,18 @@ void core_gpo::write(uint32_t bit_pos, uint32_t bit_val){
     REG_WRITE(base_addr, REG_DATA_OFFSET, wr_data);
 }
 
+void core_gpo::toggle(uint32_t data){
+    wr_data ^= (uint32_t)(0xFFFFFFFF);
+    REG_WRITE(base_addr, REG_DATA_OFFSET, wr_data);
+}
+
+void core_gpo::toggle(uint32_t bit_pos){
+    wr_data ^= ((1UL) << bit_pos);
+    REG_WRITE(base_addr, REG_DATA_OFFSET, wr_data);
+}
+
+
+
 /* ----------------------------------------
 * general purpose input (only)
 ------------------------------------------*/
