@@ -21,11 +21,11 @@ void test_led_sw(core_gpi *sw_obj, core_gpo *led_obj){
 
 void test_timer(core_gpo *led){
     /*
-    * @brief    : to test timer core;
+    * @brief    : to test timer core and gpo core;
     * @param    : led - pointer to the instantiated core_gpi object;
     * @note     : core_timer obj has been instantiated;
     * @retval   : none
-    * @test     : blink the LED every X second;
+    * @test     : blink the LED every X second with different toggling patterns;
     */
    uint32_t i;
    uint32_t led_num = 16;   // board has 16 leds;
@@ -38,6 +38,6 @@ void test_timer(core_gpo *led){
     // test toggling individual bit;
     for(i = 0; i < led_num; i++){
         led->toggle(i);
-        delay_busy_ms(1000); // two seconds;
+        delay_busy_ms(1000); // one seconds;
     }
 }
