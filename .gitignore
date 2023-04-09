@@ -11,3 +11,8 @@
 **/*.xpr
 **/vivado.log
 **/*.Xil/
+**/*.metadata/
+**/*RemoteSystemsTempFiles/
+**/*IDE.log
+**/*.analytics
+**/Packages/
