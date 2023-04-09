@@ -33,6 +33,9 @@ module core_gpo
     *   2. by specs, each core is allocated 32 internal registers;
     *   3. by above, LED only needs only internal register;
     * 
+    * Register Map:
+    *   1. only one register is used to store the output data, as explained above;
+    *
     * Extra Material on the Construction: 
     * https://www.intel.com/content/www/us/en/docs/programmable/683375/current/output-registers.html
     */

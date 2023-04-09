@@ -35,6 +35,10 @@ module core_gpi
     *   4. by above, sw does not need more than one register;
     *       also, the board does not have 32 switches;
     * 
+    * Register Map:
+    *   1. only one register is used to store the input; as explained above;
+    *
+    *
     * Extra Material on the Construction: 
     * https://www.intel.com/content/www/us/en/docs/programmable/683375/current/input-registers.html
     */
