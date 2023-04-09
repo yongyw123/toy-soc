@@ -84,8 +84,10 @@
 * max number of cores is still undecided yet;
 ----------------------------------------------------*/  
 `define S0_SYS_TIMER    0   // timer;
-`define S1_DEBUG_UART   1   // uart for serial debugging;
+`define S1_UART_DEBUG   1   // uart for serial debugging;
 `define S2_GPO_LED      2   // general purpose output to accommodate LED;
 `define S3_GPI_SW       3   // general purpose input to accommodate switches;
+`define S4_GPIO_PORT    4   // general purpose input output for flexibility and to reduce pinout;
+
 
 `endif //_IO_MAP_SVH
