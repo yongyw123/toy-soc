@@ -35,8 +35,9 @@ module mcs_top
          // 100 MHz;
         input logic clk,       
         
-        // async reset button; active low; this is the board center button;
-        input logic RESET_BTN,     
+        // async cpu (soft core) reset button; 
+        // **important; it is active low; need to invert;
+        input logic CPU_RESETN,     
         
         // external mapping from boards;
         input logic [15:0] SW,      // use all switches available on the board;
@@ -65,7 +66,7 @@ module mcs_top
     logic [`BUS_USER_SIZE_G-1:0] user_addr;
     
     // conform the signals;
-    assign reset_sys = !RESET_BTN;    // inverted since button is "active LOW";
+    assign reset_sys = !CPU_RESETN;    // inverted since button is "active LOW";
     
     /* -------------------
     instantiation;
