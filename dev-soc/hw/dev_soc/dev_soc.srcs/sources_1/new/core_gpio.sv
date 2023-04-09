@@ -56,11 +56,12 @@ module core_gpio
         output logic [`REG_DATA_WIDTH_G-1:0] rd_data,   // 32-bit
         
         // external pin mapping;
-        inout tri [PORT_WIDTH-1:0] dinout // for input and output;
+        inout tri [PORT_WIDTH-1:0] dinout // ** important; must be declared as tri for input and output;
     );
     
     // signal declarations;
     logic wr_data_en;     // for cpu addr decoding;
+    logic rd_data_en;     // for cpu addr decoding;
     logic ctrl_dir_en;    // as above;
     
     // registers;
@@ -81,12 +82,12 @@ module core_gpio
             dir_data_reg <= 0;  // by default; input ports;
         end
         else begin
-            // read operation does not need any control signal
-            rd_data_reg <= dinout;
-            // cpu write data passed as the output data;
+            if(rd_data_en)
+                rd_data_reg <= dinout;
+            
             if(wr_data_en)
                 wr_data_reg <= wr_data[PORT_WIDTH-1:0];
-            // cpu write data passed as the control data;
+            
             if(ctrl_dir_en) 
                 dir_data_reg <= wr_data[PORT_WIDTH-1:0];     
         end
@@ -94,6 +95,7 @@ module core_gpio
     // decode the addr instruction;
     assign wr_data_en = write && cs && (addr[1:0] == REG_DATA_OUT_OFFSET);
     assign ctrl_dir_en = write && cs && (addr[1:0] == REG_CTRL_DIRECTION_OFFSET);
+    assign rd_data_en = read && cs && (addr[1:0] == REG_DATA_IN_OFFSET);
     
     // determine the direction of each bit (port) individually;
     generate
