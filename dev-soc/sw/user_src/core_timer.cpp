@@ -6,11 +6,9 @@
 // constructor;
 core_timer::core_timer(uint32_t core_base_addr){
     base_addr = core_base_addr;
-    // note that clear signal supercedes go signla;
-    // reset the counter before starting the timer;
-    ctrl_signal_state &= ~CTRL_CLEAR_MASK;
-    ctrl_signal_state &= ~CTRL_GO_MASK;
-    ctrl_signal_state |= CTRL_CLEAR_MASK;
+    
+    // overwrite any existing control state since this is the start;
+    ctrl_signal_state = CTRL_GO_MASK;
     REG_WRITE(base_addr, REG_CTRL_OFFSET, ctrl_signal_state);
 
     // start the timer;
@@ -107,7 +105,7 @@ uint64_t core_timer::read_time(){
     return (uint64_t)(read_counter()/SYS_CLK_FREQ_MHZ);
 }
 
-void core_timer::delay_poll_us(uint64_t input_us){
+void core_timer::delay_busy_us(uint64_t input_us){
     /*
     * @brief        : delay for X amount of microsecond;
     * @param        : input_us - X microsecond; must be in integer;
@@ -124,6 +122,13 @@ void core_timer::delay_poll_us(uint64_t input_us){
    uint64_t start_time;
    uint64_t current_time;
    uint64_t diff_time;
+
+   // to start from a clean slate;
+   pause();     
+   clear();
+   resume();
+
+   // start the delay;
    start_time = read_time();
 
     while(1){

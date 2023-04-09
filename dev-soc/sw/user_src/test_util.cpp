@@ -29,5 +29,5 @@ void test_timer(core_gpo *led){
     */
    
    led->toggle();
-   busy_delay_ms(2000); // two seconds;
+   delay_busy_ms(2000); // two seconds;
 }

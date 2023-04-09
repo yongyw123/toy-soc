@@ -20,7 +20,7 @@ extern "C" {
 
 /* function prototypes */
 
-void busy_delay_ms(uint64_t ms);    // busy delay for X millisecond;
+void delay_busy_ms(uint64_t ms);    // busy delay for X millisecond;
 
 #ifdef __cpluscplus
 } // extern "C";
