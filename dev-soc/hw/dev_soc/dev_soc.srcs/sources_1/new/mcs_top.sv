@@ -66,6 +66,7 @@ module mcs_top
     logic [`BUS_USER_SIZE_G-1:0] user_addr;
     
     // conform the signals;
+    /* ?? to do ??, need to debounce this reset button; */
     assign reset_sys = !CPU_RESETN;    // inverted since button is "active LOW";
     
     /* -------------------
