@@ -45,10 +45,14 @@ module core_gpio_tb();
     
     // simulation var;
     logic [PORT_WIDTH-1:0] temp_wr_data;
+    logic [PORT_WIDTH-1:0] temp_wr_data_02;
     logic [PORT_WIDTH-1:0] temp_rd_data;
+    logic [PORT_WIDTH-1:0] temp_rd_data_02;
     logic [PORT_WIDTH-1:0] dir_all_out_data;
     logic [PORT_WIDTH-1:0] dir_all_in_data;
     logic [PORT_WIDTH-1:0] clean_data;
+    logic [PORT_WIDTH-1:0] dir_mix_data;
+  
 
     // instantiation;
     core_gpio #(.PORT_WIDTH(PORT_WIDTH)) uut(.*);
@@ -99,10 +103,13 @@ module core_gpio_tb();
     initial
     begin
         temp_wr_data = PORT_WIDTH'($random);
+        temp_wr_data_02 = PORT_WIDTH'($random);
         temp_rd_data = PORT_WIDTH'($random);
+        temp_rd_data_02 = PORT_WIDTH'($random);
         dir_all_out_data = PORT_WIDTH'(32'hFFFF);
         dir_all_in_data = PORT_WIDTH'(0);
         clean_data = PORT_WIDTH'(0);
+        dir_mix_data = PORT_WIDTH'($random);
     end
     
     /* input port direction */
@@ -114,7 +121,7 @@ module core_gpio_tb();
     begin
     
         // enable write operation;
-        read = 1'b0;    // read signal is not used in the timer module; ignored;
+        read = 1'b0;    
         write = 1'b1;
         cs = 1'b1;
         
@@ -149,7 +156,7 @@ module core_gpio_tb();
         @(negedge clk); 
         read = 1'b1;
         write = 1'b0;
-        
+       
         // it takes one clock cycle to update the state;
         @(negedge clk); 
         
@@ -159,6 +166,38 @@ module core_gpio_tb();
             
             
        /* test 02: hard case; mixture */
+       // change data in the write buffer;
+       @(negedge clk);
+       read = 1'b0;    
+       write = 1'b1;
+       
+       addr[1:0] = REG_DATA_OUT_OFFSET;    
+       wr_data[PORT_WIDTH - 1:0] = temp_wr_data_02;
+        
+       // update direction bits;
+       @(negedge clk);
+       addr[1:0] = REG_CTRL_DIRECTION_OFFSET;
+       wr_data[PORT_WIDTH - 1:0] = dir_mix_data;
+        
+       // check each bit;
+       // expect those with in direction to be HIGH impedance;
+       // otherwise to reflect the atcual write data buffer;
+       for(int i = 0; i < PORT_WIDTH; i++) begin
+            // out direction;
+            if(dir_mix_data[i] == 1'b1) begin
+                assert(dinout[i] == temp_wr_data_02[i]) $display("OK");
+                    else $error("%0t", $time);
+            end
+            
+            else begin
+                assert(dinout[i] == 1'bz) $display("OK");
+                    else $error("%0t", $time);
+            end
+       end
+       
+       
+       
+      
        
     $stop;
     end
