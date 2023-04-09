@@ -11,7 +11,8 @@ core_gpi obj_sw(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S3_GPI_SW));
 int main(){
 
     while(1){
-        test_led_sw(&obj_sw, &obj_led);
+        //test_led_sw(&obj_sw, &obj_led);
+        test_timer(&obj_led);
     }
 }
 

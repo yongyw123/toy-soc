@@ -4,6 +4,8 @@
 #include "io_reg_util.h"
 #include "io_map.h"
 #include "core_gpio.h"
+#include "core_timer.h"
+#include "user_util.h"
 
 /* ------------------------------------------------
 Purpose: test functions to check each HW IO cores;
@@ -28,6 +30,17 @@ extern "C" {
 * 3. map sw state to led state;
 */
 void test_led_sw(core_gpi *sw, core_gpo *led);  
+
+
+/*
+* IO cores to test:
+* 1. timer;
+* 
+* Method:
+* use in conjunction with led;
+*/
+void test_timer(core_gpo *led);
+
 
 
 #ifdef __cpluscplus
