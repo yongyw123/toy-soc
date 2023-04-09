@@ -19,3 +19,4 @@
 **/*IDE.log
 **/*.analytics
 **/Packages/
+**/vitis_sdk/
