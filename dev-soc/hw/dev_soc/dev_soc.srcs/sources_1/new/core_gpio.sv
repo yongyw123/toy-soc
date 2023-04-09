@@ -59,9 +59,11 @@ module core_gpio
         inout tri [PORT_WIDTH-1:0] dinout // for input and output;
     );
     
-    logic wr_data_en;
-    logic ctrl_dir_en;
+    // signal declarations;
+    logic wr_data_en;     // for cpu addr decoding;
+    logic ctrl_dir_en;    // as above;
     
+    // registers;
     logic [PORT_WIDTH - 1:0] wr_data_reg;
     logic [PORT_WIDTH - 1:0] rd_data_reg;
     logic [PORT_WIDTH - 1:0] dir_data_reg;
@@ -71,41 +73,40 @@ module core_gpio
     localparam REG_DATA_IN_OFFSET = 2'b01;
     localparam REG_CTRL_DIRECTION_OFFSET = 2'b10;
     
+    // body;
     always_ff @(posedge clk, posedge reset)
         if(reset) begin        
             wr_data_reg <= 0;
             rd_data_reg <= 0;
-            dir_data_reg <= 0;
+            dir_data_reg <= 0;  // by default; input ports;
         end
         else begin
+            // read operation does not need any control signal
             rd_data_reg <= dinout;
+            // cpu write data passed as the output data;
             if(wr_data_en)
                 wr_data_reg <= wr_data[PORT_WIDTH-1:0];
+            // cpu write data passed as the control data;
             if(ctrl_dir_en) 
                 dir_data_reg <= wr_data[PORT_WIDTH-1:0];     
         end
             
-    /*
-    inout tri bi;
-    assign sig_out = output_expression;
-    assign bi = (dir) ? sig_out : 1'bz;
-    assign sign_in = bi;
-    */
     // decode the addr instruction;
     assign wr_data_en = write && cs && (addr[1:0] == REG_DATA_OUT_OFFSET);
     assign ctrl_dir_en = write && cs && (addr[1:0] == REG_CTRL_DIRECTION_OFFSET);
     
-    // determine the direction of each bit individually;
+    // determine the direction of each bit (port) individually;
     generate
         genvar i;
         for(i = 0; i < PORT_WIDTH; i++) begin
+            // set high impedance: z if the port is set as input port;
             assign dinout[i] = dir_data_reg[i] ? wr_data_reg[i] : 1'bz;       
         end    
     endgenerate
         
     // read;
     assign rd_data[PORT_WIDTH-1:0] = rd_data_reg;
-    assign rd_data[`REG_DATA_WIDTH_G-1:PORT_WIDTH] = 0; // extra;        
+    assign rd_data[`REG_DATA_WIDTH_G-1:PORT_WIDTH] = 0; // extra;   padded with zero;     
     
 endmodule
 
