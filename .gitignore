@@ -1,3 +1,6 @@
+
+# useful link to remove git cache;https://stackoverflow.com/questions/24410208/gitignore-does-not-ignore-folder
+
 **/*.bak
 */*.bak
 */.bak
