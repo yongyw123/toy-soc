@@ -15,26 +15,9 @@ int main(){
     while(1){
         //test_led_sw(&obj_sw, &obj_led);
         //test_timer(&obj_led);
-    	obj_led.write((uint32_t)0xFFFFFFFF);
-        delay_busy_ms(1000); // two seconds;
+    	
+        test_timer(&obj_led);
         
-        obj_led.write((uint32_t)0x0);
-        delay_busy_ms(1000); // two seconds;
-
-        /*
-    	for(i = 0; i < 5000; i++){
-    		for(j = 0; j < 10000; j++){
-    			;
-    		}
-    	}
-
-    	obj_led.write((uint32_t)0x0);
-    	for(i = 0; i < 5000; i++){
-			for(j = 0; j < 10000; j++){
-				;
-			}
-		}
-        */
     }
 }
 

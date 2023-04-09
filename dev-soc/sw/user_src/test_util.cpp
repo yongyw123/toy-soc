@@ -27,7 +27,17 @@ void test_timer(core_gpo *led){
     * @retval   : none
     * @test     : blink the LED every X second;
     */
-   
-   led->toggle();
-   delay_busy_ms(2000); // two seconds;
+   uint32_t i;
+   uint32_t led_num = 16;   // board has 16 leds;
+
+   // test toggle as well;
+   led->write(0xAAAA);  // alternate pattern;
+   led->toggle();       // toggle the entire data;
+    delay_busy_ms(2000); // two seconds;
+    
+    // test toggling individual bit;
+    for(i = 0; i < led_num; i++){
+        led->toggle(i);
+        delay_busy_ms(1000); // two seconds;
+    }
 }
