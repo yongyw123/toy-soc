@@ -20,3 +20,4 @@
 **/*.analytics
 **/Packages/
 **/vitis_sdk/
+**/*.dcp
