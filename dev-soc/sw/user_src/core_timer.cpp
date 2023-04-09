@@ -102,44 +102,36 @@ uint64_t core_timer::read_time(){
     */
 
     // note that the counter value changes every 10 ns at 100MHz freq;
-    return (uint64_t)(read_counter()/SYS_CLK_FREQ);
+    // but SYS_CLK_FREQ_MHZ is 100 unit;
+    // so this amounts to 1 microsecond;
+    return (uint64_t)(read_counter()/SYS_CLK_FREQ_MHZ);
 }
 
-void core_timer::delay_poll_ms(uint64_t ms){
+void core_timer::delay_poll_us(uint64_t input_us){
     /*
-    * @brief        : delay for X amount of millisecond;
-    * @param        : ms - X millisecond; must be in integer;
+    * @brief        : delay for X amount of microsecond;
+    * @param        : input_us - X microsecond; must be in integer;
     * @retval       : none
     * @note         : this is a blocking function;
     * 
-    * @assumption   : 64-bit counter does not expire?
-    */
-
-   // recall that at 100MHz, each counter tick is 10ns;
-   // 1ms/10ns = 1e5;
-   uint64_t ms_threshold = 100000;  
-   uint64_t ms_tick = 0;       // how many ms has elapsedl
+    * @assumption   : system clock is 100MHz;
+    * 
+    * @assumption   : current_time > start_time;
+    * this does not always hold since the counter may wrap around (overflow);
+    * to be handled in the future;
+    */  
    
    uint64_t start_time;
    uint64_t current_time;
    uint64_t diff_time;
-   uint32_t status = 1;     // loop breaker;
    start_time = read_time();
-
-    // assumption: current_time > start_time;
-    // this does not always hold since the counter may wrap around (overflow);
-    // to be handled in the future;
 
     while(1){
         current_time = read_time();
         diff_time = (current_time - start_time);
-        
-        if(diff_time > ms_threshold){
-            ms_tick++;
-        }
-        if(ms_tick > ms){
+        if(diff_time >= input_us){
             break;
-        }
+        }     
     }
 }
 

@@ -57,9 +57,9 @@ class core_timer{
         void pause();   // pause the timer;
         void resume();  // resume the timer;
         void clear();   // clear the time;r
-        uint64_t read_counter();    // how many count;
-        uint64_t read_time();       // time elapsed based on the counter val;
-        void delay_poll_ms(uint64_t ms);       // delay for x ms; this is blocking;
+        uint64_t read_counter();                // how many count;
+        uint64_t read_time();                   // time elapsed based on the counter val;
+        void delay_poll_us(uint64_t input_us);  // delay for x us; this is blocking;
         
     private:
         uint32_t base_addr;
