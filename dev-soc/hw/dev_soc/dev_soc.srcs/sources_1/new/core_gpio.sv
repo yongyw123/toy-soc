@@ -95,7 +95,7 @@ module core_gpio
     // decode the addr instruction;
     assign wr_data_en = write && cs && (addr[1:0] == REG_DATA_OUT_OFFSET);
     assign ctrl_dir_en = write && cs && (addr[1:0] == REG_CTRL_DIRECTION_OFFSET);
-    assign rd_data_en = read && cs && (addr[1:0] == REG_DATA_IN_OFFSET);
+    assign rd_data_en = read && cs; // read does not require register;
     
     // determine the direction of each bit (port) individually;
     generate
