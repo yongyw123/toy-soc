@@ -36,7 +36,7 @@ extern "C" {
 */
 
 // system clock; fixed at 100MHz;
-#define SYS_CLK_FREQ 100   
+#define SYS_CLK_FREQ_MHZ 100   
 
 /*------------------------------------------
 * Note on Address Space
