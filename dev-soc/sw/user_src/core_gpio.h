@@ -35,7 +35,7 @@ class core_gpo{
         void write(uint32_t bit_pos, uint32_t bit_value);   // write one bit;
 
         // for convenience;
-        void toggle(uint32_t data);     // toggle the word;
+        void toggle();                  // toggle the entire word;
         void toggle(uint32_t bit_pos);  // toggle a bit;
 
     private:
