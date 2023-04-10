@@ -63,6 +63,51 @@ class core_gpi{
 };
 
 
+/* -------------------------------------------------
+core: general purpose input and output;
+
+* Register Map;
+* 1. three registers;
+* 2. offset 0: register 0 - write_data 
+* 3. offset 1: register 1 - read_data  
+* 4. offset 2: register 2 - control register 
+*               to set the direction of the port;
+* Control Register:       
+    HIGH for output direction;
+    LOW for input directionl
+*
+* Register Access:
+*   1. register 0 - write only;
+*   2. register 1 - read only;
+*   3. register 2 - write and read;
+* 
+---------------------------------------------------*/
+class core_gpio{
+    enum {
+        REG_WRITE_DATA_OFFSET = 0,  
+        REG_READ_DATA_OFFSET = 1,
+        REG_CTRL_DIR_OFFSET = 2
+    };
+
+    enum{
+        CTRL_DIRECTION_WRITE = 1,   // HIGH to set output direction;
+        CTRL_DIRECTION_READ = 0
+    }; 
+
+    public:
+        core_gpio(uint32_t core_base_addr); // constructor;
+        ~core_gpio();  // destructor;
+
+        void set_direction(uint32_t which_port, uint32_t direction);        // set direction
+        uint32_t read(uint32_t which_port);             // read 
+        void write(uint32_t which_port, uint32_t data); // write 
+
+    private:
+        uint32_t base_addr;
+        uint32_t wr_data;
+        uint32_t direction_data;
+};
+
 
 #ifdef __cpluscplus
 } // extern "C";

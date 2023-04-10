@@ -70,6 +70,7 @@ extern "C" {
 */
 #define REG_WRITE(base_addr, offset, wr_data) (*(volatile uint32_t *)((base_addr) + REG_WORD_BYTE*(offset)) = (wr_data))
 
+
 #ifdef __cpluscplus
 } // extern "C";
 #endif
