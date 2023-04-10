@@ -28,7 +28,8 @@
 module mmio_sys
     #(
     parameter SW_NUM = 8,   // number of switches at the GPI port;
-    parameter LED_NUM = 8   // number of LED at the GPO port;
+    parameter LED_NUM = 8,  // number of LED at the GPO port;
+    parameter PORT_NUM = 1  // number of port for GPIO (board PMOD jumper)
     )
     (
     // general;
@@ -48,7 +49,8 @@ module mmio_sys
     
     // HW pin mapping (by the constraint file);
     input logic [SW_NUM-1:0] sw,
-    output logic [LED_NUM-1:0] led
+    output logic [LED_NUM-1:0] led,
+    inout tri[PORT_NUM-1:0] pmod    // tristate for gpio;
     );
     
     /* ----- broadcasting arrays; */
@@ -109,7 +111,7 @@ module mmio_sys
         .rd_data(core_data_rd_array[`S0_SYS_TIMER])    
     );
     
-    /* ???
+    /* ??? pending ???
      UART core is not constructed yet;
      ???
      */
@@ -141,6 +143,24 @@ module mmio_sys
         .rd_data(core_data_rd_array[`S3_GPI_SW]),
         .din(sw)    // mapped with the board switches;
     ); 
+    
+    // general purpose input and output;
+    core_gpio #(.PORT_WIDTH(PORT_NUM)) gpio_unit
+    (
+        .clk(clk),
+        .reset(reset),
+        .cs(core_ctrl_cs_array[`S4_GPIO_PORT]),
+        .write(core_ctrl_wr_array[`S4_GPIO_PORT]),
+        .read(core_ctrl_rd_array[`S4_GPIO_PORT]),
+        .addr(core_addr_reg_array[`S4_GPIO_PORT]),
+        .wr_data(core_data_wr_array[`S4_GPIO_PORT]),
+        .rd_data(core_data_rd_array[`S4_GPIO_PORT]),
+        .dinout(pmod)    // this is a tristate, mapped to the board jumper (pmod);
+    
+    ); 
+    
+
+    
 
 endmodule
 
