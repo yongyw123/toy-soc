@@ -29,14 +29,14 @@ module core_gpio_tb();
     localparam REG_ADDRESS_WIDTH = 5;   // each io core has 2**5 registers;
     
     // specific;
-    localparam PORT_WIDTH = 16;            // gpio port width;
+    localparam PORT_WIDTH = 16;             // gpio port width;
     logic cs;                               // input; chip select;
     logic write;                            // input;
     logic read;                             // input;
     logic [REG_ADDRESS_WIDTH -1:0] addr;    // input; register address;
     logic [DATA_WIDTH-1:0] wr_data;         // input;
-    logic [DATA_WIDTH-1:0] rd_data;     // input;
-    tri [PORT_WIDTH-1:0] dinout;        // tristate for gpio;
+    logic [DATA_WIDTH-1:0] rd_data;         // input;
+    tri [PORT_WIDTH-1:0] dinout;            // tristate for gpio;
     
     // internal register of the core;
     localparam REG_DATA_OUT_OFFSET = 2'b00;         // for output data;
@@ -52,8 +52,11 @@ module core_gpio_tb();
     logic [PORT_WIDTH-1:0] dir_all_in_data;
     logic [PORT_WIDTH-1:0] clean_data;
     logic [PORT_WIDTH-1:0] dir_mix_data;
-  
-
+    logic [PORT_WIDTH-1:0] dir_mix_data_02;
+    logic [PORT_WIDTH-1:0] high_imp_data;
+    logic [PORT_WIDTH-1:0] all_true_data;
+    logic [PORT_WIDTH-1:0] all_false_data;
+    
     // instantiation;
     core_gpio #(.PORT_WIDTH(PORT_WIDTH)) uut(.*);
     
@@ -87,21 +90,11 @@ module core_gpio_tb();
         wr_data = 32'b0;     // reset the write data;  
     end
     
-    /* (main) what to test;
-    1. the hard part is that different port could have different directions;
-    2. separate into easy case and hard case;
-    
-    easy case;
-    1. either all out or all in;
-    2. if all out; then what is written will be passed to the output;
-    3. if all in; then what is on the port will be fed into the input;
-    
-    hard case;
-    1. randomly set the direction of each port;
-    2. same criteria as above;
-    */
     initial
     begin
+        high_imp_data = PORT_WIDTH'(32'bz);
+        all_true_data = PORT_WIDTH'(32'b1);
+        all_false_data = PORT_WIDTH'(32'b0);
         temp_wr_data = PORT_WIDTH'($random);
         temp_wr_data_02 = PORT_WIDTH'($random);
         temp_rd_data = PORT_WIDTH'($random);
@@ -110,22 +103,34 @@ module core_gpio_tb();
         dir_all_in_data = PORT_WIDTH'(0);
         clean_data = PORT_WIDTH'(0);
         dir_mix_data = PORT_WIDTH'($random);
+        dir_mix_data_02 = PORT_WIDTH'($random);
     end
-    
-    /* input port direction */
-    // dinout is tri-type;
-    // cannot be assigned by another value in a procedural block;
-    assign dinout = (read && !write) ? temp_rd_data : PORT_WIDTH'(16'bz);
     
     initial
     begin
-    
+        $display("----- test starts -----");
         // enable write operation;
         read = 1'b0;    
         write = 1'b1;
         cs = 1'b1;
         
-        /* test 01: easy case; input direction but forceful write (output) */
+        
+        /* --------- test 01 --------- 
+        * action:
+        * 1. direction is inwards for all ports; 
+        * 2. write some data to output register;
+        * 
+        * expectation:
+        * 1. all dinout to be high impedance since output port is disabled;
+        * 2. rd_data to sample dinout; hence same as dinout;
+        *       Why?
+        *       by construction;
+        *       rd_data either samples dinout or the direction_register;
+        *       depending on the decoded address;
+        *       by default, it always samples dinout
+        *       unless the decoded address is the direction_register;
+        * 
+        -----------------------------*/
         $display("----- test 01 -----");
         @(negedge clk);
         // write data to the output buffer;
@@ -134,18 +139,57 @@ module core_gpio_tb();
         wr_data[PORT_WIDTH - 1:0] = temp_wr_data;
         // expect the dinout to be high impedance because direction is inwards;
         @(negedge clk);   
-        #1 assert(dinout == PORT_WIDTH'(16'bz)) $display("Ok");
-            else $error("%0t", $time);
         
+        /* ******** IMPORTANT **********************
+        the following assertion will always return false;
+        //assert(dinout == 16'bZ) $display("Ok"); 
+        
+        why? cannot compare high impedance; even though both are "same";
+        HiZ is floating; it does not make sense to physically realize it;
+        because HiZ means neither zero or one;
+        so HiZ == HiZ does not make sense?
+        
+        */
+        
+       $display("expect dinout to be all High Impedance");
+       $display("time %0t; dinout: %0B", $time, dinout);
+       $display("time %0t; rd_data: %0B", $time, rd_data);
+        
+        /* --------- test 02 --------- 
+        * action:
+        * 1. direction is outwards for all ports; 
+        * 2. write some data to output register;
+        * 
+        * expectation:
+        * 1. all dinout to be driven the write_data above;
+        * 2. rd_data to sample direction_register
+        -----------------------------*/
+        $display("----- test 02 -----");
         // now change all ports to output direction;
         @(negedge clk);
         addr[1:0] = REG_CTRL_DIRECTION_OFFSET;
         wr_data[PORT_WIDTH - 1:0] = dir_all_out_data;
         // it takes one clock cycle to update the state;
         @(negedge clk); 
+        
         // expect that the dinout reflects the write data;
-        #1 assert(dinout == temp_wr_data) $display("Ok");
-                else $error("%0t", $time);
+        assert(dinout == temp_wr_data) $display("Ok");
+                else $error("time %0t, expect all dinout to reflect wr_data", $time);
+        
+        // expect rd_data to reflect the direction register;
+        assert(rd_data == dir_all_out_data) $display("Ok");
+                else $error("time %0t, expect all rd_data to the direction register", $time);
+        
+        
+        /* --------- test 03 --------- 
+        * action:
+        * 1. direction is inwards for all ports; 
+        * 
+        * expectation:
+        * 1. all dinout to be HIGH impedance since output port is disabled;
+        * 2. rd_data to sample direction register data;
+        -----------------------------*/
+        $display("----- test 03 -----");
         
         // now change back to input direction;
         @(negedge clk);
@@ -154,51 +198,93 @@ module core_gpio_tb();
         
         // enable read and disable write;
         @(negedge clk); 
-        read = 1'b1;
-        write = 1'b0;
-       
-        // it takes one clock cycle to update the state;
-        @(negedge clk); 
         
         // expect that the dinout reflects the data written at the input port for reading;
-        #1 assert(dinout == temp_rd_data) $display("Ok");
-            else $error("%0t", $time);
-            
-            
-       /* test 02: hard case; mixture */
-       // change data in the write buffer;
-       @(negedge clk);
-       read = 1'b0;    
-       write = 1'b1;
-       
-       addr[1:0] = REG_DATA_OUT_OFFSET;    
-       wr_data[PORT_WIDTH - 1:0] = temp_wr_data_02;
+        $display("expect dinout to be all High Impedance");
+        $display("time %0t; dinout: %0B", $time, dinout);
+           
+        // expect rd_data to reflect the direction register;
+        assert(rd_data == dir_all_in_data) $display("Ok");
+                else $error("time %0t, expect all rd_data to the direction register", $time);
+        @(negedge clk);
         
-       // update direction bits;
-       @(negedge clk);
-       addr[1:0] = REG_CTRL_DIRECTION_OFFSET;
-       wr_data[PORT_WIDTH - 1:0] = dir_mix_data;
+        /* --------- test 04 --------- 
+        * action:
+        * 1. mix direction across different ports;
+        * 2. wr_data is also mixed; 
+        *
+        * test method; 
+        * 1. this requires checking each port bit individually and visually;
+        *
+        * expectation;
+        * 0. index i is a given bit (port) position;
+        * 1. if the decoded address is direction register, rd_data[i] to reflect the direction[i];
+        * 2. if the decoded address is not direction register: 
+        *           if direction[i] is out, then rd_data[i] == dinout[i];
+        *           if direction[i] is in, then rd_data[i] is high impedance[i];
+       -----------------------------*/
+        $display("----- test 04 -----");
         
-       // check each bit;
-       // expect those with in direction to be HIGH impedance;
-       // otherwise to reflect the atcual write data buffer;
-       for(int i = 0; i < PORT_WIDTH; i++) begin
-            // out direction;
-            if(dir_mix_data[i] == 1'b1) begin
-                assert(dinout[i] == temp_wr_data_02[i]) $display("OK");
-                    else $error("%0t", $time);
-            end
+        /*
+        * change the direction register to mixed;
+        */
+        read = 1'b0;    
+        write = 1'b1;
+        addr[1:0] = REG_CTRL_DIRECTION_OFFSET;
+        wr_data[PORT_WIDTH - 1:0] = dir_mix_data;
+        
+        /*
+        * read the direction register;
+        */
+        @(negedge clk);
+        read = 1'b1;    
+        write = 1'b0;
+        addr[1:0] = REG_CTRL_DIRECTION_OFFSET;
+        
+        @(negedge clk);
+        assert(rd_data == dir_mix_data) $display("Ok");
+            else $error("time %0t, expect rd_data to correspond to the direction data", $time);
+
+        /*
+        * read the dinout;
+        */
+        
+        addr[1:0] = REG_DATA_IN_OFFSET;
+        @(negedge clk);
+        $display("time  %0t", $time);
+        
+        for(int i = 0; i < 16; i++) begin
+            // remember: cannot compare high impedance;
+            // can only do so by visual comparison;
+            // maybe there is a better way, but the tester has not figured it out;            
+            $display("i: %0d, dir: %0b, dinout: %0b, wr_data: %0b, rd_data: %0b", i, dir_mix_data[i], dinout[i], temp_wr_data[i], rd_data[i]);   
             
-            else begin
-                assert(dinout[i] == 1'bz) $display("OK");
-                    else $error("%0t", $time);
-            end
-       end
-       
-       
-       
-      
-       
+        end 
+        
+        /* 
+        output something;
+        change direction to out;
+        */
+        read = 1'b0;    
+        write = 1'b1;
+        addr[1:0] = REG_DATA_OUT_OFFSET;    
+        wr_data[PORT_WIDTH - 1:0] = temp_wr_data_02;
+        
+        @(negedge clk);        
+        addr[1:0] = REG_CTRL_DIRECTION_OFFSET;
+        wr_data[PORT_WIDTH - 1:0] = dir_mix_data_02;
+        
+        @(negedge clk);        
+        addr[1:0] = REG_DATA_IN_OFFSET;
+        $display("time  %0t", $time);
+        
+        @(negedge clk);
+        for(int i = 0; i < 16; i++) begin
+            $display("i: %0d, dir: %0b, dinout: %0b, wr_data: %0b, rd_data: %0b", i, dir_mix_data_02[i], dinout[i], temp_wr_data_02[i], rd_data[i]);
+        end
+        
+       #(T);
+       $display("----- test ends -----");
     $stop;
     end
     
