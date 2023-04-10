@@ -19,27 +19,11 @@ int main(){
     obj_jumper.set_direction(3, 0);     // port 3; read;
 
     while(1){
-        obj_jumper.write(0, 1);
-        obj_jumper.write(2, 1);
-        
         port01 = obj_jumper.read(1);
         port03 = obj_jumper.read(3);
 
         obj_led.write(1, port01);
         obj_led.write(3, port03);
-
-        delay_busy_ms(100);
-
-        obj_jumper.write(0, 0);
-        obj_jumper.write(2, 0);
-        
-        port01 = obj_jumper.read(1);
-        port03 = obj_jumper.read(3);
-
-        obj_led.write(1, port01);
-        obj_led.write(3, port03);
-
-        delay_busy_ms(100);
 
     }
 }

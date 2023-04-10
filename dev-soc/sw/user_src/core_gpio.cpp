@@ -19,6 +19,7 @@ void core_gpo::write(uint32_t data){
 
 void core_gpo::write(uint32_t bit_pos, uint32_t bit_val){
     if(bit_val == 1){
+        BIT_CLEAR(wr_data, bit_pos);
         BIT_SET(wr_data, bit_pos);
     }else{
         BIT_CLEAR(wr_data, bit_pos);
