@@ -42,7 +42,7 @@ module mcs_top
         // external mapping from boards;
         input logic [15:0] SW,      // use all switches available on the board;
         output logic [15:0] LED,    // use all leds available on the board;
-        inout tri PMOD_JD01             // PMOD jumper at JD1; set to tristate since it is for GPIO;
+        inout tri[3:0] PMOD_JD    // PMOD jumpers at JD1 to JD4; set to tristate since it is for GPIO;
     );
     
     // general;
@@ -108,7 +108,7 @@ module mcs_top
         .mmio_rd_data(user_rd_data),
         .sw(SW),
         .led(LED),
-        .pmod(PMOD_JD01) 
+        .pmod(PMOD_JD) 
     );
     
 endmodule

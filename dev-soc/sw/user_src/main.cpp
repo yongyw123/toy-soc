@@ -9,24 +9,38 @@ core_gpi obj_sw(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S3_GPI_SW));
 core_gpio obj_jumper(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S4_GPIO_PORT));
 
 int main(){
-    uint32_t i = 0;
-	uint32_t j = 0;
+    uint32_t port01 = 0;
+	uint32_t port03 = 0;
 
     // set to output direction;
-    obj_jumper.set_direction(0, 1); 
-        
+    obj_jumper.set_direction(0, 1);     // port 0; write
+    obj_jumper.set_direction(1, 0);     // port 1; read;
+    obj_jumper.set_direction(2, 1);     // port 2; write
+    obj_jumper.set_direction(3, 0);     // port 3; read;
 
     while(1){
-        //test_led_sw(&obj_sw, &obj_led);
-        //test_timer(&obj_led);
-    	
-        //test_timer(&obj_led);
-        
         obj_jumper.write(0, 1);
-        delay_busy_ms(1000);
-        obj_jumper.write(0, 1);
-        delay_busy_ms(1000);
+        obj_jumper.write(2, 1);
         
+        port01 = obj_jumper.read(1);
+        port03 = obj_jumper.read(3);
+
+        obj_led.write(1, port01);
+        obj_led.write(3, port03);
+
+        delay_busy_ms(100);
+
+        obj_jumper.write(0, 0);
+        obj_jumper.write(2, 0);
+        
+        port01 = obj_jumper.read(1);
+        port03 = obj_jumper.read(3);
+
+        obj_led.write(1, port01);
+        obj_led.write(3, port03);
+
+        delay_busy_ms(100);
+
     }
 }
 

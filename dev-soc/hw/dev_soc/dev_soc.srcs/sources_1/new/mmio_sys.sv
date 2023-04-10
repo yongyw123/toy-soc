@@ -29,7 +29,7 @@ module mmio_sys
     #(
     parameter SW_NUM = 8,   // number of switches at the GPI port;
     parameter LED_NUM = 8,  // number of LED at the GPO port;
-    parameter PORT_NUM = 1  // number of port for GPIO (board PMOD jumper)
+    parameter PORT_NUM = 4  // number of port for GPIO (board PMOD jumper)
     )
     (
     // general;
