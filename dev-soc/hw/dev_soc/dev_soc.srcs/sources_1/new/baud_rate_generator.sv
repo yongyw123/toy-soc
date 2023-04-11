@@ -20,6 +20,11 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module baud_rate_generator
+    /* it has been determined with the lowest supported UART baud rate of 110,
+    that the maximum of bits for a counter to hold is 10 bits;
+    however, this is parameterized for convenience;
+    */
+    #(parameter MOD_BIT_WIDTH = 10) 
     (
         input logic clk,    // 100 MHz;
         input logic reset,  // async reset;
@@ -49,7 +54,7 @@ module baud_rate_generator
         ==> max(M) = 56.8k;
         ==> bits of M = log_2(M) = 9.15 ~= 10.00 
           */
-        input logic [10:0] programmable_mod,        
+        input logic [MOD_BIT_WIDTH : 0] programmable_mod,        
         output logic sampling_tick
     );
     
