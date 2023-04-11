@@ -163,6 +163,7 @@ module uart_tb_top();
     initial
     begin
         tx_start = 1'b0;
+        din = (DATA_BIT)'($random);
         
         reset = 1'b1;
         #(T/2);
@@ -176,14 +177,13 @@ module uart_tb_top();
     initial 
     begin
         // start the tx;
-        din = (DATA_BIT)'($random);
         tx_start = 1'b1;
         #(2*T);
         tx_start = 1'b0;
         
         @(posedge rx_complete_tick);
          
-        #(10*T);
+        #(100*T);
         $stop;
     end
     
