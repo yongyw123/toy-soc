@@ -22,8 +22,10 @@
 
 module uart_rx
     #(parameter
-        DATA_BIT = 8,   // number of data bits from rx;
-        SAMPLING_STOP_BIT = 16   // number of oversampling ticks for stop bits;
+        // number of data bits from rx;
+        DATA_BIT = 8,   
+        // number of oversampling ticks for stop bits; (16 ticks means one stop bit;)
+        SAMPLING_STOP_BIT = 16   
      )
     (
         /* general */
@@ -34,7 +36,7 @@ module uart_rx
         input logic rx,     // uart rx data to process;
         input logic baud_rate_tick, // oversampling tick inidication by the baud rate gen;
         output logic rx_complete_tick,  // finish processing a complete rx data;
-        output logic [DATA_BIT-1:0] dout    // serialized uart rx data;
+        output logic [DATA_BIT-1:0] dout    // reassembled uart rx data;
     );
     
     
