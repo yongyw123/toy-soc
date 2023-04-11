@@ -23,7 +23,7 @@
 module uart_rx
     #(parameter
         DATA_BIT = 8,   // number of data bits from rx;
-        STOP_BIT = 16   // number of stop bits;
+        SAMPLING_STOP_BIT = 16   // number of oversampling ticks for stop bits;
      )
     (
         /* general */
@@ -69,6 +69,25 @@ module uart_rx
     // serial to parallel shift out the rx data for output;
     logic [DATA_BIT-1:0] shift_out_reg, shift_out_next;
     
+    
+    /* double FF synchronizer for the rx signal since this is asynchr 
+    to reduce metastability prob; */
+    logic rx_meta_reg;
+    logic rx_stable_reg;
+    
+    always_ff @(posedge clk, posedge reset)
+        if(reset)
+            rx_meta_reg <= 0;
+        else
+            rx_meta_reg <= rx;
+    
+    always_ff @(posedge clk, posedge reset)
+        if(reset)
+            rx_stable_reg <= 0;
+        else
+            rx_stable_reg <= rx_meta_reg;
+         
+    
     // fsmd;
     always_ff @(posedge clk, posedge reset)
         if(reset) 
@@ -101,7 +120,7 @@ module uart_rx
             IDLE_ST:
                 begin
                     // start bit detected;
-                    if(~rx) begin
+                    if(~rx_stable_reg) begin
                         state_next = START_ST;
                         // reload the sampling couner;
                         nsample_next = 0;
@@ -139,7 +158,7 @@ module uart_rx
                             nsample_next = 0;
                             
                             // shift in the current processed data for output;
-                            shift_out_next = {rx, shift_out_reg[DATA_BIT-1:1]};
+                            shift_out_next = {rx_stable_reg, shift_out_reg[DATA_BIT-1:1]};
                             
                             // check if all data bits have been processed;
                             // if so, go to stop;
@@ -160,7 +179,7 @@ module uart_rx
                     // similar to the above;
                     // count the number of stop bits based on the sampling tick;
                     if(baud_rate_tick) begin
-                        if(nsample_reg == (STOP_BIT - 1)) begin
+                        if(nsample_reg == (SAMPLING_STOP_BIT - 1)) begin
                             // done;
                             state_next = IDLE_ST; 
                             rx_complete_tick = 1'b1;
