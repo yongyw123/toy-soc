@@ -47,7 +47,7 @@ module uart_tx
         input logic [DATA_BIT-1:0] din, // input data to serialize out for tx;
         input logic baud_rate_tick,     // oversampling tick inidication by the baud rate gen;
         output logic tx_complete_tick,  // finish processing a complete rx data;
-        output logic rx                 // serialized output;
+        output logic tx                 // serialized output;
     );
     
     
