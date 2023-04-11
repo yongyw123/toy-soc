@@ -112,9 +112,9 @@ module uart_tx
     begin
         // important default; remain as it is until told otherwise;
         state_next = state_reg;
-        ndata_reg = ndata_next;
-        nsample_reg = nsample_next;
-        shift_out_reg = shift_out_next;
+        ndata_next = ndata_reg;
+        nsample_next = nsample_reg;
+        shift_out_next = shift_out_reg;
         tx_complete_tick = 1'b0;        // not done yet;
         tx_next = tx_reg;
         

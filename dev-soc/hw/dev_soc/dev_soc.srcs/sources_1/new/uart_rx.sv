@@ -63,7 +63,7 @@ module uart_rx
     state_type state_reg, state_next;
     
     // number of data bits that has been processed;
-    logic [DATA_BIT_WIDTH - 1:0] ndata_reg, ndata_next;
+    logic [DATA_BIT_WIDTH-1:0] ndata_reg, ndata_next;
     
     // number of oversampling tick signals from the baud rate generator;
     logic [OVERSAMPLING_BIT_WIDTH-1:0] nsample_reg, nsample_next;
@@ -112,9 +112,9 @@ module uart_rx
     begin
         // important default; remain as it is until told otherwise;
         state_next = state_reg;
-        ndata_reg = ndata_next;
-        nsample_reg = nsample_next;
-        shift_out_reg = shift_out_next;
+        ndata_next = ndata_reg;
+        nsample_next = nsample_reg;
+        shift_out_next = shift_out_reg;
         rx_complete_tick = 1'b0;        // not done yet;
         
         // start the machinery;
