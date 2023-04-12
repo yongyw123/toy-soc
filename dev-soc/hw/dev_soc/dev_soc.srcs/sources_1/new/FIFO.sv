@@ -36,10 +36,10 @@ module FIFO
         input logic reset,  // async;
         
         // specific;
-        input logic rd,     // read request;
-        input logic wr,     // write request;
-        output logic empty, // fifo status;
-        output logic full,  // fifo status;
+        input logic ctrl_rd,     // read request;
+        input logic ctrl_wr,     // write request;
+        output logic flag_empty, // fifo status;
+        output logic flag_full,  // fifo status;
         // data;
         output logic [DATA_WIDTH-1:0] rd_data, 
         input logic [DATA_WIDTH-1:0] wr_data
@@ -54,7 +54,7 @@ module FIFO
     logic full_status; 
    
    // only enable write if fifo is not full;
-   assign wr_en = wr & ~full;
+   assign wr_en = ctrl_wr & ~flag_full;
    
    // instantiation;
    FIFO_ctrl #(.ADDR_WIDTH(ADDR_WIDTH)) controller(.*);

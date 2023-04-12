@@ -9,7 +9,7 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: test bench for FIFO module; 
+// Description: test bench program for FIFO module; 
 // 
 // Dependencies: 
 // 
@@ -19,64 +19,72 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module FIFO_tb();
-    
-    // general;
-    localparam T = 10;  // system clock period: 10ns;
-    logic clk;          // system clock;
-    logic reset;        // async system clock;
-    
-    /* fifo module argument; */
-    // fifo parameter;
-    localparam DATA_WIDTH = 8;
-    localparam ADDR_WIDTH = 4;
-    
-    // input;
-    logic rd;     // read request;
-    logic wr;     // write request;
-    
-    // output;
-    logic empty; // fifo status;
-    logic full;  // fifo status;
-    
-    // data;
-    logic [DATA_WIDTH-1:0] rd_data; // output; 
-    logic [DATA_WIDTH-1:0] wr_data; // input;
+program FIFO_tb
+    #(parameter 
+    DATA_WIDTH = 8,
+    ADDR_WIDTH = 16
+    )
+    (
+        input logic clk,
+        output logic ctrl_rd,
+        output logic ctrl_wr,
+        output logic [DATA_WIDTH-1:0] wr_data
+    );
 
-    /* instantiation */
-    FIFO #(.DATA_WIDTH(DATA_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) uut(.*);
-    
-    /* simulate system clk;*/
-    always
-    begin 
-       clk = 1'b1;  
-       #(T/2); 
-       clk = 1'b0;  
-       #(T/2);
-    end
-
-    // apply reset;
-    initial
-    begin
-        reset = 1'b1;
-        #(T/2);
-        reset = 1'b0;
-        #(T/2);
-    end
-    
-    
-    // test;
-    initial
-    begin
-        for(int i = 0; i < 2**ADDR_WIDTH; i++) begin
-            ?? (DATA_WIDTH)'(i + $random);
+    initial begin
+        @(posedge clk)
+        ctrl_wr <= 1'b0;
+        ctrl_rd <= 1'b0;
+        /* test 01: write-only until fifo is full */
+        // go beyond the address width to capture fifo status flags;
+        // such as full/empty;
+        for(int i = 0; i < ADDR_WIDTH + 5; i++) begin        
+            @(posedge clk)
+            ctrl_wr <= 1'b1;
+            wr_data = (DATA_WIDTH)'($random);
+        end
         
-        end     
+        /* test 02: read-only until fifo is empty */
+        @(posedge clk)
+        ctrl_wr <= 1'b0;
+        ctrl_rd <= 1'b0;
+        for(int i = 0; i < ADDR_WIDTH + 5; i++) begin
+            @(posedge clk)
+            ctrl_rd <= 1'b1;
+        end 
         
-    
-    
+        /* test 03: read and write when fifo is already empty */
+        @(posedge clk)
+        ctrl_wr <= 1'b0;
+        ctrl_rd <= 1'b0;
+        for(int i = 0; i < ADDR_WIDTH + 5; i++) begin
+            @(posedge clk)
+            ctrl_rd <= 1'b1;
+            ctrl_wr <= 1'b1;
+        end 
+        
+        /* test 03: read and write when fifo is not empty and not full */
+        @(posedge clk)
+        ctrl_wr <= 1'b0;
+        ctrl_rd <= 1'b0;
+        // write some data;
+        for(int i = 0; i < $ceil(ADDR_WIDTH/2); i++) begin
+            @(posedge clk)
+            ctrl_wr <= 1'b1;
+            wr_data = (DATA_WIDTH)'($random);
+        end 
+        
+        // now read and write at the same time;
+        for(int i = 0; i < ADDR_WIDTH + 5; i++) begin
+            @(posedge clk)
+            ctrl_rd <= 1'b1;
+            ctrl_wr <= 1'b1;
+            wr_data = (DATA_WIDTH)'($random);
+            
+        end 
+    #(1);
+    $finish;    
     end
+endprogram: FIFO_tb
     
-    
-    
-endmodule
+ 
