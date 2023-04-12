@@ -156,6 +156,7 @@ module uart_tb_top();
         tx_start = 1'b0;
         din = (DATA_BIT)'($random);
         
+        
         reset = 1'b1;
         #(T/2);
         reset = 1'b0;

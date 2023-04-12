@@ -170,19 +170,12 @@ module uart_tx
                             shift_out_next = shift_out_reg >> 1;
                             // check if all data bits have been transmitted;
                             if(ndata_reg == (DATA_BIT - 1))
-                            begin                             
                                 state_next = STOP_ST;
-                            end
                             else
-                            begin
                                 ndata_next = ndata_reg + 1;
-                            end
                         end
                         else
-                        begin
-                            nsample_next = nsample_reg + 1;
-                        
-                        end
+                            nsample_next = nsample_reg + 1;                        
                     end
                 end
             
