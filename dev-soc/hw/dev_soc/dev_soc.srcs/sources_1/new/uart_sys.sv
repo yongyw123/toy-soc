@@ -114,7 +114,7 @@ module uart_sys
 
     /* Tx side; */
     // fifo for tx;
-    FIFO #(.DATA_WIDTH(FIFO_DATA_WIDTH), .ADDR_WIDTH(FIFO_DATA_WIDTH))
+    FIFO #(.DATA_WIDTH(FIFO_DATA_WIDTH), .ADDR_WIDTH(FIFO_ADDR_WIDTH))
     fifo_tx 
     (.clk(clk),
     .reset(reset),
@@ -138,7 +138,7 @@ module uart_sys
     
     /* Rx side */
     // fifo for rx;
-    FIFO #(.DATA_WIDTH(FIFO_DATA_WIDTH), .ADDR_WIDTH(FIFO_DATA_WIDTH))
+    FIFO #(.DATA_WIDTH(FIFO_DATA_WIDTH), .ADDR_WIDTH(FIFO_ADDR_WIDTH))
     fifo_rx
     (.clk(clk),
     .reset(reset),
