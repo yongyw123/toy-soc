@@ -137,8 +137,15 @@ module uart_tb_top();
     begin
     $display("program mod: %0d", programmable_mod);
     $monitor("tx din: %0B", din);
-    $monitor("time %0t, tx_flag: %0b, rx: %0b, rx_flag: %0b, rx_dout: %0B",
-        $time, tx_complete_tick, rx, rx_complete_tick, dout);
+    $monitor("tx start: %0b", tx_start);
+    $monitor("time %0t, tx_state: %s, tx_flag: %0b, rx_state: %s, rx: %0b, rx_flag: %0b, rx_dout: %0B",
+        $time, 
+        uart_tx_uut.state_reg.name,
+        tx_complete_tick, 
+        uart_rx_uut.state_reg.name,
+        rx, 
+        rx_complete_tick,
+        dout);
     end
    
    /* simulate system clk;*/
@@ -154,8 +161,8 @@ module uart_tb_top();
     initial
     begin
         tx_start = 1'b0;
-        din = (DATA_BIT)'($random);
-        
+        //din = (DATA_BIT)'($random);
+        din = 8'b0101_0101;
         
         reset = 1'b1;
         #(T/2);
@@ -173,9 +180,27 @@ module uart_tb_top();
         #(2*T);
         tx_start = 1'b0;
         
-        @(posedge rx_complete_tick);
+        // wait for complete flag ;
+        // it is uncertain which will flag first;
+        @(posedge rx_complete_tick, posedge tx_complete_tick);
+        @(posedge rx_complete_tick, posedge tx_complete_tick);
          
-        #(100*T);
+        #(10*T);
+        
+        // start another tx with a different data;
+        din = 8'b1010_1010;
+        // start the tx;
+        tx_start = 1'b1;
+        #(2*T);
+        tx_start = 1'b0;
+        
+        // wait for complete flag ;
+        // it is uncertain which will flag first;
+        @(posedge rx_complete_tick, posedge tx_complete_tick);
+        @(posedge rx_complete_tick, posedge tx_complete_tick);
+         
+        #(10*T);
+        
         $stop;
     end
     
