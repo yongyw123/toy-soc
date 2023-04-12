@@ -91,15 +91,6 @@ module uart_tb_top();
     logic rx_complete_tick;         // output flag;
     logic [DATA_BIT-1:0] dout;      // output;
     
-    // simulate system clk
-    always
-    begin 
-       clk = 1'b1;  
-       #(T/2); 
-       clk = 1'b0;  
-       #(T/2);
-    end
-
    /* instantiation */
    
    // to drive uart tx;
