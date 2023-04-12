@@ -65,7 +65,7 @@ module uart_sys
         UART_DATA_BIT = 8,                   // number of data bits;
         UART_STOP_BIT_SAMPLING_NUM = 16,     // this corresponds to one stop bit; (16 oversampling);
         FIFO_ADDR_WIDTH = 2,            // FIFO addr size; its data
-        FIFO_DATA_WIDTH = 8             // fifo data size;
+        FIFO_DATA_WIDTH = UART_DATA_BIT             // fifo data size;
     )
     (
         // general
