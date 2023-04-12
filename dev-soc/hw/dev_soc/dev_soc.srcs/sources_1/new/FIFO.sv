@@ -61,6 +61,5 @@ module FIFO
    
    reg_file 
    #(.DATA_WIDTH(DATA_WIDTH), .ADDR_WIDTH(ADDR_WIDTH))
-   register_file(.*);
-   
+   register_file(.*);  
 endmodule
