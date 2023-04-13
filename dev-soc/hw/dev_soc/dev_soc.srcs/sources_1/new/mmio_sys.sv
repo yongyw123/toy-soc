@@ -189,6 +189,18 @@ module mmio_sys
     
     ); 
     
+    /* ground the the read data signals from the empty io cores 
+    for vivao synthesis optimization to opt out these unused signals */
+    generate
+        genvar i;
+            for(i = 4; i < `MIMO_CORE_TOTAL_G; i++)
+            begin
+                // always HIGH ==> idle ==> not signals;
+                assign core_data_rd_array[i] = 32'hFFFF_FFFF;
+            end
+        endgenerate
+             
+        
 
     
 

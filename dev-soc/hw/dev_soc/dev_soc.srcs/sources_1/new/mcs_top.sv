@@ -108,7 +108,11 @@ module mcs_top
         .mmio_rd_data(user_rd_data),
         .sw(SW),
         .led(LED),
-        .pmod(PMOD_JD) 
+        .pmod(PMOD_JD),
+        
+        // uart signals; empty for now;
+        .uart_tx(), 
+        .uart_rx()  
     );
     
 endmodule
