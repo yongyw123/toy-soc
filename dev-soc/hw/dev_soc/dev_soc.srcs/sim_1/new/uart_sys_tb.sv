@@ -105,7 +105,8 @@ program uart_sys_tb
         /* UART Tx */
         // write until fifo is full
         // write beyond the fifo size to ensure fifo full is covered; 
-        for(int i = 0; i < (wr_data_num + 2); i++) begin
+        //for(int i = 0; i < (wr_data_num + 2); i++) begin
+        for(int i = 0; i < (wr_data_num); i++) begin
         //for(int i = 0; i < 1; i++) begin
             @(posedge clk);
             ctrl_wr <= 1'b1;

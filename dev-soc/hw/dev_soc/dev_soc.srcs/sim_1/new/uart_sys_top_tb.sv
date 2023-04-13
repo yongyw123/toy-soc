@@ -25,7 +25,25 @@ purpose: to test uart_sys() module;
 background:
 1. uart_sys() is a complete system consisting uart tx, rx and their fifos;
 2. also, uart rx, by nature must be asynchronous;
+
+test method:
+1. loopback shall be used: uart tx output shall be uart rx input (within the same system);
+2. this is for simplicity;
+3. in this setting, asynchronicity of uart rx input could not be tested;
+4. that said, asynchronicity test has been covered in the individual test bench for uart_rx module;
+5. so, there should not be any loss in the test coverage;
+
+Simulation Setting:
+1. note that due to the test stimulus and the limited baud rate, the simulation time will take longer;
+2. set it to maybe 30 millisecond in the vivado simulation setting;
+
+alternative method;
+1. if the above is not sufficient, one could have two uart_sys() module, say system A and system B;
+2. each driven by different clock;
+3. one uart tx of system A shall be fed into uart rx of system B and vice versa;
+4. this is a more complete coverage that includes asynchronicity rx input stimules; 
 */
+
 module uart_sys_top_tb();
     // general;
     localparam T = 10;  // system clock period: 10ns;
@@ -42,7 +60,7 @@ module uart_sys_top_tb();
     // higher baud rate to shorten the simulation time;
     // but respect this constraint: b < 16*system_clk;
     //localparam baud_rate = 500000; // bits per second;
-    localparam baud_rate = 50000; // bits per second;
+    localparam baud_rate = 5000000; // bits per second;
     localparam system_freq = 100000000;
     // programmable parameter;
     localparam baud_rate_programmable_mod = system_freq/(16*baud_rate); 
@@ -123,28 +141,4 @@ module uart_sys_top_tb();
         tx_full,
         rx_empty);     
     end
-    
-    /*
-    initial 
-    begin
-        @(negedge clk);
-        ctrl_rd = 1'b0;
-        ctrl_wr = 1'b0;
-        
-        @(negedge clk);
-        ctrl_wr = 1'b1;
-        wr_data = 8'b1010_1101;
-        
-        @(negedge clk);
-        ctrl_rd = 1'b0;
-        ctrl_wr = 1'b0;
-        
-        wait(rx_empty == 1'b0);
-        #(10);
-        $display("done");
-        $stop;
-    end
-    */
-    
-
 endmodule
