@@ -39,10 +39,17 @@ module mcs_top
         // **important; it is active low; need to invert;
         input logic CPU_RESETN,     
         
-        // external mapping from boards;
+        /* external mapping from boards; */
         input logic [15:0] SW,      // use all switches available on the board;
         output logic [15:0] LED,    // use all leds available on the board;
-        inout tri[3:0] PMOD_JD    // PMOD jumpers at JD1 to JD4; set to tristate since it is for GPIO;
+        inout tri[3:0] PMOD_JD,     // PMOD jumpers at JD1 to JD4; set to tristate since it is for GPIO;
+        
+        // uart;
+        // beware of the mix of tx and rx;
+        // note: uart flow ctrl is not implemented; so no cts/rts pins;
+        input UART_TXD_IN,  // this connects to the system uart rx;
+        output UART_RXD_OUT // this connects to the system uart tx;
+        
     );
     
     // general;
@@ -111,8 +118,8 @@ module mcs_top
         .pmod(PMOD_JD),
         
         // uart signals; empty for now;
-        .uart_tx(), 
-        .uart_rx()  
+        .uart_tx(UART_RXD_OUT), 
+        .uart_rx(UART_TXD_IN)  
     );
     
 endmodule
