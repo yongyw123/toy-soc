@@ -149,7 +149,6 @@ module core_uart
         .baud_rate_programmable_mod(baud_rate_reg)
     );
      
-     
      // register for baud rate;
      always_ff @(posedge clk, posedge reset)
         if(reset) 

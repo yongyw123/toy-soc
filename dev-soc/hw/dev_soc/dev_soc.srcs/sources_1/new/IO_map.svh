@@ -96,6 +96,28 @@
 /**************************************************************
 * S1_UART_DEBUG
 --------------------
+Timer Core uses three registers;
+
+Register Map: 
+   1. register 0 (offset 0): lower word of the counter;
+   2. register 1 (offset 1): upper word of the counter;
+   3. register 2 (offset 2): control register;  
+
+   Control Signals
+   1. clear: a Pulse will reset the counter to zero; (important: Pulse);
+   2. go: pause or resume the counting;    
+    
+   Control Register:
+   1. Bit 0: go;
+   2. Bit 1: clear;
+******************************************************************/
+`define S0_SYS_TIMER_REG_CNTLOW_OFFSET      0
+`define S0_SYS_TIMER_REG_CNTHIGH_OFFSET     1
+`define S0_SYS_TIMER_REG_CTRL_OFFSET        2
+
+/**************************************************************
+* S1_UART_DEBUG
+--------------------
 UART core has five registers;
 
 Register Map
