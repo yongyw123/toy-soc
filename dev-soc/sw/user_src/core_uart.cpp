@@ -1,10 +1,19 @@
 #include "core_uart.h"
 
 core_uart::core_uart(uint32_t core_base_addr){
+    /*
+    @brief  : constructor to instantiate an object of class: core_uart;
+    @param  : core_base_addr
+                - the base address of the UART core resides
+                    on the microblaze IO bus address;
+    @retval : none
+     */
     base_addr = core_base_addr;
     baud_rate = 9600;   // by default;
 }
 
+// destructor;
+// not used;
 core_uart::~core_uart() {}
 
 void core_uart::set_baud_rate(uint32_t baud_rate){

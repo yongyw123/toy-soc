@@ -15,8 +15,6 @@ Purpose: SW drivers for uart core;
 extern "C" {
 #endif
 
-
-
 class core_uart{
     // register map;
     enum{
