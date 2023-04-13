@@ -28,7 +28,7 @@ void core_gpo::write(uint32_t bit_pos, uint32_t bit_val){
     REG_WRITE(base_addr, REG_DATA_OFFSET, wr_data);
 }
 
-void core_gpo::toggle(){
+void core_gpo::toggle(void){
     wr_data = (uint32_t)(wr_data ^ (uint32_t)(0xFFFFFFFF));
     REG_WRITE(base_addr, REG_DATA_OFFSET, wr_data);
 }
@@ -51,7 +51,7 @@ core_gpi::core_gpi(uint32_t core_base_addr){
 core_gpi::~core_gpi()   {}
 
 // methods;
-uint32_t core_gpi::read(){
+uint32_t core_gpi::read(void){
     return REG_READ(base_addr, REG_DATA_OFFSET);
 }
 

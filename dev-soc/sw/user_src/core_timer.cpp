@@ -21,7 +21,7 @@ core_timer::core_timer(uint32_t core_base_addr){
 core_timer::~core_timer(){}
 
 // methods;
-void core_timer::resume(){
+void core_timer::resume(void){
     /*
     @brief      : resume counting;
     @param      : none
@@ -42,7 +42,7 @@ void core_timer::resume(){
     
 }
 
-void core_timer::pause(){
+void core_timer::pause(void){
     /*
     @brief      : stop counting;
     @param      : none
@@ -56,7 +56,7 @@ void core_timer::pause(){
     REG_WRITE(base_addr, REG_CTRL_OFFSET, ctrl_signal_state);
 }
 
-void core_timer::clear(){
+void core_timer::clear(void){
     /*
     @brief      : reset counter value to zero;
     @param      : none
@@ -77,7 +77,7 @@ void core_timer::clear(){
     
 }
 
-uint64_t core_timer::read_counter(){
+uint64_t core_timer::read_counter(void){
     /*
     @brief      : return counter value;
     @param      : none
@@ -91,7 +91,7 @@ uint64_t core_timer::read_counter(){
 
 }
 
-uint64_t core_timer::read_time(){
+uint64_t core_timer::read_time(void){
     /*
     @brief      : convert counter value to time unit;
     @param      : none

@@ -35,7 +35,7 @@ class core_gpo{
         void write(uint32_t bit_pos, uint32_t bit_value);   // write one bit;
 
         // for convenience;
-        void toggle();                  // toggle the entire word;
+        void toggle(void);                  // toggle the entire word;
         void toggle(uint32_t bit_pos);  // toggle a bit;
 
     private:
@@ -55,7 +55,7 @@ class core_gpi{
         core_gpi(uint32_t core_base_addr);  // constructor;
         ~core_gpi();                        // destructor;
 
-        uint32_t read();                    // read a word
+        uint32_t read(void);                    // read a word
         uint8_t read(uint32_t bit_pos);     // read one bit;
 
     private:

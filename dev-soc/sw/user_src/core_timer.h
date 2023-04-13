@@ -54,11 +54,11 @@ class core_timer{
     public:
         core_timer(uint32_t core_base_addr); // constructor;
         ~core_timer();  // destructor;
-        void pause();   // pause the timer;
-        void resume();  // resume the timer;
-        void clear();   // clear the time;r
-        uint64_t read_counter();                // how many count;
-        uint64_t read_time();                   // time elapsed based on the counter val;
+        void pause(void);   // pause the timer;
+        void resume(void);  // resume the timer;
+        void clear(void);   // clear the time;r
+        uint64_t read_counter(void);                // how many count;
+        uint64_t read_time(void);                   // time elapsed based on the counter val;
         void delay_busy_us(uint64_t input_us);  // delay for x us; this is blocking;
         
     private:
