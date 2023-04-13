@@ -27,9 +27,13 @@
 
 module mmio_sys
     #(
-    parameter SW_NUM = 8,   // number of switches at the GPI port;
-    parameter LED_NUM = 8,  // number of LED at the GPO port;
-    parameter PORT_NUM = 4  // number of port for GPIO (board PMOD jumper)
+    parameter 
+    SW_NUM = 8,   // number of switches at the GPI port;
+    LED_NUM = 8,  // number of LED at the GPO port;
+    PORT_NUM = 4,  // number of port for GPIO (board PMOD jumper)
+    
+    UART_DATA_BIT = 8,                  // number of UART data bits;
+    UART_STOP_BIT_SAMPLING_NUM = 16    // this corresponds to one stop bit; (16 oversampling);
     )
     (
     // general;
@@ -47,10 +51,15 @@ module mmio_sys
     input logic [`REG_DATA_WIDTH_G-1:0] mmio_wr_data,   // 32-bit'
     output logic [`REG_DATA_WIDTH_G-1:0] mmio_rd_data,   // 32-bit;
     
-    // HW pin mapping (by the constraint file);
-    input logic [SW_NUM-1:0] sw,
-    output logic [LED_NUM-1:0] led,
-    inout tri[PORT_NUM-1:0] pmod    // tristate for gpio;
+    /* HW pin mapping (by the constraint file) */
+    input logic [SW_NUM-1:0] sw, // gpi
+    output logic [LED_NUM-1:0] led,  // gpo;
+    inout tri[PORT_NUM-1:0] pmod,    // tristate for gpio;
+    
+    input logic uart_rx,    // uart
+    output logic uart_tx    // uart;
+    
+    
     );
     
     /* ----- broadcasting arrays; */
@@ -111,10 +120,31 @@ module mmio_sys
         .rd_data(core_data_rd_array[`S0_SYS_TIMER])    
     );
     
-    /* ??? pending ???
-     UART core is not constructed yet;
-     ???
-     */
+    // uart core;
+    core_uart
+    #(
+       .UART_DATA_BIT(UART_DATA_BIT),
+       .UART_STOP_BIT_SAMPLING_NUM(UART_STOP_BIT_SAMPLING_NUM),
+       .FIFO_ADDR_WIDTH(8), // uart fifo address; could hold up to 2^{8} = 64 data;
+       .FIFO_DATA_WIDTH(UART_DATA_BIT)
+    )
+    uart_unit
+    (
+        .clk(clk),
+        .reset(reset),
+        
+        // bus interface;
+        .cs(core_ctrl_cs_array[`S1_UART_DEBUG]),
+        .write(core_ctrl_wr_array[`S1_UART_DEBUG]),
+        .read(core_ctrl_rd_array[`S1_UART_DEBUG]),
+        .addr(core_addr_reg_array[`S1_UART_DEBUG]),
+        .wr_data(core_data_wr_array[`S1_UART_DEBUG]),
+        .rd_data(core_data_rd_array[`S1_UART_DEBUG]),
+        
+        // mapped with the board uart pins;
+        .tx(uart_tx),
+        .rx(uart_rx)
+    );
     
     // general purpose output core;
     core_gpo #(.W(LED_NUM)) gpo_unit
