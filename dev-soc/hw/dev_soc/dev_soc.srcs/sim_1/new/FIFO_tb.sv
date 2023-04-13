@@ -35,12 +35,33 @@ program FIFO_tb
         @(posedge clk)
         ctrl_wr <= 1'b0;
         ctrl_rd <= 1'b0;
+        /* test 00: sequential write followed up by a read */
+        $display("test 00");
+        $display("-------------------");
+        for(int i = 0; i < ADDR_WIDTH + 5; i++) begin        
+            @(posedge clk);
+            ctrl_wr <= 1'b1;
+            wr_data = (DATA_WIDTH)'($random);
+            
+            @(posedge clk);
+            ctrl_wr <= 1'b0;
+            
+            @(posedge clk);
+            ctrl_rd <= 1'b1;
+            @(posedge clk);
+            ctrl_rd <= 1'b0;
+        end
+        
+        
         /* test 01: write-only until fifo is full 
         expectation:
         1. full_flag will be triggered eventually;
         2. read_data will always point to the base (the first written data)
             because there is no read request;
         */
+        $display("test 01");
+        $display("-------------------");
+        
         
         // go beyond the address width to capture fifo status flags;
         // such as full/empty;
@@ -55,6 +76,9 @@ program FIFO_tb
         1. the read data will be the write data in test 01 in a first-in-first out manner;
         2. empty_flag will be triggered eventually;
         */
+        $display("test 02");
+        $display("-------------------");
+        
         @(posedge clk)
         ctrl_wr <= 1'b0;
         ctrl_rd <= 1'b0;
@@ -70,6 +94,9 @@ program FIFO_tb
             because the write and read pointers are pointing
             at the same place;
         */
+        $display("test 03");
+        $display("-------------------");
+        
         @(posedge clk)
         ctrl_wr <= 1'b0;
         ctrl_rd <= 1'b0;
@@ -80,11 +107,14 @@ program FIFO_tb
             wr_data = (DATA_WIDTH)'($random);
         end 
         
-        /* test 03: read and write when fifo is not empty and not full 
+        /* test 04: read and write when fifo is not empty and not full 
         expectation:
         1. full and empty flags will never occur;
         2. the read data will "lag" the write data by the amount of the write apriori;  
         */
+        $display("test 04");
+        $display("-------------------");
+        
         @(posedge clk)
         ctrl_wr <= 1'b0;
         ctrl_rd <= 1'b0;
