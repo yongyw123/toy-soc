@@ -81,7 +81,6 @@ module uart_sys_top_tb();
     );
         
     // test stimulus;
-    /*
     uart_sys_tb
     #(.UART_DATA_BIT(UART_DATA_BIT),
      .UART_STOP_BIT_SAMPLING_NUM(UART_STOP_BIT_SAMPLING_NUM),
@@ -89,7 +88,7 @@ module uart_sys_top_tb();
      .FIFO_DATA_WIDTH(FIFO_DATA_WIDTH))
      
      tb(.*);
-    */
+    
     
     /* simulate common system clk;*/
     always
@@ -125,6 +124,7 @@ module uart_sys_top_tb();
         rx_empty);     
     end
     
+    /*
     initial 
     begin
         @(negedge clk);
@@ -140,29 +140,11 @@ module uart_sys_top_tb();
         ctrl_wr = 1'b0;
         
         wait(rx_empty == 1'b0);
-        /*
-        wait(tx == 1'b0);
-        $display("0");
-        wait(tx == 1'b1);
-        $display("1");
-        wait(tx == 1'b0);
-        $display("2");
-        wait(tx == 1'b1);
-        $display("3");
-        wait(tx == 1'b1);
-        $display("4");
-        wait(tx == 1'b0);
-        $display("5");
-        wait(tx == 1'b1);
-        $display("6");
-        wait(tx == 1'b0);
-        $display("7");
-        wait(tx == 1'b1);
-        */
         #(10);
         $display("done");
         $stop;
     end
+    */
     
 
 endmodule
