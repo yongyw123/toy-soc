@@ -89,5 +89,50 @@
 `define S3_GPI_SW       3   // general purpose input to accommodate switches;
 `define S4_GPIO_PORT    4   // general purpose input output for flexibility and to reduce pinout;
 
+/* -------------------------------------------------
+*  Register Map of the Individual IO core register;
+--------------------------------------------------*/
+
+/**************************************************************
+* S1_UART_DEBUG
+--------------------
+UART core has five registers;
+
+Register Map
+1. register 01 (offset 0): status register      
+2. register 02 (offset 1): baud rate setting divisor;
+3. register 03 (offset 2): Tx (write) request register;
+4. register 04 (offset 3): Rx (read-and-pop) request (control) register;
+5. register 05 (offset 4): Rx Data;
+        
+Register Definition:
+1. register 01: Status Register
+    bit 0 - UART Rx FIFO buffer Empty Status
+    bit 1 - UART Tx FIFO buffer Full Status
+2. register 02: baud rate;
+    where bit[10:0] is allocated to store
+    the value to program the baud rate;
+3. register 03: Tx write request;
+    to put the wr_data on the bus for UART Tx;
+4. register 04: Rx read request;
+    where UART Rx FIFO requires a read requeat
+        to get the data pointed and update the pointer
+        to the next data;
+5. register 05: Rx data;
+    data popped by the read request from the register above;
+
+Register IO Access;
+1. Status Register              - Read Only
+2. Baud Rate Setting Divisior   - Write Only
+3. Tx Write Request Register    - Write Only
+4. Rx Request Register          - Write Only;
+5. Read Data Register           - Read Only;   
+******************************************************************/
+`define S1_UART_REG_STATUS_OFFSET               0
+`define S1_UART_REG_BAUD_OFFSET                 1
+`define S1_UART_REG_TX_WRITE_REQUEST_OFFSET     2
+`define S1_UART_REG_RX_READ_REQUEST_OFFSET      3
+`define S1_UART_REG_RX_READ_DATA_OFFSET         4
+
 
 `endif //_IO_MAP_SVH
