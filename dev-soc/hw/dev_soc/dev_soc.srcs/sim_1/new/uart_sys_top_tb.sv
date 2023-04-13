@@ -41,10 +41,11 @@ module uart_sys_top_tb();
     /* common baud rate, b for uart systems */
     // higher baud rate to shorten the simulation time;
     // but respect this constraint: b < 16*system_clk;
-    localparam baud_rate = 5000000; // bits per second;
+    //localparam baud_rate = 500000; // bits per second;
+    localparam baud_rate = 50000; // bits per second;
     localparam system_freq = 100000000;
     // programmable parameter;
-    localparam baud_rate_programmable_mod = $ceil((system_freq/(16*baud_rate) - 1)); 
+    localparam baud_rate_programmable_mod = system_freq/(16*baud_rate); 
     
     // argument for uart system;
     logic ctrl_wr;    // input;
@@ -64,7 +65,7 @@ module uart_sys_top_tb();
      .UART_STOP_BIT_SAMPLING_NUM(UART_STOP_BIT_SAMPLING_NUM),
      .FIFO_ADDR_WIDTH(FIFO_ADDR_WIDTH),
      .FIFO_DATA_WIDTH(FIFO_DATA_WIDTH))
-    system_A
+    system
     (
         .clk(clk),
         .reset(reset),
@@ -74,12 +75,13 @@ module uart_sys_top_tb();
         .tx_full(tx_full),
         .ctrl_rd(ctrl_rd),
         .rd_data(rd_data),
-        .rx(rx),  // from system B;
+        .rx(tx),  
         .rx_empty(rx_empty),
         .baud_rate_programmable_mod(baud_rate_programmable_mod)
     );
         
     // test stimulus;
+    /*
     uart_sys_tb
     #(.UART_DATA_BIT(UART_DATA_BIT),
      .UART_STOP_BIT_SAMPLING_NUM(UART_STOP_BIT_SAMPLING_NUM),
@@ -87,6 +89,7 @@ module uart_sys_top_tb();
      .FIFO_DATA_WIDTH(FIFO_DATA_WIDTH))
      
      tb(.*);
+    */
     
     /* simulate common system clk;*/
     always
@@ -121,5 +124,45 @@ module uart_sys_top_tb();
         tx_full,
         rx_empty);     
     end
+    
+    initial 
+    begin
+        @(negedge clk);
+        ctrl_rd = 1'b0;
+        ctrl_wr = 1'b0;
+        
+        @(negedge clk);
+        ctrl_wr = 1'b1;
+        wr_data = 8'b1010_1101;
+        
+        @(negedge clk);
+        ctrl_rd = 1'b0;
+        ctrl_wr = 1'b0;
+        
+        wait(rx_empty == 1'b0);
+        /*
+        wait(tx == 1'b0);
+        $display("0");
+        wait(tx == 1'b1);
+        $display("1");
+        wait(tx == 1'b0);
+        $display("2");
+        wait(tx == 1'b1);
+        $display("3");
+        wait(tx == 1'b1);
+        $display("4");
+        wait(tx == 1'b0);
+        $display("5");
+        wait(tx == 1'b1);
+        $display("6");
+        wait(tx == 1'b0);
+        $display("7");
+        wait(tx == 1'b1);
+        */
+        #(10);
+        $display("done");
+        $stop;
+    end
+    
 
 endmodule
