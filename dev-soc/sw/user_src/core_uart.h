@@ -15,6 +15,8 @@ Purpose: SW drivers for uart core;
 extern "C" {
 #endif
 
+
+
 class core_uart{
     // register map;
     enum{
@@ -27,12 +29,27 @@ class core_uart{
 
     // masking for the status flag of the status register;
     enum{
-        
-        STATUS_RX_EMPTY = BIT_MASK(S1_UART_REG_STATUS_BIT_POS_RX_EMPTY),
-        STATUS_TX_FULL = BIT_MASK(S1_UART_REG_STATUS_BIT_POS_TX_FULL)
+        MASK_STATUS_RX_EMPTY = BIT_MASK(S1_UART_REG_STATUS_BIT_POS_RX_EMPTY),
+        MASK_STATUS_TX_FULL = BIT_MASK(S1_UART_REG_STATUS_BIT_POS_TX_FULL)
+    };
+    
+    // codes: returned value constants;
+    enum{
+        TX_FULL_ERROR   = -2,
+        TX_OK           = 1,
+        RX_EMPTY_ERROR  = -1
     };
 
-
+    // misc; 
+    enum{
+        // by uart standard; this should be fixed (?)
+        UART_OVERSAMPLING_NUM = 16,
+        
+        // there is some operation requires a write;
+        // e.g. read a UART Rx FIFO;
+        UART_DUMMY_VAL = 0xFFFF     
+    };
+    
     public:
         // general;
         core_uart(uint32_t core_base_addr);    // constructor
@@ -46,8 +63,8 @@ class core_uart{
         uint32_t check_tx_fifo_full(void);
         
         // rw
-        void uart_tx_byte(uint8_t data);
-        void uart_rx_byte(void);
+        int tx_byte(uint8_t data);
+        int rx_byte(void);
 
         // print;
         void print(const char *str);
