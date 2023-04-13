@@ -34,6 +34,7 @@ program uart_sys_tb
     )
    (
         input logic clk,
+        output logic reset,
         // uart system;
         output logic ctrl_rd,
         output logic ctrl_wr,
@@ -93,6 +94,18 @@ program uart_sys_tb
             $display("------------------------");
         end 
         
+        
+        $display("resetting the system for a different stimulus");
+        $display("------------------------");
+        
+        @(posedge clk);
+        reset <= 1'b1;
+        
+        @(posedge clk);
+        reset <= 1'b0;
+        
+        @(posedge clk);
+                    
         /* 
         Test 01;
         1. trigger a burst of transfer which populate the tx fifo until full;
@@ -105,24 +118,23 @@ program uart_sys_tb
         /* UART Tx */
         // write until fifo is full
         // write beyond the fifo size to ensure fifo full is covered; 
-        //for(int i = 0; i < (wr_data_num + 2); i++) begin
-        for(int i = 0; i < (wr_data_num); i++) begin
+        for(int i = 0; i < (wr_data_num + 2); i++) begin
         //for(int i = 0; i < 1; i++) begin
-            @(posedge clk);
+            @(posedge clk)
             ctrl_wr <= 1'b1;
-            wr_data = (UART_DATA_BIT)'($random);
+            wr_data = (UART_DATA_BIT)'($random);            
             
             // store the wr_data for later check in the read section;
             wr_data_array[i] = wr_data;
-            
+            $display("uart tx: %0d, wr_data: %0B, fifo full?: %0b", i, wr_data, tx_full);
         end
         
-        wait(tx_full == 1'b1);
-        
+        //wait(tx_full == 1'b1);
         // disable write;
-        @(posedge clk);
+        @(posedge clk)
         ctrl_wr <= 1'b0;
-
+    
+        
         // expect that the tx fifo flag will be dropped;
         // because uart tx will keep on requesting data from tx fifo
         // as long as it is not empty;
@@ -139,11 +151,14 @@ program uart_sys_tb
         
         // keep reading until empty flag;
         for(int i = 0; i < (wr_data_num); i++) begin
+            
             // wait for the arrival;
             if(rx_empty) begin
+                $display("debug: %0d", i);
                 // disable read as there is nothing to read;
-                @(posedge clk);
+                @(posedge clk)
                 ctrl_rd <= 1'b0;
+                
                 // wait for the data arrival;
                 wait(rx_empty == 1'b0);
                 ctrl_rd <= 1'b1;
@@ -157,18 +172,37 @@ program uart_sys_tb
                 // since it takes one clock edge to update the fifo
                 // empty flag;
                 
-                @(posedge clk);
+                @(posedge clk)
                 ctrl_rd <= 1'b0;
                 
                 $display("uart rx read: %0d is done", i);                
+            end
+            // already arrive;
+            else begin
+                // read it;
+                @(posedge clk)
+                ctrl_rd <= 1'b1;
                 
+                // expect the read data to correspond;
+                // to the wr data in first in first out manner;
+                wait(rd_data == wr_data_array[i]);
+                
+                // need to disable read;
+                // otherwise it will keep reading;
+                // since it takes one clock edge to update the fifo
+                // empty flag;
+                
+                @(posedge clk)
+                ctrl_rd <= 1'b0;
+                
+                $display("uart rx read: %0d is done", i);
             end
         end
         
         // ensure the fifo here is already empty;
-        @(posedge clk);
+        @(posedge clk)
         assert(rx_empty) $display("OK");
-            $error("expected uart rx fifo to be empty here");
+            else $error("expected uart rx fifo to be empty here");
         
    $display("DONE");
    #(20);
