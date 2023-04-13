@@ -150,11 +150,16 @@ Register IO Access;
 4. Rx Request Register          - Write Only;
 5. Read Data Register           - Read Only;   
 ******************************************************************/
+// register offset;
 `define S1_UART_REG_STATUS_OFFSET               0
 `define S1_UART_REG_BAUD_OFFSET                 1
 `define S1_UART_REG_TX_WRITE_REQUEST_OFFSET     2
 `define S1_UART_REG_RX_READ_REQUEST_OFFSET      3
 `define S1_UART_REG_RX_READ_DATA_OFFSET         4
+
+// bit position of the status flags within status register;
+`define S1_UART_REG_STATUS_BIT_POS_RX_EMPTY         0
+`define S1_UART_REG_STATUS_BIT_POS_TX_FULL          1
 
 
 `endif //_IO_MAP_SVH
