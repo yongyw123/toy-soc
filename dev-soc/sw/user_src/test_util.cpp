@@ -44,15 +44,26 @@ void test_timer(core_gpo *led){
 
 void test_uart(void){
     /*
-    @brief  : to test uart core for serial debugging;
-    @param  : none
-    @retval : none
-    @note   : class core_uart has been instantiated as global in user_util
+    @brief      : to test uart core for serial debugging;
+    @param      : none
+    @retval     : none
+    @assumption : class core_uart has been instantiated as global in user_util
+    @method     :
+        1. put this function in a while loop;
+        2. program the board;
+        3. open a serial console/terminal; e.g. tera term;
+        4. set the serial setting to:
+            baud rate: 9600 (default) if not changed by the user in the application code;
+            #data bits: 8
+            #stop bits: 1
+            #parity bit: none
     */
    static int index_called = 0; // how many times it has been called?
    
    // main uart methods have been wrapped as debug function;
-   debug_str("uart called has been called");
+   debug_str("uart called has been called ");
    debug_num(index_called);
    debug_str(" times\r\n");
+
+   index_called++;
 }
