@@ -119,7 +119,9 @@ void core_gpio::write(uint32_t which_port, uint32_t data){
     REG_WRITE(base_addr, REG_WRITE_DATA_OFFSET, wr_data);
 }
 
-
+uint32_t core_gpio::get_direction(void){
+    return (uint32_t)(REG_READ(base_addr, REG_CTRL_DIR_OFFSET));
+}
 int core_gpio::get_ctrl_dir_read(void){
     return CTRL_DIRECTION_READ;
 }
