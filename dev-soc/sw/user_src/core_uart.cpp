@@ -93,6 +93,9 @@ int core_uart::tx_byte(uint8_t data){
     @note   : this is non-blocking; 
                 user to check for the error;
     */
+   
+   // this will block the tx if there is no room to transmit;
+   // flag it;
    if(check_tx_fifo_full()){
         return TX_FULL_ERROR;
    }
@@ -110,6 +113,8 @@ int core_uart::rx_byte(void){
     @note   : this is non-blocking; 
                 user to check for the error;
     */
+
+   // there is nothing to read if it is empty;
    if(check_rx_fifo_empty()){
         return RX_EMPTY_ERROR;
    }
@@ -122,6 +127,10 @@ int core_uart::rx_byte(void){
    REG_WRITE(base_addr, REG_RX_READ_RQ_OFFSET, UART_DUMMY_VAL);
    
    // done
+   // this is ok;
+   // because uart supported data bit range will
+   // not include 32-bit? if so, it is ok to give one
+   // away for the signed bit;
    return (int)retval;
 }
 

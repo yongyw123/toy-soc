@@ -33,6 +33,7 @@ class core_uart{
     
     // codes: returned value constants;
     enum{
+        // reminder: need to use signed type to use these codes;
         TX_FULL_ERROR   = -2,
         TX_OK           = 1,
         RX_EMPTY_ERROR  = -1
@@ -43,8 +44,8 @@ class core_uart{
         // by uart standard; this should be fixed (?)
         UART_OVERSAMPLING_NUM = 16,
         
-        // there is some operation requires a write;
-        // e.g. read a UART Rx FIFO;
+        // there is some operations that require a write;
+        // e.g. read a UART Rx FIFO to move the read pointer;
         UART_DUMMY_VAL = 0xFFFF     
     };
     
