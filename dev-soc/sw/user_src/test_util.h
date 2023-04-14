@@ -42,6 +42,25 @@ void test_led_sw(core_gpi *sw, core_gpo *led);
 void test_timer(core_gpo *led);
 
 
+/*
+* IO core to test;
+1. uart;
+
+method;
+1. connect the board to any PC;
+2. open any serial console;
+3. e.g. tera term;
+
+uart default settings;
+1. baud rate; 9600;
+2. number of data bits; 8;
+3. number of stop bits; 1;
+4. parity bits; none;
+
+*/
+void test_uart(){
+    
+}
 
 #ifdef __cpluscplus
 } // extern "C";
