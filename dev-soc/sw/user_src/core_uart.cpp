@@ -199,7 +199,6 @@ void core_uart::print(int number, int base){
 
    uint8_t remainder;   // to determine the base; modulo;
    uint8_t quotient;    // for base conversion;
-   uint8_t index;       // string index for tracking;
    
     // check;
     if(base != 2 && base != 8 && base != 16){
@@ -221,7 +220,6 @@ void core_uart::print(int number, int base){
     // start from the end for convenience;
     ptr = &buffer[33];
     *ptr = '\0';
-    index = 0;
     
     // base conversion;
     // standard formula:
@@ -261,8 +259,6 @@ void core_uart::print(int number, int base){
 
         // update;
         *ptr = temp_ch;
-        index++;
-
         // to break if base conversion is complete;
         if(quotient <= 0){
             break;
@@ -271,11 +267,9 @@ void core_uart::print(int number, int base){
     }
 
     // sign;
-    
     if(sign_ch == '-'){
         ptr--;
         *ptr = sign_ch;
-        index++;
     }
     // done;
     print_string((const char *)ptr);
