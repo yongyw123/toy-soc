@@ -58,9 +58,8 @@ uart default settings;
 4. parity bits; none;
 
 */
-void test_uart(){
-    
-}
+void test_uart(void);
+
 
 #ifdef __cpluscplus
 } // extern "C";

@@ -12,7 +12,7 @@ int main(){
     
     while(1){
         test_uart();
-        debug("pause for 2 seconds");
+        debug("pause for 2 seconds\r\n");
         delay_busy_ms(2000); // one seconds;
     }
 }

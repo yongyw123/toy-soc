@@ -52,7 +52,5 @@ void test_uart(void){
    static int index_called = 0; // how many times it has been called?
    
    // main uart methods have been wrapped as debug function;
-   debug("uart called has been called ");
-   debug((const char *)&index_called);
-   debug("times\r\n");
+   debug_on("uart called has been called");
 }

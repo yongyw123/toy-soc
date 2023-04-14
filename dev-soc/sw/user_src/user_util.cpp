@@ -29,9 +29,9 @@ void debug_off(void){
 void debug_on(const char *str){
     /*
     @brief  : serial print out for debugging purpose;
-    @param  : string (message) to print
+    @param  :
+        str      : pointer to the string (message) to print
     @retval : none
     */
    sys_uart.print(str);
 }
-
