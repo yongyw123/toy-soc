@@ -274,3 +274,12 @@ void core_uart::print(int number, int base){
     // done;
     print_string((const char *)ptr);
 }
+
+void core_uart::print(int number){
+    /*
+    @brief  : print decimal (could be negative);
+    @param  : number in decimal format;
+    @retval : none
+    */
+   print(number, 10);
+}

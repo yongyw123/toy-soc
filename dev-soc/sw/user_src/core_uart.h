@@ -66,10 +66,12 @@ class core_uart{
         int rx_byte(void);
 
         // print;
-        void print_string(const char *str);
-        void print(uint8_t raw);
-        void print(const char *str);
-        void print(int number, int base);
+        void print_string(const char *str); // needed to accomodate the method overloaded below;
+        void print(uint8_t raw);            // print as it is without any conversion/processing;
+        void print(const char *str);        // duplicate print_string();
+        void print(int number, int base);   // print number specified in which base?
+        void print(int number);             // assume (signed) decimal;
+
     
     private:
         uint32_t base_addr;
