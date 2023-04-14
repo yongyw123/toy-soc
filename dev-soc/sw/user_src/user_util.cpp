@@ -14,24 +14,31 @@ void delay_busy_ms(uint64_t ms){
    sys_timer.delay_busy_us((uint64_t)1000*ms);
 }
 
-
-//> debugging utility;
-void debug_off(void){
-    /*
-    @brief  : to turn off uart printing;
-    @note   : this is just a placeholder for NOP;
-    @param  : none
-    @retval : none
-    */
-   ;    // nop;
-}
   
-void debug_on(const char *str){
-    /*
-    @brief  : serial print out for debugging purpose;
-    @param  :
-        str      : pointer to the string (message) to print
-    @retval : none
-    */
-   sys_uart.print(str);
-}
+// only if debugging is enabled at the top level: main.h
+#if _DEBUG
+    void debug_str(const char *str){
+        /*
+        @brief  : serial print out a string (message) for debugging purpose;
+        @param  : str, a pointer to the string (message) to print
+        @retval : none
+        */
+    sys_uart.print(str);
+    }
+
+    void debug_num(int num){
+        /*
+        @brief  : serial print a (signed) number for debugging purposes;
+        @param  : integer
+        @retval : none
+        */
+    sys_uart.print(num);
+    }
+// debugging is disabled;
+// NOP then;
+#else
+    void debug_str(const char *str){}
+    
+    void debug_num(int num){}
+
+#endif
