@@ -78,18 +78,18 @@ module core_gpio_tb();
         #(T/2);
         reset = 1'b0;
         #(T/2);
-        @(negedge clk); // avoid data setup and hold time for subsequent simulation;
     end
     
     // setup some init value;
     // this is necessary since not all bits are used;
     // need to set the rest to avoid "X" unknown values;
+    /*
     initial
     begin
-        addr = 5'b0;        // reset the register address
+        //addr = 5'b0;        // reset the register address
         wr_data = 32'b0;     // reset the write data;  
     end
-    
+    */
     initial
     begin
         high_imp_data = PORT_WIDTH'(32'bz);
@@ -109,10 +109,38 @@ module core_gpio_tb();
     initial
     begin
         $display("----- test starts -----");
-        // enable write operation;
-        read = 1'b0;    
-        write = 1'b1;
+        /* --------- test 00 ---------
+        * check all registers are at default values, after reset;
+        -----------------------------*/
+        $display("----- test 00 -----");
+        
+        // after reset, the rd_data will be reset to zero;
+        // expect read data to be either zero or unknown;
+        // depending on the reset timing;
+        $display("time %0t; rd_data: %0B", $time, rd_data);
+        
+        @(negedge clk);
+        
+        // expect read data to be zero or unknown;
+        // depending on the reset timing;
+        $display("time %0t; rd_data: %0B", $time, rd_data);
+        
+        read = 1'b1;    
+        write = 1'b0;
         cs = 1'b1;
+        addr[1:0] = REG_DATA_IN_OFFSET;
+        
+        @(negedge clk);
+        // expect read data to be high impedance since all output is disabled;
+        $display("time %0t; rd_data: %0B", $time, rd_data);
+        
+        @(negedge clk);
+        addr[1:0] = REG_CTRL_DIRECTION_OFFSET;
+        
+        @(negedge clk);
+        // expect read direction to be zero (input);
+        // direction is input after reset;
+        $display("time %0t; rd_data: %0B", $time, rd_data);
         
         
         /* --------- test 01 --------- 
@@ -133,6 +161,11 @@ module core_gpio_tb();
         -----------------------------*/
         $display("----- test 01 -----");
         @(negedge clk);
+        // enable write operation;
+        read = 1'b0;    
+        write = 1'b1;
+        cs = 1'b1;
+        
         // write data to the output buffer;
         // but direction is configured as input by the reset above;
         addr[1:0] = REG_DATA_OUT_OFFSET;    
@@ -283,6 +316,7 @@ module core_gpio_tb();
             $display("i: %0d, dir: %0b, dinout: %0b, wr_data: %0b, rd_data: %0b", i, dir_mix_data_02[i], dinout[i], temp_wr_data_02[i], rd_data[i]);
         end
         
+                
        #(T);
        $display("----- test ends -----");
     $stop;

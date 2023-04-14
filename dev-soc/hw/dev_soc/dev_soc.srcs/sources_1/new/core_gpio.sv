@@ -67,6 +67,7 @@ module core_gpio
     // signal declarations;
     logic wr_data_en;     // for writing;
     logic ctrl_dir_en;    // for direction control;
+    logic rd_data_en;     // for reading;
     
     // registers;
     logic [PORT_WIDTH - 1:0] wr_data_reg;
@@ -105,6 +106,8 @@ module core_gpio
     assign wr_data_en = write && cs && (addr[1:0] == REG_DATA_OUT_OFFSET);
     // for direction control;
     assign ctrl_dir_en = write && cs && (addr[1:0] == REG_CTRL_DIRECTION_OFFSET);
+    // for reading;
+    assign rd_data_en = read && cs;
     
     // determine the direction of each bit (port) individually;
     generate
@@ -125,10 +128,10 @@ module core_gpio
     begin
         // extra; not needed; pad with zero;
         rd_data[`REG_DATA_WIDTH_G-1:PORT_WIDTH] = 0;
-        case(addr[1:0])
-            REG_DATA_IN_OFFSET          : rd_data[PORT_WIDTH-1:0] = rd_data_reg;
-            REG_CTRL_DIRECTION_OFFSET   : rd_data[PORT_WIDTH-1:0] = dir_data_reg; 
-            default                     : rd_data[PORT_WIDTH-1:0] = rd_data_reg;      
+        case({rd_data_en, addr[1:0]})
+            {1'b1, REG_DATA_IN_OFFSET}          : rd_data[PORT_WIDTH-1:0] = rd_data_reg;
+            {1'b1, REG_CTRL_DIRECTION_OFFSET}   : rd_data[PORT_WIDTH-1:0] = dir_data_reg; 
+            default                             : rd_data[PORT_WIDTH-1:0] = rd_data_reg;      
         endcase
     end     
     
