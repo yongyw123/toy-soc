@@ -42,7 +42,9 @@ assumption: class core_uart has been instantiated as a global object;
 3. [future] floating;
 */
 void debug_str(const char *str);
-void debug_num(int num); 
+void debug_dec(int dec_num); 
+void debug_hex(int hex_num);
+void debug_bin(int bin_num);
 
 #ifdef __cpluscplus
 } // extern "C";

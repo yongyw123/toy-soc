@@ -26,14 +26,35 @@ void delay_busy_ms(uint64_t ms){
     sys_uart.print(str);
     }
 
-    void debug_num(int num){
+    void debug_dec(int dec_num){
         /*
         @brief  : serial print a (signed) number for debugging purposes;
-        @param  : integer
+        @param  : integer decimal
         @retval : none
         */
-    sys_uart.print(num);
+    sys_uart.print(dec_num);
     }
+
+    void debug_hex(int hex_num){
+        /*
+        @brief  : serial print a hex number for debugging purposes;
+        @param  : hexadecimal;
+        @retval : none
+        */
+       sys_uart.print("0x");
+       sys_uart.print(hex_num, 16);
+    }
+
+    void debug_bin(int bin_num){
+        /*
+        @brief  : serial print a binary number for debugging purposes;
+        @param  : hexadecimal;
+        @retval : none
+        */
+       sys_uart.print("0b");
+       sys_uart.print(bin_num, 2);
+    }
+
 // debugging is disabled;
 // NOP then;
 #else

@@ -188,6 +188,7 @@ void core_uart::print(int number, int base){
         number  : number to print;
         base    : the base of the number: dec, octal or hex?
     @support    : supported base: {binary, octal, decimal, hexadecimal}
+    @support    : maximum 32-bit wide number;
     @retval : none
     */
 
@@ -195,7 +196,7 @@ void core_uart::print(int number, int base){
    uint8_t *ptr;        // pointer to store the converted number in ascii;
    uint8_t sign_ch;        // to indicate negative;
    uint8_t temp_ch;     // to hold converted ascii;
-
+   
 
    uint8_t remainder;   // to determine the base; modulo;
    uint8_t quotient;    // for base conversion;
@@ -259,6 +260,7 @@ void core_uart::print(int number, int base){
 
         // update;
         *ptr = temp_ch;
+        
         // to break if base conversion is complete;
         if(quotient <= 0){
             break;
@@ -271,6 +273,7 @@ void core_uart::print(int number, int base){
         ptr--;
         *ptr = sign_ch;
     }
+
     // done;
     print_string((const char *)ptr);
 }
