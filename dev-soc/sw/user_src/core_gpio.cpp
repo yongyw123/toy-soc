@@ -69,7 +69,7 @@ uint8_t core_gpi::read(uint32_t bit_pos){
 core_gpio::core_gpio(uint32_t core_base_addr){
     base_addr = core_base_addr;
     direction_data = (uint32_t)CTRL_DIRECTION_READ; // by default after reset;
-    wr_data = 0;
+    wr_data = (uint32_t)0x00000000;
 }
 
 // destructor; null;
@@ -104,7 +104,7 @@ void core_gpio::set_direction(uint32_t which_port, uint32_t direction){
 
 uint32_t core_gpio::read(uint32_t which_port){
     uint32_t rd_data = REG_READ(base_addr, REG_READ_DATA_OFFSET);
-    return (uint32_t)((rd_data >> which_port) & 0xFF);   
+    return (uint32_t)((rd_data >> which_port) & 0xF);   
 }
 
 
@@ -120,5 +120,11 @@ void core_gpio::write(uint32_t which_port, uint32_t data){
 }
 
 
+int core_gpio::get_ctrl_dir_read(void){
+    return CTRL_DIRECTION_READ;
+}
 
+int core_gpio::get_ctrl_dir_write(void){
+    return CTRL_DIRECTION_WRITE;
+}
 

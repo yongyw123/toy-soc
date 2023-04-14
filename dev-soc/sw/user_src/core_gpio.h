@@ -102,6 +102,10 @@ class core_gpio{
         uint32_t read(uint32_t which_port);             // read 
         void write(uint32_t which_port, uint32_t data); // write 
 
+        // access the enum constants;
+        int get_ctrl_dir_write(void);   
+        int get_ctrl_dir_read(void);
+
     private:
         uint32_t base_addr;
         uint32_t wr_data;

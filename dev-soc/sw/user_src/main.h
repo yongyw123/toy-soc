@@ -21,8 +21,30 @@ Purpose: top level directives;
 extern "C" {
 #endif
 
-
+/*---------------------------------
+* CONTROL
+---------------------------------*/
 #define _DEBUG  1
+
+/* ---------------------------------
+* PIN MAPPING
+----------------------------------*/
+// gpo - board all leds;
+#define PIN_GPO_LED_00  0
+#define PIN_GPO_LED_01  1
+#define PIN_GPO_LED_02  2
+#define PIN_GPO_LED_03  3
+
+// ?? to be filled in ??
+
+// gpi - board all switches;
+
+// gpio pins - PMOD JD00 to JD03 are allocated for GPIO; 
+#define PIN_GPIO_PMOD_JD0   0
+#define PIN_GPIO_PMOD_JD1   1
+#define PIN_GPIO_PMOD_JD2   2
+#define PIN_GPIO_PMOD_JD3   3
+
 
 
 #ifdef __cpluscplus

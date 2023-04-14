@@ -45,7 +45,7 @@ module core_gpio
     *   INPUT if the direction bit is LOW;
     *
     */
-    #(parameter PORT_WIDTH = 16)    // board has 16 switches and 16 leds;
+    #(parameter PORT_WIDTH = 16)    // gpio candidate; board pmod jumpers;
     (
         // general;
         input logic clk,    // 100 MHz;
@@ -102,9 +102,9 @@ module core_gpio
      read and write are mutually exclusive;
     */
     // for writing;
-    assign wr_data_en = write && cs && !(read) && (addr[1:0] == REG_DATA_OUT_OFFSET);
+    assign wr_data_en = write && cs && (addr[1:0] == REG_DATA_OUT_OFFSET);
     // for direction control;
-    assign ctrl_dir_en = write && cs && !(read) && (addr[1:0] == REG_CTRL_DIRECTION_OFFSET);
+    assign ctrl_dir_en = write && cs && (addr[1:0] == REG_CTRL_DIRECTION_OFFSET);
     
     // determine the direction of each bit (port) individually;
     generate
