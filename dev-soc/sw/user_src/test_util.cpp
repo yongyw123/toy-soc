@@ -49,7 +49,8 @@ void test_uart(void){
     @retval     : none
     @assumption : class core_uart has been instantiated as global in user_util
     @method     :
-        1. put this function in a while loop;
+        1. put this function in a while main loop and insert one noticeable delay,
+            say at least two seconds (in the main while loop);
         2. program the board;
         3. open a serial console/terminal; e.g. tera term;
         4. set the serial setting to:
@@ -58,12 +59,23 @@ void test_uart(void){
             #stop bits: 1
             #parity bit: none
     */
-   static int index_called = 0; // how many times it has been called?
+
+   // how many times it has been called?
+   static int index_called_p = 0; 
    
+   // negative; to see whether the print method actually prints negative sign;
+   static int index_called_n = 0;   
+
    // main uart methods have been wrapped as debug function;
    debug_str("uart called has been called ");
-   debug_num(index_called);
+   debug_num(index_called_p);
    debug_str(" times\r\n");
+   debug_str("uart could display negative number: ");
+   debug_num(index_called_n);
+   debug_str("\r\n");
+   
+   index_called_p++;
+   index_called_n--;
 
-   index_called++;
+
 }
