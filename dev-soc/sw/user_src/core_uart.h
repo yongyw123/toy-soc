@@ -66,7 +66,10 @@ class core_uart{
         int rx_byte(void);
 
         // print;
+        void print_string(const char *str);
+        void print(uint8_t raw);
         void print(const char *str);
+        void print(int number, int base);
     
     private:
         uint32_t base_addr;
