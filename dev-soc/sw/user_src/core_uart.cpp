@@ -10,6 +10,9 @@ core_uart::core_uart(uint32_t core_base_addr){
      */
     base_addr = core_base_addr;
     baud_rate = 9600;   // by default;
+    
+    // set the baud rate by default;
+    set_baud_rate(baud_rate);
 }
 
 // destructor;
@@ -22,10 +25,33 @@ void core_uart::set_baud_rate(uint32_t baud_rate){
     @param  : baud_rate to be set (must be in integer)
     @retval : none
     */
-    
+
+    // update the private;
+    baud_rate = baud_rate;
+
     // need to convert baud rate to the 
     // counter mod threshold within the baud rate generator;
     uint32_t conv;
+
+    /*
+    formula;
+
+    assume oversampling takes 16 ticks;
+
+    take;
+    baud_rate, b;
+    system freq, f;
+    mod_threshold, t;
+
+    t = f/(16*b)
+
+    however, it is coded such that the count starts from
+    zero and up to (mod threshold);
+    so, there is an extra one;
+    need to offset this; hence we have;
+
+    t = f / (16*b) - 1;
+    */ 
 
     conv = ((SYS_CLK_FREQ_HZ/(UART_OVERSAMPLING_NUM*baud_rate)) - 1);
     REG_WRITE(base_addr, REG_BAUD_OFFSET, conv);
