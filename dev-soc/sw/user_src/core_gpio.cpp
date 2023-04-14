@@ -119,7 +119,13 @@ void core_gpio::write(uint32_t which_port, uint32_t data){
     REG_WRITE(base_addr, REG_WRITE_DATA_OFFSET, wr_data);
 }
 
-uint32_t core_gpio::get_direction(void){
+uint32_t core_gpio::read_ctrl_reg(void){
+    /*
+    @brief  : to read the control register;
+    @param  : none
+    @retval : 32-bit control register data;
+    */
+
     return (uint32_t)(REG_READ(base_addr, REG_CTRL_DIR_OFFSET));
 }
 int core_gpio::get_ctrl_dir_read(void){
@@ -130,3 +136,12 @@ int core_gpio::get_ctrl_dir_write(void){
     return CTRL_DIRECTION_WRITE;
 }
 
+uint32_t core_gpio::debug_get_dir(void){
+    /*
+    @brief  : to get the object current private direction setting; 
+    @note   : compare against the data read from the control register;
+    @param  : none
+    @retval : class object current private direction setting;
+    */
+    return direction_data;
+}

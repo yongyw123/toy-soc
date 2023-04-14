@@ -101,12 +101,15 @@ class core_gpio{
         void set_direction(uint32_t which_port, uint32_t direction);        // set direction
         uint32_t read(uint32_t which_port);             // read 
         void write(uint32_t which_port, uint32_t data); // write 
-        uint32_t get_direction(void);       // read the ctrl register;
+        uint32_t read_ctrl_reg(void);       // read the ctrl register;
 
 
-        // access the enum constants;
+        // access the enum constants and private var;
         int get_ctrl_dir_write(void);   
         int get_ctrl_dir_read(void);
+        
+        // for debugging; to compare against read_ctrl_reg();
+        uint32_t debug_get_dir(void);   
 
     private:
         uint32_t base_addr;
