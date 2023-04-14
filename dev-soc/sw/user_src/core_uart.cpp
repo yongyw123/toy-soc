@@ -237,15 +237,16 @@ void core_uart::print(int number, int base){
         remainder = quotient % base;
         quotient = quotient / base;
         
-        /* ascii caution;
-        need to consider
+        /* ascii caution for hex;
         if the current digit (remainder)
         is above 10 or not;
         
         e.g. 
         consider "10".
-        "10" is represented by two ascii characters;
-        
+        "10" is represented by "a";
+
+        for other bases;
+        there should be no such problem(?);
         */
         if(remainder < 10){
             // only one digit;
@@ -253,9 +254,9 @@ void core_uart::print(int number, int base){
             // start offset is zero;
             temp_ch = (uint8_t)(remainder + '0');     
         }
-        // more than one digits;
+        // for hex base;
         else{
-            // 
+            temp_ch = (uint8_t)(remainder - 10 + 'a');
         }
 
         // update;
