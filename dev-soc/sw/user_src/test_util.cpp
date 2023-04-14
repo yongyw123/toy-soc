@@ -68,10 +68,10 @@ void test_uart(void){
 
    // main uart methods have been wrapped as debug function;
    debug_str("uart called has been called ");
-   debug_num(index_called_p);
+   debug_dec(index_called_p);
    debug_str(" times\r\n");
    debug_str("uart could display negative number: ");
-   debug_num(index_called_n);
+   debug_dec(index_called_n);
    debug_str("\r\n");
    
    index_called_p++;
