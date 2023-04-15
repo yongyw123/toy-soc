@@ -8,8 +8,8 @@
 - [x] General Purpose Output (GPO)
 - [x] General Purpose Input (GPI)
 - [x] System Timer
-- [ ] GPIO core as a single entity (GPIO)
-- [ ] UART interface for debugging purpose
+- [x] GPIO core as a single entity (GPIO)
+- [x] UART interface for debugging purpose
 - [ ] SPI interface
 - [ ] i2C interface
 - [ ] Digital Camera Interface (DCMI)
