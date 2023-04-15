@@ -1,4 +1,4 @@
-# fpga-system-verilog-learning
+# Toy SoC
 
 
 ## Task List
