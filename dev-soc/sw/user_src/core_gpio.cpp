@@ -76,7 +76,7 @@ core_gpio::core_gpio(uint32_t core_base_addr){
 core_gpio::~core_gpio()   {}
 
 // methods;
-void core_gpio::set_direction(uint32_t which_port, uint32_t direction){
+void core_gpio::set_direction(int which_port, uint32_t direction){
     /*
     * @brief: set the port direction;
     * @param:
@@ -102,15 +102,37 @@ void core_gpio::set_direction(uint32_t which_port, uint32_t direction){
     REG_WRITE(base_addr, REG_CTRL_DIR_OFFSET, direction_data);
 }
 
-uint32_t core_gpio::read(uint32_t which_port){
+int core_gpio::read(int which_port){
+    /*
+    @brief  : read the data from a specified port;
+    @param  : which port?
+    @retval : the read data;
+    */
     uint32_t rd_data = REG_READ(base_addr, REG_READ_DATA_OFFSET);
-    //return ((uint32_t)(rd_data >> which_port) & 0xF);   
-    //return (uint32_t)(rd_data >> which_port);   
+    return ((int)(rd_data >> which_port) & 0xFF);   
+    
+}
+
+uint32_t core_gpio::read(void){
+    /*
+    @brief  : read from the entire gpio pins (regardless of the direction set)
+    @param  : none
+    @retval : a vector of the read data status of the entire gpio pins;
+    */
+    
+    uint32_t rd_data = REG_READ(base_addr, REG_READ_DATA_OFFSET);
     return (uint32_t)(rd_data);   
 }
 
 
-void core_gpio::write(uint32_t which_port, uint32_t data){
+void core_gpio::write(int which_port, uint32_t data){
+    /*
+    @brief      : write a data to a specified port;
+    @param      : which port?
+    @retval     : none
+    @assumption : the specified port has its direction set to out;
+    */
+    
     if(data == 1){
         BIT_CLEAR(wr_data, which_port);
         BIT_SET(wr_data, which_port);
@@ -130,6 +152,18 @@ uint32_t core_gpio::read_ctrl_reg(void){
 
     return (uint32_t)(REG_READ(base_addr, REG_CTRL_DIR_OFFSET));
 }
+
+int core_gpio::read_ctrl_reg(int which_port){
+    /*
+    @brief  : to read the direction set for a specified port;
+    @param  : which port to read?
+    @retval : the direction status of the port
+    */
+   uint32_t read_data = (uint32_t)(REG_READ(base_addr, REG_CTRL_DIR_OFFSET));
+   return (int)((read_data >> which_port) & 0xFF);
+}
+
+
 int core_gpio::get_ctrl_dir_read(void){
     return CTRL_DIRECTION_READ;
 }

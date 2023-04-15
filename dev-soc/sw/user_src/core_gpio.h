@@ -98,10 +98,17 @@ class core_gpio{
         core_gpio(uint32_t core_base_addr); // constructor;
         ~core_gpio();  // destructor;
 
-        void set_direction(uint32_t which_port, uint32_t direction);        // set direction
-        uint32_t read(uint32_t which_port);             // read 
-        void write(uint32_t which_port, uint32_t data); // write 
-        uint32_t read_ctrl_reg(void);       // read the ctrl register;
+        void set_direction(int which_port, uint32_t direction);        // set direction
+        // read data
+        int read(int which_port);   // read a given port;
+        uint32_t read(void);            // read all (in a vector);
+        
+        // write
+        void write(int which_port, uint32_t data); // write 
+
+        // read direction from the ctrl direction reg;
+        int read_ctrl_reg(int which_port);       // read a given port;
+        uint32_t read_ctrl_reg(void);             // read all (in a vector)
 
 
         // access the enum constants and private var;
