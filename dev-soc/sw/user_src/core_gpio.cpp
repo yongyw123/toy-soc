@@ -109,7 +109,9 @@ int core_gpio::read(int which_port){
     @retval : the read data;
     */
     uint32_t rd_data = REG_READ(base_addr, REG_READ_DATA_OFFSET);
-    return ((int)(rd_data >> which_port) & 0xFF);   
+    return (int)((rd_data & BIT_MASK(which_port)) >> which_port);
+    
+    //return ((int)(rd_data >> which_port) & 0xFF);   
     
 }
 
@@ -160,7 +162,8 @@ int core_gpio::read_ctrl_reg(int which_port){
     @retval : the direction status of the port
     */
    uint32_t read_data = (uint32_t)(REG_READ(base_addr, REG_CTRL_DIR_OFFSET));
-   return (int)((read_data >> which_port) & 0xFF);
+   return (int)((read_data & BIT_MASK(which_port)) >> which_port);
+   //return (int)((read_data >> which_port) & 0xFF);
 }
 
 

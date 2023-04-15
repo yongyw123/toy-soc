@@ -40,8 +40,8 @@ int main(){
     debug_str("after setting, the direction data\r\n");
 
     obj_jumper.set_direction(PIN_GPIO_PMOD_JD0, obj_jumper.get_ctrl_dir_read());
-    obj_jumper.set_direction(PIN_GPIO_PMOD_JD1, obj_jumper.get_ctrl_dir_write());
-    obj_jumper.set_direction(PIN_GPIO_PMOD_JD2, obj_jumper.get_ctrl_dir_read());
+    obj_jumper.set_direction(PIN_GPIO_PMOD_JD1, obj_jumper.get_ctrl_dir_read());
+    obj_jumper.set_direction(PIN_GPIO_PMOD_JD2, obj_jumper.get_ctrl_dir_write());
     obj_jumper.set_direction(PIN_GPIO_PMOD_JD3, obj_jumper.get_ctrl_dir_write());
     
     debug_str("from the control reg: "); 
@@ -57,20 +57,21 @@ int main(){
     
     
 
+    
     while(1){
         
-        /*
+        
         input_00 = obj_jumper.read(PIN_GPIO_PMOD_JD0);
         input_01 = obj_jumper.read(PIN_GPIO_PMOD_JD1);
-        
-        debug_str("input 00: "); debug_num(input_00); debug_str("\r\n");
-        debug_str("input 01: "); debug_num(input_01); debug_str("\r\n");
         
         obj_led.write(PIN_GPO_LED_00, input_00);
         obj_led.write(PIN_GPO_LED_01, input_01);
         
-        */
-        //delay_busy_ms(2000); // one seconds;
+        debug_str("input 00: "); debug_dec(input_00); debug_str("\r\n");
+        debug_str("input 01: "); debug_dec(input_01); debug_str("\r\n");
+        
+        //delay_busy_ms(10);
+        
     }
 }
 
