@@ -79,10 +79,11 @@ module spi_sys
     /* mosi arguments; */
     input logic [DATA_BIT-1:0] mosi_data_write,   // data to send to the slave;
     
-    /* spi clock setting; */
+    /* user control inputs and spi clock setting; */
     input logic [MAX_SPI_CLOCK_WIDTH-1:0] count_mod, // counter threshold for spi clock as discussed above;
     input logic cpol,
     input logic cpha,
+    input start,        // start spi transaction;
     
     /*  miso arguments; */
     // assembled data from the slave after one SPI transaction is complete
@@ -90,7 +91,7 @@ module spi_sys
     
     /* status */
     output logic spi_complete_flag, // spi transcation is done;
-    output logic spi_ready,         // spi is idle, available for new transaction;
+    output logic spi_ready_flag,   // spi is idle, available for new transaction;
     
     /* actual SPI pins drive */
     output logic sclk,  // spi clock;
@@ -123,10 +124,105 @@ module spi_sys
     logic[DATA_BIT-1:0] mosi_reg, mosi_next;    // to hold mosi output for shifting;
     
     // register;
-    
+    always_ff @(posedge clk, posedge reset)
+        if(reset)
+        begin
+            state_reg <= ST_IDLE;
+            clk_cnt_reg <= 0;
+            spi_clk_reg <= 0;
+            data_cnt_reg <= 0;
+            miso_reg <= 0;
+            mosi_reg <= 0;        
+        end
+        else
+        begin
+            state_reg <= state_next;
+            clk_cnt_reg <= clk_cnt_next;
+            spi_clk_reg <= spi_clk_next;
+            data_cnt_reg <= data_cnt_next;
+            miso_reg <= miso_next;
+            mosi_reg <= mosi_next;
+        end    
     
     // fsm;
-    
+    always_comb
+    begin
+        // remain as it is until told otherwise;
+        state_next = state_reg;
+        clk_cnt_next = clk_cnt_reg;
+        spi_clk_next = spi_clk_reg;
+        data_cnt_next = data_cnt_reg;
+        miso_next = miso_reg;
+        mosi_next = mosi_reg;
+        
+        spi_ready_flag = 1'b0;   // not ready except in idle state;
+        spi_complete_flag = 1'b0;  // not ready until told otherwise;
+        
+        case(state_reg)
+            ST_IDLE: 
+            begin
+                spi_ready_flag = 1'b1;
+                if(start)
+                begin
+                    state_next = ST_FHALF;
+                    mosi_next = mosi_data_write;
+                    // start the clk count;
+                    clk_cnt_next = 0;
+               end
+                
+            end
+            
+           
+            ST_FHALF:
+            begin
+                // first half of the spi clock has elapsed;
+                if(clk_cnt_reg == count_mod) 
+                begin
+                    // sample the miso data by shifting in at LSB;
+                    miso_next = {miso_reg[DATA_BIT-2:0], miso};
+                    // first half is done; second half;
+                    state_next = ST_SHALF;
+                    // reset the counters;
+                    clk_cnt_next = 0;
+                    // shoudl start counting the data;
+                    data_cnt_next = 0;  
+                end
+                else 
+                begin
+                    clk_cnt_next = clk_cnt_reg + 1;
+                end
+            end
+            
+            ST_SHALF:
+            begin
+                // second half of the spi clock has elapsed;
+                if(clk_cnt_reg == count_mod) 
+                begin
+                    // all data bits have been transmitted?
+                    // spi transaction is complete then;
+                    if(data_cnt_reg == (DATA_BIT-1))
+                    begin
+                        state_next = ST_IDLE;
+                        spi_complete_flag = 1'b1;
+                    end
+                    else
+                    begin
+                        // shift for the next mosi bit;
+                        mosi_next = {mosi_reg[DATA_BIT-2:0], 1'b0};
+                        // one bit is done; back to next bit transaction;
+                        state_next = ST_FHALF;
+                        data_cnt_next = data_cnt_reg + 1;
+                        // reset the clk;
+                        clk_cnt_next = 0;
+                    end
+                end
+                else 
+                begin
+                    clk_cnt_next = clk_cnt_reg + 1;
+                end
+            end
+        endcase
+    end
     /* spi clock generator;
     // reference: https://onlinedocs.microchip.com/pr/GUID-835917AF-E521-4046-AD59-DCB458EB8466-en-US-1/index.html?GUID-E4682943-46B9-4A20-A62C-33E8FD3343A3
     example;
@@ -146,7 +242,5 @@ module spi_sys
     assign mosi = mosi_reg[DATA_BIT-1]; // shift the MSB by the assumption;
     assign miso_assembled_data = miso_reg;
     assign sclk = spi_clk_reg;
-       
- 
     
 endmodule
