@@ -33,7 +33,7 @@ int main(){
     
     debug_str("\r\n");
     debug_str("from the data reg: "); 
-    debug_bin(obj_jumper.read(1));
+    debug_bin(obj_jumper.read());
     
     
     debug_str("\r\n");
@@ -53,7 +53,7 @@ int main(){
 
     debug_str("\r\n");
     debug_str("from the data reg: "); 
-    debug_bin(obj_jumper.read(1));
+    debug_bin(obj_jumper.read());
     
     
 
