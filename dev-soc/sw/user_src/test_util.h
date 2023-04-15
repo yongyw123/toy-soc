@@ -97,7 +97,7 @@ for safety;
 
 -----------------------------------------------------------*/
 void test_gpio_read(core_gpio *gpio_obj, core_gpo *led_obj)__attribute__((noreturn)); 
-//void test_gpio_write(core_gpio *gpio_obj)__attribute__((noreturn));
+void test_gpio_write(core_gpio *gpio_obj)__attribute__((noreturn));
 
 
 #ifdef __cpluscplus

@@ -204,5 +204,44 @@ void test_gpio_read(core_gpio *gpio_obj, core_gpo *led_obj){
         led_obj->write(PIN_GPO_LED_00, input_00);
         led_obj->write(PIN_GPO_LED_01, input_01);
     }
+}
+
+void test_gpio_write(core_gpio *gpio_obj){
+    /*
+    @brief  : test gpio read;
+    @param  : 
+        gpio_obj    : pointer to the instantiated gpio core class;
+    @retval : none
+    
+    @pin setup:
+    1. PMOD JD00 to JD03 are configured as GPIO PINS;
+    2. PMOD JD00 and JD01 directions are input;
+    3. PMOD JD02 and JD03 directions are output;
+
+    @test setup:
+    1. output a square wave on the pins configured as output;
+    2. use logic analyser to measure and check against the expectation;
+    */    
+
+   // set the pin direction;
+   test_gpio_ctrl_direction(gpio_obj);
+
+   // loop forever;
+   while(1){
+        // JD3 and JD2 output should be out of phase;
+        gpio_obj->write(PIN_GPIO_PMOD_JD2, 1);
+        gpio_obj->write(PIN_GPIO_PMOD_JD3, 0);
+
+        // set to 20 ms period;
+        delay_busy_ms(10);
+
+        // toggle;
+        gpio_obj->write(PIN_GPIO_PMOD_JD2, 0);
+        gpio_obj->write(PIN_GPIO_PMOD_JD3, 1);
+
+        // set to 20 ms period;
+        delay_busy_ms(10);
+
+   }
 
 }

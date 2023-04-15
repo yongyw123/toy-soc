@@ -9,8 +9,8 @@ core_gpio obj_jumper(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S4_GPIO_POR
 
 int main(){
     // this test will loop forever; 
-    test_gpio_read(&obj_jumper, &obj_led);
-    
+    test_gpio_write(&obj_jumper);
+
     while(1){
         ;    
     }
