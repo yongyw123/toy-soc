@@ -81,7 +81,7 @@ void test_uart(void){
 
 void test_gpio_ctrl_direction(core_gpio *gpio_obj){
     /*
-    @brief  : test whether control direction register manipulation
+    @brief  : test control direction register manipulation
     @param  : pointer to the instantiated gpio core class;
     @retval : none
     @setup  : use UART to debug; 
@@ -157,4 +157,52 @@ void test_gpio_ctrl_direction(core_gpio *gpio_obj){
     
     debug_str("\r\n");
     debug_str("test done-------");
+}
+
+
+void test_gpio_read(core_gpio *gpio_obj, core_gpo *led_obj){
+    /*
+    @brief  : test gpio read;
+    @param  : 
+        gpio_obj    : pointer to the instantiated gpio core class;
+        led_obj     : pointer to the instantiated gpo core class for LED;
+    @retval : none
+    
+    @pin setup:
+    1. PMOD JD00 to JD03 are configured as GPIO PINS;
+    2. PMOD JD00 and JD01 directions are input;
+    3. PMOD JD02 and JD03 directions are output;
+    
+    @ hw setup  :
+    0. switches with pull-up resistor to 3.3V Power;
+    1. switch: SPST where if pressed; connect to ground;
+        otherwise, it will pulled up to the Power;
+    2. connect the output of the read result to the corresponding LED;
+    
+        switch A @ pin JD0 <-> LED 00;
+        switch B @ pin JD1 <-> LED 01;
+
+    @test + expectation:
+    1. without pressed, LED turns ON;
+    2. pressed -> LED should turn OFF
+
+
+    */
+    
+    // set the pin direction;
+    test_gpio_ctrl_direction(gpio_obj);
+
+    // start testing;
+
+    int input_00;
+    int input_01;
+    // loop forever;
+    while(1){
+        input_00 = gpio_obj->read(PIN_GPIO_PMOD_JD0);
+        input_01 = gpio_obj->read(PIN_GPIO_PMOD_JD1);
+        
+        led_obj->write(PIN_GPO_LED_00, input_00);
+        led_obj->write(PIN_GPO_LED_01, input_01);
+    }
+
 }

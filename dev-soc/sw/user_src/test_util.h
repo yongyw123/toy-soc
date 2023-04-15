@@ -19,7 +19,7 @@ extern "C" {
 
 /* function prototypes */
 
-/*
+/*---------------------------------------------------
 * IO cores to test:
 * 1. general purpose output (gpo);
 * 2. general purpose input (gpi);
@@ -28,21 +28,21 @@ extern "C" {
 * 1. map led to gpo;
 * 2. map sw to gpi;
 * 3. map sw state to led state;
-*/
+---------------------------------------------------*/
 void test_led_sw(core_gpi *sw, core_gpo *led);  
 
 
-/*
+/*---------------------------------------------------
 * IO cores to test:
 * 1. timer;
 * 
 * Method:
 * use in conjunction with led;
-*/
+---------------------------------------------------*/
 void test_timer(core_gpo *led);
 
 
-/*
+/*---------------------------------------------------
 * IO core to test;
 1. uart;
 
@@ -57,36 +57,26 @@ uart default settings;
 3. number of stop bits; 1;
 4. parity bits; none;
 
-*/
+---------------------------------------------------*/
 void test_uart(void);
 
 /*
 * IO core to test;
-1. gpio
+1. gpio 
 
-note that at the time of this writing;
-PMOD JD0 to JD3 are configured as GPIO pins;
-
-note that this requires some external HW connections
-for testing
-
-METHOD
-for safety;
-1. for pins configured as inputs; setup switches
-    and connect the output of the switches to the LEDs;
-2. for pins configured as outputs;
-    generate a square wave and use logic analyzer
-    to observe;
-3. caution: DO NOT connect pins configured as outputs
-    to pins configured as inputs;
-    this is to reduce the incident of shorting the board!!
-
+Feature to test:
+1. gpio pin control direction manipulation;
 */
 void test_gpio_ctrl_direction(core_gpio *gpio_obj);
 
 
 /* ---------------------------------------------------
-TEST SETUP
+* IO core to test;
+1. gpio 
+
+Feature to test:
+1. gpio pin - read 
+2. gpio pin - write;
 
 note that at the time of this writing;
 PMOD JD0 to JD3 are configured as GPIO pins;
@@ -106,6 +96,9 @@ for safety;
     this is to reduce the incident of shorting the board!!
 
 -----------------------------------------------------------*/
+void test_gpio_read(core_gpio *gpio_obj, core_gpo *led_obj)__attribute__((noreturn)); 
+//void test_gpio_write(core_gpio *gpio_obj)__attribute__((noreturn));
+
 
 #ifdef __cpluscplus
 } // extern "C";
