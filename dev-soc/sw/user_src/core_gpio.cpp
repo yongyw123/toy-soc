@@ -91,8 +91,8 @@ void core_gpio::set_direction(uint32_t which_port, uint32_t direction){
     if(direction == CTRL_DIRECTION_WRITE){
         BIT_CLEAR(direction_data, which_port);  // clear first;
         BIT_SET(direction_data, which_port);    
-        
     }
+    
     // read direction;
     else{
         BIT_CLEAR(direction_data, which_port);  // clear == LOW:
@@ -104,7 +104,9 @@ void core_gpio::set_direction(uint32_t which_port, uint32_t direction){
 
 uint32_t core_gpio::read(uint32_t which_port){
     uint32_t rd_data = REG_READ(base_addr, REG_READ_DATA_OFFSET);
-    return (uint32_t)((rd_data >> which_port) & 0xF);   
+    //return ((uint32_t)(rd_data >> which_port) & 0xF);   
+    //return (uint32_t)(rd_data >> which_port);   
+    return (uint32_t)(rd_data);   
 }
 
 

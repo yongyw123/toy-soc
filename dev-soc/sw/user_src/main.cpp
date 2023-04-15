@@ -24,11 +24,17 @@ int main(){
     
     debug_str("\r\n");
     debug_str("after reset, the direction data\r\n");
+    
     debug_str("from the control reg: "); 
     debug_bin(obj_jumper.read_ctrl_reg());
     debug_str("\r\n");
     debug_str("from obj priv var: ");
     debug_bin(obj_jumper.debug_get_dir());
+    
+    debug_str("\r\n");
+    debug_str("from the data reg: "); 
+    debug_bin(obj_jumper.read(1));
+    
     
     debug_str("\r\n");
     debug_str("after setting, the direction data\r\n");
@@ -40,9 +46,15 @@ int main(){
     
     debug_str("from the control reg: "); 
     debug_bin(obj_jumper.read_ctrl_reg());
+    
     debug_str("\r\n");
     debug_str("from obj priv var: ");
     debug_bin(obj_jumper.debug_get_dir());
+
+    debug_str("\r\n");
+    debug_str("from the data reg: "); 
+    debug_bin(obj_jumper.read(1));
+    
     
 
     while(1){
