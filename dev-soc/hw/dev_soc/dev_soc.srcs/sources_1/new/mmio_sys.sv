@@ -193,7 +193,7 @@ module mmio_sys
     for vivao synthesis optimization to opt out these unused signals */
     generate
         genvar i;
-            for(i = 4; i < `MIMO_CORE_TOTAL_G; i++)
+            for(i = 5; i < `MIMO_CORE_TOTAL_G; i++)
             begin
                 // always HIGH ==> idle ==> not signals;
                 assign core_data_rd_array[i] = 32'hFFFF_FFFF;
