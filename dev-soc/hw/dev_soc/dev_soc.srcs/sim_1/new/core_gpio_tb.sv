@@ -165,9 +165,49 @@ program core_gpio_tb
     write <= 1'b0;
     addr[1:0] = REG_CTRL_DIRECTION_OFFSET;
     
+    /*test : mix direction;
+    * if the port is set to input; dinout of that port shall be high imepdance;
+    * otherwise, it shall reflect whatever is written at its port;
+    */
+    // first write some data before changing the direction;
+    @(posedge clk);
+    test_index <= 8;
+    cs <= 1'b1;
+    read <= 1'b0;
+    write <= 1'b1;
+    addr[1:0] = REG_DATA_OUT_OFFSET;
+    wr_data = (PORT_WIDTH)'($random);
     
+    // mix the direction;
+    @(posedge clk);
+    cs <= 1'b1;
+    read <= 1'b0;
+    write <= 1'b1;
+    addr[1:0] = REG_CTRL_DIRECTION_OFFSET;
+    wr_data = (PORT_WIDTH)'($random);
     
+    // check the rd_data;
+    @(posedge clk);
+    cs <= 1'b1;
+    read <= 1'b1;
+    write <= 1'b0;
+    addr[1:0] = REG_DATA_IN_OFFSET;
     
+    @(posedge clk);
+    
+    // check the ctrl dir register;
+    @(posedge clk);
+    cs <= 1'b1;
+    read <= 1'b1;
+    write <= 1'b0;
+    addr[1:0] = REG_CTRL_DIRECTION_OFFSET;
+    
+    @(posedge clk);
+    
+    @(posedge clk);
+    cs <= 1'b0;
+    read <= 1'b1;
+    write <= 1'b0;
     
    
     

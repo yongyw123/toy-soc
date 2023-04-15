@@ -27,7 +27,7 @@ module core_gpio_top_tb();
     logic reset;        // async system clock;
     
     // param;
-    localparam PORT_WIDTH = 4;
+    localparam PORT_WIDTH = 16;
     localparam DATA_WIDTH = 32;         // microblaze uses 32-bit data;
     localparam REG_ADDRESS_WIDTH = 5;   // each io core has 2**5 registers;
     
@@ -58,7 +58,8 @@ module core_gpio_top_tb();
      uut(.*);
      
      // test stimulus drive;
-     core_gpio_tb tb(.*);
+     core_gpio_tb #(.PORT_WIDTH(PORT_WIDTH))
+     tb(.*);
      
      /* simulate clk */
      always
