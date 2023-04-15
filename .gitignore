@@ -1,11 +1,23 @@
+
+# useful link to remove git cache;https://stackoverflow.com/questions/24410208/gitignore-does-not-ignore-folder
+
 **/*.bak
 */*.bak
 */.bak
 **/*.cache/
 **/*.hw/
 **/*.ip_user_files/
+**/*.gen/
 **/*.runs/
 **/*.sim/
 **/*.jou
 **/*.xpr
 **/vivado.log
+**/*.Xil/
+**/*.metadata/
+**/*RemoteSystemsTempFiles/
+**/*IDE.log
+**/*.analytics
+**/Packages/
+**/vitis_sdk/
+**/*.dcp
