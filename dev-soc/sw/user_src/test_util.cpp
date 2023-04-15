@@ -77,5 +77,84 @@ void test_uart(void){
    index_called_p++;
    index_called_n--;
 
+}
 
+void test_gpio_ctrl_direction(core_gpio *gpio_obj){
+    /*
+    @brief  : test whether control direction register manipulation
+    @param  : pointer to the instantiated gpio core class;
+    @retval : none
+    @setup  : use UART to debug; 
+    
+    @pin setup:
+    1. PMOD JD00 to JD03 are configured as GPIO PINS;
+    2. PMOD JD00 and JD01 directions are input;
+    3. PMOD JD02 and JD03 directions are output;
+    
+    @test + expectation:
+    
+    1. check whether control direction is configured accordingly
+    2. after reset, by default, all ports (pins) are set to input;
+    3. and read_data will sample whatever is on the port, by construction;
+    4. if pins set to inputs, the pins will have high impedance;
+        until it is being fed externally;
+    5. if not, rd_data of that particular pin will be HIGH due
+        as it samples the high impedance by point (4);
+    6. if pins set to outputs; by default, it will be LOW
+        if there is a wr_data set by the user to the pins;
+
+    */
+    
+    debug_str("background-------");
+    debug_str("\r\n");
+
+    /* just after a CPU reset */  
+    // apply a cpu reset here;
+    debug_str("if pin set to read, the direction status will be LOW\r\n");
+    debug_str("otherwise, it will be HIGH\r\n");
+    
+    debug_str("example status direction read: ");
+    debug_dec(gpio_obj->get_ctrl_dir_read());
+    debug_str("\r\n");
+    debug_str("example status direction write: ");
+    debug_dec(gpio_obj->get_ctrl_dir_write());
+    
+    debug_str("\r\n");
+    debug_str("test start-------");
+    debug_str("\r\n");
+    debug_str("after reset, the direction data\r\n");
+    
+    debug_str("from the control reg: "); 
+    debug_bin(gpio_obj->read_ctrl_reg());
+    debug_str("\r\n");
+    debug_str("from obj priv var: ");
+    debug_bin(gpio_obj->debug_get_dir());
+    
+    debug_str("\r\n");
+    debug_str("from the data reg: "); 
+    debug_bin(gpio_obj->read());
+    
+    /* setting the gpio */  
+    
+    debug_str("\r\n");
+    debug_str("after setting, the direction data\r\n");
+
+    gpio_obj->set_direction(PIN_GPIO_PMOD_JD0, gpio_obj->get_ctrl_dir_read()); 
+    gpio_obj->set_direction(PIN_GPIO_PMOD_JD1, gpio_obj->get_ctrl_dir_read());
+    gpio_obj->set_direction(PIN_GPIO_PMOD_JD2, gpio_obj->get_ctrl_dir_write());
+    gpio_obj->set_direction(PIN_GPIO_PMOD_JD3, gpio_obj->get_ctrl_dir_write());
+    
+    debug_str("from the control reg: "); 
+    debug_bin(gpio_obj->read_ctrl_reg());
+    
+    debug_str("\r\n");
+    debug_str("from obj priv var: ");
+    debug_bin(gpio_obj->debug_get_dir());
+
+    debug_str("\r\n");
+    debug_str("from the data reg: "); 
+    debug_bin(gpio_obj->read());
+    
+    debug_str("\r\n");
+    debug_str("test done-------");
 }

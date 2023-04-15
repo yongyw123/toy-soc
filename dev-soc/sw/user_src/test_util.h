@@ -60,11 +60,60 @@ uart default settings;
 */
 void test_uart(void);
 
+/*
+* IO core to test;
+1. gpio
+
+note that at the time of this writing;
+PMOD JD0 to JD3 are configured as GPIO pins;
+
+note that this requires some external HW connections
+for testing
+
+METHOD
+for safety;
+1. for pins configured as inputs; setup switches
+    and connect the output of the switches to the LEDs;
+2. for pins configured as outputs;
+    generate a square wave and use logic analyzer
+    to observe;
+3. caution: DO NOT connect pins configured as outputs
+    to pins configured as inputs;
+    this is to reduce the incident of shorting the board!!
+
+*/
+void test_gpio_ctrl_direction(core_gpio *gpio_obj);
+
+
+/* ---------------------------------------------------
+TEST SETUP
+
+note that at the time of this writing;
+PMOD JD0 to JD3 are configured as GPIO pins;
+
+note that this requires some external HW connections
+for testing
+
+METHOD
+for safety;
+1. for pins configured as inputs; setup switches
+    and connect the output of the switches to the LEDs;
+2. for pins configured as outputs;
+    generate a square wave and use logic analyzer
+    to observe;
+3. caution: DO NOT connect pins configured as outputs
+    to pins configured as inputs;
+    this is to reduce the incident of shorting the board!!
+
+-----------------------------------------------------------*/
 
 #ifdef __cpluscplus
 } // extern "C";
 #endif
 
+
+    
+    
 
 
 #endif // _TEST_UTIL_H
