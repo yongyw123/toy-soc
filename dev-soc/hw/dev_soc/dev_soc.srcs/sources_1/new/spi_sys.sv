@@ -150,7 +150,6 @@ module spi_sys
         // remain as it is until told otherwise;
         state_next = state_reg;
         clk_cnt_next = clk_cnt_reg;
-        spi_clk_next = spi_clk_reg;
         data_cnt_next = data_cnt_reg;
         miso_next = miso_reg;
         mosi_next = mosi_reg;
