@@ -102,7 +102,16 @@ module mcs_top
     mcs_bus_bridge bridge_unit(.mcs_bridge_base_addr(`BUS_MICROBLAZE_IO_BASE_ADDR_G), .*);
     
     // mmio system;
-    mmio_sys #(.SW_NUM(16), .LED_NUM(16)) 
+    mmio_sys 
+    
+    #(.SW_NUM(16), 
+    .LED_NUM(16),
+    .PORT_NUM(4), 
+    .UART_DATA_BIT(8),
+    .UART_STOP_BIT_SAMPLING_NUM(16),
+    .SPI_DATA_BIT(8),
+    .SPI_SLAVE_NUM(1))
+     
     mmio_unit
     (
         .clk(clk),
@@ -117,9 +126,16 @@ module mcs_top
         .led(LED),
         .pmod(PMOD_JD),
         
-        // uart signals; empty for now;
+        // uart signals; 
         .uart_tx(UART_RXD_OUT), 
-        .uart_rx(UART_TXD_IN)  
+        .uart_rx(UART_TXD_IN),
+        
+        // spi; empty for now;
+        .spi_sclk(),
+        .spi_mosi(),
+        .spi_miso(),
+        .spi_ss_n(),
+        .spi_data_or_command()  
     );
     
 endmodule
