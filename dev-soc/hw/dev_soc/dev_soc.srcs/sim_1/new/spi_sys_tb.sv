@@ -58,7 +58,7 @@ module spi_sys_tb
     cpol = 1'b0;
     cpha = 1'b0;
     mosi_data_write = (DATA_BIT)'($random);
-    miso = 1'b1;
+    miso = 1'($random);
     
     @(posedge clk);
     test_index <= 0;
@@ -72,6 +72,24 @@ module spi_sys_tb
     wait(spi_complete_flag == 1'b1);
     wait(spi_ready_flag == 1'b1);
     
+    // change spi clock;
+    count_mod = spi_clock_test_program_1;
+    cpol = 1'b0;
+    cpha = 1'b0;
+    mosi_data_write = (DATA_BIT)'($random);
+    miso = 1'($random);
+    
+    @(posedge clk);
+    test_index <= 1;
+    
+    wait(spi_ready_flag == 1'b1);
+    start <= 1'b1;
+    
+    @(posedge clk);
+    start <= 1'b0;
+    
+    wait(spi_complete_flag == 1'b1);
+    wait(spi_ready_flag == 1'b1);
     
     
     #(10);

@@ -57,7 +57,7 @@ module  spi_sys_top_tb();
     /* monitoring */
     initial
     begin
-        $monitor("time: %0t, index: %0d, spi_state: %s, cpol: %0b, cpha: %0b, start: %0b, count_mod: %0D, mosi_din: %0B, complete: %0b, ready: %0b, sclk: %0b, miso: %0b, mosi: %0b, miso_assembled: %0B",
+        $monitor("time: %0t, test index: %0d, spi_state: %s, cpol: %0b, cpha: %0b, start: %0b, count_mod: %0D, mosi_din: %0B, complete: %0b, ready: %0b, sclk: %0b, miso: %0b, mosi: %0b, miso_assembled: %0B",
             $time,
             test_index,
             uut.state_reg.name,
