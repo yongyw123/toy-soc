@@ -27,7 +27,9 @@
 
 module core_spi
     #(
-        parameter NUM_SPI_SLAVE = 1 // number of spi slaves for the master?
+        parameter 
+        NUM_SPI_SLAVE = 1, // number of spi slaves for the master?
+        SPI_DATA_BIT = 8    // this is fixed usually;
     )
     
     (
@@ -57,8 +59,48 @@ module core_spi
     );
     
    // decode for write as there are multiple register for writing;
-   ??;
+   logic wr_en;
+   logic wr_ss;
+   logic wr_spi_start;
+   logic wr_ctrl;
    
+   logic[`S5_SPI_REG_CTRL_CLK_WIDTH-1:0] spi_clk_count_mod;
+   logic cpol;
+   logic cpha;
+   
+   logic spi_ready_flag;
+
+   logic [SPI_DATA_BIT-1:0] spi_miso_assembled_reg;
+
+   logic[NUM_SPI_SLAVE-1:0] spi_ss_reg;
+   logic spi_data_or_command_reg;
+   
+   // spi controller instantiation;
+   spi_sys spi_controller
+   (
+    .clk(clk),
+    .reset(reset),
+    .mosi_data_write(wr_data[SPI_DATA_BIT-1:0]),
+    .count_mod(spi_clk_count_mod),
+    .cpol(cpol),
+    .cpha(cpha),
+    .start(wr_spi_start),
+    .miso_assembled_data(spi_miso_assembled_reg),
+    .spi_complete_flag(),   // not needed;
+    .spi_ready_flag(spi_ready_flag),
+    .sclk(spi_sclk),
+    .mosi(spi_mosi),
+    .miso(spi_miso)
+   );
+   
+   // register ;
+   
+   // decoding;
+   
+   
+   
+   
+    
 endmodule
 
 `endif // CORE_SPI_SV

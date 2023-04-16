@@ -218,8 +218,9 @@ Register IO Access:
 `define S5_SPI_REG_CTRL_BIT_POS_CPHA        18
 
 // register valid length for convenience;
-`define S5_SPI_REG_READ_LEN     9
-`define S5_SPI_REG_CTRL_LEN     18
+`define S5_SPI_REG_READ_LEN         9
+`define S5_SPI_REG_CTRL_LEN         18
+`define S5_SPI_REG_CTRL_CLK_WIDTH   16
 
 
 
