@@ -2,6 +2,18 @@
 
 module  spi_sys_top_tb();
     
+    /*
+    what to test;
+    1. spi clock programmability; whether sclk is set according to the user input;
+    2. cpol and cpha; 
+    3. mosi;
+    4. miso;
+    
+    test method;
+    1. for test item (1) to (3), we could just use a program to drive the test stimulus;
+    2. for test item (4): miso; we loop back mosi as input to miso;
+            this may cause miso to be one sclk lagged;
+    */
     // general;
     localparam T = 10;  // system clock period: 10ns;
     logic clk;          // common system clock;
@@ -29,9 +41,11 @@ module  spi_sys_top_tb();
 
     // sim var;
     logic [5:0] test_index;
-   
+    
+    
     /* instantiation */
-    spi_sys uut(.*);
+    assign miso = mosi;
+    spi_sys uut(.*, .miso(miso));
     
     /* test stimulus */
     spi_sys_tb tb(.*);

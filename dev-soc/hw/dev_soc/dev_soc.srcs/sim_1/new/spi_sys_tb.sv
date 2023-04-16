@@ -35,7 +35,7 @@ module spi_sys_tb
         output logic cpol,
         output logic cpha,
         output logic start,
-        output logic miso,
+        //output logic miso,  // not used;
 
         input logic spi_ready_flag,
         input logic spi_complete_flag,
@@ -60,11 +60,11 @@ module spi_sys_tb
     
     $display("test 00: check spi clock progam, miso sampling and mosi shifting");
     
-    count_mod = spi_clock_test_program_0;
+    count_mod = spi_clock_test_program_1;
     cpol = 1'b0;
     cpha = 1'b0;
     mosi_data_write = (DATA_BIT)'($random);
-    miso = 1'($random);
+    //miso = 1'($random);
     
     @(posedge clk);
     test_index <= 0;
@@ -78,12 +78,13 @@ module spi_sys_tb
     wait(spi_complete_flag == 1'b1);
     wait(spi_ready_flag == 1'b1);
     
+    $display("change clock -----");
     // change spi clock;
-    count_mod = spi_clock_test_program_1;
+    count_mod = spi_clock_test_program_0;
     cpol = 1'b0;
     cpha = 1'b0;
     mosi_data_write = (DATA_BIT)'($random);
-    miso = 1'($random);
+    //miso = ~miso;
     
     @(posedge clk);
     test_index <= 1;
@@ -104,7 +105,7 @@ module spi_sys_tb
     test_index_count = test_index;
     for(index = 0; index < 4; index++) begin
         mosi_data_write = (DATA_BIT)'($random);
-        miso = 1'($random);
+        //miso = ~miso;
         
         cpol = index[0];
         cpha = index[1];
