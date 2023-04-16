@@ -61,44 +61,44 @@ program core_spi_tb
    
     // sim var;
     logic [10:0] index;  
-    
+    int test_index_count = 0;
     initial begin
     
     $display("start");
     
-    $display("test 00: read spi status flag------");
-    /* 
-    expect the the SPI to be ready since there is no any ongoing transaction *
-    */
+    $display("test 01: set data or command-------");
+    //$display("set dc to command");
     @(posedge clk);
     test_index <= 0;
     cs <= 1'b1;
-    read <= 1'b1;
+    read <= 1'b0;
+    write <= 1'b1;
+    addr[2:0] <= 3'b100;
+    wr_data <= 32'b0;   // data;
+    
+    @(posedge clk);
+    cs <= 1'b0;
+    read <= 1'b0;
     write <= 1'b0;
-    addr[2:0] <= SPI_REG_STATUS;
-    @(posedge clk);
     
-    $display("test 01: set data or command-------");
-    $display("set to command");
     @(posedge clk);
+    //$display("set dc to data");
     test_index <= 1;
+    cs <= 1'b1;
     read <= 1'b0;
     write <= 1'b1;
     addr[2:0] <= 3'b100;
-    wr_data[`S5_SPI_REG_CTRL_BIT_POS_DC] <= 1'b0;   // command;
+    wr_data <= 32'(3'b100);   // data;
+    
     @(posedge clk);
     
-    
-    $display("set to data");
     @(posedge clk);
-    test_index <= 2;
+    cs <= 1'b0;
     read <= 1'b0;
-    write <= 1'b1;
-    addr[2:0] <= 3'b100;
-    wr_data[`S5_SPI_REG_CTRL_BIT_POS_DC] <= 1'b1;   // data;
-    @(posedge clk);
+    write <= 1'b0;
     
     
+   
     
     $display("done");
     $stop;
