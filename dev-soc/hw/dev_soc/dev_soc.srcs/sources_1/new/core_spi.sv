@@ -70,10 +70,11 @@ module core_spi
    
    logic spi_ready_flag;
 
-   logic [SPI_DATA_BIT-1:0] spi_miso_assembled_reg;
-
-   logic[NUM_SPI_SLAVE-1:0] spi_ss_reg;
-   logic spi_data_or_command_reg;
+    // register;s
+   logic [SPI_DATA_BIT-1:0] spi_miso_assembled_reg, spi_miso_assembled_reg; 
+   logic [`S5_SPI_REG_CTRL_LEN-1:0] ctrl_reg, ctrl_next;
+   logic[NUM_SPI_SLAVE-1:0] spi_ss_reg, spi_ss_reg;
+   logic spi_data_or_command_reg, spi_data_or_command_reg;
    
    // spi controller instantiation;
    spi_sys spi_controller
@@ -94,6 +95,20 @@ module core_spi
    );
    
    // register ;
+   always_ff @(posedge clk, posedge reset)
+        if(reset)
+            begin
+                ctrl_reg[`S5_SPI_REG_CTRL_CLK_LEN - 1:0] <= `S5_SPI_REG_CTRL_CLK_LEN'(32'h0000_0000); // this disables SPI clock;
+                ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPHA - 1] <= 1'b0;
+                ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPOL - 1] <= 1'b0;  
+                ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_DC - 1] <= 1'b0;    // default: data (not command);
+                spi_ss_reg <= NUM_SPI_SLAVE'(32hFFFF_FFFF); // all not enabled;
+            end
+        else
+            begin
+                
+            
+            end    
    
    // decoding;
    
