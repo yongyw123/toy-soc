@@ -56,10 +56,6 @@ module core_spi
         // note that this depends on the slave device specs;
         output logic[SPI_SLAVE_NUM-1:0] spi_ss_n,    // low to assert a given slave;
         output logic spi_data_or_command,            // is the current MOSI a data or command for the slave?  
-     
-        // debug;
-        output logic[SPI_SLAVE_NUM-1:0] spi_ss_reg,    // low to assert a given slave;
-        output logic[SPI_SLAVE_NUM-1:0] spi_ss_next    // low to assert a given slave;
     );
    
    // for cleaner view; 
@@ -157,7 +153,7 @@ module core_spi
    // decoding;
    assign wr_en         = write && cs;
    assign wr_ss         = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_SS);
-   assign wr_spi_start  = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_MOSI_WR);
+   assign wr_spi_start  = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_MOSI_WR);   // auto;
    assign wr_ctrl       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_CTRL);
    assign wr_sclk       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_SCLK);
    
