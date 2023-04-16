@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module spi_sys_tb
+program spi_sys_tb
     #(parameter 
         DATA_BIT = 8,   
         MAX_SPI_CLOCK_WIDTH = 16   
@@ -130,4 +130,4 @@ module spi_sys_tb
     $stop;
     
     end
-endmodule
+endprogram
