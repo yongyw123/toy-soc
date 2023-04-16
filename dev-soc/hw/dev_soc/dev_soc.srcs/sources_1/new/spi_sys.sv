@@ -83,7 +83,7 @@ module spi_sys
     input logic [MAX_SPI_CLOCK_WIDTH-1:0] count_mod, // counter threshold for spi clock as discussed above;
     input logic cpol,
     input logic cpha,
-    input start,        // start spi transaction;
+    input logic start,        // start spi transaction;
     
     /*  miso arguments; */
     // assembled data from the slave after one SPI transaction is complete
