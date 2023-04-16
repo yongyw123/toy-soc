@@ -55,7 +55,7 @@ module core_spi
         // extra SPI pins; 
         // note that this depends on the slave device specs;
         output logic[SPI_SLAVE_NUM-1:0] spi_ss_n,    // low to assert a given slave;
-        output logic spi_data_or_command,            // is the current MOSI a data or command for the slave?  
+        output logic spi_data_or_command          // is the current MOSI a data or command for the slave?  
     );
    
    // for cleaner view; 
@@ -100,11 +100,16 @@ module core_spi
      to the spi_sys module at port mosi_data_write;
      this is because spi_sys itself already has a register to hold this;
      
+     also, no need for miso reassmebled data;
+     by the same reason above;
+     
     */
    logic [REG_WIDTH-1:0] ctrl_reg, ctrl_next;
    logic[SPI_SLAVE_NUM-1:0] spi_ss_reg, spi_ss_next;
    logic[REG_WIDTH-1:0] spi_sclk_mod_reg, spi_sclk_mod_next;    // to program sclk;
+   logic spi_status_reg, spi_status_next;
    
+    
    // spi controller instantiation;
    spi_sys spi_controller
    (
@@ -127,6 +132,9 @@ module core_spi
    always_ff @(posedge clk, posedge reset)
         if(reset)
             begin
+                // status;
+                spi_status_reg <= {REG_WIDTH{1'b1}};    // after reset, spi should be free;
+                
                 // zero means the spi sclk is disabled;
                 spi_sclk_mod_reg <= {REG_WIDTH{1'b0}};
                                 
@@ -142,6 +150,8 @@ module core_spi
             end
         else
             begin
+                spi_status_reg <= spi_status_next;
+                
                 if(wr_sclk)
                     spi_sclk_mod_reg <= spi_sclk_mod_next;
                 if(wr_ctrl)
@@ -192,6 +202,7 @@ module core_spi
    assign spi_ss_next       = wr_data[SPI_SLAVE_NUM-1:0];
    assign ctrl_next         = wr_data;
    assign spi_sclk_mod_next = wr_data;
+   assign spi_status_next   = spi_ready_flag;
    
    // input to the spi system;
    assign cpol = ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPOL];
@@ -207,7 +218,7 @@ module core_spi
    always_comb
         case({rd_en, addr[SPI_REG_ADDR_W-1:0]})
             {1'b1, SPI_REG_MISO_RD} : rd_data = {ZERO_PAD_RD_DATA_MISO, spi_miso_reassembled};
-            {1'b1, SPI_REG_STATUS}  : rd_data = {ZERO_PAD_RD_DATA_STATUS, spi_ready_flag};
+            {1'b1, SPI_REG_STATUS}  : rd_data = {ZERO_PAD_RD_DATA_STATUS, spi_status_next};
             default                 : ; // nop
         endcase
 endmodule
