@@ -229,10 +229,6 @@ module mmio_sys
                 assign core_data_rd_array[i] = 32'hFFFF_FFFF;
             end
         endgenerate
-             
-        
-
-    
 
 endmodule
 

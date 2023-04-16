@@ -138,7 +138,7 @@ module mcs_top
         .uart_tx(UART_RXD_OUT), 
         .uart_rx(UART_TXD_IN),
         
-        // spi; empty for now;
+        // spi;
         .spi_sclk(SPI_SCLK_JC1),
         .spi_mosi(SPI_MOSI_JC2),
         .spi_miso(SPI_MISO_JC3),
