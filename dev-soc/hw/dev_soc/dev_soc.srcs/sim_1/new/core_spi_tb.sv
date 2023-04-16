@@ -60,25 +60,46 @@ program core_spi_tb
    localparam SPI_REG_SCLK = `S5_SPI_REG_SCLK_MOD_OFFSET;
    
     // sim var;
-    logic [2:0] index;  // loop index;
-    logic [10:0] test_index_count;  // loop index;
+    logic [10:0] index;  
     
     initial begin
     
     $display("start");
     
-    $display("test 00: read spi status flag");
+    $display("test 00: read spi status flag------");
+    /* 
+    expect the the SPI to be ready since there is no any ongoing transaction *
+    */
     @(posedge clk);
     test_index <= 0;
     cs <= 1'b1;
     read <= 1'b1;
     write <= 1'b0;
     addr[2:0] <= SPI_REG_STATUS;
-    
     @(posedge clk);
     
+    $display("test 01: set data or command-------");
+    $display("set to command");
     @(posedge clk);
-    #(10);
+    test_index <= 1;
+    read <= 1'b0;
+    write <= 1'b1;
+    addr[2:0] <= 3'b100;
+    wr_data[`S5_SPI_REG_CTRL_BIT_POS_DC] <= 1'b0;   // command;
+    @(posedge clk);
+    
+    
+    $display("set to data");
+    @(posedge clk);
+    test_index <= 2;
+    read <= 1'b0;
+    write <= 1'b1;
+    addr[2:0] <= 3'b100;
+    wr_data[`S5_SPI_REG_CTRL_BIT_POS_DC] <= 1'b1;   // data;
+    @(posedge clk);
+    
+    
+    
     $display("done");
     $stop;
     end
