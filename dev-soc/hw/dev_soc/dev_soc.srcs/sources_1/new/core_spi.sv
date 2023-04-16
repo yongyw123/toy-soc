@@ -66,6 +66,7 @@ module core_spi
    localparam SPI_TOTAL_STATUS_FLAG_NUM = `S5_SPI_REG_TOTAL_STATUS_NUM;
    localparam ZERO_PAD_RD_DATA_MISO = {(REG_WIDTH - SPI_DATA_BIT){1'b0}};
    localparam ZERO_PAD_RD_DATA_STATUS = {(REG_WIDTH - SPI_TOTAL_STATUS_FLAG_NUM){1'b0}};
+   
    // register offset;
    localparam SPI_REG_STATUS = `S5_SPI_REG_STATUS_OFFSET;
    localparam SPI_REG_SS = `S5_SPI_REG_SS_OFFSET;
