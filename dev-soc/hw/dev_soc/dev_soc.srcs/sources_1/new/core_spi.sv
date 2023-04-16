@@ -57,7 +57,7 @@ module core_spi
     );
     
    // decode for write as there are multiple register for writing;
-   
+   ??;
    
 endmodule
 
