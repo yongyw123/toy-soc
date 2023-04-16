@@ -198,7 +198,7 @@ Register Definition:
     BIT[0]     : cpol;
     BIT[1]     : cpha;
     BIT[2]     : current MOSI byte is command or data for the slave;
-                    HIGH if the current SPI byte is a command;
+                    HIGH if the current SPI byte is a data;
                     LOW otherwise;
                     (this is not SPI intrinsic; it 
                     is created for convenience);
@@ -233,4 +233,9 @@ Register IO Access:
 // misc;
 `define S5_SPI_REG_SCLK_WIDTH           16
 `define S5_SPI_REG_TOTAL_STATUS_NUM     1
+
+// DC contrl signal to indicate to the slave;
+// HIGh if it is data; LOW if it is a command;
+`define S5_SPI_REG_CTRL_DC_DATA 1
+
 `endif //_IO_MAP_SVH

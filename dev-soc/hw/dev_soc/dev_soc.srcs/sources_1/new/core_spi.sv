@@ -46,15 +46,16 @@ module core_spi
         input logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    
         output logic [`REG_DATA_WIDTH_G-1:0]  rd_data,
         
-        /* spi specific;*/
+        /* EXTERNAL PINS: spi specific;*/
         // spi standard signals;
         output logic spi_sclk,
         output logic spi_mosi,
         input logic spi_miso,
         
-        // misc 
+        // extra SPI pins; 
+        // note that this depends on the slave device specs;
         output logic[NUM_SPI_SLAVE-1:0] spi_ss_n,    // low to assert a given slave;
-        output logic spi_data_or_command            // is the current MOSI a data or command for the slave;  
+        output logic spi_data_or_command            // is the current MOSI a data or command for the slave?  
      
     );
    
