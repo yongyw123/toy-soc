@@ -218,4 +218,4 @@ Register IO Access:
 `define S5_SPI_REG_CTRL_BIT_POS_CPHA        18
 
 
-endif //_IO_MAP_SVH
+`endif //_IO_MAP_SVH
