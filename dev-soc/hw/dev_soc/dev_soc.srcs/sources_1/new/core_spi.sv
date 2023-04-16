@@ -93,6 +93,7 @@ module core_spi
    logic wr_ss;
    logic wr_spi_start;
    logic wr_ctrl;
+   logic wr_sclk;
    logic rd_en;
    
    // SPI settings;   
