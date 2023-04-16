@@ -169,61 +169,64 @@ Register IO Access;
 SPI core has five registers;
 
 Register Map
-1. register 01 (offset 0): status and read-data register; 
+1. register 01 (offset 0): status register; 
 2. register 02 (offset 1): slave select register;
-3. register 03 (offset 2): write data register;
-4. register 04 (offset 3): control register;
+3. register 03 (offset 2): MOSI write data register;
+4. register 04 (offset 3): MISO read data register;
+5. register 05 (offset 4): ctrl register;
+6. register 06 (offset 5): SPI sclk programming register;
+
 
 Register Definition:
-1. register 01: status and read-data;
-    BIT 8 store the SPI ready state
+1. register 01: status register;
+    BIT[0]: store the SPI ready state
         HIGH if SPI is available;
-        LOW otherwise
-    BIT[7:0] SPI slave data;
-
+        LOW otherwise;
+        
 2. register 02: slave select rgeister;
     for multiple slave selection;
-    BIT[X-1:0] where X is the number of slaves;
+    BIT[X-1:0], where X is the number of slaves;
 
-3. register 03: write_data register;
-    BIT[7:0] mosi data;
+3. register 03: MOSI write data register;
+    BIT[7:0]: mosi data;
     once written, this automatically start the SPI;
     
-4. register 04: control register;
-    BIT[15:0]   : to set the SPI clock;
-    BIT[16]     : cpol;
-    BIT[17]     : cpha;
-    BIT[18]     : current MOSI byte is command or data for the slave;
+4. register 04: MISO read data register;
+    BIT[7:0] : (assembled) miso data from the slave;
+
+5. register 05: control register;
+    BIT[0]     : cpol;
+    BIT[1]     : cpha;
+    BIT[2]     : current MOSI byte is command or data for the slave;
                     HIGH if the current SPI byte is a command;
                     LOW otherwise;
                     (this is not SPI intrinsic; it 
                     is created for convenience);
+
+6. register 06: SPI sclk register
+    BIT[15:0]   : stores the SPI sclk counter modulus;
+    
 Register IO Access:
 1. Status Register          : read only;
 2. Slave Select Register    : write only;
-3. Write Data Register      : write only;
-4. Control Regitser         : write only
+3. MOSI Write Data Register : write only;
+4. MISO Read Data Register  : read only; 
+5. Control Regitser         : write only
+6. SPI sclk register        : write only
 ******************************************************************/
 
 // register offset;
-`define S5_SPI_REG_READ_OFFSET      0
+`define S5_SPI_REG_STATUS_OFFSET    0
 `define S5_SPI_REG_SS_OFFSET        1
-`define S5_SPI_REG_WRITE_OFFSET     2
-`define S5_SPI_REG_CTRL_OFFSET      3
+`define S5_SPI_REG_MOSI_WR_OFFSET   2
+`define S5_SPI_REG_MISO_RD_OFFSET   3
+`define S5_SPI_REG_CTRL_OFFSET      4
+`define S5_SPI_REG_SCLK_MOD_OFFSET  5
 
 // bit position;
-`define S5_SPI_REG_READ_BIT_POS_READY_FLAG  8
-`define S5_SPI_REG_CTRL_BIT_POS_CPOL        16
-`define S5_SPI_REG_CTRL_BIT_POS_CPHA        17
-`define S5_SPI_REG_CTRL_BIT_POS_DC          18  // data or command;
-
-
-// register valid length for convenience;
-`define S5_SPI_REG_READ_LEN         9
-`define S5_SPI_REG_CTRL_LEN         19
-`define S5_SPI_REG_CTRL_CLK_LEN     16
-
-
-
+`define S5_SPI_REG_STATUS_BIT_POS_READY     0
+`define S5_SPI_REG_CTRL_BIT_POS_CPOL        0
+`define S5_SPI_REG_CTRL_BIT_POS_CPHA        1
+`define S5_SPI_REG_CTRL_BIT_POS_DC          2
 
 `endif //_IO_MAP_SVH
