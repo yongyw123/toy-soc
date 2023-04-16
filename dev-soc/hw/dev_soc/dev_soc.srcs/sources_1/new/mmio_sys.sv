@@ -33,7 +33,10 @@ module mmio_sys
     PORT_NUM = 4,  // number of port for GPIO (board PMOD jumper)
     
     UART_DATA_BIT = 8,                  // number of UART data bits;
-    UART_STOP_BIT_SAMPLING_NUM = 16    // this corresponds to one stop bit; (16 oversampling);
+    UART_STOP_BIT_SAMPLING_NUM = 16,    // this corresponds to one stop bit; (16 oversampling);
+    
+    SPI_DATA_BIT = 8,     
+    SPI_SLAVE_NUM = 1  // how many connected SPI slaves on the same board SPI core?
     )
     (
     // general;
@@ -56,10 +59,16 @@ module mmio_sys
     output logic [LED_NUM-1:0] led,  // gpo;
     inout tri[PORT_NUM-1:0] pmod,    // tristate for gpio;
     
-    input logic uart_rx,    // uart
-    output logic uart_tx    // uart;
+    // uart;
+    input logic uart_rx,    // receiver;
+    output logic uart_tx,   // transmitter;
     
-    
+    // spi;
+    output logic spi_sclk,  // spi clock; to synchronize with the slave;
+    output logic spi_mosi,  // spi mosi bit to the slave;
+    input logic spi_miso,   // spi slave data bit;
+    output logic [SPI_SLAVE_NUM-1:0] spi_ss_n,  // multiple slave selects;
+    output logic spi_data_or_command            // is the mosi a data or command for the slave?
     );
     
     /* ----- broadcasting arrays; */
@@ -189,11 +198,32 @@ module mmio_sys
     
     ); 
     
+    // spi core;
+    core_spi #(.SPI_DATA_BIT(SPI_DATA_BIT), .SPI_SLAVE_NUM(SPI_SLAVE_NUM)) spi_unit
+    (
+        .clk(clk),
+        .reset(reset),
+        .cs(core_ctrl_cs_array[`S5_SPI]),
+        .write(core_ctrl_wr_array[`S5_SPI]),
+        .read(core_ctrl_rd_array[`S5_SPI]),
+        .addr(core_addr_reg_array[`S5_SPI]),
+        .wr_data(core_data_wr_array[`S5_SPI]),
+        .rd_data(core_data_rd_array[`S5_SPI]),
+        
+        // spi specific pin;
+        .spi_sclk(spi_sclk),
+        .spi_mosi(spi_mosi),
+        .spi_miso(spi_miso),
+        .spi_ss_n(spi_ss_n),
+        .spi_data_or_command(spi_data_or_command)
+    );
+     
+    
     /* ground the the read data signals from the empty io cores 
     for vivao synthesis optimization to opt out these unused signals */
     generate
         genvar i;
-            for(i = 5; i < `MIMO_CORE_TOTAL_G; i++)
+            for(i = 6; i < `MIMO_CORE_TOTAL_G; i++)
             begin
                 // always HIGH ==> idle ==> not signals;
                 assign core_data_rd_array[i] = 32'hFFFF_FFFF;
