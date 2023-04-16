@@ -167,6 +167,8 @@ module spi_sys
                     mosi_next = mosi_data_write;
                     // start the clk count;
                     clk_cnt_next = 0;
+                    // shoudl start counting the data;
+                    data_cnt_next = 0;
                end
                 
             end
@@ -183,8 +185,16 @@ module spi_sys
                     state_next = ST_SHALF;
                     // reset the counters;
                     clk_cnt_next = 0;
-                    // shoudl start counting the data;
-                    data_cnt_next = 0;  
+                      
+                   /* important: do not reset the data counter here;
+                   because one complete data-bit is "processed in a single
+                   spi clock period: first half and second half 
+                   
+                   DO NOT DO THIS HERE; otherwise 
+                   this FSM will forever loop between ST_FHALF and
+                   ST_SHALF;
+                   // data_cnt_next = 0;
+                   */
                 end
                 else 
                 begin
