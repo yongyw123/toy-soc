@@ -67,10 +67,11 @@ module core_spi_top_tb();
     // sim var;
     logic [5:0] test_index;
     
-    
+   
     /* instantiation */
+    assign spi_miso = spi_mosi; // loop back;
     core_spi #(.SPI_SLAVE_NUM(SPI_SLAVE_NUM), .SPI_DATA_BIT(SPI_DATA_BIT))
-    uut(.*);
+    uut(.*, .spi_miso(spi_miso));
     
     /* test stimulus */
     core_spi_tb #(.SPI_SLAVE_NUM(SPI_SLAVE_NUM), .SPI_DATA_BIT(SPI_DATA_BIT))

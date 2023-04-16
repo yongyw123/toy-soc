@@ -40,7 +40,8 @@ program core_spi_tb
         output logic write,
         output logic read,
         output logic [`REG_ADDR_SIZE_G-1:0] addr,    
-        output logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    
+        output logic [`REG_DATA_WIDTH_G-1:0]  wr_data, 
+        output logic [`REG_DATA_WIDTH_G-1:0]  rd_data,   
    
         // debugging;
         output logic [5:0] test_index
@@ -60,26 +61,27 @@ program core_spi_tb
    localparam SPI_REG_SCLK = `S5_SPI_REG_SCLK_MOD_OFFSET;
    
     // sim var;
-    logic [10:0] index;  
-    int test_index_count = 0;
+    logic [2:0] index;  // loop index;
+    logic [10:0] test_index_count;  // loop index;
+    logic spi_cpol;
+    logic spi_cpha;
+    
     initial begin
     
     $display("start");
     
-    $display("test 01: set data or command-------");
+    $display("test 00: set data or command-------");
     //$display("set dc to command");
     @(posedge clk);
     test_index <= 0;
     cs <= 1'b1;
     read <= 1'b0;
     write <= 1'b1;
-    addr[2:0] <= 3'b100;
-    wr_data <= 32'b0;   // data;
+    //addr[2:0] <= 3'b100;
+    addr <= SPI_REG_CTRL;
+    wr_data <= 32'b0;   // command;
     
     @(posedge clk);
-    cs <= 1'b0;
-    read <= 1'b0;
-    write <= 1'b0;
     
     @(posedge clk);
     //$display("set dc to data");
@@ -87,18 +89,65 @@ program core_spi_tb
     cs <= 1'b1;
     read <= 1'b0;
     write <= 1'b1;
-    addr[2:0] <= 3'b100;
+    addr <= SPI_REG_CTRL; 
     wr_data <= 32'(3'b100);   // data;
     
     @(posedge clk);
     
+    $display("test 01: check status -------");
     @(posedge clk);
-    cs <= 1'b0;
-    read <= 1'b0;
+    test_index <= 2;
+    cs <= 1'b1;
+    read <= 1'b1;
     write <= 1'b0;
+    addr <= SPI_REG_STATUS; 
+
+    @(posedge clk);
     
+    $display("test 02: check slave select setting -------");
+    @(posedge clk);
+    test_index <= 3;
+    // try different ss combo;
+    for(int i = 0; i < 4; i++) begin
+        @(posedge clk);
+        cs <= 1'b1;
+        read <= 1'b0;
+        write <= 1'b1;
+        addr <= SPI_REG_SS;
+        wr_data <= 32'($random); 
+    end
+    @(posedge clk);
     
-   
+    /*
+    $display("test 03: spi setting clokc -----");
+    @(posedge clk);
+    test_index <= 4;
+    cs <= 1'b1;
+    read <= 1'b0;
+    write <= 1'b1;
+    addr <= SPI_REG_CTRL;
+    wr_data <=  spi_clock_test_program_0;
+    @(posedge clk);
+    
+    // start spi;
+    cs <= 1'b1;
+    read <= 1'b0;
+    write <= 1'b1;
+    addr <= SPI_REG_MOSI_WR;
+    wr_data <=  32'($random);
+    
+    // check if spi flag is busy;
+    @(posedge clk);
+    test_index <= 3;
+    cs <= 1'b1;
+    read <= 1'b1;
+    write <= 1'b0;
+    addr <= SPI_REG_STATUS; 
+    wait(rd_data == 32'b0);  // spi busy;
+    //wait(rd_data == 32'b1);  // spi free?
+    
+    #(100);
+    */
     
     $display("done");
     $stop;
