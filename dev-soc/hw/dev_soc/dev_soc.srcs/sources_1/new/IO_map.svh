@@ -198,7 +198,13 @@ Register Definition:
                     LOW otherwise;
                     (this is not SPI intrinsic; it 
                     is created for convenience);
+Register IO Access:
+1. Status Register          : read only;
+2. Slave Select Register    : write only;
+3. Write Data Register      : write only;
+4. Control Regitser         : write only
 ******************************************************************/
+
 // register offset;
 `define S5_SPI_REG_READ_OFFSET      0
 `define S5_SPI_REG_SS_OFFSET        1
