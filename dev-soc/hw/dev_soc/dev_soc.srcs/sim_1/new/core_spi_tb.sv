@@ -73,7 +73,9 @@ program core_spi_tb
     cs <= 1'b1;
     read <= 1'b1;
     write <= 1'b0;
-    addr[2:0] = SPI_REG_STATUS;
+    addr[2:0] <= SPI_REG_STATUS;
+    
+    @(posedge clk);
     
     @(posedge clk);
     #(10);

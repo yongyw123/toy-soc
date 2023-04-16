@@ -67,12 +67,14 @@ module core_spi
    localparam ZERO_PAD_RD_DATA_STATUS = {(REG_WIDTH - SPI_TOTAL_STATUS_FLAG_NUM){1'b0}};
    
    // register offset;
-   localparam SPI_REG_STATUS = `S5_SPI_REG_STATUS_OFFSET;
-   localparam SPI_REG_SS = `S5_SPI_REG_SS_OFFSET;
-   localparam SPI_REG_MOSI_WR = `S5_SPI_REG_MOSI_WR_OFFSET;
-   localparam SPI_REG_MISO_RD = `S5_SPI_REG_MISO_RD_OFFSET;
-   localparam SPI_REG_CTRL = `S5_SPI_REG_CTRL_OFFSET;
-   localparam SPI_REG_SCLK = `S5_SPI_REG_SCLK_MOD_OFFSET;
+   /* !!! important ;!!! need to explict cast the bit width otherwise comparsion may resultt in false
+   since other bits of the same address amy be unkonwn or other values */
+   localparam SPI_REG_STATUS = SPI_REG_ADDR_W'(`S5_SPI_REG_STATUS_OFFSET);
+   localparam SPI_REG_SS = SPI_REG_ADDR_W'(`S5_SPI_REG_SS_OFFSET);
+   localparam SPI_REG_MOSI_WR = SPI_REG_ADDR_W'(`S5_SPI_REG_MOSI_WR_OFFSET);
+   localparam SPI_REG_MISO_RD = SPI_REG_ADDR_W'(`S5_SPI_REG_MISO_RD_OFFSET);
+   localparam SPI_REG_CTRL = SPI_REG_ADDR_W'(`S5_SPI_REG_CTRL_OFFSET);
+   localparam SPI_REG_SCLK = SPI_REG_ADDR_W'(`S5_SPI_REG_SCLK_MOD_OFFSET);
    
    // required for decoding as there are multiple register for writing/reading;
    logic wr_en;
@@ -107,7 +109,7 @@ module core_spi
    logic [REG_WIDTH-1:0] ctrl_reg, ctrl_next;
    logic[SPI_SLAVE_NUM-1:0] spi_ss_reg, spi_ss_next;
    logic[REG_WIDTH-1:0] spi_sclk_mod_reg, spi_sclk_mod_next;    // to program sclk;
-   logic spi_status_reg, spi_status_next;
+   //logic spi_status_reg, spi_status_next;
    
     
    // spi controller instantiation;
@@ -133,7 +135,7 @@ module core_spi
         if(reset)
             begin
                 // status;
-                spi_status_reg <= {REG_WIDTH{1'b1}};    // after reset, spi should be free;
+                //spi_status_reg <= {REG_WIDTH{1'b1}};    // after reset, spi should be free;
                 
                 // zero means the spi sclk is disabled;
                 spi_sclk_mod_reg <= {REG_WIDTH{1'b0}};
@@ -150,7 +152,7 @@ module core_spi
             end
         else
             begin
-                spi_status_reg <= spi_status_next;
+                //spi_status_reg <= spi_status_next;
                 
                 if(wr_sclk)
                     spi_sclk_mod_reg <= spi_sclk_mod_next;
@@ -202,7 +204,7 @@ module core_spi
    assign spi_ss_next       = wr_data[SPI_SLAVE_NUM-1:0];
    assign ctrl_next         = wr_data;
    assign spi_sclk_mod_next = wr_data;
-   assign spi_status_next   = spi_ready_flag;
+   //assign spi_status_next   = spi_ready_flag;
    
    // input to the spi system;
    assign cpol = ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPOL];
@@ -217,8 +219,12 @@ module core_spi
    assign rd_en = read && cs;   // this is actually not necessary;
    always_comb
         case({rd_en, addr[SPI_REG_ADDR_W-1:0]})
+        //case({rd_en, addr[2:0]})
             {1'b1, SPI_REG_MISO_RD} : rd_data = {ZERO_PAD_RD_DATA_MISO, spi_miso_reassembled};
-            {1'b1, SPI_REG_STATUS}  : rd_data = {ZERO_PAD_RD_DATA_STATUS, spi_status_next};
+            //{1'b1, SPI_REG_STATUS}  : rd_data = {ZERO_PAD_RD_DATA_STATUS, spi_status_next};
+            {1'b1, SPI_REG_STATUS}  : rd_data = {ZERO_PAD_RD_DATA_STATUS, spi_ready_flag};
+            //{1'b1, SPI_REG_STATUS}  : rd_data = {31'b0, spi_ready_flag};
+            //{1'b1, 3'b0}  : rd_data = {31'b0, spi_ready_flag};
             default                 : ; // nop
         endcase
 endmodule
