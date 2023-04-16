@@ -69,12 +69,24 @@ module core_spi
    // register offset;
    /* !!! important ;!!! need to explict cast the bit width otherwise comparsion may resultt in false
    since other bits of the same address amy be unkonwn or other values */
+   
+   /* CAUTION for address decoding;
+   cpu addr width is 5 bits;
+   here we cast it as 3-bit wide for the internal register address;
+   so if we were to decode the cpu addr to see if it matches the internal register address;
+   , one may result in wrong result or undefined behaviour;
+   since 5-bit wide is NOT equivalent to 3-bit wide address!!
+   
+   so we need to explicit make sure the comparison is done on the same bit-width;
+   */
+   
    localparam SPI_REG_STATUS = SPI_REG_ADDR_W'(`S5_SPI_REG_STATUS_OFFSET);
    localparam SPI_REG_SS = SPI_REG_ADDR_W'(`S5_SPI_REG_SS_OFFSET);
    localparam SPI_REG_MOSI_WR = SPI_REG_ADDR_W'(`S5_SPI_REG_MOSI_WR_OFFSET);
    localparam SPI_REG_MISO_RD = SPI_REG_ADDR_W'(`S5_SPI_REG_MISO_RD_OFFSET);
    localparam SPI_REG_CTRL = SPI_REG_ADDR_W'(`S5_SPI_REG_CTRL_OFFSET);
    localparam SPI_REG_SCLK = SPI_REG_ADDR_W'(`S5_SPI_REG_SCLK_MOD_OFFSET);
+   
    
    // required for decoding as there are multiple register for writing/reading;
    logic wr_en;
@@ -163,11 +175,13 @@ module core_spi
             end    
    
    // decoding;
+   
    assign wr_en         = write && cs;
    assign wr_ss         = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_SS);
    assign wr_spi_start  = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_MOSI_WR);   // auto;
    assign wr_ctrl       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_CTRL);
    assign wr_sclk       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_SCLK);
+   
    
    /* DO NOT DO THE FOLLOWING; BAD PRACTICE!!!
    // instead, put the (wr_XX) enable signals on th flip flop above;
@@ -225,6 +239,8 @@ module core_spi
             {1'b1, SPI_REG_STATUS}  : rd_data = {ZERO_PAD_RD_DATA_STATUS, spi_ready_flag};
             //{1'b1, SPI_REG_STATUS}  : rd_data = {31'b0, spi_ready_flag};
             //{1'b1, 3'b0}  : rd_data = {31'b0, spi_ready_flag};
+            //{1'b1, 3'b011} : rd_data = {24'b0, spi_miso_reassembled};
+            //{1'b1, 3'b000} : rd_data = {31'b0, spi_ready_flag};
             default                 : ; // nop
         endcase
 endmodule
