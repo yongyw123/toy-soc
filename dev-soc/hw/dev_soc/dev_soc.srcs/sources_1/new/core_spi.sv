@@ -28,7 +28,7 @@
 module core_spi
     #(
         parameter 
-        NUM_SPI_SLAVE = 1, // number of spi slaves for the master?
+        SPI_SLAVE_NUM = 1, // number of spi slaves for the master?
         SPI_DATA_BIT = 8    // this is fixed usually;
     )
     
@@ -54,7 +54,7 @@ module core_spi
         
         // extra SPI pins; 
         // note that this depends on the slave device specs;
-        output logic[NUM_SPI_SLAVE-1:0] spi_ss_n,    // low to assert a given slave;
+        output logic[SPI_SLAVE_NUM-1:0] spi_ss_n,    // low to assert a given slave;
         output logic spi_data_or_command            // is the current MOSI a data or command for the slave?  
      
     );
@@ -102,7 +102,7 @@ module core_spi
      
     */
    logic [REG_WIDTH-1:0] ctrl_reg, ctrl_next;
-   logic[NUM_SPI_SLAVE-1:0] spi_ss_reg, spi_ss_next;
+   logic[SPI_SLAVE_NUM-1:0] spi_ss_reg, spi_ss_next;
    logic[REG_WIDTH-1:0] spi_sclk_mod_reg, spi_sclk_mod_next;    // to program sclk;
    
    // spi controller instantiation;
@@ -138,7 +138,7 @@ module core_spi
                 ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_DC] <= 1'b1;
                 
                 //  all slave is NOT selected; (active LOW);
-                spi_ss_reg <= {NUM_SPI_SLAVE{1'b1}};
+                spi_ss_reg <= {SPI_SLAVE_NUM{1'b1}};
             end
         else
             begin
@@ -154,7 +154,7 @@ module core_spi
    assign wr_ctrl       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_CTRL);
    assign wr_sclk       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_SCLK);
    
-   assign spi_ss_next       = (wr_ss) ? wr_data[NUM_SPI_SLAVE-1:0] : spi_ss_reg;
+   assign spi_ss_next       = (wr_ss) ? wr_data[SPI_SLAVE_NUM-1:0] : spi_ss_reg;
    assign ctrl_next         = (wr_ctrl) ? wr_data : ctrl_reg;
    assign spi_sclk_mod_next = (wr_sclk) ? wr_data : spi_sclk_mod_reg;
    
