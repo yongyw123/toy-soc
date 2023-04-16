@@ -29,11 +29,11 @@ module  spi_sys_top_tb();
 
     // sim var;
     logic [5:0] test_index;
-            
+   
     /* instantiation */
     spi_sys uut(.*);
     
-    // test stimulus;
+    /* test stimulus */
     spi_sys_tb tb(.*);
     
     /* simulate clk */

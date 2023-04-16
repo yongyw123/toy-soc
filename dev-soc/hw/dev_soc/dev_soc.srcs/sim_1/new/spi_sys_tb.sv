@@ -41,7 +41,10 @@ module spi_sys_tb
         input logic spi_complete_flag,
         
         // debugging;
-        output logic [5:0] test_index
+        output logic [5:0] test_index,
+        
+        // for miso generation;
+        input logic sclk
     );
     
     
@@ -49,10 +52,13 @@ module spi_sys_tb
     localparam spi_clock_test_program_0 = 100_000_000/(2*10_000_000) - 1;   // 10Mhz;
     localparam spi_clock_test_program_1 = 100_000_000/(2*1_000_000) - 1;   // 1Mhz;
     
+    // sim var;
+    logic [2:0] index;  // loop index;
+    logic [10:0] test_index_count;  // loop index;
     initial begin
     $display("start");
     
-    $display("test 00: check spi clock progam");
+    $display("test 00: check spi clock progam, miso sampling and mosi shifting");
     
     count_mod = spi_clock_test_program_0;
     cpol = 1'b0;
@@ -91,9 +97,36 @@ module spi_sys_tb
     wait(spi_complete_flag == 1'b1);
     wait(spi_ready_flag == 1'b1);
     
+    $display("test 01: cpol and cpha combo--------");
+    count_mod = spi_clock_test_program_0;
+    
+    // four combinations;
+    test_index_count = test_index;
+    for(index = 0; index < 4; index++) begin
+        mosi_data_write = (DATA_BIT)'($random);
+        miso = 1'($random);
+        
+        cpol = index[0];
+        cpha = index[1];
+        $display("test: cpol: %0b, cpha: %0b", cpol, cpha);
+        test_index_count++;
+        @(posedge clk);
+        test_index <= test_index_count;
+ 
+        wait(spi_ready_flag == 1'b1);
+        start <= 1'b1;
+        
+        @(posedge clk);
+        start <= 1'b0;
+        
+        wait(spi_complete_flag == 1'b1);
+        wait(spi_ready_flag == 1'b1);
+                       
+    end
     
     #(10);
     $display("done");
     $stop;
+    
     end
 endmodule
