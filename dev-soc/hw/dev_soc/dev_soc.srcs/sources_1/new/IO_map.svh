@@ -217,8 +217,8 @@ Register IO Access:
 `define S5_SPI_TOTAL_REG_NUM        6
 
 // register offset;
-`define S5_SPI_REG_STATUS_OFFSET    1   // 000
-`define S5_SPI_REG_SS_OFFSET        2   // 001
+`define S5_SPI_REG_STATUS_OFFSET    0   // 000
+`define S5_SPI_REG_SS_OFFSET        1   // 001
 `define S5_SPI_REG_MOSI_WR_OFFSET   2   // 010
 `define S5_SPI_REG_MISO_RD_OFFSET   3   // 011
 `define S5_SPI_REG_CTRL_OFFSET      4   // 100
