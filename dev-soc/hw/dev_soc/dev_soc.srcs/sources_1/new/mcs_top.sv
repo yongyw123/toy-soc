@@ -47,10 +47,18 @@ module mcs_top
         // uart;
         // beware of the mix of tx and rx;
         // note: uart flow ctrl is not implemented; so no cts/rts pins;
-        input UART_TXD_IN,  // this connects to the system uart rx;
-        output UART_RXD_OUT // this connects to the system uart tx;
+        input logic UART_TXD_IN,  // this connects to the system uart rx;
+        output logic UART_RXD_OUT, // this connects to the system uart tx;
         
+        // spi;
+        // uses PMOD jumper @ JC;
+        output logic SPI_SCLK_JC1,
+        output logic SPI_MOSI_JC2,
+        input logic SPI_MISO_JC3,
+        output logic SPI_SS_JC4, // slave select; asset active low;
+        output logic SPI_DC_JC7  // is the current MOSI a data or command for the slave?  
     );
+    
     
     // general;
     logic reset_sys;    // to invert the input reset;
@@ -131,11 +139,11 @@ module mcs_top
         .uart_rx(UART_TXD_IN),
         
         // spi; empty for now;
-        .spi_sclk(),
-        .spi_mosi(),
-        .spi_miso(),
-        .spi_ss_n(),
-        .spi_data_or_command()  
+        .spi_sclk(SPI_SCLK_JC1),
+        .spi_mosi(SPI_MOSI_JC2),
+        .spi_miso(SPI_MISO_JC3),
+        .spi_ss_n(SPI_SS_JC4),
+        .spi_data_or_command(SPI_DC_JC7)  
     );
     
 endmodule
