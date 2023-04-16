@@ -64,16 +64,18 @@ program core_spi_tb
     logic [10:0] test_index_count;  // loop index;
     
     initial begin
+    
     $display("start");
     
     $display("test 00: read spi status flag");
     @(posedge clk);
+    test_index <= 0;
     cs <= 1'b1;
     read <= 1'b1;
     write <= 1'b0;
-    addr <= SPI_REG_STATUS;
+    addr[2:0] = SPI_REG_STATUS;
     
-    
+    @(posedge clk);
     #(10);
     $display("done");
     $stop;
