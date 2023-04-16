@@ -98,7 +98,7 @@ module core_spi_top_tb();
     /* monitoring */
     initial
     begin
-        $monitor("time: %0t, test index: %0d, cs: %0b, wr: %0b, rd: %0b, addr: %0B, rdatad: %0D, wrdatab: %0B, rddata: %0B, mosi: %0b, miso: %0b, ss: %0B, dc: %0b",
+        $monitor("time: %0t, test index: %0d, cs: %0b, wr: %0b, rd: %0b, addr: %0B, rdatad: %0D, wrdatab: %0B, rddata: %0B, sclk: %0b, mosi: %0b, miso: %0b, ss: %0B, dc: %0b",
             $time,
             test_index,
             cs,
@@ -108,6 +108,7 @@ module core_spi_top_tb();
             wr_data,
             wr_data,
             rd_data,
+            spi_sclk,
             spi_mosi,
             spi_miso,
             spi_ss_n,

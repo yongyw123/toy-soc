@@ -116,38 +116,48 @@ program core_spi_tb
         addr <= SPI_REG_SS;
         wr_data <= 32'($random); 
     end
+
     @(posedge clk);
     
-    /*
+    
     $display("test 03: spi setting clokc -----");
+    
     @(posedge clk);
     test_index <= 4;
     cs <= 1'b1;
     read <= 1'b0;
     write <= 1'b1;
-    addr <= SPI_REG_CTRL;
+    addr <= SPI_REG_SCLK;
     wr_data <=  spi_clock_test_program_0;
     @(posedge clk);
     
+    // check spi is free before starting;
+    @(posedge clk);
+    cs <= 1'b1;
+    read <= 1'b1;
+    write <= 1'b0;
+    addr <= SPI_REG_STATUS; 
+    
     // start spi;
+    @(posedge clk);
     cs <= 1'b1;
     read <= 1'b0;
     write <= 1'b1;
     addr <= SPI_REG_MOSI_WR;
     wr_data <=  32'($random);
     
+    
     // check if spi flag is busy;
     @(posedge clk);
-    test_index <= 3;
     cs <= 1'b1;
     read <= 1'b1;
     write <= 1'b0;
     addr <= SPI_REG_STATUS; 
     wait(rd_data == 32'b0);  // spi busy;
-    //wait(rd_data == 32'b1);  // spi free?
+    wait(rd_data == 32'b1);  // spi free?
     
-    #(100);
-    */
+    #(100000);
+    
     
     $display("done");
     $stop;
