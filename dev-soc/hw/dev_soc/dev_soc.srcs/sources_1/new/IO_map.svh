@@ -214,19 +214,23 @@ Register IO Access:
 5. Control Regitser         : write only
 6. SPI sclk register        : write only
 ******************************************************************/
+`define S5_SPI_TOTAL_REG_NUM        6
 
 // register offset;
-`define S5_SPI_REG_STATUS_OFFSET    0
-`define S5_SPI_REG_SS_OFFSET        1
-`define S5_SPI_REG_MOSI_WR_OFFSET   2
-`define S5_SPI_REG_MISO_RD_OFFSET   3
-`define S5_SPI_REG_CTRL_OFFSET      4
-`define S5_SPI_REG_SCLK_MOD_OFFSET  5
-
+`define S5_SPI_REG_STATUS_OFFSET    0   // 000
+`define S5_SPI_REG_SS_OFFSET        1   // 001
+`define S5_SPI_REG_MOSI_WR_OFFSET   2   // 010
+`define S5_SPI_REG_MISO_RD_OFFSET   3   // 011
+`define S5_SPI_REG_CTRL_OFFSET      4   // 100
+`define S5_SPI_REG_SCLK_MOD_OFFSET  5   // 101
+    
 // bit position;
 `define S5_SPI_REG_STATUS_BIT_POS_READY     0
 `define S5_SPI_REG_CTRL_BIT_POS_CPOL        0
 `define S5_SPI_REG_CTRL_BIT_POS_CPHA        1
 `define S5_SPI_REG_CTRL_BIT_POS_DC          2
 
+// misc;
+`define S5_SPI_REG_SCLK_WIDTH           16
+`define S5_SPI_REG_TOTAL_STATUS_NUM     1
 `endif //_IO_MAP_SVH

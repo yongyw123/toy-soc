@@ -57,24 +57,52 @@ module core_spi
         output logic spi_data_or_command            // is the current MOSI a data or command for the slave;  
      
     );
-    
-   // decode for write as there are multiple register for writing;
+   
+   // for cleaner view; 
+   localparam REG_WIDTH = `REG_DATA_WIDTH_G;
+   localparam REG_SPI_SCLK_W = `S5_SPI_REG_SCLK_WIDTH;
+   localparam SPI_REG_ADDR_W = $clog2(`S5_SPI_TOTAL_REG_NUM);
+   localparam SPI_TOTAL_STATUS_FLAG_NUM = `S5_SPI_REG_TOTAL_STATUS_NUM;
+   localparam ZERO_PAD_RD_DATA_MISO = {(REG_WIDTH - SPI_DATA_BIT){1'b0}};
+   localparam ZERO_PAD_RD_DATA_STATUS = {(REG_WIDTH - SPI_TOTAL_STATUS_FLAG_NUM){1'b0}};
+   // register offset;
+   localparam SPI_REG_STATUS = `S5_SPI_REG_STATUS_OFFSET;
+   localparam SPI_REG_SS = `S5_SPI_REG_SS_OFFSET;
+   localparam SPI_REG_MOSI_WR = `S5_SPI_REG_MOSI_WR_OFFSET;
+   localparam SPI_REG_MISO_RD = `S5_SPI_REG_MISO_RD_OFFSET;
+   localparam SPI_REG_CTRL = `S5_SPI_REG_CTRL_OFFSET;
+   localparam SPI_REG_SCLK = `S5_SPI_REG_SCLK_MOD_OFFSET;
+   
+   // required for decoding as there are multiple register for writing/reading;
    logic wr_en;
    logic wr_ss;
    logic wr_spi_start;
    logic wr_ctrl;
+   logic rd_en;
    
-   logic[`S5_SPI_REG_CTRL_CLK_WIDTH-1:0] spi_clk_count_mod;
+   // SPI settings;   
    logic cpol;
    logic cpha;
+   logic sclk_mod;
    
+   // reassmebled miso slave data;
+   logic [SPI_DATA_BIT-1:0] spi_miso_reassembled;
+   
+   // spi status;
    logic spi_ready_flag;
 
-    // register;s
-   logic [SPI_DATA_BIT-1:0] spi_miso_assembled_reg, spi_miso_assembled_reg; 
-   logic [`S5_SPI_REG_CTRL_LEN-1:0] ctrl_reg, ctrl_next;
-   logic[NUM_SPI_SLAVE-1:0] spi_ss_reg, spi_ss_reg;
-   logic spi_data_or_command_reg, spi_data_or_command_reg;
+    /*
+     registers;
+     
+     note that there is no need to create another register for MOSI write data;
+     instead, we could just plug in wr_data from the processor directly
+     to the spi_sys module at port mosi_data_write;
+     this is because spi_sys itself already has a register to hold this;
+     
+    */
+   logic [REG_WIDTH-1:0] ctrl_reg, ctrl_next;
+   logic[NUM_SPI_SLAVE-1:0] spi_ss_reg, spi_ss_next;
+   logic[REG_WIDTH-1:0] spi_sclk_mod_reg, spi_sclk_mod_next;    // to program sclk;
    
    // spi controller instantiation;
    spi_sys spi_controller
@@ -82,11 +110,11 @@ module core_spi
     .clk(clk),
     .reset(reset),
     .mosi_data_write(wr_data[SPI_DATA_BIT-1:0]),
-    .count_mod(spi_clk_count_mod),
+    .count_mod(sclk_mod),
     .cpol(cpol),
     .cpha(cpha),
     .start(wr_spi_start),
-    .miso_assembled_data(spi_miso_assembled_reg),
+    .miso_assembled_data(spi_miso_reassembled),
     .spi_complete_flag(),   // not needed;
     .spi_ready_flag(spi_ready_flag),
     .sclk(spi_sclk),
@@ -98,24 +126,54 @@ module core_spi
    always_ff @(posedge clk, posedge reset)
         if(reset)
             begin
-                ctrl_reg[`S5_SPI_REG_CTRL_CLK_LEN - 1:0] <= `S5_SPI_REG_CTRL_CLK_LEN'(32'h0000_0000); // this disables SPI clock;
-                ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPHA - 1] <= 1'b0;
-                ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPOL - 1] <= 1'b0;  
-                ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_DC - 1] <= 1'b0;    // default: data (not command);
-                spi_ss_reg <= NUM_SPI_SLAVE'(32hFFFF_FFFF); // all not enabled;
+                // zero means the spi sclk is disabled;
+                spi_sclk_mod_reg <= {REG_WIDTH{1'b0}};
+                                
+                // by default, {cpol, cpha} = {0,0};
+                ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPOL] <= 1'b0;
+                ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPHA] <= 1'b0;
+                
+                // spi data is interpreted as data (not command) for the slave;    
+                ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_DC] <= 1'b1;
+                
+                //  all slave is NOT selected; (active LOW);
+                spi_ss_reg <= {NUM_SPI_SLAVE{1'b1}};
             end
         else
             begin
-                
-            
+                spi_sclk_mod_reg <= spi_sclk_mod_next;
+                ctrl_reg <= ctrl_next;
+                spi_ss_reg <= spi_ss_next;
             end    
    
    // decoding;
+   assign wr_en         = write && cs;
+   assign wr_ss         = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_SS);
+   assign wr_spi_start  = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_MOSI_WR);
+   assign wr_ctrl       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_CTRL);
+   assign wr_sclk       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_SCLK);
    
+   assign spi_ss_next       = (wr_ss) ? wr_data[NUM_SPI_SLAVE-1:0] : spi_ss_reg;
+   assign ctrl_next         = (wr_ctrl) ? wr_data : ctrl_reg;
+   assign spi_sclk_mod_next = (wr_sclk) ? wr_data : spi_sclk_mod_reg;
    
+   // input to the spi system;
+   assign cpol = ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPOL];
+   assign cpha = ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPHA];
+   assign sclk_mod = spi_sclk_mod_reg;
    
+   // output to the processor;
+   assign spi_data_or_command = ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_DC];
+   assign spi_ss_n = spi_ss_reg;
    
-    
+   // read;
+   assign rd_en = read && cs;   // this is actually not necessary;
+   always_comb
+        case({rd_en, addr[SPI_REG_ADDR_W-1:0]})
+            {1'b1, SPI_REG_MISO_RD} : rd_data = {ZERO_PAD_RD_DATA_MISO, spi_miso_reassembled};
+            {1'b1, SPI_REG_STATUS}  : rd_data = {ZERO_PAD_RD_DATA_STATUS, spi_ready_flag};
+            default                 : ; // nop
+        endcase
 endmodule
 
 `endif // CORE_SPI_SV
