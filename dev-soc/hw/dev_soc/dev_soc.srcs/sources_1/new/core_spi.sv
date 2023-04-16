@@ -55,8 +55,11 @@ module core_spi
         // extra SPI pins; 
         // note that this depends on the slave device specs;
         output logic[SPI_SLAVE_NUM-1:0] spi_ss_n,    // low to assert a given slave;
-        output logic spi_data_or_command            // is the current MOSI a data or command for the slave?  
+        output logic spi_data_or_command,            // is the current MOSI a data or command for the slave?  
      
+        // debug;
+        output logic[SPI_SLAVE_NUM-1:0] spi_ss_reg,    // low to assert a given slave;
+        output logic[SPI_SLAVE_NUM-1:0] spi_ss_next    // low to assert a given slave;
     );
    
    // for cleaner view; 
@@ -143,9 +146,12 @@ module core_spi
             end
         else
             begin
-                spi_sclk_mod_reg <= spi_sclk_mod_next;
-                ctrl_reg <= ctrl_next;
-                spi_ss_reg <= spi_ss_next;
+                if(wr_sclk)
+                    spi_sclk_mod_reg <= spi_sclk_mod_next;
+                if(wr_ctrl)
+                    ctrl_reg <= ctrl_next;
+                if(wr_ss)
+                    spi_ss_reg <= spi_ss_next;
             end    
    
    // decoding;
@@ -155,9 +161,41 @@ module core_spi
    assign wr_ctrl       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_CTRL);
    assign wr_sclk       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_SCLK);
    
+   /* DO NOT DO THE FOLLOWING; BAD PRACTICE!!!
+   // instead, put the (wr_XX) enable signals on th flip flop above;
+   // this is because it is possible that any of this signals are in an unknown state;
+   // which will render it to be unknown as well;
+   
+   BAD CODE:
+   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    assign spi_ss_next       = (wr_ss) ? wr_data[SPI_SLAVE_NUM-1:0] : spi_ss_reg;
    assign ctrl_next         = (wr_ctrl) ? wr_data : ctrl_reg;
    assign spi_sclk_mod_next = (wr_sclk) ? wr_data : spi_sclk_mod_reg;
+   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   
+   ???? WHY ??
+   // for exmaple; take ss;
+   after reset, spi_ss_reg is all HIGH;
+   but write and cs are undefined (unknown);
+   this means that wr_ss is alos unknown;
+   ==> spi_ss_next could take either value; hence unknnown;
+   at the next clock edge, if wothout a conditional safeguard,
+   the flip flop will clock in this unknown value;
+   i.e
+   
+   always_ff @(posedge clk)
+        spi_ss_reg <= spi_ss_next;
+        
+    by above, we have spi_ss_reg as unknown;
+    since this is assigned as the output logic, spi_ss_n pin;
+    it is alos unknown as well;
+   
+   */
+   
+   // OK CODE in contrast to the above;
+   assign spi_ss_next       = wr_data[SPI_SLAVE_NUM-1:0];
+   assign ctrl_next         = wr_data;
+   assign spi_sclk_mod_next = wr_data;
    
    // input to the spi system;
    assign cpol = ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPOL];
