@@ -88,6 +88,7 @@
 `define S2_GPO_LED      2   // general purpose output to accommodate LED;
 `define S3_GPI_SW       3   // general purpose input to accommodate switches;
 `define S4_GPIO_PORT    4   // general purpose input output for flexibility and to reduce pinout;
+`define S5_SPI          5   // spi (mainly to test TFT-LCD);
 
 /* -------------------------------------------------
 *  Register Map of the Individual IO core register;
@@ -162,4 +163,53 @@ Register IO Access;
 `define S1_UART_REG_STATUS_BIT_POS_TX_FULL          1
 
 
-`endif //_IO_MAP_SVH
+/**************************************************************
+* S5_SPI;
+--------------------
+SPI core has five registers;
+
+Register Map
+1. register 01 (offset 0): status and read-data register; 
+2. register 02 (offset 1): slave select register;
+3. register 03 (offset 2): write data register;
+4. register 04 (offset 3): control register;
+
+Register Definition:
+1. register 01: status and read-data;
+    BIT 8 store the SPI ready state
+        HIGH if SPI is available;
+        LOW otherwise
+    BIT[7:0] SPI slave data;
+
+2. register 02: slave select rgeister;
+    for multiple slave selection;
+    BIT[X-1:0] where X is the number of slaves;
+
+3. register 03: write_data register;
+    BIT[7:0] mosi data;
+    once written, this automatically start the SPI;
+    
+4. register 04: control register;
+    BIT[15:0]   : to set the SPI clock;
+    BIT[16]     : cpol;
+    BIT[17]     : cpha;
+    BIT[18]     : current MOSI byte is command or data for the slave;
+                    HIGH if the current SPI byte is a command;
+                    LOW otherwise;
+                    (this is not SPI intrinsic; it 
+                    is created for convenience);
+******************************************************************/
+// register offset;
+`define S5_SPI_REG_READ_OFFSET      0
+`define S5_SPI_REG_SS_OFFSET        1
+`define S5_SPI_REG_WRITE_OFFSET     2
+`define S5_SPI_REG_CTRL_OFFSET      3
+
+// bit position;
+`define S5_SPI_REG_READ_BIT_POS_READY_FLAG  8
+`define S5_SPI_REG_CTRL_BIT_POS_CPOL        16
+`define S5_SPI_REG_CTRL_BIT_POS_CPHA        17
+`define S5_SPI_REG_CTRL_BIT_POS_CPHA        18
+
+
+endif //_IO_MAP_SVH
