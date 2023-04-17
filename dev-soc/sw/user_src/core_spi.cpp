@@ -203,7 +203,7 @@ int core_spi::check_ready(void){
    return (int)((status >> BIT_POS_STATUS_READY) & (uint32_t)0xF);
 }
 
-uint8_t core_spi::full_duplex_transfer(uint8_t wr_mosi_data, int dc){
+uint8_t core_spi::full_duplex_transfer(uint8_t wr_mosi_data){
     /*
     @brief  : to start the SPI with the connected (asserted) slave;
     @param  : wr_mosi_data: data byte to transfer to the slave;
