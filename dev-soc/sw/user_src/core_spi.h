@@ -53,11 +53,18 @@ class core_spi{
         void set_transfer_mode(int user_cpol, int user_cpha);
         void set_sclk(int user_freq);
 
+        void set_dc(int dcx);
+
+
     private:
-        uint32_t base_addr;
-        uint32_t ss_n_vector;
-        uint32_t sclk_mod;
-        int cpol;
+        uint32_t base_addr;     
+        uint32_t ss_n_vector;   // slave select confi;
+        
+        //uint32_t sclk_mod;      // spi clock setting;
+        uint32_t sclk_freq;     // spi clock freq;
+        
+        // transfer mode;
+        int cpol;       
         int cpha;
 
 };
