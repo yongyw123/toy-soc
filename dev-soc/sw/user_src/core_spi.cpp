@@ -16,8 +16,7 @@ core_spi::core_spi(uint32_t core_base_addr){
 
     // spi clock;
     sclk_freq = 10000000; // default: 10MHz;
-    // please see the set_sclk() method on the formula;
-    //sclk_mod = 4;   // this gives 10Mhz SPI clock freq;
+    sclk_mod = 4;   // for debugging; this gives 10Mhz SPI clock freq;
     set_sclk(sclk_freq);
 
     // transfer mode; usually this combo?
@@ -85,16 +84,17 @@ void core_spi::set_sclk(uint32_t user_freq){
    m = fsys(2*user_freq) - 1; 
    */
 
-    uint32_t sclk_mod;
+    uint32_t user_mod;
 
     // update the private variable;
     sclk_freq = user_freq;
+    sclk_mod = user_mod;
 
     // compute;
-    sclk_mod = (uint32_t) ceil(SYS_CLK_FREQ_MHZ/(2*user_freq) - 1);
+    user_mod = (uint32_t) ceil(SYS_CLK_FREQ_MHZ/(2*user_freq) - 1);
     
     // update the register;
-    REG_WRITE(base_addr, REG_SCLK_MOD_OFFSET, sclk_mod);
+    REG_WRITE(base_addr, REG_SCLK_MOD_OFFSET, user_mod);
 }
 
 void core_spi::set_dc(int dcx){
@@ -118,3 +118,148 @@ void core_spi::set_dc(int dcx){
    REG_WRITE(base_addr, REG_DC_OFFSET, placeholder);
 }
 
+void core_spi::set_ss_n(uint32_t user_vector){
+    /*
+    @brief  : to set the initial value of the slave select status of the slaves;
+    @param  : user_vector, a vector where each element corresponds to a slave;
+    @retval : none
+    @note   : slave select is active low;
+    */
+
+   // update the private vari;
+   ss_n_vector = user_vector;
+
+   // update the register;
+   REG_WRITE(base_addr, REG_SS_OFFSET, user_vector);
+}
+
+
+void core_spi::set_ss_n(int ss_signal, int which_slave){
+    /*
+    @brief  : to set an individual slave;
+    @param  : 
+            ss_signal: HIGH to assert the slave; LOW otherwise;
+            which_slave: which slave to set the ss_signal
+    @retval : none
+    @note   : slave select is active low;
+    */
+
+   // get the existing ss_vector;
+   uint32_t placeholder = ss_n_vector;
+
+    // bit clear first;
+    placeholder &= ~BIT_MASK(which_slave);
+
+    // the slave is selected;
+    if(ss_signal == SPI_SS_ASSERT){
+        // recall; it is active low;
+       placeholder &= ~BIT_MASK(which_slave);
+    }else{
+        placeholder |= BIT_MASK(which_slave);
+    }
+    
+    // update the private variable;
+    ss_n_vector = placeholder;
+
+    // update the reg;
+    REG_WRITE(base_addr, REG_SS_OFFSET, ss_n_vector);
+}
+
+void core_spi::assert_ss(int which_slave){
+    /*
+    @brief  : to select which slave?
+    @param  : 
+        which_slave - this corresponds to which port the slave is connected to;
+    @retval : none
+    @note   : slave select is active low;
+    */
+   set_ss_n(SPI_SS_ASSERT, which_slave);
+
+}
+
+void core_spi::deassert_ss(int which_slave){
+    /*
+    @brief  : to deselect which slave?
+    @param  : 
+        which_slave - this corresponds to which port the slave is connected to;
+    @retval : none
+    @note   : slave select is active low;
+    */
+   set_ss_n(SPI_SS_DEASSERT, which_slave);
+}
+
+int core_spi::check_ready(void){
+    /* 
+    @bried  : check whether the SPI is busy or ready (free);
+    @param  : none;
+    @retval : status of the SPI: HIGH if ready;
+
+    */
+
+   uint32_t status;
+   status = REG_READ(base_addr, REG_STATUS_OFFSET);
+   
+   // the status is at LSB;
+   return (int)((status >> BIT_POS_STATUS_READY) & (uint32_t)0xF);
+}
+
+uint8_t core_spi::full_duplex_transfer(uint8_t wr_mosi_data, int dc){
+    /*
+    @brief  : to start the SPI with the connected (asserted) slave;
+    @param  : wr_mosi_data: data byte to transfer to the slave;
+    @note   : this is a blocking method;
+    @note   : supported data size is 8-bot
+    @note   : this assumes a full duplex transfer;
+
+    */
+
+    uint32_t wr_data;
+    uint32_t rd_data;
+
+    /* initiate write, hence spi */
+    // register write assumes 32-bit wide;
+    // clear the rest that is not part of the data byte;
+    
+    wr_data = (((uint32_t) wr_mosi_data) & FIELD_MISO_RD_BYTE);
+    // block until spi is free;
+    while(!check_ready());
+    REG_WRITE(base_addr, REG_MOSI_WR_OFFSET, wr_data);
+
+    /* read */
+    // block until spi is free;
+    while(!check_ready());
+    rd_data = (uint32_t)REG_READ(base_addr, REG_MISO_RD_OFFSET);
+    return (uint8_t)(rd_data & FIELD_MISO_RD_BYTE);
+}
+
+uint8_t core_spi::full_duplex_transfer(uint8_t wr_mosi_data, int dc){
+    /*
+    @brief  : to start the SPI with the connected (asserted) slave;
+    @param  : 
+        wr_mosi_data: data byte to transfer to the slave;
+        dc          : is the data byte a data or command for the slave;
+    @retval : the miso data byte received;
+    @note   : this assumes a full duplex transfer;
+    */
+
+   // set the dc;
+   set_dc(dc);
+
+    uint32_t wr_data;
+    uint32_t rd_data;
+
+    /* initiate write, hence spi */
+    // register write assumes 32-bit wide;
+    // clear the rest that is not part of the data byte;
+
+    wr_data = (((uint32_t) wr_mosi_data) & FIELD_MISO_RD_BYTE);
+    // block until spi is free;
+    while(!check_ready());
+    REG_WRITE(base_addr, REG_MOSI_WR_OFFSET, wr_data);
+
+    /* read */
+    // block until spi is free;
+    while(!check_ready());
+    rd_data = (uint32_t)REG_READ(base_addr, REG_MISO_RD_OFFSET);
+    return (uint8_t)(rd_data & FIELD_MISO_RD_BYTE);
+}

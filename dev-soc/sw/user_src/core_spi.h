@@ -53,7 +53,12 @@ class core_spi{
         // extra external (optional) SPI pin to signal
         // to the slave whether the current mosi
         // byte is data or command?
-        SPI_MOSI_BYTE_IS_DATA = 1   // zero for command;
+        SPI_MOSI_BYTE_IS_DATA = 1,  // zero for command;
+
+        // slave select signal;
+        SPI_SS_ASSERT = 0,  // recall; active low
+        SPI_SS_DEASSERT = 1 
+    
 
     };
 
@@ -61,16 +66,33 @@ class core_spi{
         core_spi(uint32_t core_base_addr);
         ~core_spi();
 
+        // SPI settings;
         void set_transfer_mode(int user_cpol, int user_cpha);
         void set_sclk(uint32_t user_freq);
-        void set_dc(int dcx);
+        
+        // extra HW SPI pin to indicate to the slave whether the current MOSI data byte is a command or data;
+        void set_dc(int dcx);  
 
+        // slave select;
+        // note it is active low (to select a given slave)
+        // there could be multiple slave;
+        void set_ss_n(uint32_t user_vector);                    // set up the initial SS status for all slaves;
+        void set_ss_n(int ss_signal, int which_slave);   // overloaded; individual control;
+        void assert_ss(int which_slave);
+        void deassert_ss(int which_slave);
+
+        // status;
+        int check_ready(void);  // HIGH means free;
+
+        // start the spi transaction;
+        uint8_t full_duplex_transfer(uint8_t wr_mosi_data);
+        uint8_t full_duplex_transfer(uint8_t wr_mosi_data, int dc);
 
     private:
         uint32_t base_addr;     
         uint32_t ss_n_vector;   // slave select confi;
         
-        //uint32_t sclk_mod;      // spi clock setting;
+        uint32_t sclk_mod;      // for debugging purpose;
         uint32_t sclk_freq;     // spi clock freq;
         
         // transfer mode;
