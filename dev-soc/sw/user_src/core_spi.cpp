@@ -29,4 +29,66 @@ core_spi::core_spi(uint32_t core_base_addr){
 // not used;
 core_spi::~core_spi() {}
 
+void core_spi::set_transfer_mode(int user_cpol, int user_cpha){
+    /*
+    @brief  : to set the spi transfer mode;
+    @param  :
+        user_cpol for cpol;
+        user_cpha for cpha;
+    @retval : none
+    */
+
+    uint32_t placeholder;
+
+    // update the data;
+    if(user_cpol == 1){
+        placeholder = MASK_CTRL_CPOL;
+
+    }else{
+        placeholder &= ~MASK_CTRL_CPOL;
+    }
+
+    if(user_cpha == 1){
+        placeholder |= MASK_CTRL_CPHA;
+    }else{
+        placeholder &= ~MASK_CTRL_CPHA;
+    }
+
+    // update the register;
+    REG_WRITE(base_addr, REG_CTRL_OFFSET, placeholder);
+
+}
+
+void core_spi::set_sclk(uint32_t user_freq){
+    /*
+    @brief  : to set spi clock rate;
+    @param  : user_freq - frequency (Hz)
+    @retval : none
+    */
+
+   /* background;
+   HW spi clock is essentially a counter
+   that wraps around (mod);
+
+   so, need to program this mod to reflect the user_freq;
+
+   formula;
+   say;
+   mod, m 
+   system freq; fsys;
+   spi freq;    user_freq;
+
+   m = fsys(2*user_freq) - 1; 
+   */
+
+    uint32_t sclk_mod;
+    sclk_mod = (uint32_t) ceil(SYS_CLK_FREQ_MHZ/(2*user_freq) - 1);
+    // update the register;
+    REG_WRITE(base_addr, REG_SCLK_MOD_OFFSET, sclk_mod);
+}
+
+
+
+
+
 

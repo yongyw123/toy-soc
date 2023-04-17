@@ -8,6 +8,7 @@ Purpose: SW drivers for spi core;
 #include "io_map.h"
 #include "io_reg_util.h"
 #include "inttypes.h"
+#include "math.h"
 
 // c and cpp linkage;
 // reference: https://igl.ethz.ch/teaching/tau/resources/cprog.htm
@@ -51,7 +52,7 @@ class core_spi{
         ~core_spi();
 
         void set_transfer_mode(int user_cpol, int user_cpha);
-        void set_sclk(int user_freq);
+        void set_sclk(uint32_t user_freq);
 
         void set_dc(int dcx);
 
