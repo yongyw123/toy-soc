@@ -61,6 +61,7 @@ program core_spi_tb
    localparam SPI_REG_MISO_RD = `S5_SPI_REG_MISO_RD_OFFSET;
    localparam SPI_REG_CTRL = `S5_SPI_REG_CTRL_OFFSET;
    localparam SPI_REG_SCLK = `S5_SPI_REG_SCLK_MOD_OFFSET;
+   localparam SPI_REG_DC = `S5_SPI_REG_DC_OFFSET;
    
     // sim var;
     logic [2:0] index;  // loop index;
@@ -73,7 +74,6 @@ program core_spi_tb
     
     $display("start");
     
-    /*
     $display("test 00: set data or command-------");
     //$display("set dc to command");
     @(posedge clk);
@@ -82,8 +82,9 @@ program core_spi_tb
     read <= 1'b0;
     write <= 1'b1;
     //addr[2:0] <= 3'b100;
-    addr <= SPI_REG_CTRL;
-    wr_data <= 32'b0;   // command;
+    addr <= SPI_REG_DC;
+    // bit pos at LSB;
+    wr_data <= 32'(1'b0);   // command;
     
     @(posedge clk);
     
@@ -93,11 +94,11 @@ program core_spi_tb
     cs <= 1'b1;
     read <= 1'b0;
     write <= 1'b1;
-    addr <= SPI_REG_CTRL; 
-    wr_data <= 32'(3'b100);   // data;
+    addr <= SPI_REG_DC; 
+    wr_data <= 32'(1'b1);   // data;
     
     @(posedge clk);
-    
+    /*
     $display("test 01: check status -------");
     @(posedge clk);
     test_index <= 2;
@@ -180,7 +181,7 @@ program core_spi_tb
         addr <= SPI_REG_MISO_RD; 
         
     end
-    */
+    
     
     $display("test: cpol and cpha setting -----");
     // set to the faster sclk;
@@ -243,7 +244,7 @@ program core_spi_tb
         addr <= SPI_REG_MISO_RD; 
         
     end
-    
+    */
     
     #(20);
     
