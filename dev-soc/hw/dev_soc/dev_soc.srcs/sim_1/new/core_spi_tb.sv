@@ -98,7 +98,7 @@ program core_spi_tb
     wr_data <= 32'(1'b1);   // data;
     
     @(posedge clk);
-    /*
+    
     $display("test 01: check status -------");
     @(posedge clk);
     test_index <= 2;
@@ -124,7 +124,7 @@ program core_spi_tb
 
     @(posedge clk);
     
-    
+
     $display("test 03: spi setting clock with two different parameter -----");
     test_index_count = 4;
     for(int i = 0; i < 2; i++) begin
@@ -244,7 +244,7 @@ program core_spi_tb
         addr <= SPI_REG_MISO_RD; 
         
     end
-    */
+    
     
     #(20);
     
