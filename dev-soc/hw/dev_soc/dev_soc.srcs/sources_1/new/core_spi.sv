@@ -105,7 +105,7 @@ module core_spi
    // SPI settings;   
    logic cpol;
    logic cpha;
-   logic sclk_mod;
+   logic [MAX_SPI_CLOCK_WIDTH-1:0] sclk_mod;
    
    // reassmebled miso slave data;
    logic [SPI_DATA_BIT-1:0] spi_miso_reassembled;
@@ -137,8 +137,9 @@ module core_spi
     .clk(clk),
     .reset(reset),
     .mosi_data_write(wr_data[SPI_DATA_BIT-1:0]),
-    //.count_mod(sclk_mod),
-    .count_mod(16'(3'b100)),
+    .count_mod(sclk_mod),
+    //.count_mod(spi_sclk_mod_reg),
+    //.count_mod(16'(3'b100)),
     .cpol(cpol),
     .cpha(cpha),
     .start(wr_spi_start),

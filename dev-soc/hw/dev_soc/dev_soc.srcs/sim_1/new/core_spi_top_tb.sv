@@ -103,6 +103,7 @@ module core_spi_top_tb();
     initial
     begin
         $monitor("spi system -  state: %s, current_cnt: %0d, count_mod: %0d", uut.spi_controller.state_reg.name, uut.spi_controller.clk_cnt_reg, uut.spi_controller.count_mod);
+        $monitor("core spi - sclk_mod: %0d, spi_sclk_mod_reg: %0d, spi_sclk_mod_next: %0d", uut.sclk_mod, uut.spi_sclk_mod_reg, uut.spi_sclk_mod_next);
         $monitor("time: %0t, test index: %0d, cs: %0b, wr: %0b, rd: %0b, addr: %0B, rdatad: %0D, wrdatab: %0B, rddata: %0B, sclk: %0b, mosi: %0b, miso: %0b, ss: %0B, dc: %0b, wr_sclk: %0b, wr_start: %0b",
             $time,
             test_index,
