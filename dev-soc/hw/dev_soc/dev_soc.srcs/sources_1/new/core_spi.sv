@@ -29,7 +29,8 @@ module core_spi
     #(
         parameter 
         SPI_SLAVE_NUM = 1, // number of spi slaves for the master?
-        SPI_DATA_BIT = 8    // this is fixed usually;
+        SPI_DATA_BIT = 8,    // this is fixed usually;
+        MAX_SPI_CLOCK_WIDTH = 16    // this is for covenience;
     )
     
     (
@@ -55,7 +56,12 @@ module core_spi
         // extra SPI pins; 
         // note that this depends on the slave device specs;
         output logic[SPI_SLAVE_NUM-1:0] spi_ss_n,    // low to assert a given slave;
-        output logic spi_data_or_command          // is the current MOSI a data or command for the slave?  
+        output logic spi_data_or_command,          // is the current MOSI a data or command for the slave?
+        
+        // debugging;
+        output logic wr_sclk,
+        output logic wr_spi_start
+          
     );
    
    // for cleaner view; 
@@ -91,9 +97,9 @@ module core_spi
    // required for decoding as there are multiple register for writing/reading;
    logic wr_en;
    logic wr_ss;
-   logic wr_spi_start;
+   //??? logic wr_spi_start;
    logic wr_ctrl;
-   logic wr_sclk;
+   // ?? logic wr_sclk;
    logic rd_en;
    
    // SPI settings;   
@@ -121,7 +127,7 @@ module core_spi
     */
    logic [REG_WIDTH-1:0] ctrl_reg, ctrl_next;
    logic[SPI_SLAVE_NUM-1:0] spi_ss_reg, spi_ss_next;
-   logic[REG_WIDTH-1:0] spi_sclk_mod_reg, spi_sclk_mod_next;    // to program sclk;
+   logic[MAX_SPI_CLOCK_WIDTH-1:0] spi_sclk_mod_reg, spi_sclk_mod_next;    // to program sclk;
    //logic spi_status_reg, spi_status_next;
    
     
@@ -131,7 +137,8 @@ module core_spi
     .clk(clk),
     .reset(reset),
     .mosi_data_write(wr_data[SPI_DATA_BIT-1:0]),
-    .count_mod(sclk_mod),
+    //.count_mod(sclk_mod),
+    .count_mod(16'(3'b100)),
     .cpol(cpol),
     .cpha(cpha),
     .start(wr_spi_start),
@@ -151,7 +158,8 @@ module core_spi
                 //spi_status_reg <= {REG_WIDTH{1'b1}};    // after reset, spi should be free;
                 
                 // zero means the spi sclk is disabled;
-                spi_sclk_mod_reg <= {REG_WIDTH{1'b0}};
+                //spi_sclk_mod_reg <= {MAX_SPI_CLOCK_WIDTH{1'b0}};
+                spi_sclk_mod_reg <= MAX_SPI_CLOCK_WIDTH'(4);
                                 
                 // by default, {cpol, cpha} = {0,0};
                 ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPOL] <= 1'b0;
@@ -179,7 +187,9 @@ module core_spi
    
    assign wr_en         = write && cs;
    assign wr_ss         = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_SS);
-   assign wr_spi_start  = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_MOSI_WR);   // auto;
+   //assign wr_spi_start  = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_MOSI_WR);   // auto;
+   //assign wr_spi_start  = wr_en && (addr[SPI_REG_ADDR_W-1:0] == 3'b010);   // auto;
+   assign wr_spi_start  = wr_en && (addr[2:0] == 3'b010);   // auto;
    assign wr_ctrl       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_CTRL);
    assign wr_sclk       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_SCLK);
    
@@ -218,7 +228,7 @@ module core_spi
    // OK CODE in contrast to the above;
    assign spi_ss_next       = wr_data[SPI_SLAVE_NUM-1:0];
    assign ctrl_next         = wr_data;
-   assign spi_sclk_mod_next = wr_data;
+   assign spi_sclk_mod_next = wr_data[MAX_SPI_CLOCK_WIDTH-1:0];
    //assign spi_status_next   = spi_ready_flag;
    
    // input to the spi system;

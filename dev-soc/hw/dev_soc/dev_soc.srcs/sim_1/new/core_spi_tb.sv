@@ -129,7 +129,11 @@ program core_spi_tb
     write <= 1'b1;
     addr <= SPI_REG_SCLK;
     wr_data <=  spi_clock_test_program_0;
+    
     @(posedge clk);
+    cs <= 1'b1;
+    read <= 1'b0;
+    write <= 1'b1;
     
     // check spi is free before starting;
     @(posedge clk);
@@ -148,6 +152,7 @@ program core_spi_tb
     
     
     // check if spi flag is busy;
+    /*
     @(posedge clk);
     cs <= 1'b1;
     read <= 1'b1;
@@ -155,9 +160,9 @@ program core_spi_tb
     addr <= SPI_REG_STATUS; 
     wait(rd_data == 32'b0);  // spi busy;
     wait(rd_data == 32'b1);  // spi free?
-    
-    #(100000);
-    
+    */
+    @(posedge clk);
+    wait(rd_data == 32'b1);  // spi free?
     
     $display("done");
     $stop;
