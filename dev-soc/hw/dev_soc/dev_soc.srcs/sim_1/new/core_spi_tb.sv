@@ -65,6 +65,7 @@ program core_spi_tb
     // sim var;
     logic [2:0] index;  // loop index;
     logic [10:0] test_index_count;  // loop index;
+    logic [10:0] test_index_track;  // loop index;
     logic spi_cpol;
     logic spi_cpha;
     
@@ -72,6 +73,7 @@ program core_spi_tb
     
     $display("start");
     
+    /*
     $display("test 00: set data or command-------");
     //$display("set dc to command");
     @(posedge clk);
@@ -135,7 +137,7 @@ program core_spi_tb
         addr <= SPI_REG_SCLK;
         //wr_data <=  spi_clock_test_program_0;
         wr_data <= spi_clock_mod_candidate_array[i];
-        $display("clock mod: %0d", spi_clock_mod_candidate_array[i]);
+        $display("clock mod: %0d ------------", spi_clock_mod_candidate_array[i]);
         
         @(posedge clk);
         cs <= 1'b1;
@@ -170,7 +172,7 @@ program core_spi_tb
         wait(rd_data == 32'b1);  // spi free?
         
         // check the reassembled miso data;
-        $display("check miso reassmbled data");
+        $display("check miso reassmbled data---------------");
         @(posedge clk);
         cs <= 1'b1;
         read <= 1'b1;
@@ -178,9 +180,69 @@ program core_spi_tb
         addr <= SPI_REG_MISO_RD; 
         
     end
+    */
     
+    $display("test: cpol and cpha setting -----");
+    // set to the faster sclk;
+    @(posedge clk);
+    cs <= 1'b1;
+    read <= 1'b0;
+    write <= 1'b1;
+    addr <= SPI_REG_SCLK;
+    wr_data <= spi_clock_test_program_0;
+    $display("clock mod: %0d-----------", spi_clock_test_program_0);
     
-    //$display("test 03: spi setting clock with two different parameter -----");
+    test_index_track = 0;
+    test_index_count = 0;
+    for(test_index_track = 0; test_index_track < 4; test_index_track++) begin 
+        
+        // set the cpol, cpha; 
+        @(posedge clk);
+        test_index <= test_index_count;
+        test_index_count++;
+        cs <= 1'b1;
+        read <= 1'b0;
+        write <= 1'b1;
+        addr <= SPI_REG_CTRL;
+        
+        spi_cpol = test_index_track[0];
+        spi_cpha = test_index_track[1];
+        
+        $display("cpol: %0b, cpha: %0b ------------", spi_cpol, spi_cpha);
+        // the third bit is for the DC control;
+        wr_data[1:0] <= {spi_cpha, spi_cpol};
+            
+        // start spi;
+        $display("start spi-----------------");
+        @(posedge clk);
+        cs <= 1'b1;
+        read <= 1'b0;
+        write <= 1'b1;
+        addr <= SPI_REG_MOSI_WR;
+        wr_data <=  32'($random);
+        
+        
+        // check if spi flag is busy;
+        @(posedge clk);
+        cs <= 1'b1;
+        read <= 1'b1;
+        write <= 1'b0;
+        addr <= SPI_REG_STATUS; 
+        // expect that spi is busy at this stage;
+        wait(rd_data == 32'b0);  // spi busy;
+        
+        // block until it is free
+        wait(rd_data == 32'b1);  // spi free?
+        
+        // check the reassembled miso data;
+        $display("check miso reassmbled data---------------");
+        @(posedge clk);
+        cs <= 1'b1;
+        read <= 1'b1;
+        write <= 1'b0;
+        addr <= SPI_REG_MISO_RD; 
+        
+    end
     
     
     #(20);
