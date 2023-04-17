@@ -51,6 +51,8 @@ program core_spi_tb
     // spi clock programming candidates; 
     localparam spi_clock_test_program_0 = 100_000_000/(2*10_000_000) - 1;   // 10Mhz;
     localparam spi_clock_test_program_1 = 100_000_000/(2*1_000_000) - 1;   // 1Mhz;
+    logic [15:0] spi_clock_mod_candidate_array[0:1] = {spi_clock_test_program_0, spi_clock_test_program_1};
+    
     
     // register offset;
    localparam SPI_REG_STATUS = `S5_SPI_REG_STATUS_OFFSET;
@@ -120,55 +122,66 @@ program core_spi_tb
     @(posedge clk);
     
     
-    $display("test 03: spi setting clokc -----");
+    $display("test 03: spi setting clock with two different parameter -----");
+    test_index_count = 4;
+    for(int i = 0; i < 2; i++) begin
+        
+        @(posedge clk);
+        test_index <= test_index_count;
+        test_index_count++;
+        cs <= 1'b1;
+        read <= 1'b0;
+        write <= 1'b1;
+        addr <= SPI_REG_SCLK;
+        //wr_data <=  spi_clock_test_program_0;
+        wr_data <= spi_clock_mod_candidate_array[i];
+        $display("clock mod: %0d", spi_clock_mod_candidate_array[i]);
+        
+        @(posedge clk);
+        cs <= 1'b1;
+        read <= 1'b0;
+        write <= 1'b1;
+        
+        // check spi is free before starting;
+        @(posedge clk);
+        cs <= 1'b1;
+        read <= 1'b1;
+        write <= 1'b0;
+        addr <= SPI_REG_STATUS; 
+        
+        // start spi;
+        @(posedge clk);
+        cs <= 1'b1;
+        read <= 1'b0;
+        write <= 1'b1;
+        addr <= SPI_REG_MOSI_WR;
+        wr_data <=  32'($random);
+        
+        // check if spi flag is busy;
+        @(posedge clk);
+        cs <= 1'b1;
+        read <= 1'b1;
+        write <= 1'b0;
+        addr <= SPI_REG_STATUS; 
+        // expect that spi is busy at this stage;
+        wait(rd_data == 32'b0);  // spi busy;
+        
+        // block until it is free
+        wait(rd_data == 32'b1);  // spi free?
+        
+        // check the reassembled miso data;
+        $display("check miso reassmbled data");
+        @(posedge clk);
+        cs <= 1'b1;
+        read <= 1'b1;
+        write <= 1'b0;
+        addr <= SPI_REG_MISO_RD; 
+        
+    end
     
-    @(posedge clk);
-    test_index <= 4;
-    cs <= 1'b1;
-    read <= 1'b0;
-    write <= 1'b1;
-    addr <= SPI_REG_SCLK;
-    wr_data <=  spi_clock_test_program_0;
     
-    @(posedge clk);
-    cs <= 1'b1;
-    read <= 1'b0;
-    write <= 1'b1;
+    //$display("test 03: spi setting clock with two different parameter -----");
     
-    // check spi is free before starting;
-    @(posedge clk);
-    cs <= 1'b1;
-    read <= 1'b1;
-    write <= 1'b0;
-    addr <= SPI_REG_STATUS; 
-    
-    // start spi;
-    @(posedge clk);
-    cs <= 1'b1;
-    read <= 1'b0;
-    write <= 1'b1;
-    addr <= SPI_REG_MOSI_WR;
-    wr_data <=  32'($random);
-    
-    
-    // check if spi flag is busy;
-    @(posedge clk);
-    cs <= 1'b1;
-    read <= 1'b1;
-    write <= 1'b0;
-    addr <= SPI_REG_STATUS; 
-    // expect that spi is busy at this stage;
-    wait(rd_data == 32'b0);  // spi busy;
-    
-    // block until it is free
-    wait(rd_data == 32'b1);  // spi free?
-    
-    // check the reassembled miso data;
-    @(posedge clk);
-    cs <= 1'b1;
-    read <= 1'b1;
-    write <= 1'b0;
-    addr <= SPI_REG_MISO_RD; 
     
     #(20);
     

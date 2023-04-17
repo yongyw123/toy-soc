@@ -62,16 +62,10 @@ module core_spi_top_tb();
     logic spi_miso;
     logic[SPI_SLAVE_NUM-1:0] spi_ss_n;   // low to assert a given slave;
     logic spi_data_or_command;           // is the current MOSI a data or command for the slave?  
- 
     
     // sim var;
     logic [5:0] test_index;
     
-    // debugging;
-    logic wr_sclk;
-    logic wr_spi_start;
-    
-   
     /* instantiation */
     assign spi_miso = spi_mosi; // loop back;
     core_spi #(.SPI_SLAVE_NUM(SPI_SLAVE_NUM), .SPI_DATA_BIT(SPI_DATA_BIT))
@@ -102,8 +96,12 @@ module core_spi_top_tb();
     /* monitoring */
     initial
     begin
-        $monitor("spi system -  state: %s, current_cnt: %0d, count_mod: %0d", uut.spi_controller.state_reg.name, uut.spi_controller.clk_cnt_reg, uut.spi_controller.count_mod);
+        // to view the internal spi system state within the core spi (uut)
+        //$monitor("spi system -  state: %s, current_cnt: %0d, count_mod: %0d", uut.spi_controller.state_reg.name, uut.spi_controller.clk_cnt_reg, uut.spi_controller.count_mod);
+        
+        // to view the internal variables of the uut;
         $monitor("core spi - sclk_mod: %0d, spi_sclk_mod_reg: %0d, spi_sclk_mod_next: %0d", uut.sclk_mod, uut.spi_sclk_mod_reg, uut.spi_sclk_mod_next);
+        
         $monitor("time: %0t, test index: %0d, cs: %0b, wr: %0b, rd: %0b, addr: %0B, rdatad: %0D, wrdatab: %0B, rddata: %0B, sclk: %0b, mosi: %0b, miso: %0b, ss: %0B, dc: %0b, wr_sclk: %0b, wr_start: %0b",
             $time,
             test_index,
@@ -119,8 +117,8 @@ module core_spi_top_tb();
             spi_miso,
             spi_ss_n,
             spi_data_or_command,
-            wr_sclk,
-            wr_spi_start
+            uut.wr_sclk,
+            uut.wr_spi_start
            );
     end
     
