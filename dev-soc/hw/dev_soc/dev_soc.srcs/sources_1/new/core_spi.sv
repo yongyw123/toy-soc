@@ -87,6 +87,7 @@ module core_spi
    localparam SPI_REG_MISO_RD = SPI_REG_ADDR_W'(`S5_SPI_REG_MISO_RD_OFFSET);
    localparam SPI_REG_CTRL = SPI_REG_ADDR_W'(`S5_SPI_REG_CTRL_OFFSET);
    localparam SPI_REG_SCLK = SPI_REG_ADDR_W'(`S5_SPI_REG_SCLK_MOD_OFFSET);
+   localparam SPI_REG_DC = SPI_REG_ADDR_W'(`S5_SPI_REG_DC_OFFSET);
    
    
    // required for decoding as there are multiple register for writing/reading;
@@ -95,6 +96,7 @@ module core_spi
    logic wr_spi_start;
    logic wr_ctrl;
    logic wr_sclk;
+   logic wr_dc;
    logic rd_en;
    
    // SPI settings;   
@@ -122,6 +124,7 @@ module core_spi
     */
    logic [REG_WIDTH-1:0] ctrl_reg, ctrl_next;
    logic[SPI_SLAVE_NUM-1:0] spi_ss_reg, spi_ss_next;
+   logic [REG_WIDTH-1:0] spi_dc_reg, spi_dc_next;
    logic[MAX_SPI_CLOCK_WIDTH-1:0] spi_sclk_mod_reg, spi_sclk_mod_next;    // to program sclk;
    //logic spi_status_reg, spi_status_next;
    
@@ -161,11 +164,11 @@ module core_spi
                 ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPOL] <= 1'b0;
                 ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_CPHA] <= 1'b0;
                 
-                // spi data is interpreted as data (not command) for the slave;    
-                ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_DC] <= 1'b1;
-                
                 //  all slave is NOT selected; (active LOW);
                 spi_ss_reg <= {SPI_SLAVE_NUM{1'b1}};
+                
+                // command or data? data;
+                spi_dc_reg <= {REG_WIDTH{1'b1}};
             end
         else
             begin
@@ -177,6 +180,8 @@ module core_spi
                     ctrl_reg <= ctrl_next;
                 if(wr_ss)
                     spi_ss_reg <= spi_ss_next;
+                if(wr_dc)
+                    spi_dc_reg <= spi_dc_next;
             end    
    
    // decoding;
@@ -188,7 +193,7 @@ module core_spi
    //assign wr_spi_start  = wr_en && (addr[2:0] == 3'b010);   // auto;
    assign wr_ctrl       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_CTRL);
    assign wr_sclk       = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_SCLK);
-   
+   assign wr_dc         = wr_en && (addr[SPI_REG_ADDR_W-1:0] == SPI_REG_DC);
    
    /* DO NOT DO THE FOLLOWING; BAD PRACTICE!!!
    // instead, put the (wr_XX) enable signals on th flip flop above;
@@ -225,6 +230,8 @@ module core_spi
    assign spi_ss_next       = wr_data[SPI_SLAVE_NUM-1:0];
    assign ctrl_next         = wr_data;
    assign spi_sclk_mod_next = wr_data[MAX_SPI_CLOCK_WIDTH-1:0];
+   assign spi_dc_next       = wr_data;
+   
    //assign spi_status_next   = spi_ready_flag;
    
    // input to the spi system;
@@ -233,7 +240,9 @@ module core_spi
    assign sclk_mod = spi_sclk_mod_reg;
    
    // output to the processor;
-   assign spi_data_or_command = ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_DC];
+   //assign spi_data_or_command = ctrl_reg[`S5_SPI_REG_CTRL_BIT_POS_DC];
+   assign spi_data_or_command = spi_dc_reg[`S5_SPI_REG_DC_BIT_POS_DC];
+   
    assign spi_ss_n = spi_ss_reg;
    
    // read;

@@ -166,7 +166,7 @@ Register IO Access;
 /**************************************************************
 * S5_SPI;
 --------------------
-SPI core has five registers;
+SPI core has seven registers;
 
 Register Map
 1. register 01 (offset 0): status register; 
@@ -175,7 +175,7 @@ Register Map
 4. register 04 (offset 3): MISO read data register;
 5. register 05 (offset 4): ctrl register;
 6. register 06 (offset 5): SPI sclk programming register;
-
+7. register 07 (offset 6): data or command register;
 
 Register Definition:
 1. register 01: status register;
@@ -197,15 +197,17 @@ Register Definition:
 5. register 05: control register;
     BIT[0]     : cpol;
     BIT[1]     : cpha;
-    BIT[2]     : current MOSI byte is command or data for the slave;
-                    HIGH if the current SPI byte is a data;
-                    LOW otherwise;
-                    (this is not SPI intrinsic; it 
-                    is created for convenience);
-
+    
 6. register 06: SPI sclk register
     BIT[15:0]   : stores the SPI sclk counter modulus;
-    
+
+7. register 07: data or command register;
+    BIT[0]     : current MOSI byte is command or data for the slave;
+                HIGH if the current SPI byte is a data;
+                LOW otherwise;
+                (this is not SPI intrinsic; it 
+                is created for convenience);
+
 Register IO Access:
 1. Status Register          : read only;
 2. Slave Select Register    : write only;
@@ -213,6 +215,7 @@ Register IO Access:
 4. MISO Read Data Register  : read only; 
 5. Control Regitser         : write only
 6. SPI sclk register        : write only
+7. Data or Command Register : write only
 ******************************************************************/
 `define S5_SPI_TOTAL_REG_NUM        6
 
@@ -223,12 +226,13 @@ Register IO Access:
 `define S5_SPI_REG_MISO_RD_OFFSET   3   // 011
 `define S5_SPI_REG_CTRL_OFFSET      4   // 100
 `define S5_SPI_REG_SCLK_MOD_OFFSET  5   // 101
+`define S5_SPI_REG_DC_OFFSET        6   // 110
     
 // bit position;
 `define S5_SPI_REG_STATUS_BIT_POS_READY     0
 `define S5_SPI_REG_CTRL_BIT_POS_CPOL        0
 `define S5_SPI_REG_CTRL_BIT_POS_CPHA        1
-`define S5_SPI_REG_CTRL_BIT_POS_DC          2
+`define S5_SPI_REG_DC_BIT_POS_DC            0
 
 // misc;
 `define S5_SPI_REG_SCLK_WIDTH           16
@@ -236,6 +240,6 @@ Register IO Access:
 
 // DC contrl signal to indicate to the slave;
 // HIGh if it is data; LOW if it is a command;
-`define S5_SPI_REG_CTRL_DC_DATA 1
+`define S5_SPI_REG_DC_DATA 1
 
 `endif //_IO_MAP_SVH
