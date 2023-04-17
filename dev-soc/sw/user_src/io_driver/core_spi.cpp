@@ -87,7 +87,7 @@ void core_spi::set_sclk(uint32_t user_freq){
     uint32_t user_mod;
     
     // compute;
-    user_mod = (uint32_t) ceil(SYS_CLK_FREQ_MHZ/(2*user_freq) - 1);
+    user_mod = (uint32_t) ceil(SYS_CLK_FREQ_HZ/(2*user_freq) - 1);
     // update the private variable;
     sclk_freq = user_freq;
     sclk_mod = user_mod;

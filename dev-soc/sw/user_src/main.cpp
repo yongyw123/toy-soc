@@ -9,10 +9,10 @@ core_spi obj_spi(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S5_SPI));
 
 int main(){
     
-    //test_spi_mosi(&obj_spi);
+    test_spi_mosi(&obj_spi);
 
     while(1){
-        test_uart();    
+        //test_uart();    
     }
 }
 

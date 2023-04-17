@@ -285,9 +285,10 @@ void test_spi_mosi(core_spi *spi_obj){
         // start;
         wr_data = (uint8_t)i;
         debug_str("\r\n");
-        debug_str("mosi data: \r\n");
+        debug_str("mosi data: ");
         debug_dec(wr_data);
-                     
+        debug_str("\r\n");
+        
         spi_obj->full_duplex_transfer(wr_data);
 
         // deassert;
