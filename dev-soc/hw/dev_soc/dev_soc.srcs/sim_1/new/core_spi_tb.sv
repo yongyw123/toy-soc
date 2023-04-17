@@ -157,12 +157,20 @@ program core_spi_tb
     read <= 1'b1;
     write <= 1'b0;
     addr <= SPI_REG_STATUS; 
+    // expect that spi is busy at this stage;
     wait(rd_data == 32'b0);  // spi busy;
-    wait(rd_data == 32'b1);  // spi free?
     
-    @(posedge clk);
     // block until it is free
     wait(rd_data == 32'b1);  // spi free?
+    
+    // check the reassembled miso data;
+    @(posedge clk);
+    cs <= 1'b1;
+    read <= 1'b1;
+    write <= 1'b0;
+    addr <= SPI_REG_MISO_RD; 
+    
+    #(20);
     
     $display("done");
     $stop;
