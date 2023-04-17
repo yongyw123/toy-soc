@@ -38,7 +38,11 @@ void core_spi::set_transfer_mode(int user_cpol, int user_cpha){
     @retval : none
     */
 
-    uint32_t placeholder;
+    uint32_t placeholder = 0x00000000;
+    
+    // update the private variable;
+    cpol = user_cpol;
+    cpha = user_cpha;
 
     // update the data;
     if(user_cpol == 1){
@@ -82,13 +86,35 @@ void core_spi::set_sclk(uint32_t user_freq){
    */
 
     uint32_t sclk_mod;
+
+    // update the private variable;
+    sclk_freq = user_freq;
+
+    // compute;
     sclk_mod = (uint32_t) ceil(SYS_CLK_FREQ_MHZ/(2*user_freq) - 1);
+    
     // update the register;
     REG_WRITE(base_addr, REG_SCLK_MOD_OFFSET, sclk_mod);
 }
 
+void core_spi::set_dc(int dcx){
+    /*
+    @brief  : to set the extra (optional) SPI HW pin
+                to indicate to the slave whether the current mosi
+                data byte is a data or command;
+    @param  : dcx - HIGH for data; LOW otherwise;
+    @retval : none
+    */
 
-
-
-
+   uint32_t placeholder = 0x00000000;
+   if(dcx == SPI_MOSI_BYTE_IS_DATA){
+        // set the bit;
+        placeholder |= (uint32_t)MASK_POS_DC;
+   }else{
+        // clear the bit;
+        placeholder &= ~(uint32_t)MASK_POS_DC;
+   }
+   // update the reg;
+   REG_WRITE(base_addr, REG_DC_OFFSET, placeholder);
+}
 
