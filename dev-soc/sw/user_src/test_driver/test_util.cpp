@@ -245,3 +245,56 @@ void test_gpio_write(core_gpio *gpio_obj){
    }
 
 }
+
+void test_spi_mosi(core_spi *spi_obj){
+    /*
+    @brief  : to test spi core (except miso line);
+    @param  : spi_obj - pointer to an instantiated spi core object;
+    @retval : none
+    @method : logic analyser;
+    @assumption : board pmod jumpers are used for the spi hw signals;
+    
+    */
+
+   int cpol = 0;
+   int cpha = 0;
+   uint32_t sclk_freq = 100000; // 100 kHz;
+   uint32_t ss_vector = (uint32_t)0xFFFFFFFF;
+   // there is only one slave connected by the constraint map;
+   int which_slave = 0; 
+   
+   // setup;
+   spi_obj->set_transfer_mode(cpol, cpha);
+   spi_obj->set_sclk(sclk_freq);
+   spi_obj->set_ss_n(ss_vector);
+
+    uint8_t wr_data;
+
+    // start;
+    for(int i = 0; i  < 100; i++){
+        // assert;
+        spi_obj->assert_ss(which_slave);
+
+        // interchange between data and command;
+        // high for data;
+        // low for command;
+        spi_obj->set_dc(i%2);
+
+        // start;
+        wr_data = (uint8_t)i;
+        debug_str("\r\n");
+        debug_str("mosi data: \r\n");
+        debug_dec(wr_data);
+                     
+        spi_obj->full_duplex_transfer(wr_data);
+
+        // deassert;
+        spi_obj->deassert_ss(which_slave);
+    
+        // set to 20 ms period;
+        debug_str("pause for 10ms \r\n");
+        delay_busy_ms(10);
+
+    }
+
+}
