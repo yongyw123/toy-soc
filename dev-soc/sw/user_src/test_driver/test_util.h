@@ -120,6 +120,17 @@ what to test;
 -----------------------------------------------------------*/
 void test_spi_mosi(core_spi *spi_obj);
 
+/*
+IO core to test: SPI;
+1. SPI core is tested by using an actual external SPI device;
+2. Device: LCD (chip: ILI9341);
+3. Method: This could test MOSI and MISO lines;
+4. 
+*/
+void test_spi_device_lcd_ili9341(core_spi *spi_obj);
+
+
+
 
 #ifdef __cpluscplus
 } // extern "C";
