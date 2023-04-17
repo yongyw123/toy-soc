@@ -77,6 +77,8 @@ void test_uart(void){
    index_called_p++;
    index_called_n--;
 
+    debug_str("pause for 2 seconds\r\n");
+    delay_busy_ms(2000);
 }
 
 void test_gpio_ctrl_direction(core_gpio *gpio_obj){
