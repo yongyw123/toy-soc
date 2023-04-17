@@ -208,6 +208,7 @@ uint8_t core_spi::full_duplex_transfer(uint8_t wr_mosi_data){
     @brief  : to start the SPI with the connected (asserted) slave;
     @param  : wr_mosi_data: data byte to transfer to the slave;
     @note   : this is a blocking method;
+    @note   : MSB is first transmitted on the MOSI line;
     @note   : supported data size is 8-bot
     @note   : this assumes a full duplex transfer;
 
@@ -239,6 +240,8 @@ uint8_t core_spi::full_duplex_transfer(uint8_t wr_mosi_data, int dc){
         wr_mosi_data: data byte to transfer to the slave;
         dc          : is the data byte a data or command for the slave;
     @retval : the miso data byte received;
+    @note   : MSB is first transmitted on the MOSI line;
+    @note   : this is a blocking method;
     @note   : this assumes a full duplex transfer;
     */
 
