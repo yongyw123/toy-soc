@@ -288,16 +288,11 @@ void test_spi_mosi(core_spi *spi_obj){
         debug_str("mosi data: ");
         debug_dec(wr_data);
         debug_str("\r\n");
-        
+
         spi_obj->full_duplex_transfer(wr_data);
 
         // deassert;
         spi_obj->deassert_ss(which_slave);
     
-        // set to 20 ms period;
-        debug_str("pause for 10ms \r\n");
-        delay_busy_ms(10);
-
     }
-
 }
