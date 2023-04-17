@@ -54,6 +54,8 @@ class core_spi{
         // to the slave whether the current mosi
         // byte is data or command?
         SPI_MOSI_BYTE_IS_DATA = 1,  // zero for command;
+        
+        SPI_MOSI_BYTE_IS_COMMAND = 0,  // zero for command;
 
         // slave select signal;
         SPI_SS_ASSERT = 0,  // recall; active low
