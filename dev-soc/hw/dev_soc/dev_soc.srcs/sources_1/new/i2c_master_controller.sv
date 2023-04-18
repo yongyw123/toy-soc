@@ -64,8 +64,8 @@ module i2c_master_controller
         
         // debugging;
         output debug_scl_sim,
-        output debug_sda_sim,
-        output debug_sda_io
+        output debug_sda_sim
+        
     );
     
     // misc constants;
@@ -509,7 +509,6 @@ module i2c_master_controller
     assign sda = (set_hiz || sda_reg) ? 1'bz : 1'b0;
     // for simulation purpose;
     assign debug_sda_sim = (set_hiz || sda_reg) ? 1'b1 : 1'b0;   
-    assign debug_sda_io = sda;
     
     // same reasoning for scl due to th epull up resistor;
     assign scl = (scl_reg) ? 1'bz : 1'b0;
