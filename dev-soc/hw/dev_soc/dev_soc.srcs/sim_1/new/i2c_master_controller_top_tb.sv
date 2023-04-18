@@ -88,11 +88,11 @@ module i2c_master_controller_top_tb();
     /* monitoring */
     initial
     begin
-        $monitor("time: %0t, index: %0d, uut.state: %s, mod: %0d, cmd: %0d, start: %0b, ready: %0b, done: %0b, ack: %0b, din: %0B, dout: %0B, scl: %0b, scl_sim: %0b, sda: %0b, sda_sim: %0b, uut.sda_reg: %0b, uut.sethiz: %0b",
+        $monitor("cnt mod: %0d, uut.phase_quarter: %0d, uut.phase_half: %0d", user_cnt_mod, uut.phase_quarter, uut.phase_half);
+        $monitor("time: %0t, index: %0d, uut.state: %s, cmd: %0d, start: %0b, ready: %0b, done: %0b, ack: %0b, din: %0B, dout: %0B, scl: %0b, scl_sim: %0b, sda: %0b, sda_sim: %0b, uut.sda_reg: %0b, uut.sethiz: %0b",
          $time,
           test_index,
           uut.state_reg.name,
-           user_cnt_mod,
             user_cmd,
           wr_i2c_start,
           ready_flag,
