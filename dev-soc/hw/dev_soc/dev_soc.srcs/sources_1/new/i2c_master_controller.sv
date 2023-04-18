@@ -169,7 +169,7 @@ module i2c_master_controller
             sda_reg <= sda_next;
             scl_reg <= scl_next;
         end
-    end 
+    end
     
     /* determine the phases; */
     // this requires user to precomputer;
@@ -369,7 +369,7 @@ module i2c_master_controller
                 phase_data = 1'b1;
                 if(clk_cnt_reg == phase_quarter)
                 begin
-                    clk_cnt_reg = 0;
+                    clk_cnt_next = 0;
                     state_next = ST_DATA_04;
                     // do nothing since both data must remain;
                 end                
@@ -485,8 +485,8 @@ module i2c_master_controller
     
     
     */
-    assign condition_read_slave_data = (phase_data && (cmd_reg = CMD_RD) && (data_cnt_reg < 8));
-    assign condition_master_read_ack = (phase_data && (cmd_reg = CMD_WR) && (data_cnt_reg == 8));
+    assign condition_read_slave_data = (phase_data && (cmd_reg == CMD_RD) && (data_cnt_reg < 8));
+    assign condition_master_read_ack = (phase_data && (cmd_reg == CMD_WR) && (data_cnt_reg == 8));
     assign set_hiz = (condition_read_slave_data || condition_master_read_ack);
     
     // recall that sda and scl lines have a pulled up resistor;
