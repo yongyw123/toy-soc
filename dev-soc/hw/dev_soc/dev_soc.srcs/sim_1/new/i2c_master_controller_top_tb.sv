@@ -62,6 +62,7 @@ module i2c_master_controller_top_tb();
     logic debug_scl_sim;
     // fake sda; same reason as above;
     logic debug_sda_sim;
+    logic debug_sda_io; // this is assigned as the real sda but its type is output only;
         
     /* instantiation */
     i2c_master_controller uut(.*);      // uut;
@@ -89,7 +90,7 @@ module i2c_master_controller_top_tb();
     initial
     begin
         $monitor("cnt mod: %0d, uut.phase_quarter: %0d, uut.phase_half: %0d", user_cnt_mod, uut.phase_quarter, uut.phase_half);
-        $monitor("time: %0t, index: %0d, uut.state: %s, cmd: %0d, start: %0b, ready: %0b, done: %0b, ack: %0b, din: %0B, dout: %0B, scl: %0b, scl_sim: %0b, sda: %0b, sda_sim: %0b, uut.sda_reg: %0b, uut.sethiz: %0b",
+        $monitor("time: %0t, index: %0d, uut.state: %s, cmd: %0d, start: %0b, ready: %0b, done: %0b, ack: %0b, din: %0B, dout: %0B, scl: %0b, scl_sim: %0b, sda: %0b, sda_sim: %0b, sda_io: %0b, uut.sda_reg: %0b, uut.sethiz: %0b, uut.scl_next: %0b, uut.sda_next: %0b",
          $time,
           test_index,
           uut.state_reg.name,
@@ -104,8 +105,11 @@ module i2c_master_controller_top_tb();
           debug_scl_sim, 
             sda,
             debug_sda_sim,
+            debug_sda_io,
          uut.sda_reg,
-         uut.set_hiz   
+         uut.set_hiz,
+         uut.scl_next,
+         uut.sda_next   
          );
     end
 endmodule

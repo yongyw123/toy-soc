@@ -53,10 +53,10 @@ program i2c_master_controller_tb
     );
     
     localparam sys_freq = 100_000_000;  // 100MHz;
-    localparam scl_rate_candidate_01 = 10_000_000; // 10MHz;
-    localparam scl_rate_candidate_02 = 1_000_000; // 1MHz;
+    localparam scl_rate_candidate_01 = 2_500_000; // 2.5MHz;
+    //localparam scl_rate_candidate_02 = 250_000; // 1MHz;
     localparam scl_program_candidate_mod_01 =  sys_freq/(4*scl_rate_candidate_01) - 1;
-    localparam scl_program_candidate_mod_02 =  sys_freq/(4*scl_rate_candidate_01) - 1;
+    //localparam scl_program_candidate_mod_02 =  sys_freq/(4*scl_rate_candidate_01) - 1;
     
     // command constants;
     localparam CMD_START    = 3'b000;   // generate start condition;
@@ -76,7 +76,11 @@ program i2c_master_controller_tb
     user_cmd <= CMD_START;
     wr_i2c_start <= 1'b1;
     
-    #(100);
+    @(posedge clk);
+    user_cmd <= CMD_WR;
+    //wait(ready_flag == 1'b0);    // expect it to be working;
+    //wait(ready_flag == 1'b1);    // expect it to be eventually free;
+    #(5000);
     /*
     wait(done_flag == 1'b1);
     // set another rate;
