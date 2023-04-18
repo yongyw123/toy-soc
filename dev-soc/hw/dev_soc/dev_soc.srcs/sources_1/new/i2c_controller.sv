@@ -43,7 +43,7 @@ module i2c_master_controller
         
         /* i2c specific */
         // user input;
-        input logic [I2C_CLK_WIDTH-1:0] cnt_mod,    // counter modulus;
+        input logic [I2C_CLK_WIDTH-1:0] user_cnt_mod,    // counter modulus;
         input logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd,    // what command: stop, start,?
         input logic wr_i2c_start,                   // initiate the i2c master;
         input logic [I2C_DATA_BIT-1:0] din,             // i2c write data;
@@ -144,8 +144,10 @@ module i2c_master_controller
             tx_reg <= 0;
             rx_reg <= 0;
             data_cnt_reg <= 0;
-            sda_reg <= 0;
-            scl_reg <= 0;
+            
+            // both lines must be high tfor idle condition;
+            sda_reg <= 1'b1;    
+            scl_reg <= 1'b1;
         end
         
         else
@@ -156,12 +158,20 @@ module i2c_master_controller
             tx_reg <= tx_next;
             rx_reg <= rx_next;
             data_cnt_reg <= data_cnt_next;
+            
             sda_reg <= sda_next;
             scl_reg <= scl_next;
         end
     end 
     
-    // determine the phases;
+    /* determine the phases; */
+    // this requires user to precomputer;
+    assign phase_quarter = user_cnt_mod;    
+   
+   // phase_half = 2*phase_quarter;
+   // shift left == multiply two;
+   // these vakues are unsigned; so logical or arithmetic shift should not make a difference;
+    assign phase_half = (phase_quarter << 1); 
     
     // fsm;
     always_comb
@@ -440,7 +450,12 @@ module i2c_master_controller
     end
     
     // output;
-        
+    assign dout = rx_reg[8:1];
+    assign ack = rx_reg[0];
+    assign nack = din[0];
+    
+    /* logic to determine sda and scl lines */
+    
     
      
     
