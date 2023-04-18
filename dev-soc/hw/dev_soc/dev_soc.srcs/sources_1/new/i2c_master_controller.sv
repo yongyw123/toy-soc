@@ -132,7 +132,11 @@ module i2c_master_controller
     logic [I2C_TOTAL_CMD_NUM-1:0] cmd_reg, cmd_next;    // to store the user command;
     logic [TOTAL_BIT_INC_ACK_OR_NACK-1:0] tx_reg, tx_next;   // master write to slave;
     logic [TOTAL_BIT_INC_ACK_OR_NACK-1:0] rx_reg, rx_next;  // slave to master;
-    logic [DATA_BIT_W-1:0]  data_cnt_reg, data_cnt_next;   // track the number of data bits
+    
+    //logic [DATA_BIT_W-1:0]  data_cnt_reg, data_cnt_next;   // track the number of data bits
+    // track the number of data bits; need to include the ack/nack bit!!
+    logic [3:0]  data_cnt_reg, data_cnt_next;  
+    
     logic sda_reg, sda_next;    // to control sda line;
     logic scl_reg, scl_next;    // to control scl line;
     
