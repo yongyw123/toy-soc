@@ -33,7 +33,7 @@ program i2c_master_controller_tb
         
         // i2c main lines;
         input logic scl,        // test stimulus based on i2c clock; not the system clock;
-        output logic sda,       
+        inout logic sda,       
         // scl is either HiZ or Zero; so created anothe replicate of scl that is either high or low (well defined);
         input logic debug_scl_sim, 
         

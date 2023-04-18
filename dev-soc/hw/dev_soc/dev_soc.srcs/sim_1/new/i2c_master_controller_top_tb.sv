@@ -95,7 +95,7 @@ module i2c_master_controller_top_tb();
           test_index,
           uut.state_reg.name,
             user_cmd,
-          wr_i2c_start,
+          wr_i2c,
           ready_flag,
           done_flag,
           ack,
