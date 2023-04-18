@@ -43,10 +43,10 @@ module i2c_master_controller
         
         /* i2c specific */
         // user input;
-        input logic [I2C_CLK_WIDTH-1:0] user_cnt_mod,    // counter modulus;
-        input logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd,    // what command: stop, start,?
+        input logic [I2C_CLK_WIDTH-1:0] user_cnt_mod, // counter modulus to set the i2c scl rate;
+        input logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd, // what command: stop, start,?
         input logic wr_i2c_start,                   // initiate the i2c master;
-        input logic [I2C_DATA_BIT-1:0] din,             // i2c write data;
+        input logic [I2C_DATA_BIT-1:0] din,         // i2c write data;
         
         /* user output; */
         output logic ready_flag,    // idle;
