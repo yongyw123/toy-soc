@@ -285,6 +285,13 @@ module i2c_master_controller
                 begin
                     // store the command
                     // so that mainly, write or read could be distinguished;
+                    /*
+                    !!! IMPORTANT !!!
+                    here, the user_cmd will only get??
+                    ???
+                    */
+                    
+                    
                     cmd_next = user_cmd;
                     
                     // reset for the next phase;                    

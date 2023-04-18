@@ -43,7 +43,8 @@ program i2c_master_controller_tb
         
         // test stimulus input for the uut;
         output logic [I2C_CLK_WIDTH-1:0] user_cnt_mod,    // counter modulus;
-        output logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd,    // what command: stop, start,?
+        //output logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd,    // what command: stop, start,?
+        output logic [2:0] user_cmd,    // what command: stop, start,?
         output logic wr_i2c,                   // initiate the i2c master;
         output logic [I2C_DATA_BIT-1:0] din,             // i2c write data;
         
@@ -160,8 +161,9 @@ program i2c_master_controller_tb
     /* part 02: read from the slave */
     // simulate slave data for the master to read;
     // use scl as the dictator;
-    @(posedge clk);
     $display("master to read from slave ---------------");
+    @(posedge clk);
+    
     user_cmd <= CMD_RD;
     din <= 0;   // lsb is the master ack bit for the slave;
     
