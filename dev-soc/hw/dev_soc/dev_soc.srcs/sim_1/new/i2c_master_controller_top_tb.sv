@@ -57,9 +57,13 @@ module i2c_master_controller_top_tb();
     
     // sim var;
     logic [31:0] test_index;
-    
+    logic [I2C_DATA_BIT-1:0] slave_data_write;
+    // scl is either HiZ or Zero; so created anothe replicate of scl that is either high or low (well defined);
+    logic debug_scl_sim; 
+        
     /* instantiation */
-    i2c_master_controller_tb tb(.*);
+    i2c_master_controller uut(.*);      // uut;
+    i2c_master_controller_tb tb(.*);    // test stimulus;
     
     /* simulate clk */
      always
@@ -82,6 +86,22 @@ module i2c_master_controller_top_tb();
     /* monitoring */
     initial
     begin
-        $monitor("time: %0t, index: %0d, ", $time, test_index, );
+        $monitor("time: %0t, index: %0d, uut.state: %s, mod: %0d, cmd: %0d, start: %0b, ready: %0b, done: %0b, ack: %0b, din: %0B, dout: %0B, scl: %0b, scl_sim: %0b, sda: %0b, uut.sda_reg: %0b",
+         $time,
+          test_index,
+          uut.state_reg.name,
+           user_cnt_mod,
+            user_cmd,
+          wr_i2c_start,
+          ready_flag,
+          done_flag,
+          ack,
+          din,
+          dout,
+          scl,
+          debug_scl_sim, 
+            sda,
+         uut.sda_reg   
+         );
     end
 endmodule
