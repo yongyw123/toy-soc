@@ -50,6 +50,7 @@ program i2c_master_controller_tb
         // sim var;
         output logic [31:0] test_index,
         output logic [I2C_DATA_BIT-1:0] slave_data_write
+        
     );
     
     localparam sys_freq = 100_000_000;  // 100MHz;
@@ -66,33 +67,46 @@ program i2c_master_controller_tb
     localparam CMD_STOP     = 3'b011;   // generate stop condition;
     localparam CMD_REPEAT   = 3'b100;   // generate repeated_start condition;
     
+    logic [31:0] cnt_scl;
+    logic set_slave_ack;
+    
+    assign sda = (set_slave_ack) ? 1'b0: 1'bz;
     
     initial begin
+    set_slave_ack = 1'b0;
+    cnt_scl = 0;
     
     $display("test starts");
-    $display("test 01, check i2c scl rate program--------");
+    $display("-----------");
+    $display("test 01:");
+    $display("1. check i2c scl rate");
+    $display("2. master write");
+    $display("3. master read slave ack");
+    $display("-----------");
     $display("set rate: 25 MHz");
     @(posedge clk);
     user_cnt_mod <= scl_program_candidate_mod_01;
     user_cmd <= CMD_START;
     wr_i2c <= 1'b1;
+    // make sure the din lsb is high (nack);
+    // this is to check for slave ack bit;
+    din <= {8'($random), 1'b1};
     
     @(posedge clk);
     user_cmd <= CMD_WR;
     
+    // simulate slave ack for the ninth bit;
+    // use scl as the dictator;
+    for(int i = 0; i < 9; i++) begin
+        @(negedge scl);
+        cnt_scl++;
+    end
+    set_slave_ack = 1'b1;
+        
     wait(done_flag == 1'b1);    // wait for done then stop the communication;
     user_cmd <= CMD_STOP;
     
     #(5000);
-    /*
-    wait(done_flag == 1'b1);
-    // set another rate;
-    $display("set rate: 1.0 MHz");
-    @(posedge clk);
-    user_cnt_mod <= scl_program_candidate_mod_01;
-    user_cmd <= CMD_START;
-    wr_i2c_start <= 1'b1;
-    */
     
     #(10);
     $display("test ends");
