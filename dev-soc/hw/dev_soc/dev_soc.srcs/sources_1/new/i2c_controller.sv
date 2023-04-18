@@ -62,6 +62,8 @@ module i2c_master_controller
     
     // misc constants;
     localparam DATA_BIT_W = $clog2(I2C_DATA_BIT);
+    localparam TOTAL_BIT = I2C_DATA_BIT + 1;    // include ACK
+    localparam DUMMY_BIT = 1'b0;    // for placeholder;
     
     // command constants;
     localparam CMD_START    = 3'b000;   // generate start condition;
@@ -82,6 +84,7 @@ module i2c_master_controller
         ST_HOLD,
         
         // start phases 
+        //to generate a start condition;
         ST_START_01,
         ST_START_02,
         
@@ -95,7 +98,12 @@ module i2c_master_controller
         ST_STOP_01,
         ST_STOP_02,
         
-        // end condition;
+        /*
+         after finishing all data bits;
+         there is a hold period where
+         both scl and sda must be low for 
+         a quarter of the scl clock period;
+       */
         ST_DATA_END,
         
         // repeat start condition
@@ -152,6 +160,8 @@ module i2c_master_controller
             scl_reg <= scl_next;
         end
     end 
+    
+    // determine the phases;
     
     // fsm;
     always_comb
@@ -276,18 +286,156 @@ module i2c_master_controller
                 end
             end
             
+            /* data phases
+            
+                each bit will go through all four data phase;
+                so, only update the data and tx reg at the end;
+                
+                master tx bit has to start from phase 01;
+                and hold until phase 02;
+                
+                slave rx sampling starts at phase 02;
+                
+            */
+            
+            // start master tx data prep;
             ST_DATA_01:
             begin
                 // master should set up the tx data by now;
                 // when the scl is still low;
-                sda_next = tx_reg[8];
+                sda_next = tx_reg[8];   // msb;
                 scl_next = 1'b0;
                 // indicate
                 phase_data = 1'b1;
                 // each data phase spends a quarter of the scl clock period;
-                
+                if(clk_cnt_reg == phase_quarter)
+                begin
+                    state_next = ST_DATA_02;
+                    clk_cnt_next = 0;
+                end   
+            end
             
+            // start slave rx sampling;
+            ST_DATA_02:
+            begin
+                // master should set up the tx data by now;
+                sda_next = tx_reg[8];   // msb;
+                scl_next = 1'b1;        // scl should be high at this phase;
+                // indicate;
+                phase_data = 1'b1;
+                if(clk_cnt_reg == phase_quarter)
+                begin
+                    clk_cnt_next = 0;
+                    state_next = ST_DATA_03;
+                    // shift in the sda line;
+                    // reminder: output logic should set the sda line to high Z accordingly;
+                    // reminder: hiZ when user command is read from slave;
+                    //              or master receiving ack bit from the slave;
+                    rx_next = {rx_reg[7:0], sda};                    
+                end    
             end 
+            
+            // hold slave rx data and master tx data;
+            ST_DATA_03:
+            begin
+                // master should set up the tx data by now;
+                sda_next = tx_reg[8];   // msb;
+                scl_next = 1'b1;        // scl should be high at this phase;
+                // indicate;
+                phase_data = 1'b1;
+                if(clk_cnt_reg == phase_quarter)
+                begin
+                    clk_cnt_reg = 0;
+                    state_next = ST_DATA_04;
+                    // do nothing since both data must remain;
+                end                
+            end
+            
+            // at the end of the data phase per bit;
+            ST_DATA_04:
+                 begin
+                    // master should set up the tx data by now;
+                    sda_next = tx_reg[8];   // msb;
+                    scl_next = 1'b1;        // scl should be high at this phase;
+                    // indicate;
+                    phase_data = 1'b1;
+                    if(clk_cnt_reg == phase_quarter)
+                    begin
+                        clk_cnt_next = 0;
+                        // check if all data bits (wuthin a byte) has been processed;
+                        // include the ack bit as well;
+                        // otherwise, shift for the next master tx data;
+                        if(data_cnt_reg == TOTAL_BIT-1)
+                        begin
+                            state_next = ST_DATA_END;
+                            done_flag = 1'b1;   // all bits inc ack are done processed;
+                        end
+                        else
+                        // continue running the data bit throgh all the data phases;
+                        begin
+                            state_next = ST_DATA_01;
+                            data_cnt_next = data_cnt_reg + 1;
+                            // shift out for the next master tx;
+                            tx_next = {tx_reg[7:0], DUMMY_BIT};
+                        end
+                    end
+                 end
+           // after finishing all data bits;
+            // there is a hold period where
+            // both scl and sda must be low for a quarter of sclk clk period;
+            ST_DATA_END:
+            begin
+                sda_next = 1'b0;
+                scl_next = 1'b1;
+                if(clk_cnt_reg == phase_quarter)
+                begin
+                    state_next = ST_HOLD;
+                    clk_cnt_next = 0;
+                end
+            end
+                   
+           // repeat restart;
+           // by i2c specs; repeat_satrt is functionally identical to start;
+           // literally
+           ST_REPEAT:
+           begin
+                // by above, scl and sda must be high for half period;
+                // to have the same initial conditions as start state;
+                scl_next = 1'b1;
+                sda_next = 1'b1;
+                if(clk_cnt_reg == phase_half)
+                begin
+                    state_next = ST_START_01;
+                    clk_cnt_next = 0;
+                end
+           end  
+          
+            // stop phases;
+            // similar to start phases;
+            // just different transition to generate a stop condition;
+            ST_STOP_01:
+            begin
+                // at this phase; scl is high; sda is low;
+                sda_next = 1'b0;
+                scl_next = 1'b1;
+                if(clk_cnt_reg == phase_half)
+                begin
+                    clk_cnt_next = 0;
+                    state_next = ST_STOP_02;
+                end
+            end
+            
+            // here, sda low to high transit during scl high to generate a stop condition;
+            ST_STOP_02:
+            begin
+                sda_next = 1'b1;
+                scl_next = 1'b1;
+                if(clk_cnt_reg == phase_half)
+                begin
+                    clk_cnt_next = 0;
+                    state_next = ST_IDLE;
+                end
+            end
         endcase
     end
     
