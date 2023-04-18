@@ -92,7 +92,7 @@ module i2c_master_controller_top_tb();
     initial
     begin
         $monitor("cnt mod: %0d, uut.phase_quarter: %0d, uut.phase_half: %0d", user_cnt_mod, uut.phase_quarter, uut.phase_half);
-        $monitor("time: %0t, index: %0d, uut.state: %s, cmd: %0d, start: %0b, ready: %0b, done: %0b, ack: %0b, din: %0B, dout: %0B, scl: %0b, scl_sim: %0b, sda: %0b, sda_sim: %0b, uut.sda_reg: %0b, uut.sethiz: %0b, uut.scl_next: %0b, uut.sda_next: %0b, uut.datacnt: 0",
+        $monitor("time: %0t, index: %0d, uut.state: %s, cmd: %0d, start: %0b, ready: %0b, done: %0b, ack: %0b, din: %0B, dout: %0B, scl: %0b, scl_sim: %0b, sda: %0b, sda_sim: %0b, uut.sda_reg: %0b, uut.sethiz: %0b, uut.scl_next: %0b, uut.sda_next: %0b, uut.datacnt: %0d, uut.con_rd_slave: %0b, uut.wr_master: %0b, uut.phase: %0b, uut.cmd_reg: %0d, cmd_next: %0d",
          $time,
           test_index,
           uut.state_reg.name,
@@ -111,7 +111,13 @@ module i2c_master_controller_top_tb();
          uut.set_hiz,
          uut.scl_next,
          uut.sda_next,
-         uut.data_cnt_reg   
+         uut.data_cnt_reg,
+         uut.condition_read_slave_data,
+         uut.condition_master_read_ack,
+         uut.phase_data,
+         uut.cmd_reg,
+         uut.cmd_next
+         
          );
     end
 endmodule

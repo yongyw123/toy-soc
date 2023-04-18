@@ -69,11 +69,15 @@ program i2c_master_controller_tb
     
     logic [31:0] cnt_scl;
     logic set_slave_ack;
+    logic set_slave_wr_data;
     
-    assign sda = (set_slave_ack) ? 1'b0: 1'bz;
+    /*assign sda = (set_slave_ack) ? 1'b0 : 
+                 (set_slave_wr_data) ? $random  : 1'bz;
+    */
     
     initial begin
     set_slave_ack = 1'b0;
+    set_slave_wr_data = 1'b0;
     cnt_scl = 0;
     
     $display("test starts");
@@ -85,28 +89,101 @@ program i2c_master_controller_tb
     $display("-----------");
     $display("set rate: 25 MHz");
     @(posedge clk);
+    test_index <= 0;
     user_cnt_mod <= scl_program_candidate_mod_01;
     user_cmd <= CMD_START;
     wr_i2c <= 1'b1;
-    // make sure the din lsb is high (nack);
-    // this is to check for slave ack bit;
-    din <= {8'($random), 1'b1};
+    // master write something;
+    din <= {7'($random), 1'b0};   // to isolate from the ack from the slave later;
     
     @(posedge clk);
     user_cmd <= CMD_WR;
     
     // simulate slave ack for the ninth bit;
     // use scl as the dictator;
-    for(int i = 0; i < 9; i++) begin
+    for(int i = 0; i < 8; i++) begin
         @(negedge scl);
         cnt_scl++;
     end
+    @(negedge scl);
     set_slave_ack = 1'b1;
         
     wait(done_flag == 1'b1);    // wait for done then stop the communication;
     user_cmd <= CMD_STOP;
+    set_slave_ack = 1'b0;
     
-    #(5000);
+    wait(ready_flag == 1'b1);    
+    wait(ready_flag == 1'b0);
+    wait(ready_flag == 1'b1);        
+    
+    /* 
+    1. first master write to the slave;
+    2. followed by a read from the slave;
+    3. the master send ack to the slave;
+    4. followed by another read from the slave;
+    5. master sends a nack to terminate the read;
+    6. send a stop signal;
+    */
+    
+    
+    $display("-----------");
+    $display("test 02:");
+    $display("-----------");
+    
+    /* first part, master identofies the slave */
+    @(posedge clk);
+    test_index <= 1;
+    user_cnt_mod <= scl_program_candidate_mod_01;
+    user_cmd <= CMD_START;
+    wr_i2c <= 1'b1;
+    // master write something;
+    din <= {7'($random), 1'b0};   // to isolate from the ack from the slave later;
+    
+    @(posedge clk);
+    user_cmd <= CMD_WR;
+    
+    // simulate slave ack for the ninth bit;
+    // use scl as the dictator;
+    for(int i = 0; i < 8; i++) begin
+        @(negedge scl);
+        cnt_scl++;
+    end
+    @(negedge scl);
+    set_slave_ack = 1'b1;
+        
+    wait(done_flag == 1'b1);    
+    set_slave_ack = 1'b0;
+    
+    wait(ready_flag == 1'b1);    
+    @(posedge clk);
+    
+    /* part 02: read from the slave */
+    // simulate slave data for the master to read;
+    // use scl as the dictator;
+    @(posedge clk);
+    $display("master to read from slave ---------------");
+    user_cmd <= CMD_RD;
+    din <= 0;   // lsb is the master ack bit for the slave;
+    
+    /*
+    for(int i = 0; i < 8; i++) begin
+        @(negedge scl);
+        set_slave_wr_data = 1'b1;
+    end
+    */
+    @(negedge scl);
+    set_slave_wr_data = 1'b0;
+    
+    
+
+    wait(done_flag == 1'b1);    // wait for done then stop the communication;
+    user_cmd <= CMD_STOP;
+    set_slave_ack = 1'b0;
+    
+    wait(ready_flag == 1'b1);    
+    wait(ready_flag == 1'b0);
+    wait(ready_flag == 1'b1);        
+    
     
     #(10);
     $display("test ends");

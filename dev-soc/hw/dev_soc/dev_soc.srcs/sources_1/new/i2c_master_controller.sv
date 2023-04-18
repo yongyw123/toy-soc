@@ -44,7 +44,8 @@ module i2c_master_controller
         /* i2c specific */
         // user input;
         input logic [I2C_CLK_WIDTH-1:0] user_cnt_mod, // counter modulus to set the i2c scl rate;
-        input logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd, // what command: stop, start,?
+        //input logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd, // what command: stop, start,?
+        input logic [2:0] user_cmd, // what command: stop, start,?
         input logic wr_i2c,                   // processor requests a write;
         input logic [I2C_DATA_BIT-1:0] din,         // i2c write data;
         
@@ -129,7 +130,8 @@ module i2c_master_controller
     
     // registers;
     logic [I2C_CLK_WIDTH-1:0] clk_cnt_reg, clk_cnt_next;    // scl clock counter;
-    logic [I2C_TOTAL_CMD_NUM-1:0] cmd_reg, cmd_next;    // to store the user command;
+    //logic [I2C_TOTAL_CMD_NUM-1:0] cmd_reg, cmd_next;    // to store the user command;
+    logic [2:0] cmd_reg, cmd_next;    // to store the user command;
     logic [TOTAL_BIT_INC_ACK_OR_NACK-1:0] tx_reg, tx_next;   // master write to slave;
     logic [TOTAL_BIT_INC_ACK_OR_NACK-1:0] rx_reg, rx_next;  // slave to master;
     
@@ -500,8 +502,11 @@ module i2c_master_controller
     
     */
     assign condition_read_slave_data = (phase_data && (cmd_reg == CMD_RD) && (data_cnt_reg < 8));
-    assign condition_master_read_ack = (phase_data && (cmd_reg == CMD_WR) && (data_cnt_reg == 8));
-    assign set_hiz = (condition_read_slave_data || condition_master_read_ack);
+    //assign condition_read_slave_data = 1'b1; // for debugging;
+    //assign condition_master_read_ack = (phase_data && (cmd_reg == CMD_WR) && (data_cnt_reg == 8));
+    assign condition_master_read_ack = (phase_data && (cmd_reg == 3'b001) && (data_cnt_reg == 8));
+    //assign set_hiz = (condition_read_slave_data || condition_master_read_ack);
+    assign set_hiz = ((phase_data && (cmd_reg == 3'b010) && (data_cnt_reg < 8)) || (phase_data && (cmd_reg == 3'b001) && (data_cnt_reg == 8)));
     
     // recall that sda and scl lines have a pulled up resistor;
     // so at high impedance, it is pulled to high as well;
