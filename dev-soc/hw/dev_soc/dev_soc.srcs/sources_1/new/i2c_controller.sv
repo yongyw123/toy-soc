@@ -44,7 +44,7 @@ module i2c_master_controller
         /* i2c specific */
         // user input;
         input logic [I2C_CLK_WIDTH-1:0] cnt_mod,    // counter modulus;
-        input logic [I2C_TOTAL_CMD_NUM-1:0] cmd,    // what command: stop, start,?
+        input logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd,    // what command: stop, start,?
         input logic wr_i2c_start,                   // initiate the i2c master;
         input logic [I2C_DATA_BIT-1:0] din,             // i2c write data;
         
@@ -99,7 +99,7 @@ module i2c_master_controller
         ST_DATA_END,
         
         // repeat start condition
-        ST_RESTART
+        ST_REPEAT
     }state_type;
     
     /* signals; */
@@ -156,14 +156,138 @@ module i2c_master_controller
     // fsm;
     always_comb
     begin
-        // remain as it is until told otherwise;
+        // in all states followed clock counter will be incremented;
+        // so might as well do it here;
+        clk_cnt_next = clk_cnt_reg + 1;
         
+        // remain as it is until told otherwise;
+        state_next = state_reg;
+        cmd_next = cmd_reg;
+        tx_next = tx_reg;
+        rx_next = rx_reg;
+        data_cnt_next = data_cnt_reg;
+        sda_next = sda_reg;
+        scl_next = scl_reg;
+    
+        /* i2c lines;
+        recall that i2c lines must have pull resistor;
+        so, in the case where we set them to hiz;
+        it will be pull up to high, seen by both master and
+        slave;
+        
+        also recall, if both lines are high, then i2c is idle;
+        so, make this explicit
+        */
+        scl_next = 1'b1;
+        sda_next = 1'b1;
+        
+        // output status;
+        ready_flag = 1'b0;   // unless told otherwise;
+        done_flag = 1'b0;
+        
+        // start the main machinery;
         case (state_reg)
-            ST_IDLE: begin
+            ST_IDLE:
+            begin
+                ready_flag = 1'b1;
+                if(wr_i2c_start && user_cmd == CMD_START) 
+                begin
+                    state_next = ST_START_01;
+                end
             end
-            ST_START_01: begin
             
+            ST_START_01:
+            begin
+                // note there, scl is high;
+                // so a low sda means a start condition;
+                scl_next = 1'b1;
+                sda_next = 1'b0;    
+                // by the doc, start has two phases;
+                // each phase spends half of the scl clk period;
+                if(clk_cnt_reg == phase_half)
+                begin
+                    state_next = ST_START_02;
+                    // reset the counter;
+                    clk_cnt_next = 0;
+                end
             end
+            
+            ST_START_02:
+            begin
+               // second phase of the start;
+               // in this phase, both lines are low;
+                scl_next = 1'b0;
+                sda_next = 1'b0;
+                // check if the start phase expires;
+                if(clk_cnt_reg == phase_half)
+                begin
+                    // by i2c spec;
+                    // there is a hold period
+                    // before processing the data, repeat or stop;
+                    state_next = ST_HOLD;
+                    clk_cnt_next = 0;
+                end
+            end
+            
+            ST_HOLD:
+            begin
+                // hold state is defined when both signals
+                // to be low just after start state OR
+                // just prior to entering stop state;
+                ready_flag = 1'b1;  // hold state is not doing any meaningful stuff;
+                sda_next = 1'b0;
+                scl_next = 1'b0;
+                // check whether the user wants to start a i2c communication;
+                if(wr_i2c_start)
+                begin
+                    // store the command
+                    // so that mainly, write or read could be distinguished;
+                    cmd_next = user_cmd;
+                    
+                    // reset for the next phase;                    
+                    clk_cnt_next = 0;
+                    
+                    // determine what the user wnats;
+                    case(user_cmd)
+                        // read and write are processed simultaneously in the data phases;
+                        CMD_WR:
+                        begin
+                            state_next = ST_DATA_01;
+                            data_cnt_next = 0;  // prepare to start counting;
+                            tx_next = {din, nack};
+                        end
+                        CMD_RD:
+                        begin
+                            state_next = ST_DATA_01;
+                            data_cnt_next = 0;  // prepare to start counting;
+                            tx_next = {din, nack};
+                        end
+                        
+                        CMD_REPEAT:
+                            state_next = ST_REPEAT;
+                        CMD_START:
+                            state_next = ST_REPEAT;
+                        
+                        CMD_STOP:
+                            state_next = ST_STOP_01;
+                        
+                        default: state_next = ST_DATA_01;
+                    endcase 
+                end
+            end
+            
+            ST_DATA_01:
+            begin
+                // master should set up the tx data by now;
+                // when the scl is still low;
+                sda_next = tx_reg[8];
+                scl_next = 1'b0;
+                // indicate
+                phase_data = 1'b1;
+                // each data phase spends a quarter of the scl clock period;
+                
+            
+            end 
         endcase
     end
     
