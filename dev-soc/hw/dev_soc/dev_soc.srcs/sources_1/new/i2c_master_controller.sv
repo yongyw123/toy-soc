@@ -224,6 +224,7 @@ module i2c_master_controller
                 if(wr_i2c_start && user_cmd == CMD_START) 
                 begin
                     state_next = ST_START_01;
+                    clk_cnt_next = 0;
                 end
             end
             
