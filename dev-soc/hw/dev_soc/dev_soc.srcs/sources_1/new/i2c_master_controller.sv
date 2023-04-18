@@ -64,7 +64,8 @@ module i2c_master_controller
         
         // debugging;
         output debug_scl_sim,
-        output debug_sda_sim
+        output debug_sda_sim,
+        output debug_sda_io
     );
     
     // misc constants;
@@ -119,7 +120,6 @@ module i2c_master_controller
     
     /* signals; */
     state_type state_reg, state_next;
-    logic [I2C_CLK_WIDTH-1:0] clk_cnt_reg, clk_cnt_next;    // scl clock counter;
 
     // scl clock period divided to the four (quarter) phases of the data; 
     logic [I2C_CLK_WIDTH-1:0] phase_quarter;     
@@ -128,6 +128,7 @@ module i2c_master_controller
     logic [I2C_CLK_WIDTH-1:0] phase_half;
     
     // registers;
+    logic [I2C_CLK_WIDTH-1:0] clk_cnt_reg, clk_cnt_next;    // scl clock counter;
     logic [I2C_TOTAL_CMD_NUM-1:0] cmd_reg, cmd_next;    // to store the user command;
     logic [TOTAL_BIT_INC_ACK_OR_NACK-1:0] tx_reg, tx_next;   // master write to slave;
     logic [TOTAL_BIT_INC_ACK_OR_NACK-1:0] rx_reg, rx_next;  // slave to master;
@@ -255,6 +256,7 @@ module i2c_master_controller
                 sda_next = 1'b0;
                 // check if the start phase expires;
                 if(clk_cnt_reg == phase_half)
+                //if(clk_cnt_reg == phase_quarter)
                 begin
                     // by i2c spec;
                     // there is a hold period
@@ -388,7 +390,7 @@ module i2c_master_controller
                  begin
                     // master should keep on holding the tx data;
                     sda_next = tx_reg[8];   // msb;
-                    scl_next = 1'b1;        // scl should be high at this phase;
+                    scl_next = 1'b0;        // scl should be low at this phase;
                     // indicate;
                     phase_data = 1'b1;
                     if(clk_cnt_reg == phase_quarter)
@@ -418,7 +420,7 @@ module i2c_master_controller
             ST_DATA_END:
             begin
                 sda_next = 1'b0;
-                scl_next = 1'b1;
+                scl_next = 1'b0;
                 if(clk_cnt_reg == phase_quarter)
                 begin
                     state_next = ST_HOLD;
@@ -501,7 +503,9 @@ module i2c_master_controller
     // so at high impedance, it is pulled to high as well;
     // so either the master is in read mode or the master is intended to write a HIGH;
     assign sda = (set_hiz || sda_reg) ? 1'bz : 1'b0;
-    assign debug_sda_sim = (set_hiz || sda_reg) ? 1'b1 : 1'b0;   // for simulation purpose;
+    // for simulation purpose;
+    assign debug_sda_sim = (set_hiz || sda_reg) ? 1'b1 : 1'b0;   
+    assign debug_sda_io = sda;
     
     // same reasoning for scl due to th epull up resistor;
     assign scl = (scl_reg) ? 1'bz : 1'b0;
