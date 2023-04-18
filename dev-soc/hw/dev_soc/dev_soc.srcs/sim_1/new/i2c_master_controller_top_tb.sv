@@ -55,8 +55,8 @@ module i2c_master_controller_top_tb();
     tri scl;
     tri sda;
     
-    // sim varl
-    logic [31:0] test;
+    // sim var;
+    logic [31:0] test_index;
     
     /* instantiation */
     i2c_master_controller_tb tb(.*);
@@ -82,6 +82,6 @@ module i2c_master_controller_top_tb();
     /* monitoring */
     initial
     begin
-        $monitor("test: %0D", test);
+        $monitor("time: %0t, index: %0d, ", $time, test_index, );
     end
 endmodule

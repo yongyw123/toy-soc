@@ -21,19 +21,57 @@
 
 
 program i2c_master_controller_tb
+    #(parameter
+        I2C_CLK_WIDTH = 32,       // for i2c clock counter;
+        I2C_TOTAL_CMD_NUM = 3,   // number of i2c command: start, stop, repeat_start etc..?
+        I2C_DATA_BIT = 8
+     )
+    
     (
-        input logic clk,
-        output logic [31:0] test
+        
+        input clk,  // system clock;
+        
+        // i2c main lines;
+        input logic scl,        // test stimulus based on i2c clock; not the system clock;
+        output logic sda,       
+        
+        // status output from the uyt;
+        input done_flag,
+        input ready_flag,
+        
+        // test stimulus input for the uut;
+        output logic [I2C_CLK_WIDTH-1:0] user_cnt_mod,    // counter modulus;
+        output logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd,    // what command: stop, start,?
+        output logic wr_i2c_start,                   // initiate the i2c master;
+        output logic [I2C_DATA_BIT-1:0] din,             // i2c write data;
+        
+        // sim var;
+        output logic [31:0] test_index
     );
     
-    initial begin
-    test = 0;   
-    $display("test starts");
-    for(int i = 0; i < 10; i++) begin
+    localparam sys_freq = 100_000_000;  // 100MHz;
+    localparam scl_rate_candidate_01 = 10_000_000; // 10MHz;
+    localparam scl_rate_candidate_02 = 1_000_000; // 1MHz;
+    localparam scl_program_candidate_mod_01 =  sys_freq/(4*scl_rate_candidate_01) - 1;
+    localparam scl_program_candidate_mod_02 =  sys_freq/(4*scl_rate_candidate_01) - 1;
     
-        @(posedge clk);
-        test++;
-    end
+    
+    initial begin
+    
+    $display("test starts");
+    $display("test 01, check i2c scl rate program--------");
+    $display("set rate: 10.0 MHz");
+    @(posedge clk);
+    user_cnt_mod = scl_program_candidate_mod_01;
+    wr_i2c_start = 1'b1;
+    
+    wait(done_flag == 1'b1);
+    // set another rate;
+    $display("set rate: 1.0 MHz");
+    @(posedge clk);
+    user_cnt_mod = scl_program_candidate_mod_01;
+    wr_i2c_start = 1'b1;
+    
     
     #(10);
     $display("test ends");
