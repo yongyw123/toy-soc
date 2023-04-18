@@ -42,7 +42,7 @@ module i2c_master_controller_top_tb();
     // input;
     logic [I2C_CLK_WIDTH-1:0] user_cnt_mod;    // counter modulus;
     logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd;    // what command: stop, start,?
-    logic wr_i2c_start;                // initiate the i2c master;
+    logic wr_i2c;                // initiate the i2c master;
     logic [I2C_DATA_BIT-1:0] din;             // i2c write data;
     
     // output;
@@ -90,7 +90,7 @@ module i2c_master_controller_top_tb();
     initial
     begin
         $monitor("cnt mod: %0d, uut.phase_quarter: %0d, uut.phase_half: %0d", user_cnt_mod, uut.phase_quarter, uut.phase_half);
-        $monitor("time: %0t, index: %0d, uut.state: %s, cmd: %0d, start: %0b, ready: %0b, done: %0b, ack: %0b, din: %0B, dout: %0B, scl: %0b, scl_sim: %0b, sda: %0b, sda_sim: %0b, sda_io: %0b, uut.sda_reg: %0b, uut.sethiz: %0b, uut.scl_next: %0b, uut.sda_next: %0b",
+        $monitor("time: %0t, index: %0d, uut.state: %s, cmd: %0d, start: %0b, ready: %0b, done: %0b, ack: %0b, din: %0B, dout: %0B, scl: %0b, scl_sim: %0b, sda: %0b, sda_sim: %0b, sda_io: %0b, uut.sda_reg: %0b, uut.sethiz: %0b, uut.scl_next: %0b, uut.sda_next: %0b, uut.datacnt: 0",
          $time,
           test_index,
           uut.state_reg.name,
@@ -109,7 +109,8 @@ module i2c_master_controller_top_tb();
          uut.sda_reg,
          uut.set_hiz,
          uut.scl_next,
-         uut.sda_next   
+         uut.sda_next,
+         uut.data_cnt_reg   
          );
     end
 endmodule

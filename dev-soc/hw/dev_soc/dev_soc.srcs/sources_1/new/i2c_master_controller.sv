@@ -45,7 +45,7 @@ module i2c_master_controller
         // user input;
         input logic [I2C_CLK_WIDTH-1:0] user_cnt_mod, // counter modulus to set the i2c scl rate;
         input logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd, // what command: stop, start,?
-        input logic wr_i2c_start,                   // initiate the i2c master;
+        input logic wr_i2c,                   // processor requests a write;
         input logic [I2C_DATA_BIT-1:0] din,         // i2c write data;
         
         /* user output; */
@@ -229,7 +229,7 @@ module i2c_master_controller
             ST_IDLE:
             begin
                 ready_flag = 1'b1;
-                if(wr_i2c_start && user_cmd == CMD_START) 
+                if(wr_i2c && user_cmd == CMD_START) 
                 begin
                     state_next = ST_START_01;
                     clk_cnt_next = 0;
@@ -279,7 +279,7 @@ module i2c_master_controller
                 sda_next = 1'b0;
                 scl_next = 1'b0;
                 // check whether the user wants to start a i2c communication;
-                if(wr_i2c_start)
+                if(wr_i2c)
                 begin
                     // store the command
                     // so that mainly, write or read could be distinguished;

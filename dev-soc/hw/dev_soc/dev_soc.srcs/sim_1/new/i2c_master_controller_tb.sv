@@ -44,7 +44,7 @@ program i2c_master_controller_tb
         // test stimulus input for the uut;
         output logic [I2C_CLK_WIDTH-1:0] user_cnt_mod,    // counter modulus;
         output logic [I2C_TOTAL_CMD_NUM-1:0] user_cmd,    // what command: stop, start,?
-        output logic wr_i2c_start,                   // initiate the i2c master;
+        output logic wr_i2c,                   // initiate the i2c master;
         output logic [I2C_DATA_BIT-1:0] din,             // i2c write data;
         
         // sim var;
@@ -53,9 +53,10 @@ program i2c_master_controller_tb
     );
     
     localparam sys_freq = 100_000_000;  // 100MHz;
-    localparam scl_rate_candidate_01 = 2_500_000; // 2.5MHz;
-    //localparam scl_rate_candidate_02 = 250_000; // 1MHz;
-    localparam scl_program_candidate_mod_01 =  sys_freq/(4*scl_rate_candidate_01) - 1;
+    localparam scl_rate_candidate_01 = 25_000_000; // 25 MHz;
+    //localparam scl_rate_candidate_02 = 2_500_000; // 2.5 MHz;
+    //localparam scl_program_candidate_mod_01 =  sys_freq/(4*scl_rate_candidate_01) - 1;
+    localparam scl_program_candidate_mod_01 =  sys_freq/(4*scl_rate_candidate_01);
     //localparam scl_program_candidate_mod_02 =  sys_freq/(4*scl_rate_candidate_01) - 1;
     
     // command constants;
@@ -70,16 +71,18 @@ program i2c_master_controller_tb
     
     $display("test starts");
     $display("test 01, check i2c scl rate program--------");
-    $display("set rate: 10.0 MHz");
+    $display("set rate: 25 MHz");
     @(posedge clk);
     user_cnt_mod <= scl_program_candidate_mod_01;
     user_cmd <= CMD_START;
-    wr_i2c_start <= 1'b1;
+    wr_i2c <= 1'b1;
     
     @(posedge clk);
     user_cmd <= CMD_WR;
-    //wait(ready_flag == 1'b0);    // expect it to be working;
-    //wait(ready_flag == 1'b1);    // expect it to be eventually free;
+    
+    wait(done_flag == 1'b1);    // wait for done then stop the communication;
+    user_cmd <= CMD_STOP;
+    
     #(5000);
     /*
     wait(done_flag == 1'b1);
