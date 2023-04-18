@@ -197,9 +197,7 @@ module i2c_master_controller
         tx_next = tx_reg;
         rx_next = rx_reg;
         data_cnt_next = data_cnt_reg;
-        sda_next = sda_reg;
-        scl_next = scl_reg;
-    
+        
         /* i2c lines;
         recall that i2c lines must have pull resistor;
         so, in the case where we set them to hiz;
@@ -211,10 +209,15 @@ module i2c_master_controller
         */
         scl_next = 1'b1;
         sda_next = 1'b1;
+        //scl_next = scl_reg;
+        //sda_next = sda_reg;
         
         // output status;
         ready_flag = 1'b0;   // unless told otherwise;
         done_flag = 1'b0;
+        
+        // indicator;
+        phase_data = 1'b0;
         
         // start the main machinery;
         case (state_reg)
