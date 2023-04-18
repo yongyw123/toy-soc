@@ -63,7 +63,8 @@ module i2c_master_controller
         inout tri sda,   // this line is shared between master and slaves;
         
         // debugging;
-        output debug_scl_sim
+        output debug_scl_sim,
+        output debug_sda_sim
     );
     
     // misc constants;
@@ -496,6 +497,7 @@ module i2c_master_controller
     // so at high impedance, it is pulled to high as well;
     // so either the master is in read mode or the master is intended to write a HIGH;
     assign sda = (set_hiz || sda_reg) ? 1'bz : 1'b0;
+    assign debug_sda_sim = (set_hiz || sda_reg) ? 1'b1 : 1'b0;   // for simulation purpose;
     
     // same reasoning for scl due to th epull up resistor;
     assign scl = (scl_reg) ? 1'bz : 1'b0;
