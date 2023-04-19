@@ -98,7 +98,16 @@ class core_i2c_master{
     // misc;
     enum{
         // dummy data;
-        DUMMY_DATA_BYTE = (uint8_t)(0xFF)
+        DUMMY_DATA_BYTE = (uint8_t)(0xFF),
+
+
+        // this is paired with the slave device id;
+        // when the master is to identify the slave;
+        // and to indicate to the slave;
+        // if the master intends to write and read;
+        MASTER_WRITE_BIT = 0x00,
+        MASTER_READ_BIT = 0x01
+
 
     };
 
@@ -126,8 +135,8 @@ class core_i2c_master{
         wrapper to start a complete transfer between
         the master and the slave;
         */ 
-        int write_transfer(uint8_t dev, uint8_t *wr_buffer, int num, int restart);
-        int read_transfer(uint8_t dev, uint8_t *rd_buffer, int num, int restart);
+        int write_transfer(uint8_t dev, uint8_t *wr_buffer, int num_transfer, int repeat);
+        int read_transfer(uint8_t dev, uint8_t *rd_buffer, int num_transfer, int repeat);
 
 
     private:

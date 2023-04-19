@@ -175,3 +175,48 @@ uint8_t core_i2c_master::read_byte(int terminate){
     return (uint8_t)(rd_data & 0x00FF);
 
 }
+
+int core_i2c_master::write_transfer(uint8_t slave_id, uint8_t *wr_buffer, int num_transfer, int repeat){
+    /*
+    @brief  : to start a master data byte transfer to the slave;
+    @param  :
+        1. slave_id     : the identification number of the slave to communicate;
+        2. wr_buffer    : a pointer to the buffer containing the data bytes to transfer;
+        3. num_transfer : the number of data bytes to transfer;
+        4. repeat       : to send a repeat start condition? HIGH if yes, LOW otherwise
+    @retval : error codes;
+        +1 if transfer is successful;
+        -1 otherwise;
+    @note   : this is a blocking method;
+    */
+
+    uint8_t slave_id_with_write;
+    int ack_status;         
+
+    // by i2c specs;
+    // the lsb is a LOW to indicate to the slave that 
+    // the master intends to write;
+    slave_id_with_write = uint8_t((slave_id << 1) | MASTER_WRITE_BIT);
+
+    // start;
+    send_start();
+
+    // send all the wr_buffer element;
+    for(int i = 0; i < num_transfer; i++){
+        ack_status = write_byte(*wr_buffer);
+        wr_buffer++;
+        if(ack_status == STATUS_I2C_SLAVE_ACK_ERROR){
+            return STATUS_I2C_SLAVE_ACK_ERROR;
+        }
+    }
+
+    if(repeat){
+        send_repeat_start();
+    }else{
+        send_stop();
+    }
+    
+    return STATUS_I2C_SLAVE_ACK_OK;
+}
+
+
