@@ -56,7 +56,13 @@ module mcs_top
         output logic SPI_MOSI_JC2,
         input logic SPI_MISO_JC3,
         output logic SPI_SS_JC4, // slave select; asset active low;
-        output logic SPI_DC_JC7  // is the current MOSI a data or command for the slave?  
+        output logic SPI_DC_JC7,  // is the current MOSI a data or command for the slave?
+        
+        // i2c;
+        // uses PMOD jumper @ JA;
+        output tri I2C_SCL_JA01,    // tri because we have a pull up resistor;
+        inout tri I2C_SDA_JA02      // inout becos shared between master and slaves;
+        
     );
     
     
@@ -118,7 +124,8 @@ module mcs_top
     .UART_DATA_BIT(8),
     .UART_STOP_BIT_SAMPLING_NUM(16),
     .SPI_DATA_BIT(8),
-    .SPI_SLAVE_NUM(1))
+    .SPI_SLAVE_NUM(1),
+    .I2C_DATA_BIT(8))
      
     mmio_unit
     (
@@ -143,7 +150,12 @@ module mcs_top
         .spi_mosi(SPI_MOSI_JC2),
         .spi_miso(SPI_MISO_JC3),
         .spi_ss_n(SPI_SS_JC4),
-        .spi_data_or_command(SPI_DC_JC7)  
+        .spi_data_or_command(SPI_DC_JC7),
+        
+        // i2c;
+        .i2c_scl(I2C_SCL_JA01),
+        .i2c_sda(I2C_SDA_JA02)
+        
     );
     
 endmodule
