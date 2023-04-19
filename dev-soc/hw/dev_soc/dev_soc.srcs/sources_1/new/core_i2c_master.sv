@@ -94,7 +94,7 @@ module core_i2c_master
     // enable signals;
     logic wr_en;
     logic wr_clkmod;
-    //logic rd_en;  // since there is only one read register; no need to multiplex;
+    //logic rd_en;  
     
     // i2c master controller siganls;
     logic[I2C_TOTAL_CMD_NUM-1:0] user_cmd;
@@ -156,7 +156,6 @@ module core_i2c_master
     
     // read multiplezing;
     // this is not necessary since there is only one read register;
-    // there is no need to multiplex it;
     //assign rd_en = cs & write & (addr[1:0] == I2C_REG_READ_OFFSET);  
     
     /*
@@ -165,6 +164,7 @@ module core_i2c_master
         bit[8]      slave ACK bit;
         bit[9]      i2c master controller ready status
     */
+    //assign rd_data = (rd_en) ? {22'b0, ready_flag, ack, dout} : 32'b0;
     assign rd_data = {22'b0, ready_flag, ack, dout};
     
     
