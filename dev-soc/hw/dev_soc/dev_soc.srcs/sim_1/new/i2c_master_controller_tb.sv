@@ -202,11 +202,19 @@ program i2c_master_controller_tb
     $display("test 03:");
     /* 
     1. test NOP command;
+        expect that the FSM will remain in the hold state waiting for 
+        further user commands;
+    2. test REPEAT command;
+        expect the state will be reset to the start state;
+        so, we expect that there will be another i2C start condition;
+        before it lands back in the hold state;
+    3. send a stop command;
+    
     */
     
     $display("-----------");
     @(posedge clk);
-    test_index <= 1;
+    test_index <= 2;
     user_cnt_mod <= scl_program_candidate_mod_01;
     user_cmd <= CMD_START;
     wr_i2c <= 1'b1;
@@ -234,8 +242,17 @@ program i2c_master_controller_tb
     user_cmd <= CMD_NOP;
     
     wait(ready_flag == 1'b1);
+    #(1000);
     
+    // repeat start
+    user_cmd <= CMD_REPEAT;
     
+    wait(ready_flag == 1'b1);
+    #(1000);
+    
+    // stop it after some time;
+    user_cmd <= CMD_STOP;
+    wait(ready_flag == 1'b1);
     
     #(100);
     $display("test ends");
