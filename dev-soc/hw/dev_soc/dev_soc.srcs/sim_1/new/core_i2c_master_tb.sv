@@ -70,6 +70,9 @@ module core_i2c_master_tb
     
     logic[7:0] master_data;
     
+    // sim;
+    logic [31:0] count_index;
+    
     initial 
     begin
     $display("test starts");
@@ -173,6 +176,71 @@ module core_i2c_master_tb
     
     
     #(100);
+    
+    
+    $display("----- master write repeat --------");
+    /* test - master write repeat;
+    1. start i2c;
+    3. issue write command;
+    4. issue repeat command;
+    5. issue stop command;
+    
+    */
+    // issue a start;
+    @(posedge clk);
+    test_index <= 7;
+    write <= 1'b1;
+    master_data = 8'($random);
+    addr <= I2C_REG_WRITE_OFFSET;
+    wr_data <= {21'b0, CMD_START, master_data};
+  
+    // issue a write command; 
+    @(posedge clk);
+    test_index <= 8;
+    addr <= I2C_REG_WRITE_OFFSET;
+    wr_data <= {21'b0, CMD_WR, master_data};
+    
+    // issue multiple repeats;
+    // expect multiple generation of the start-condition;
+    count_index = 8;
+    for(int i = 0; i < 8; i++) begin
+        count_index++;
+        // probe the ready flag; 
+        @(posedge clk);     // it takes one clock cycle to update the relevant bits;
+        wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);  // expect it to be eventually free;
+        
+        // pause;
+        // expect in the hold state;
+        // both scl and sda are held low for as long as the pause time;
+        #(500);
+        
+        @(posedge clk);
+        test_index <= count_index;
+        addr <= I2C_REG_WRITE_OFFSET;
+        wr_data <= {21'b0, CMD_REPEAT, master_data};
+    end
+    
+    // probe the ready flag; 
+    // issue a stop command;
+    @(posedge clk);     // it takes one clock cycle to update the relevant bits;
+    //wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b0);  // expect it to be busy;  
+    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);  // expect it to be eventually free;
+    
+    // issue stopl
+    @(posedge clk);
+    test_index <= 6;
+    addr <= I2C_REG_WRITE_OFFSET;
+    wr_data <= {21'b0, CMD_STOP, master_data};
+    
+    // expect the i2c controller to generate
+    // a stop condition;
+    // hence it will be busy for awhile to do this;
+    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b0);
+    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);
+    
+    
+    #(100);
+    
     
     $display("test stops");
     $stop;
