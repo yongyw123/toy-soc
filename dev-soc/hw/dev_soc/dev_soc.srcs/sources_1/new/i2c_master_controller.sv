@@ -492,6 +492,9 @@ module i2c_master_controller
                     state_next = ST_IDLE;
                 end
             end
+            
+            default: 
+                state_next = ST_IDLE;  
         endcase
     end
     
