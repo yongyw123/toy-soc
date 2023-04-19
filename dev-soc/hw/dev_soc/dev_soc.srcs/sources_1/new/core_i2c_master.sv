@@ -112,7 +112,7 @@ module core_i2c_master
     logic [31:0] clkmod_reg, clkmod_next;
     
     // instantiation;
-    i2c_master_controller
+    i2c_master_controller #(.I2C_DATA_BIT(I2C_DATA_BIT))
     unit
     (
         .clk(clk),
