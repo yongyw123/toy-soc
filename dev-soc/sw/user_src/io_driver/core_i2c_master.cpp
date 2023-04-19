@@ -178,7 +178,7 @@ uint8_t core_i2c_master::read_byte(int terminate){
 
 int core_i2c_master::write_transfer(uint8_t slave_id, uint8_t *wr_buffer, int num_transfer, int repeat){
     /*
-    @brief  : to start a master data byte transfer to the slave;
+    @brief  : to start master data byte transfer to the slave;
     @param  :
         1. slave_id     : the identification number of the slave to communicate;
         2. wr_buffer    : a pointer to the buffer containing the data bytes to transfer;
@@ -201,6 +201,12 @@ int core_i2c_master::write_transfer(uint8_t slave_id, uint8_t *wr_buffer, int nu
     // start;
     send_start();
 
+    // identify with the slave;
+    ack_status = write_byte(slave_id_with_write);
+    if(ack_status == STATUS_I2C_SLAVE_ACK_ERROR){
+            return STATUS_I2C_SLAVE_ACK_ERROR;
+    }
+
     // send all the wr_buffer element;
     for(int i = 0; i < num_transfer; i++){
         ack_status = write_byte(*wr_buffer);
@@ -210,13 +216,64 @@ int core_i2c_master::write_transfer(uint8_t slave_id, uint8_t *wr_buffer, int nu
         }
     }
 
+    // clean up?
+    if(repeat){
+        send_repeat_start();
+    }else{
+        send_stop();
+    }
+    return STATUS_I2C_SLAVE_ACK_OK;
+}
+
+
+int core_i2c_master::read_transfer(uint8_t slave_id, uint8_t *rd_buffer, int num_transfer, int repeat){
+    /*
+    @brief  : to start reading from the slave
+    @param  :
+        1. slave_id     : the identification number of the slave to communicate;
+        2. rd_buffer    : a pointer to the buffer to store the data bytes read from the slave;
+        3. num_transfer : the number of data bytes to read;
+        4. repeat       : to send a repeat start condition? HIGH if yes, LOW otherwise
+    @retval : error codes;
+        +1 if transfer is successful;
+        -1 otherwise;
+    @note   : this is a blocking method;
+    */
+
+   
+    uint8_t slave_id_with_read;
+    int ack_status;
+    int nack_to_terminate = MASTER_NACK_SLAVE;  // to terminate the read;
+    int ack_to_continue =  MASTER_ACK_SLAVE;    // to continue reading;
+
+    // by i2c specs;
+    // the lsb is a LOW to indicate to the slave that 
+    // the master intends to write;
+    slave_id_with_read = uint8_t((slave_id << 1) | MASTER_READ_BIT);
+
+    // start;
+    send_start();
+
+    // identify with the slave;
+    ack_status = write_byte(slave_id_with_read);
+
+    // note that the last byte needs the master to send a nack to terminate;
+    // so do not put this in the loop;
+    for(int i = 0; i < (num_transfer-1); i++){
+        // store to the buffer;
+        *rd_buffer = read_byte(ack_to_continue);
+        rd_buffer++;
+    }
+    // last byte; terminate the read;
+    *rd_buffer = read_byte(nack_to_terminate);
+    
+
+    // clean up?
     if(repeat){
         send_repeat_start();
     }else{
         send_stop();
     }
     
-    return STATUS_I2C_SLAVE_ACK_OK;
+    return ack_status;
 }
-
-
