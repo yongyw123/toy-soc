@@ -48,12 +48,20 @@ class core_i2c_master{
         localparam CMD_REPEAT   = 3'b101;   // generate repeated_start condition;
         
         */
+        /*
         CMD_NOP = ((uint32_t)0x00 << BIT_POS_CMD_OFFSET),
         CMD_START = ((uint32_t)0x01 << BIT_POS_CMD_OFFSET),
         CMD_WR = ((uint32_t)0x02 << BIT_POS_CMD_OFFSET),
         CMD_RD = ((uint32_t)0x03 << BIT_POS_CMD_OFFSET),
         CMD_STOP = ((uint32_t)0x04 << BIT_POS_CMD_OFFSET),
         CMD_REPEAT = ((uint32_t)0x05 << BIT_POS_CMD_OFFSET),
+        */
+        CMD_NOP = 0x00,
+        CMD_START = 0x01,
+        CMD_WR = 0x02,
+        CMD_RD = 0x03,
+        CMD_STOP = 0x04,
+        CMD_REPEAT = 0x05
     };
     
     // protocol between the master and the slave ack/nack;
@@ -85,6 +93,14 @@ class core_i2c_master{
         STATUS_SET_FREQ_ERROR = -1,
         STATUS_SET_FREQ_OK = 1
     };
+
+    // misc;
+    enum{
+        // dummy data;
+        DUMMY_DATA_BYTE = (uint8_t)(0xFF)
+
+    };
+
     
     public:
         core_i2c_master(uint32_t core_base_addr);

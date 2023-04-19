@@ -65,3 +65,24 @@ int core_i2c_master::is_ready(void){
 }
 
 
+void core_i2c_master::send_start(void){
+     /*
+    @brief  : to send a start condition (as a master)
+    @param  : none
+    @note   : this is a blocking method;
+    */
+
+   // there is only one HW register to send the command;
+   // this register also packs other non-command data as well;
+   // bit[7:0] packs the master write data byte;
+   // bit[10:8] packs the user commands;
+   
+   uint32_t temp = ((uint32_t)CMD_START << BIT_POS_CMD_OFFSET);
+   uint32_t packed = temp | DUMMY_DATA_BYTE;
+   
+   // block until the master controller is ready;
+   while(!is_ready()){};
+
+   REG_WRITE(base_addr, REG_WRITE_OFFSET, packed);
+
+}
