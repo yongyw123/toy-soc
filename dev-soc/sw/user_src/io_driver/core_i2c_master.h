@@ -96,10 +96,13 @@ class core_i2c_master{
         void send_stop(void);           // send a stop condition;
 
         // rw;
-        int write_byte(uint8_t data);
-        int read_byte(void);
+        int write_byte(uint8_t data);   // master writes a byte to the slave;
+        int read_byte(void);            // master reads a byte from teh slave
 
-        // wrapper;
+        /*
+        wrapper to start a complete transfer between
+        the master and the slave;
+        */ 
         int write_transfer(uint8_t dev, uint8_t *wr_buffer, int num, int restart);
         int read_transfer(uint8_t dev, uint8_t *rd_buffer, int num, int restart);
 
