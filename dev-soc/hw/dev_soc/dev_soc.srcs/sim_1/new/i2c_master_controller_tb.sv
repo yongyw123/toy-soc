@@ -32,8 +32,8 @@ program i2c_master_controller_tb
         input clk,  // system clock;
         
         // i2c main lines;
-        input logic scl,        // test stimulus based on i2c clock; not the system clock;
-        inout logic sda,       
+        input tri scl,        // test stimulus based on i2c clock; not the system clock;
+        inout tri sda,       
         // scl is either HiZ or Zero; so created anothe replicate of scl that is either high or low (well defined);
         input logic debug_scl_sim, 
         
@@ -101,10 +101,10 @@ program i2c_master_controller_tb
     // simulate slave ack for the ninth bit;
     // use scl as the dictator;
     for(int i = 0; i < 8; i++) begin
-        @(negedge scl);
+        @(negedge debug_scl_sim);
         cnt_scl++;
     end
-    @(negedge scl);
+    @(negedge debug_scl_sim);
     set_slave_ack = 1'b1;
         
     wait(done_flag == 1'b1);    // wait for done then stop the communication;
@@ -144,10 +144,10 @@ program i2c_master_controller_tb
     // simulate slave ack for the ninth bit;
     // use scl as the dictator;
     for(int i = 0; i < 8; i++) begin
-        @(negedge scl);
+        @(negedge debug_scl_sim);
         cnt_scl++;
     end
-    @(negedge scl);
+    @(negedge debug_scl_sim);
     set_slave_ack = 1'b1;
         
     wait(done_flag == 1'b1);    
@@ -171,7 +171,7 @@ program i2c_master_controller_tb
         set_slave_wr_data = 1'b1;
     end
     */
-    @(negedge scl);
+    @(negedge debug_scl_sim);
     set_slave_wr_data = 1'b0;
     
 
@@ -224,10 +224,10 @@ program i2c_master_controller_tb
     // simulate slave ack for the ninth bit;
     // use scl as the dictator;
     for(int i = 0; i < 8; i++) begin
-        @(negedge scl);
+        @(negedge debug_scl_sim);
         cnt_scl++;
     end
-    @(negedge scl);
+    @(negedge debug_scl_sim);
     set_slave_ack = 1'b1;
         
     wait(done_flag == 1'b1);    
@@ -252,7 +252,7 @@ program i2c_master_controller_tb
     user_cmd <= CMD_STOP;
     wait(ready_flag == 1'b1);
     
-    #(100);
+    #(500);
     $display("test ends");
     $stop;
     end
