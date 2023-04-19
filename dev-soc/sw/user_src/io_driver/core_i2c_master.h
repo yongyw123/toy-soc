@@ -77,7 +77,13 @@ class core_i2c_master{
         // i2c master controller is ready to accept user commands;
         STATUS_I2C_MASTER_READY = 1,        
         // slave does not return ack in master write op;
-        STATUS_I2C_SLAVE_ACK_ERROR = -1     
+        STATUS_I2C_SLAVE_ACK_ERROR = -1,   
+
+        // error in setting the frequency;
+        // usually when the user-specified scl freq is such 
+        // that 4*user_freq > system_clk_freq;
+        STATUS_SET_FREQ_ERROR = -1,
+        STATUS_SET_FREQ_OK = 1
     };
     
     public:
@@ -85,7 +91,7 @@ class core_i2c_master{
         ~core_i2c_master();
 
         // setting;
-        void set_freq(int freq);
+        int set_freq(int user_freq);
 
         // status;
         int check_ready(void);
@@ -110,6 +116,7 @@ class core_i2c_master{
     private:
         // i2c core base address in the user address space;
         uint32_t base_addr;
+        int scl_freq;       // scl rate;
 
 };
 
