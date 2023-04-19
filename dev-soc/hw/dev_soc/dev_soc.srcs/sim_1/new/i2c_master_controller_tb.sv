@@ -55,11 +55,8 @@ program i2c_master_controller_tb
     );
     
     localparam sys_freq = 100_000_000;  // 100MHz;
-    localparam scl_rate_candidate_01 = 25_000_000; // 25 MHz;
-    //localparam scl_rate_candidate_02 = 2_500_000; // 2.5 MHz;
-    //localparam scl_program_candidate_mod_01 =  sys_freq/(4*scl_rate_candidate_01) - 1;
-    localparam scl_program_candidate_mod_01 =  sys_freq/(4*scl_rate_candidate_01);
-    //localparam scl_program_candidate_mod_02 =  sys_freq/(4*scl_rate_candidate_01) - 1;
+    localparam scl_rate_candidate_01 = 2_500_000; // 2.5 MHz;
+    localparam scl_program_candidate_mod_01 =  sys_freq/(4*scl_rate_candidate_01) - 1;
     
     // command constants;
     localparam CMD_NOP      = 3'b000;   // no operation;
@@ -68,7 +65,7 @@ program i2c_master_controller_tb
     localparam CMD_RD       = 3'b011;   // master reads from slave;
     localparam CMD_STOP     = 3'b100;   // generate stop condition;
     localparam CMD_REPEAT   = 3'b101;   // generate repeated_start condition;
-    
+                                                                                                                                                                                                                                                                                        
     logic [31:0] cnt_scl;
     logic set_slave_ack;
     logic set_slave_wr_data;
@@ -246,7 +243,8 @@ program i2c_master_controller_tb
     
     // repeat start
     user_cmd <= CMD_REPEAT;
-    
+    // keep on issuing the REPEAT commands;
+    // expect to see consecutive i2c start conditions!!;
     wait(ready_flag == 1'b1);
     #(1000);
     
