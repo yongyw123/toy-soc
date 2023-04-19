@@ -27,16 +27,18 @@
 
 module mmio_sys
     #(
-    parameter 
-    SW_NUM = 8,   // number of switches at the GPI port;
-    LED_NUM = 8,  // number of LED at the GPO port;
-    PORT_NUM = 4,  // number of port for GPIO (board PMOD jumper)
-    
-    UART_DATA_BIT = 8,                  // number of UART data bits;
-    UART_STOP_BIT_SAMPLING_NUM = 16,    // this corresponds to one stop bit; (16 oversampling);
-    
-    SPI_DATA_BIT = 8,     
-    SPI_SLAVE_NUM = 1  // how many connected SPI slaves on the same board SPI core?
+        parameter 
+        SW_NUM = 8,   // number of switches at the GPI port;
+        LED_NUM = 8,  // number of LED at the GPO port;
+        PORT_NUM = 4,  // number of port for GPIO (board PMOD jumper)
+        
+        UART_DATA_BIT = 8,                  // number of UART data bits;
+        UART_STOP_BIT_SAMPLING_NUM = 16,    // this corresponds to one stop bit; (16 oversampling);
+        
+        SPI_DATA_BIT = 8,     
+        SPI_SLAVE_NUM = 1,  // how many connected SPI slaves on the same board SPI core?
+        
+        I2C_DATA_BIT = 8
     )
     (
     // general;
@@ -68,7 +70,12 @@ module mmio_sys
     output logic spi_mosi,  // spi mosi bit to the slave;
     input logic spi_miso,   // spi slave data bit;
     output logic [SPI_SLAVE_NUM-1:0] spi_ss_n,  // multiple slave selects;
-    output logic spi_data_or_command            // is the mosi a data or command for the slave?
+    output logic spi_data_or_command,            // is the mosi a data or command for the slave?
+    
+    // i2c master;
+    output tri i2c_scl, // i2c master clock (note, it must be in tristate);
+    inout tri i2c_sda   // sda line; note it is inout type since sda line is shared; 
+    
     );
     
     /* ----- broadcasting arrays; */
@@ -218,12 +225,29 @@ module mmio_sys
         .spi_data_or_command(spi_data_or_command)
     );
      
+    // i2c core;
+    core_i2c_master #(.I2C_DATA_BIT(I2C_DATA_BIT)) i2c_master_unit
+    (
+        .clk(clk),
+        .reset(reset),
+        .cs(core_ctrl_cs_array[`S6_I2C_MASTER]),
+        .write(core_ctrl_wr_array[`S6_I2C_MASTER]),
+        .read(core_ctrl_rd_array[`S6_I2C_MASTER]),
+        .addr(core_addr_reg_array[`S6_I2C_MASTER]),
+        .wr_data(core_data_wr_array[`S6_I2C_MASTER]),
+        .rd_data(core_data_rd_array[`S6_I2C_MASTER]),
+        
+        // i2c specific;
+        .scl(i2c_scl),
+        .sda(i2c_sda)
+        
+    );
     
     /* ground the the read data signals from the empty io cores 
     for vivao synthesis optimization to opt out these unused signals */
     generate
         genvar i;
-            for(i = 6; i < `MIMO_CORE_TOTAL_G; i++)
+            for(i = 7; i < `MIMO_CORE_TOTAL_G; i++)
             begin
                 // always HIGH ==> idle ==> not signals;
                 assign core_data_rd_array[i] = 32'hFFFF_FFFF;
