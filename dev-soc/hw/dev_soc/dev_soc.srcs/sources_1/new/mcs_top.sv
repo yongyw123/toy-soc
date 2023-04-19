@@ -60,8 +60,8 @@ module mcs_top
         
         // i2c;
         // uses PMOD jumper @ JA;
-        output tri I2C_SCL_JA01,    // tri because we have a pull up resistor;
-        inout tri I2C_SDA_JA02      // inout becos shared between master and slaves;
+        output tri I2C_SCL_JA01,    // spi clock; tri because we have a pull up resistor;
+        inout tri I2C_SDA_JA02      // spi data; inout becos shared between master and slaves;
         
     );
     
