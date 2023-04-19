@@ -76,7 +76,7 @@ module core_i2c_master_tb
     initial 
     begin
     $display("test starts");
-    $display("----- master write --------");
+    $display("----- test: master write --------");
     
     /* test - write mode only;
     1. set i2c clock rate;
@@ -130,7 +130,7 @@ module core_i2c_master_tb
     // rest;
     #(100);
     
-    $display("----- master read slave --------");
+    $display("----- test: master read slave --------");
     /* test - read mode only;
     1. start i2c;
     3. issue read command;
@@ -178,7 +178,7 @@ module core_i2c_master_tb
     #(100);
     
     
-    $display("----- master write repeat --------");
+    $display("----- test: master write repeat --------");
     /* test - master write repeat;
     1. start i2c;
     3. issue write command;
@@ -200,6 +200,7 @@ module core_i2c_master_tb
     addr <= I2C_REG_WRITE_OFFSET;
     wr_data <= {21'b0, CMD_WR, master_data};
     
+    $display("----- repeat cmd issued --------");
     // issue multiple repeats;
     // expect multiple generation of the start-condition;
     count_index = 8;
