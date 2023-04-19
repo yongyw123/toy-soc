@@ -90,8 +90,7 @@ module core_i2c_master_tb
     addr <= I2C_REG_CLKMOD_OFFSET;
     wr_data <= scl_program_candidate_mod_01;
     
-    // write master data;
-    // note that this action will auto start the i2c controller;
+    // issue a start;
     master_data = 8'($random);
     @(posedge clk);
     test_index <= 1;
@@ -99,29 +98,24 @@ module core_i2c_master_tb
     cs <= 1'b1;
     addr <= I2C_REG_WRITE_OFFSET;
     wr_data <= {21'b0, CMD_START, master_data};
-    @(posedge clk);
-    
-    // wait for the start condittion
-    // read the ready flag then 
-    // issue a write command;
-    
-    @(posedge clk);
-    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);
-     
+  
+    // issue a write command; 
     @(posedge clk);
     addr <= I2C_REG_WRITE_OFFSET;
     wr_data <= {21'b0, CMD_WR, master_data};
     
-    /*
     // probe the ready flag; 
     // issue a stop command;
+    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b0);  // expect it to be busy;  
+    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);  // expect it to be eventually free;
+    
     @(posedge clk);
-    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);
     addr <= I2C_REG_WRITE_OFFSET;
     wr_data <= {21'b0, CMD_STOP, master_data};
-    */
-    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);
     
+    
+    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b0);
+    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);
     
     
     #(1000);
