@@ -209,11 +209,6 @@ module core_i2c_master_tb
         @(posedge clk);     // it takes one clock cycle to update the relevant bits;
         wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);  // expect it to be eventually free;
         
-        // pause;
-        // expect in the hold state;
-        // both scl and sda are held low for as long as the pause time;
-        #(500);
-        
         @(posedge clk);
         test_index <= count_index;
         addr <= I2C_REG_WRITE_OFFSET;
