@@ -334,7 +334,10 @@ module i2c_master_controller
                         CMD_STOP:
                             state_next = ST_STOP_01;
                         
-                        default: state_next = ST_DATA_01;
+                        // NOP; keep holding;
+                        // is this a good idea?
+                        // maybe require SW to implement a timeout;
+                        default: state_next = ST_HOLD;
                     endcase 
                 end
             end
