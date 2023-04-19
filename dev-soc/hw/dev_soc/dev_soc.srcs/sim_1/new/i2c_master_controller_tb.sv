@@ -118,6 +118,9 @@ program i2c_master_controller_tb
     wait(ready_flag == 1'b0);
     wait(ready_flag == 1'b1);        
     
+    
+    $display("-----------");
+    $display("test 02:");
     /* 
     1. first master write to the slave;
     2. followed by a read from the slave;
@@ -127,9 +130,6 @@ program i2c_master_controller_tb
     6. send a stop signal;
     */
     
-    
-    $display("-----------");
-    $display("test 02:");
     $display("-----------");
     
     /* first part, master identofies the slave */
@@ -198,7 +198,46 @@ program i2c_master_controller_tb
     wait(ready_flag == 1'b1);        
     
     
-    #(10);
+    $display("-----------");
+    $display("test 03:");
+    /* 
+    1. test NOP command;
+    */
+    
+    $display("-----------");
+    @(posedge clk);
+    test_index <= 1;
+    user_cnt_mod <= scl_program_candidate_mod_01;
+    user_cmd <= CMD_START;
+    wr_i2c <= 1'b1;
+    // master write something;
+    din <= {7'($random), 1'b0};   // to isolate from the ack from the slave later;
+    
+    @(posedge clk);
+    user_cmd <= CMD_WR;
+    
+    // simulate slave ack for the ninth bit;
+    // use scl as the dictator;
+    for(int i = 0; i < 8; i++) begin
+        @(negedge scl);
+        cnt_scl++;
+    end
+    @(negedge scl);
+    set_slave_ack = 1'b1;
+        
+    wait(done_flag == 1'b1);    
+    set_slave_ack = 1'b0;
+    
+    wait(ready_flag == 1'b1);    
+    // here, the fsm should be in the hold state;
+    // since ready flag will only be true while in the hold state;
+    user_cmd <= CMD_NOP;
+    
+    wait(ready_flag == 1'b1);
+    
+    
+    
+    #(100);
     $display("test ends");
     $stop;
     end
