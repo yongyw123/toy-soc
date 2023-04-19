@@ -274,9 +274,9 @@ Register IO access:
 3. register 2: write only;                 
 ******************************************************************/
 // register offset;
-`define S6_I2C_REG_READ_OFFSET      0   // 000
-`define S6_I2C_REG_CLKMOD_OFFSET    1   // 001
-`define S6_I2C_REG_WRITE_OFFSET     2   // 010
+`define S6_I2C_REG_READ_OFFSET      0   // 00
+`define S6_I2C_REG_CLKMOD_OFFSET    1   // 01
+`define S6_I2C_REG_WRITE_OFFSET     2   // 10
 
 // bit position;
 `define S6_I2C_REG_READ_BIT_POS_ACK     8  
