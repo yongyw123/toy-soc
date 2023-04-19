@@ -11,6 +11,7 @@ core_i2c_master::core_i2c_master(uint32_t core_base_addr){
      */
     base_addr = core_base_addr;
     scl_freq = 10000; // default: 10kHz;
+    set_freq(scl_freq);
 }
 
 
@@ -72,19 +73,9 @@ void core_i2c_master::send_start(void){
     @note   : this is a blocking method;
     */
 
-   // there is only one HW register to send the command;
-   // this register also packs other non-command data as well;
-   // bit[7:0] packs the master write data byte;
-   // bit[10:8] packs the user commands;
-   
-   uint32_t temp = ((uint32_t)CMD_START << BIT_POS_CMD_OFFSET);
-   uint32_t packed = temp | DUMMY_DATA_BYTE;
-   
    // block until the master controller is ready;
    while(!is_ready()){};
-
-   REG_WRITE(base_addr, REG_WRITE_OFFSET, packed);
-
+   REG_WRITE(base_addr, REG_WRITE_OFFSET, CMD_START);
 }
 
 void core_i2c_master::send_repeat_start(void){
@@ -94,19 +85,9 @@ void core_i2c_master::send_repeat_start(void){
     @note   : this is a blocking method;
     */
 
-   // there is only one HW register to send the command;
-   // this register also packs other non-command data as well;
-   // bit[7:0] packs the master write data byte;
-   // bit[10:8] packs the user commands;
-   
-   uint32_t temp = ((uint32_t)CMD_REPEAT << BIT_POS_CMD_OFFSET);
-   uint32_t packed = temp | DUMMY_DATA_BYTE;
-   
    // block until the master controller is ready;
    while(!is_ready()){};
-
-   REG_WRITE(base_addr, REG_WRITE_OFFSET, packed);
-
+   REG_WRITE(base_addr, REG_WRITE_OFFSET, CMD_REPEAT);
 }
 
 
@@ -117,17 +98,47 @@ void core_i2c_master::send_stop(void){
     @note   : this is a blocking method;
     */
 
-   // there is only one HW register to send the command;
-   // this register also packs other non-command data as well;
-   // bit[7:0] packs the master write data byte;
-   // bit[10:8] packs the user commands;
-   
-   uint32_t temp = ((uint32_t)CMD_STOP << BIT_POS_CMD_OFFSET);
-   uint32_t packed = temp | DUMMY_DATA_BYTE;
-   
    // block until the master controller is ready;
    while(!is_ready()){};
+   REG_WRITE(base_addr, REG_WRITE_OFFSET, CMD_STOP);
+}
 
-   REG_WRITE(base_addr, REG_WRITE_OFFSET, packed);
+int core_i2c_master::write_byte(uint8_t data_byte){
+    /*
+    @brief  : to transfer a data byte from master to the slave;
+    @param  : data_byte to write;
+    @retval :   binary error indication
+        +1 if the slave returns a valid ACK;
+        -1 otherwise;
+    @note   : this is a blocking method;
+    */
+
+
+   /* var declar*/
+   uint32_t rd_data;
+   int ack;
+
+   // there is only one write register for sending data;
+   // this register also packs other stuffs as well;
+   // so need to pack or unpack;
+    uint32_t packed;
+   
+   // blocked until ready;
+   while(!is_ready()){};
+
+    // start writing;
+    packed = (CMD_WR | (uint32_t)data_byte);
+    REG_WRITE(base_addr, REG_WRITE_OFFSET, packed);
+
+   // blocked until ready;
+   while(!is_ready()){};
+
+    // read and check the ack from the slave;
+   rd_data = (uint32_t)REG_READ(base_addr, REG_READ_OFFSET);
+   ack = (int) ((rd_data & MASK_READ_ACK) >> BIT_POS_READ_ACK);
+   if(ack == SLAVE_ACK_MASTER){
+        return STATUS_I2C_SLAVE_ACK_OK;
+   }
+   return STATUS_I2C_SLAVE_ACK_ERROR;
 
 }
