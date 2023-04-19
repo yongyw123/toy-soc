@@ -156,13 +156,13 @@ program i2c_master_controller_tb
     set_slave_ack = 1'b0;
     
     wait(ready_flag == 1'b1);    
-    @(posedge clk);
+    
     
     /* part 02: read from the slave */
     // simulate slave data for the master to read;
     // use scl as the dictator;
     $display("master to read from slave ---------------");
-    @(posedge clk);
+    
     
     user_cmd <= CMD_RD;
     din <= 0;   // lsb is the master ack bit for the slave;
@@ -176,9 +176,19 @@ program i2c_master_controller_tb
     @(negedge scl);
     set_slave_wr_data = 1'b0;
     
-    
 
-    wait(done_flag == 1'b1);    // wait for done then stop the communication;
+    /*
+    !!! IMPORTANT !!!
+    it is important to note that the ST_HOLD state
+    will not be immediately reached;
+    so it is crucial to probe for the ready_flag;
+    otherwise, any immediate change to say user_cmd
+    will not be registered if it is changed before
+    the FSM reaches this state!!
+    */
+                        
+    wait(done_flag == 1'b1);
+    wait(ready_flag == 1'b1);    
     user_cmd <= CMD_STOP;
     set_slave_ack = 1'b0;
     
