@@ -75,11 +75,12 @@ module i2c_master_controller
     localparam DUMMY_BIT = 1'b0;    // for placeholder;
     
     // command constants;
-    localparam CMD_START    = 3'b000;   // generate start condition;
-    localparam CMD_WR       = 3'b001;   // master write to slave;
-    localparam CMD_RD       = 3'b010;   // master reads from slave;
-    localparam CMD_STOP     = 3'b011;   // generate stop condition;
-    localparam CMD_REPEAT   = 3'b100;   // generate repeated_start condition;
+    localparam CMD_NOP      = 3'b000;   // no operation;
+    localparam CMD_START    = 3'b001;   // generate start condition;
+    localparam CMD_WR       = 3'b010;   // master write to slave;
+    localparam CMD_RD       = 3'b011;   // master reads from slave;
+    localparam CMD_STOP     = 3'b100;   // generate stop condition;
+    localparam CMD_REPEAT   = 3'b101;   // generate repeated_start condition;
         
     /* state;
     the state definitions are
@@ -515,10 +516,10 @@ module i2c_master_controller
     */
     assign condition_read_slave_data = (phase_data && (cmd_reg == CMD_RD) && (data_cnt_reg < 8));
     //assign condition_read_slave_data = 1'b1; // for debugging;
-    //assign condition_master_read_ack = (phase_data && (cmd_reg == CMD_WR) && (data_cnt_reg == 8));
-    assign condition_master_read_ack = (phase_data && (cmd_reg == 3'b001) && (data_cnt_reg == 8));
-    //assign set_hiz = (condition_read_slave_data || condition_master_read_ack);
-    assign set_hiz = ((phase_data && (cmd_reg == 3'b010) && (data_cnt_reg < 8)) || (phase_data && (cmd_reg == 3'b001) && (data_cnt_reg == 8)));
+    assign condition_master_read_ack = (phase_data && (cmd_reg == CMD_WR) && (data_cnt_reg == 8));
+    //assign condition_master_read_ack = (phase_data && (cmd_reg == 3'b001) && (data_cnt_reg == 8));
+    assign set_hiz = (condition_read_slave_data || condition_master_read_ack);
+    //assign set_hiz = ((phase_data && (cmd_reg == 3'b010) && (data_cnt_reg < 8)) || (phase_data && (cmd_reg == 3'b001) && (data_cnt_reg == 8)));
     
     // recall that sda and scl lines have a pulled up resistor;
     // so at high impedance, it is pulled to high as well;

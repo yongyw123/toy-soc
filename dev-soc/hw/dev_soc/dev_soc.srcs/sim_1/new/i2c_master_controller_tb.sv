@@ -62,11 +62,12 @@ program i2c_master_controller_tb
     //localparam scl_program_candidate_mod_02 =  sys_freq/(4*scl_rate_candidate_01) - 1;
     
     // command constants;
-    localparam CMD_START    = 3'b000;   // generate start condition;
-    localparam CMD_WR       = 3'b001;   // master write to slave;
-    localparam CMD_RD       = 3'b010;   // master reads from slave;
-    localparam CMD_STOP     = 3'b011;   // generate stop condition;
-    localparam CMD_REPEAT   = 3'b100;   // generate repeated_start condition;
+    localparam CMD_NOP      = 3'b000;   // no operation;
+    localparam CMD_START    = 3'b001;   // generate start condition;
+    localparam CMD_WR       = 3'b010;   // master write to slave;
+    localparam CMD_RD       = 3'b011;   // master reads from slave;
+    localparam CMD_STOP     = 3'b100;   // generate stop condition;
+    localparam CMD_REPEAT   = 3'b101;   // generate repeated_start condition;
     
     logic [31:0] cnt_scl;
     logic set_slave_ack;
