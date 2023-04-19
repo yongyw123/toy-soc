@@ -74,12 +74,12 @@ module core_i2c_master_tb
     begin
     $display("test starts");
     
-    /* test;
+    /* test - write mode only;
     1. set i2c clock rate;
     2. start i2c;
-    3. stop i2c;
-    4. read ready flag;
-    
+    3. issue write command;
+    4. stop i2c;
+    5. read ready flag;
     */
     // set clock rate;
     @(posedge clk);
@@ -104,9 +104,11 @@ module core_i2c_master_tb
     addr <= I2C_REG_WRITE_OFFSET;
     wr_data <= {21'b0, CMD_WR, master_data};
     
+    
     // probe the ready flag; 
     // issue a stop command;
-    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b0);  // expect it to be busy;  
+    @(posedge clk);     // it takes one clock cycle to update the relevant bits;
+    //wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b0);  // expect it to be busy;  
     wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);  // expect it to be eventually free;
     
     @(posedge clk);
@@ -114,11 +116,23 @@ module core_i2c_master_tb
     wr_data <= {21'b0, CMD_STOP, master_data};
     
     
+    // expect the i2c controller to generate
+    // a stop condition;
+    // hence it will be busy for awhile to do this;
     wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b0);
     wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);
     
+    /* test - read mode only;
+    1. set i2c clock rate;
+    2. start i2c;
+    3. issue read command;
+    4. stop i2c;
+    5. read ready flag;
+    */
     
-    #(1000);
+    
+    
+    #(100);
     $display("test stops");
     $stop;
     end
