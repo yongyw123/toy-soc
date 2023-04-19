@@ -25,7 +25,7 @@ class core_i2c_master{
         REG_WRITE_OFFSET = S6_I2C_REG_WRITE_OFFSET
     };
 
-    // masking 
+    // fields and maskings
     enum{
        BIT_POS_CMD_OFFSET =  S6_I2C_REG_WRITE_BIT_POS_CMD_OFFSET,
        BIT_POS_READ_ACK = S6_I2C_REG_READ_BIT_POS_ACK,
@@ -56,20 +56,57 @@ class core_i2c_master{
         CMD_REPEAT = ((uint32_t)0x05 << BIT_POS_CMD_OFFSET),
     };
     
+    // protocol between the master and the slave ack/nack;
+    // specs: https://web.eecs.umich.edu/~prabal/teaching/resources/eecs373/NXP-I2C-Specification.pdf
+    enum{
+
+        // used when master still wants to read more from the slave;
+        MASTER_ACK_SLAVE = 0, 
+
+        // used when master stops reading from the slave;
+        MASTER_NACK_SLAVE = 1,
+
+        // to process where the slave returns ack or not;
+        SLAVE_ACK = 0,
+        SLAVE_NACK = 1
+        
+    };
+
     // codes: returned value constants;
     enum{
-        STATUS_I2C_MASTER_READY = 1,
-        STATUS_I2C_SLAVE_ACK_ERROR = -1     // slave does not return ack;
+        // i2c master controller is ready to accept user commands;
+        STATUS_I2C_MASTER_READY = 1,        
+        // slave does not return ack in master write op;
+        STATUS_I2C_SLAVE_ACK_ERROR = -1     
     };
     
+    public:
+        core_i2c_master(uint32_t core_base_addr);
+        ~core_i2c_master();
 
-    
+        // setting;
+        void set_freq(int freq);
+
+        // status;
+        int check_ready(void);
+
+        // basic commands;
+        void send_start(void);          // send a start condition;
+        void send_repeat_start(void);   // send a repeat start condition;
+        void send_stop(void);           // send a stop condition;
+
+        // rw;
+        int write_byte(uint8_t data);
+        int read_byte(void);
+
+        // wrapper;
+        int write_transfer(uint8_t dev, uint8_t *wr_buffer, int num, int restart);
+        int read_transfer(uint8_t dev, uint8_t *rd_buffer, int num, int restart);
 
 
-
-
-    
-
+    private:
+        // i2c core base address in the user address space;
+        uint32_t base_addr;
 
 };
 
