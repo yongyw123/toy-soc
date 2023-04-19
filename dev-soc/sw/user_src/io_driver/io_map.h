@@ -95,7 +95,8 @@ extern "C" {
 #define S2_GPO_LED      2   // general purpose output to accommodate LED;
 #define S3_GPI_SW       3   // general purpose input to accommodate switches;
 #define S4_GPIO_PORT    4   // general purpose input output for flexibility and to reduce pinout;
-#define S5_SPI          5
+#define S5_SPI_         5   // spi master controller;
+#define S6_I2C_MASTER   6   // i2c master controller;
 
 /* -------------------------------------------------
 *  Register Map of the Individual IO core register;
@@ -247,6 +248,47 @@ Register IO Access:
 // HIGh if it is data; LOW if it is a command;
 #define S5_SPI_REG_DC_DATA 1
 
+
+
+/**************************************************************
+* S6_I2C_MASTER
+--------------------
+i2c master has three registers;
+
+Register Map
+1. register 0 (offset 0): read register 
+2. register 1 (offset 1): i2c clock rate set register;
+3. register 2 (offset 2): write register;
+
+Register Definition:
+1. register 0: read register
+        bit[7:0]    received slave data;
+        bit[8]      slave ACK bit;
+        bit[9]      i2c master controller ready status
+
+2. register 1: i2c clock rate register;
+        all 32 bits are dedicated to the program the i2c clock;
+        this is to program the clock counter modulus (mod):
+
+3. register 2: write register;
+        bit[7:0]    master 8-bit data to slave;
+        bit[10:8]   i2c user commands;
+
+Register IO access:
+1. register 0: read only;
+2. register 1: write only;
+3. register 2: write only;                 
+******************************************************************/
+// register offset;
+#define S6_I2C_REG_READ_OFFSET      0   // 00
+#define S6_I2C_REG_CLKMOD_OFFSET    1   // 01
+#define S6_I2C_REG_WRITE_OFFSET     2   // 10
+
+// bit position;
+#define S6_I2C_REG_READ_BIT_POS_ACK     8  
+#define S6_I2C_REG_READ_BIT_POS_READY   9
+
+#define S6_I2C_REG_WRITE_BIT_POS_CMD_OFFSET 8   
 
 
 #ifdef __cpluscplus
