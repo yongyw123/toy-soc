@@ -285,10 +285,15 @@ module i2c_master_controller
                 begin
                     // store the command
                     // so that mainly, write or read could be distinguished;
+                    
                     /*
                     !!! IMPORTANT !!!
-                    here, the user_cmd will only get??
-                    ???
+                    it is important to note that this ST_HOLD state
+                    will not be immediately reached;
+                    so it is crucial to probe for the ready_flag;
+                    otherwise, any immediate change to say user_cmd
+                    will not be registered if it is changed before
+                    the FSM reaches this state!!
                     */
                     
                     
