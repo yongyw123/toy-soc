@@ -142,3 +142,36 @@ int core_i2c_master::write_byte(uint8_t data_byte){
    return STATUS_I2C_SLAVE_ACK_ERROR;
 
 }
+
+uint8_t core_i2c_master::read_byte(int terminate){
+    /*
+    @brief  : to read a data byte from the slave;
+    @param  : terminate, 
+            HIGH (NACK) to terminate 
+            LOW (ACK) to continue reading;
+            
+            (this is the i2c protocol where the master
+            sends a NACK to indicate to the slave that 
+            it does not want to read anymore)
+    
+    @retval : the data byte read;
+    @note   : this is a blocking method;
+    */
+
+    uint32_t packed;
+    uint32_t rd_data;
+    
+    // the write register stores different stuffs;
+    // need to pack them;
+    packed = (CMD_RD | (uint8_t)terminate);
+    
+    // send the read request;
+    while(!is_ready()){};
+    REG_WRITE(base_addr, REG_WRITE_OFFSET, packed);
+    
+    // read ;
+    while(!is_ready()){};
+    rd_data = REG_READ(base_addr, REG_READ_OFFSET);
+    return (uint8_t)(rd_data & 0x00FF);
+
+}

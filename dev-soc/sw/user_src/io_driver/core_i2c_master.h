@@ -120,7 +120,7 @@ class core_i2c_master{
 
         // rw;
         int write_byte(uint8_t data_byte);   // master writes a byte to the slave;
-        int read_byte(int terminate);   // master reads a byte from teh slave
+        uint8_t read_byte(int terminate);   // master reads a byte from teh slave
 
         /*
         wrapper to start a complete transfer between
