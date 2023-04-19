@@ -73,6 +73,7 @@ module core_i2c_master_tb
     initial 
     begin
     $display("test starts");
+    $display("----- master write --------");
     
     /* test - write mode only;
     1. set i2c clock rate;
@@ -101,6 +102,7 @@ module core_i2c_master_tb
   
     // issue a write command; 
     @(posedge clk);
+    test_index <= 2;
     addr <= I2C_REG_WRITE_OFFSET;
     wr_data <= {21'b0, CMD_WR, master_data};
     
@@ -112,9 +114,9 @@ module core_i2c_master_tb
     wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);  // expect it to be eventually free;
     
     @(posedge clk);
+    test_index <= 3;
     addr <= I2C_REG_WRITE_OFFSET;
     wr_data <= {21'b0, CMD_STOP, master_data};
-    
     
     // expect the i2c controller to generate
     // a stop condition;
@@ -122,17 +124,56 @@ module core_i2c_master_tb
     wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b0);
     wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);
     
+    // rest;
+    #(100);
+    
+    $display("----- master read slave --------");
     /* test - read mode only;
-    1. set i2c clock rate;
-    2. start i2c;
+    1. start i2c;
     3. issue read command;
     4. stop i2c;
     5. read ready flag;
     */
     
+    // issue a start;
+    @(posedge clk);
+    test_index <= 4;
+    
+    // prep master ack bit (0) to distinguish;
+    // if high, it will be HiZ on the sda line;
+ 
+    master_data = {7'($random), 1'b0};  
+    write <= 1'b1;
+    cs <= 1'b1;
+    addr <= I2C_REG_WRITE_OFFSET;
+    wr_data <= {21'b0, CMD_START, master_data};
+  
+    // issue a read command; 
+    @(posedge clk);
+    test_index <= 5;
+    addr <= I2C_REG_WRITE_OFFSET;
+    wr_data <= {21'b0, CMD_RD, master_data};
+    
+    
+    @(posedge clk);     // it takes one clock cycle to update the relevant bits;
+    //wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b0);  // expect it to be busy;  
+    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);  // expect it to be eventually free;
+    
+    // issue stopl
+    @(posedge clk);
+    test_index <= 6;
+    addr <= I2C_REG_WRITE_OFFSET;
+    wr_data <= {21'b0, CMD_STOP, master_data};
+    
+    // expect the i2c controller to generate
+    // a stop condition;
+    // hence it will be busy for awhile to do this;
+    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b0);
+    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);
     
     
     #(100);
+    
     $display("test stops");
     $stop;
     end
