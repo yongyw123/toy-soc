@@ -90,13 +90,14 @@ module core_i2c_master_top_tb();
     /* monitoring */
     initial
     begin
-        $monitor("time: %0t, test index: %0d, cs: %0b, wr: %0b, rd: %0b, addr: %0B, wrdatad: %0D, wrdatab: %0B, rddata: %0B, scl: %0b, sda: %0b, uut.wr_clkmod: %0b, uut.wr_i2c: %0b",
+        $monitor("time: %0t, test index: %0d, cs: %0b, wr: %0b, rd: %0b, addr: %0B, user_cmd: %0B, wrdatad: %0D, wrdatab: %0B, rddata: %0B, scl: %0b, sda: %0b, uut.wr_clkmod: %0b, uut.wr_i2c: %0b",
             $time,
             test_index,
             cs,
             write,
             read,
             addr[2:0],
+            uut.user_cmd,
             wr_data,
             wr_data,
             rd_data,

@@ -99,15 +99,14 @@ module core_i2c_master_tb
     cs <= 1'b1;
     addr <= I2C_REG_WRITE_OFFSET;
     wr_data <= {21'b0, CMD_START, master_data};
+    @(posedge clk);
     
     // wait for the start condittion
     // read the ready flag then 
     // issue a write command;
     
-    //wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);
-    //wait(rd_data[9] == 1'b0);
-    wait(rd_data[9] == 1'b1);
-    
+    @(posedge clk);
+    wait(rd_data[I2C_REG_READ_BIT_POS_READY] == 1'b1);
      
     @(posedge clk);
     addr <= I2C_REG_WRITE_OFFSET;
