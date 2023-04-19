@@ -46,7 +46,22 @@ int core_i2c_master::set_freq(int user_freq){
     scl_freq = user_freq;
 
     uint32_t scl_mod = (uint32_t)ceil(SYS_CLK_FREQ_HZ/(4*user_freq) - 1);
+    // set the register;
     REG_WRITE(base_addr, REG_CLKMOD_OFFSET, scl_mod);
     return STATUS_SET_FREQ_OK;
 }
+
+int core_i2c_master::is_ready(void){
+    /*
+    @brief  : to see if the i2c master controller is ready to accept any user command;
+    @param  : none;
+    @retval :
+        HIGH if ready;
+        LOW otherwise;
+    */
+   uint32_t rd_data;
+   rd_data = REG_READ(base_addr, BIT_POS_READ_READY);
+   return (int)((rd_data & MASK_READ_READY) >> BIT_POS_READ_READY);
+}
+
 

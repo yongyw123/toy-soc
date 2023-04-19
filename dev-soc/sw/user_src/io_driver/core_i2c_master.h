@@ -94,7 +94,7 @@ class core_i2c_master{
         int set_freq(int user_freq);
 
         // status;
-        int check_ready(void);
+        int is_ready(void);
 
         // basic commands;
         void send_start(void);          // send a start condition;
