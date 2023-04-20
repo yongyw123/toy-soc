@@ -77,6 +77,8 @@ void test_uart(void){
    index_called_p++;
    index_called_n--;
 
+    debug_str("pause for 2 seconds\r\n");
+    delay_busy_ms(2000);
 }
 
 void test_gpio_ctrl_direction(core_gpio *gpio_obj){
@@ -245,3 +247,171 @@ void test_gpio_write(core_gpio *gpio_obj){
    }
 
 }
+
+void test_spi_mosi(core_spi *spi_obj){
+    /*
+    @brief  : to test spi core (except miso line);
+    @param  : spi_obj - pointer to an instantiated spi core object;
+    @retval : none
+    @method : logic analyser;
+    @assumption : board pmod jumpers are used for the spi hw signals;
+    
+    */
+
+   int cpol = 0;
+   int cpha = 0;
+   uint32_t sclk_freq = 100000; // 100 kHz;
+   uint32_t ss_vector = (uint32_t)0xFFFFFFFF;
+   // there is only one slave connected by the constraint map;
+   int which_slave = 0; 
+   
+   // setup;
+   spi_obj->set_transfer_mode(cpol, cpha);
+   spi_obj->set_sclk(sclk_freq);
+   spi_obj->set_ss_n(ss_vector);
+
+    uint8_t wr_data;
+
+    // start;
+    for(int i = 0; i  < 100; i++){
+        // assert;
+        spi_obj->assert_ss(which_slave);
+
+        // interchange between data and command;
+        // high for data;
+        // low for command;
+        spi_obj->set_dc(i%2);
+
+        // start;
+        wr_data = (uint8_t)i;
+        debug_str("\r\n");
+        debug_str("mosi data: ");
+        debug_dec(wr_data);
+        debug_str("\r\n");
+
+        spi_obj->full_duplex_transfer(wr_data);
+
+        // deassert;
+        spi_obj->deassert_ss(which_slave);
+    
+    }
+}
+
+void test_spi_device_lcd_ili9341(core_spi *spi_obj){
+    /*
+    @brief  : to test spi core with an actual SPI device;
+    @param  : spi_obj - pointer to an instantiated spi core object;
+    retval  : none
+
+    Test:
+    IO core to test: SPI;
+    1. SPI core is tested by using an actual external SPI device;
+    2. Device: LCD (chip: ILI9341);
+    3. Method: This could test MOSI and MISO lines;
+
+    datasheet:
+    https://cdn-shop.adafruit.com/datasheets/ILI9341.pdf
+
+    Background;
+    1. the spi core here corresponds to 4-wire Serial (SPI) interface
+        specified in the datasheet;
+
+    What to read:
+    1. from the datasheet, we shall read the following
+    because the slave will only return one byte after a read command is issued;
+    the rest of the information returns multiple bytes, which, is not 
+    supported by the spi core here; why? spi core assummes full duplex single-byte 
+    transaction only;
+
+    how to read;
+    1. first master issues a command to read a specific slave register address;
+    2. then master issues a second dummy data write; which when the slave will respond
+        from the (1) command;
+    slave register (info) to read;
+    1. display power mode @ 0x0A (slave register address);
+        expect it to return 0x8 after power on reset;
+    2. display MADCTL @ 0x0B
+        expected returned value: 0x00
+    3. display pixel format @ 0x0C
+        expected returned value: 8'b0000_0110;
+    4. display image format @ 0x0D;
+        expected returned value: 0x00;
+
+
+    */
+
+   /* 
+   setup 
+   1. sclk rate: 1Mhz;
+   2. cpol: 0;
+   3. cpha: 0
+   */
+    int cpol = 0;
+    int cpha = 0;
+    int which_slave = 0;    // only one slave;
+    uint32_t ss_vector = (uint32_t)0xFFFFFFFF;
+    uint32_t sclk_freq = 1000000;   // 1MHz;
+    int is_data = 1;
+    int is_command = 0;
+    uint8_t dummy_data = 0x00;
+    uint8_t wr_data;
+    uint8_t rd_data;
+
+    spi_obj->set_transfer_mode(cpol, cpha);
+    spi_obj->set_sclk(sclk_freq);
+    spi_obj->set_ss_n(ss_vector);
+
+    // start communicating;
+    spi_obj->assert_ss(which_slave);
+
+    debug_str("test starts\r\n");
+    
+    // read test 0;
+    debug_str("read lcd at 0x0A, expect 0x08 response\r\n");
+    spi_obj->set_dc(is_command);
+    wr_data = 0x0A;
+    spi_obj->full_duplex_transfer(wr_data);
+    spi_obj->set_dc(is_data);
+    rd_data = spi_obj->full_duplex_transfer(dummy_data);
+    debug_str("returned: ");
+    debug_dec(rd_data);
+    debug_str("\r\n");
+
+    // read test 1;
+    debug_str("read lcd at 0x0B, expect 0x00 response\r\n");
+    spi_obj->set_dc(is_command);
+    wr_data = 0x0B;
+    spi_obj->full_duplex_transfer(wr_data);
+    spi_obj->set_dc(is_data);
+    rd_data = spi_obj->full_duplex_transfer(dummy_data);
+    debug_str("returned: ");
+    debug_dec(rd_data);
+    debug_str("\r\n");
+    
+    // read test 2;
+    debug_str("read lcd at 0x0C, expect 0x06 response\r\n");
+    spi_obj->set_dc(is_command);
+    wr_data = 0x0C;
+    spi_obj->full_duplex_transfer(wr_data);
+    spi_obj->set_dc(is_data);
+    rd_data = spi_obj->full_duplex_transfer(dummy_data);
+    debug_str("returned: ");
+    debug_dec(rd_data);
+    debug_str("\r\n");
+    
+    // read test 3;
+    debug_str("read lcd at 0x0D, expect 0x00 response\r\n");
+    spi_obj->set_dc(is_command);
+    wr_data = 0x0D;
+    spi_obj->full_duplex_transfer(wr_data);
+    spi_obj->set_dc(is_data);
+    rd_data = spi_obj->full_duplex_transfer(dummy_data);
+    debug_str("returned: ");
+    debug_dec(rd_data);
+    debug_str("\r\n");
+
+
+    debug_str("test ends\r\n");
+
+}
+

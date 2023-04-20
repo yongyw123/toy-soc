@@ -21,3 +21,6 @@
 **/Packages/
 **/vitis_sdk/
 **/*.dcp
+**/*.vscode
+**/*user_docs/
+**/*.dcp

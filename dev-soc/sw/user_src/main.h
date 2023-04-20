@@ -11,8 +11,12 @@ Purpose: top level directives;
 #include "core_gpio.h"
 #include "core_timer.h"
 #include "core_uart.h"
+#include "core_spi.h"
+
 #include "test_util.h"
 #include "user_util.h"
+
+#include "cam_ov7670.h"
 
 
 // c and cpp linkage;

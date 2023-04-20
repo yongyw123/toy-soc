@@ -95,6 +95,8 @@ extern "C" {
 #define S2_GPO_LED      2   // general purpose output to accommodate LED;
 #define S3_GPI_SW       3   // general purpose input to accommodate switches;
 #define S4_GPIO_PORT    4   // general purpose input output for flexibility and to reduce pinout;
+#define S5_SPI         5   // spi master controller;
+#define S6_I2C_MASTER   6   // i2c master controller;
 
 /* -------------------------------------------------
 *  Register Map of the Individual IO core register;
@@ -166,6 +168,128 @@ Register IO Access;
 // bit position of the status flags within status register;
 #define S1_UART_REG_STATUS_BIT_POS_RX_EMPTY         0
 #define S1_UART_REG_STATUS_BIT_POS_TX_FULL          1
+
+/**************************************************************
+* S5_SPI;
+--------------------
+SPI core has seven registers;
+
+Register Map
+1. register 01 (offset 0): status register; 
+2. register 02 (offset 1): slave select register;
+3. register 03 (offset 2): MOSI write data register;
+4. register 04 (offset 3): MISO read data register;
+5. register 05 (offset 4): ctrl register;
+6. register 06 (offset 5): SPI sclk programming register;
+7. register 07 (offset 6): data or command register;
+
+Register Definition:
+1. register 01: status register;
+    BIT[0]: store the SPI ready state
+        HIGH if SPI is available;
+        LOW otherwise;
+        
+2. register 02: slave select rgeister;
+    for multiple slave selection;
+    BIT[X-1:0], where X is the number of slaves;
+
+3. register 03: MOSI write data register;
+    BIT[7:0]: mosi data;
+    once written, this automatically start the SPI;
+    
+4. register 04: MISO read data register;
+    BIT[7:0] : (assembled) miso data from the slave;
+
+5. register 05: control register;
+    BIT[0]     : cpol;
+    BIT[1]     : cpha;
+    
+6. register 06: SPI sclk register
+    BIT[15:0]   : stores the SPI sclk counter modulus;
+
+7. register 07: data or command register;
+    BIT[0]     : current MOSI byte is command or data for the slave;
+                HIGH if the current SPI byte is a data;
+                LOW otherwise;
+                (this is not SPI intrinsic; it 
+                is created for convenience);
+
+Register IO Access:
+1. Status Register          : read only;
+2. Slave Select Register    : write only;
+3. MOSI Write Data Register : write only;
+4. MISO Read Data Register  : read only; 
+5. Control Regitser         : write only
+6. SPI sclk register        : write only
+7. Data or Command Register : write only
+******************************************************************/
+#define S5_SPI_TOTAL_REG_NUM        6
+
+// register offset;
+#define S5_SPI_REG_STATUS_OFFSET    0   // 000
+#define S5_SPI_REG_SS_OFFSET        1   // 001
+#define S5_SPI_REG_MOSI_WR_OFFSET   2   // 010
+#define S5_SPI_REG_MISO_RD_OFFSET   3   // 011
+#define S5_SPI_REG_CTRL_OFFSET      4   // 100
+#define S5_SPI_REG_SCLK_MOD_OFFSET  5   // 101
+#define S5_SPI_REG_DC_OFFSET        6   // 110
+    
+// bit position;
+#define S5_SPI_REG_STATUS_BIT_POS_READY     0
+#define S5_SPI_REG_CTRL_BIT_POS_CPOL        0
+#define S5_SPI_REG_CTRL_BIT_POS_CPHA        1
+#define S5_SPI_REG_DC_BIT_POS_DC            0
+
+// misc;
+#define S5_SPI_REG_SCLK_WIDTH           16
+#define S5_SPI_REG_TOTAL_STATUS_NUM     1
+
+// DC contrl signal to indicate to the slave;
+// HIGh if it is data; LOW if it is a command;
+#define S5_SPI_REG_DC_DATA 1
+
+
+
+/**************************************************************
+* S6_I2C_MASTER
+--------------------
+i2c master has three registers;
+
+Register Map
+1. register 0 (offset 0): read register 
+2. register 1 (offset 1): i2c clock rate set register;
+3. register 2 (offset 2): write register;
+
+Register Definition:
+1. register 0: read register
+        bit[7:0]    received slave data;
+        bit[8]      slave ACK bit;
+        bit[9]      i2c master controller ready status
+
+2. register 1: i2c clock rate register;
+        all 32 bits are dedicated to the program the i2c clock;
+        this is to program the clock counter modulus (mod):
+
+3. register 2: write register;
+        bit[7:0]    master 8-bit data to slave;
+        bit[10:8]   i2c user commands;
+
+Register IO access:
+1. register 0: read only;
+2. register 1: write only;
+3. register 2: write only;                 
+******************************************************************/
+// register offset;
+#define S6_I2C_REG_READ_OFFSET      0   // 00
+#define S6_I2C_REG_CLKMOD_OFFSET    1   // 01
+#define S6_I2C_REG_WRITE_OFFSET     2   // 10
+
+// bit position;
+#define S6_I2C_REG_READ_BIT_POS_ACK     8  
+#define S6_I2C_REG_READ_BIT_POS_READY   9
+
+#define S6_I2C_REG_WRITE_BIT_POS_CMD_OFFSET 8   
+
 
 #ifdef __cpluscplus
 } // extern "C";

@@ -6,6 +6,7 @@
 #include "core_gpio.h"
 #include "core_timer.h"
 #include "user_util.h"
+#include "core_spi.h"
 
 /* ------------------------------------------------
 Purpose: test functions to check each HW IO cores;
@@ -98,6 +99,48 @@ for safety;
 -----------------------------------------------------------*/
 void test_gpio_read(core_gpio *gpio_obj, core_gpo *led_obj)__attribute__((noreturn)); 
 void test_gpio_write(core_gpio *gpio_obj)__attribute__((noreturn));
+
+
+/*-----------------------------------------------------------
+IO core to test: SPI
+background:
+1. spi is a full duplex with the board being the master;
+2. intended spi slave is the ILI9341 LCD;
+
+test method:
+before trying the spi core on the lcd;
+we shall use logic analyser;
+in this setting,
+we could test the sclk, mosi, dcx lines;
+for miso line; we could loop it back BUT we wont do this
+out of fear that it may short the board;
+
+what to test;
+1. spi clock rate;
+-----------------------------------------------------------*/
+void test_spi_mosi(core_spi *spi_obj);
+
+/*
+IO core to test: SPI;
+1. SPI core is tested by using an actual external SPI device;
+2. Device: LCD (chip: ILI9341);
+3. Method: This could test MOSI and MISO lines;
+4. 
+*/
+void test_spi_device_lcd_ili9341(core_spi *spi_obj);
+
+/*-----------------------------------------------------------
+IO core to test: i2c
+Note:
+1. the test files are in cam_ov7670
+
+Test Method:
+1. to communicate with an actual i2c device; 
+
+Device:
+1. Camera OV7670;
+-----------------------------------------------------------*/
+
 
 
 #ifdef __cpluscplus

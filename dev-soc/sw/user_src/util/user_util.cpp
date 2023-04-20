@@ -59,7 +59,7 @@ void delay_busy_ms(uint64_t ms){
 // NOP then;
 #else
     void debug_str(const char *str){}
-    
-    void debug_num(int num){}
-
+    void debug_dec(int dec_num){}
+    void debug_hex(int hex_num){}
+    void debug_bin(int bin_num){}
 #endif
