@@ -30,7 +30,7 @@ module mmio_sys
         parameter 
         SW_NUM = 8,   // number of switches at the GPI port;
         LED_NUM = 8,  // number of LED at the GPO port;
-        PORT_NUM = 4,  // number of port for GPIO (board PMOD jumper)
+        GPIO_PORT_NUM = 4,  // number of port for GPIO (board PMOD jumper)
         
         UART_DATA_BIT = 8,                  // number of UART data bits;
         UART_STOP_BIT_SAMPLING_NUM = 16,    // this corresponds to one stop bit; (16 oversampling);
@@ -59,7 +59,7 @@ module mmio_sys
     /* HW pin mapping (by the constraint file) */
     input logic [SW_NUM-1:0] sw, // gpi
     output logic [LED_NUM-1:0] led,  // gpo;
-    inout tri[PORT_NUM-1:0] pmod,    // tristate for gpio;
+    inout tri[PORT_NUM-1:0] gpio,    // tristate for gpio;
     
     // uart;
     input logic uart_rx,    // receiver;
@@ -201,7 +201,7 @@ module mmio_sys
         .addr(core_addr_reg_array[`S4_GPIO_PORT]),
         .wr_data(core_data_wr_array[`S4_GPIO_PORT]),
         .rd_data(core_data_rd_array[`S4_GPIO_PORT]),
-        .dinout(pmod)    // this is a tristate, mapped to the board jumper (pmod);
+        .dinout(gpio)    // this is a tristate, mapped to the board jumper (pmod);
     
     ); 
     

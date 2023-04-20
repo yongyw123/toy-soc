@@ -42,7 +42,6 @@ module mcs_top
         /* external mapping from boards; */
         input logic [15:0] SW,      // use all switches available on the board;
         output logic [15:0] LED,    // use all leds available on the board;
-        inout tri[3:0] PMOD_JD,     // PMOD jumpers at JD1 to JD4; set to tristate since it is for GPIO;
         
         // uart;
         // beware of the mix of tx and rx;
@@ -58,6 +57,11 @@ module mcs_top
         output logic SPI_SS_JC4, // slave select; asset active low;
         output logic SPI_DC_JC7,  // is the current MOSI a data or command for the slave?
         
+        /* camera ov7670 control 
+        1. use i2c protocol;
+        2. require a clock driver of 24 MHz (to drive the camera itself);
+        3. use a HW reset;
+        */
         // i2c;
         // uses PMOD jumper @ JA;
         output tri I2C_SCL_JA01,    // spi clock; tri because we have a pull up resistor;
@@ -65,7 +69,11 @@ module mcs_top
         
         // output clocks @ JA jumpers;
         output CLKOUT_24M_JA03,
-        output CLKOUT_12M_JA04
+        output CLKOUT_12M_JA04,
+        
+        // hw reset;
+        inout tri GPIO_CAM_OV7670_RESETN_JA07     // configure a pmod jumper as gpio; 
+        
         
     );
     
@@ -125,12 +133,19 @@ module mcs_top
     
     #(.SW_NUM(16), 
     .LED_NUM(16),
-    .PORT_NUM(4), 
-    .UART_DATA_BIT(8),
+    
+    /* uart for serial console debugging */
+    .UART_DATA_BIT(8),      
     .UART_STOP_BIT_SAMPLING_NUM(16),
+    
+    /* for lcd sanity control */
     .SPI_DATA_BIT(8),
     .SPI_SLAVE_NUM(1),
-    .I2C_DATA_BIT(8))
+    
+    /* for camera ov7670 */
+    .I2C_DATA_BIT(8),   // for camera control;
+    .GPIO_PORT_NUM(1)   // for camera hw reset;
+    )
      
     mmio_unit
     (
@@ -144,7 +159,6 @@ module mcs_top
         .mmio_rd_data(user_rd_data),
         .sw(SW),
         .led(LED),
-        .pmod(PMOD_JD),
         
         // uart signals; 
         .uart_tx(UART_RXD_OUT), 
@@ -157,9 +171,13 @@ module mcs_top
         .spi_ss_n(SPI_SS_JC4),
         .spi_data_or_command(SPI_DC_JC7),
         
-        // i2c;
+        /* 
+        i2c; 
+        camera ov7670; 
+        */        
         .i2c_scl(I2C_SCL_JA01),
-        .i2c_sda(I2C_SDA_JA02)
+        .i2c_sda(I2C_SDA_JA02),
+        .gpio(GPIO_CAM_OV7670_RESETN_JA07)
         
     );
     
