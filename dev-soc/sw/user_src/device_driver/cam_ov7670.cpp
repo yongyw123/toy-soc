@@ -453,6 +453,37 @@ void ov7670_set_flip(uint8_t hflip, uint8_t vflip){
 	}
 }
 
+void ov7670_set_test_pattern(uint8_t test_pattern){
+	/*
+	 @brief	:  to generate test pattern
+	 @param	: test_pattern
+	 @retval: none
+	 @note: three available test patterns:
+	  		0: none;
+	  		1: single pixel wide vertical RGB stropes
+	  		2: 8-bar colour bar
+	  		3: 8-bar colour with fading
+	 */
+
+	if(test_pattern == OV7670_TEST_PATTERN_NONE){
+		ov7670_update_reg(OV7670_REG_SCALING_XSC, OV7670_SCALING_XSC_TEST_PATTERN_LOWER_MASK, 0x00);
+		ov7670_update_reg(OV7670_REG_SCALING_YSC, OV7670_SCALING_YSC_TEST_PATTERN_UPPER_MASK, 0x00);
+	}
+	else if(test_pattern == OV7670_TEST_PATTERN_SHIFTING){
+		ov7670_update_reg(OV7670_REG_SCALING_XSC, OV7670_SCALING_XSC_TEST_PATTERN_LOWER_MASK, MASK_TOGGLE_BIT_B7);
+		ov7670_update_reg(OV7670_REG_SCALING_YSC, OV7670_SCALING_YSC_TEST_PATTERN_UPPER_MASK, 0x00);
+	}
+	else if(test_pattern == OV7670_TEST_PATTERN_COLOUR_BAR){
+		ov7670_update_reg(OV7670_REG_SCALING_XSC, OV7670_SCALING_XSC_TEST_PATTERN_LOWER_MASK, 0x00);
+		ov7670_update_reg(OV7670_REG_SCALING_YSC, OV7670_SCALING_YSC_TEST_PATTERN_UPPER_MASK, MASK_TOGGLE_BIT_B7);
+	}
+	// OV7670_TEST_PATTERN_COLOUR_BAR_FADING
+	else{
+		ov7670_update_reg(OV7670_REG_SCALING_XSC, OV7670_SCALING_XSC_TEST_PATTERN_LOWER_MASK, MASK_TOGGLE_BIT_B7);
+		ov7670_update_reg(OV7670_REG_SCALING_YSC, OV7670_SCALING_YSC_TEST_PATTERN_UPPER_MASK, MASK_TOGGLE_BIT_B7);
+	}
+}
+
 
 const uint8_t ov7670_basic_init_array[][2] = {
 		/*-----------------------------------------------------------

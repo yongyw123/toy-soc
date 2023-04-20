@@ -62,6 +62,7 @@ void ov7670_set_pixel_clock(void);  // used only when the MCO is 36Mhz;
 void ov7670_set_QVGA_size(void);    // set to QVGA: 240 x 320;
 void ov7670_set_output_format(uint8_t output_format);   // YUV422 or RGB565?
 void ov7670_set_flip(uint8_t hflip, uint8_t vflip);
+void ov7670_set_test_pattern(uint8_t test_pattern);
 
 // test drivers;
 void ov7670_test(void);
