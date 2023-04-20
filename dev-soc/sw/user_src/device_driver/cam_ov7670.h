@@ -8,6 +8,7 @@
 #include "core_timer.h"
 #include "core_spi.h"
 #include "core_i2c_master.h"
+#include "main.h"
 
 /* ------------------------------------------------
 Purpose: APP driver for Camera OV7670;
@@ -21,6 +22,15 @@ Content:
 #ifdef __cpluscplus
 extern "C" {
 #endif
+
+/* constants */
+#define OV7670_HW_RSTN_PIN_JA07 0   // which gpio port index used for camera hw reset;
+
+
+// hw reset using an gpio pin;
+void ov7670_hw_reset(core_gpio *gpio_obj);
+
+
 
 
 
