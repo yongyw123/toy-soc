@@ -61,7 +61,11 @@ module mcs_top
         // i2c;
         // uses PMOD jumper @ JA;
         output tri I2C_SCL_JA01,    // spi clock; tri because we have a pull up resistor;
-        inout tri I2C_SDA_JA02      // spi data; inout becos shared between master and slaves;
+        inout tri I2C_SDA_JA02,      // spi data; inout becos shared between master and slaves;
+        
+        // output clocks @ JA jumpers;
+        output CLKOUT_24M_JA03,
+        output CLKOUT_12M_JA04
         
     );
     
@@ -93,9 +97,10 @@ module mcs_top
     
     /* -------------------
     instantiation;
-    1. cpu;
-    2. bridge between microblaze io bus and user bus;
-    3. mmio system (where all the io cores reside);
+    1. cpu_unit     : ip-generated microblaze mcs
+    2. bridge unit  : bridge between microblaze io bus and user bus;
+    3. mmio_unit    : mmio system (where all the io cores reside);
+    4. clock_unit   : ip-generated MMCM (mixed mode clock manager);
     -----------------*/
     
     // cpu
@@ -158,6 +163,28 @@ module mcs_top
         
     );
     
+    
+    clk_wiz_0 clock_unit
+   (
+    // Clock out ports
+    .clkout_12M(CLKOUT_12M_JA04),     // output clkout_12M
+    .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M
+    
+    // Status and control signals
+    .reset(reset), // input reset
+    
+    // to turn off the clock for power saving;
+    // not used for now;
+    .power_down(),   // input power_down
+    
+    // assertion of locked here means that the output clock
+    // is stable; ready for use?
+    // LOCKED signal of MMCM will go LOW if the input clock of MMCM is unavailable?
+    // not used for now;
+    .locked(),       // output locked
+   // Clock in ports
+    .clk_in1(clk));      // system clock at 100Mhz;
+
 endmodule
 
 `endif // _MCS_TOP_SV;
