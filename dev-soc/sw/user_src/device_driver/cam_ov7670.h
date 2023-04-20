@@ -32,9 +32,14 @@ extern "C" {
 /*------------------------------
 function prototype;
 ------------------------------*/
+// basic ov7670 rw;
 void ov7670_hw_reset(void); // hw reset using an gpio pin;
 int ov7670_write(uint8_t reg_addr, uint8_t wr_data); 
 int ov7670_read(uint8_t reg_addr, uint8_t *rd_buffer);
+void OV7670_update_reg(uint8_t reg_addr, uint8_t bit_mask_field, uint8_t bit_mask_set);
+
+
+// test drivers;
 void ov7670_test(void);
 
 

@@ -140,7 +140,36 @@ void ov7670_test(void){
     debug_str("\r\n");
     
     delay_busy_ms(1);
-
-
 }
+
+void OV7670_update_reg(uint8_t reg_addr, uint8_t bit_mask_field, uint8_t bit_mask_set){
+	/*
+	 @brief: A utility tool to update certain bit of the control register in OV7670 camera;
+	 @param:
+	 	    reg_addr        : which control register address to update?
+	  		bit_mask_field  : for masking;
+	  		bit_mask_set    : for setting;
+	 @output: none
+	 
+	 @usage:
+	 reg_addr		= 0x00 			// the control register is located at 0x00;
+	 bit_mask_field	= 0b0010_0010	// the user want to change the second and sixth bit;
+	 bit_mask_set	= 0b0010_0000 	// the user want to set the second to LOW and the sixth to HIGH;
+	 
+	 */
+	uint8_t rd_buffer[1]; // to read from the camera register;
+	uint8_t wr_reg_val;
+
+	// read the existing config to avoid changing other bit fields;
+	ov7670_read(reg_addr, rd_buffer);
+	wr_reg_val = rd_buffer[0];
+
+	// clear the bit fields of interest;
+	wr_reg_val &= ~bit_mask_field;
+
+	// update the bit of interest;
+	wr_reg_val |= bit_mask_set;
+	ov7670_write(reg_addr, wr_reg_val);
+}
+
 
