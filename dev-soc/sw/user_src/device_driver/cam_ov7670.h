@@ -46,6 +46,10 @@ void ov7670_read_array(const uint8_t input_array[][2]);     // read an array of 
 // constants;
 extern const uint8_t ov7670_basic_init_array[][2];    // array of initial values to set the basic control register of the camera;
 
+// specific camera config;
+void user_OV7670_set_pixel_clock(void);
+
+
 // test drivers;
 void ov7670_test(void);
 
