@@ -106,7 +106,7 @@ void ov7670_test(void){
 
     */ 
     
-    int chosen_reg = 0x00;
+    uint8_t chosen_reg = 0x00;
     uint8_t test_register_addr_set_00[1] = {chosen_reg};
 	uint8_t test_register_value_set_00[1] = {0x11};
 
@@ -115,7 +115,7 @@ void ov7670_test(void){
 
     // HW reset to clear all registers to default;
     ov7670_hw_reset();
-    delay_busy_ms(10);
+    delay_busy_ms(1);
 
     // read to make sure reg value is at default;
     ov7670_read(test_register_addr_set_00[0], read_buffer);
@@ -123,7 +123,7 @@ void ov7670_test(void){
     debug_hex(read_buffer[0]);
     debug_str("\r\n");
 
-    delay_busy_ms(10);
+    delay_busy_ms(1);
 
     // change the register values;
     ov7670_write(test_register_addr_set_00[0], test_register_value_set_00[0]);
@@ -131,7 +131,7 @@ void ov7670_test(void){
     debug_hex(test_register_value_set_00[0]);
     debug_str("\r\n");
     
-    delay_busy_ms(10);
+    delay_busy_ms(1);
 
     // read if the reg val has been updated;
     ov7670_read(test_register_addr_set_00[0], read_buffer);
@@ -139,7 +139,7 @@ void ov7670_test(void){
     debug_hex(read_buffer[0]);
     debug_str("\r\n");
     
-    delay_busy_ms(10);
+    delay_busy_ms(1);
 
 
 }
