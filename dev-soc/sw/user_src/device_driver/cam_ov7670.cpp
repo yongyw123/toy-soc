@@ -298,6 +298,94 @@ void user_OV7670_set_pixel_clock(void){
 
 }
 
+void user_OV7670_set_QVGA_size(void){
+	/*
+	 @brief	: set OV7670 output resolution to QVGA (320 x 240 dimension);
+	 @param	: none
+	 @retval: none
+	 */
+
+	/* Steps based on the following implementation guide;
+	 * Implementation Guide: Reference: https://www.haoyuelectronics.com/Attachment/OV7670%20+%20AL422B(FIFO)%20Camera%20Module(V2.0)/OV7670%20Implementation%20Guide%20(V1.0).pdf
+	 * 1. TSLB register (0x3A): disable auto windowing;
+	 * 2. COM7 (0x12): disabled predefined QVGA format since we will be manually scaling it;
+	 * 3. COM3 (0x0C): Enable scaling and DCW;
+	 * 4. COM14 (0x3E): Enable DCW and scaling PCLK enable;
+	 * 5. SCALING_XSC (0x70): scaling ratio for horizontal
+	 * 6. SCALING_YSC (0x71): scaling ratio for vertical;
+	 * 7. SCALING_DCWCTR (0x72): Downsampling vertically and horizontally;
+	 * 8. SCALING_PCLK_DIV (0x73): adjust the PCLK timing to account for the extra time required to change the image size;
+	 * 9. windowing (frame control): select the window of interest;
+	 * 10. SCALING_PCLK_DELAY (0xA2): pixel clock offset (delay) for reason as above (pixel clock divider);
+	 */
+
+	//> variable declarations;
+	// for frame control (windowing);
+	uint16_t vstart;
+	uint16_t vstop;
+	uint16_t hstart;
+	uint16_t hstop;
+	uint16_t edge_offset;
+
+	// step 01: disable auto window
+	ov7670_update_reg(OV7670_REG_TSLB, OV7670_TSLB_AUTO_WINDOW_MASK , OV7670_TSLB_AUTO_WINDOW_SET_DISABLE);
+
+	// step 02: disabled predefined QVGA output format;
+	ov7670_update_reg(OV7670_REG_COM7, USER_OV7670_COM7_QVGA_MASK , USER_OV7670_COM7_QVGA_DISABLE);
+
+	// step 03: enable scaling and DCW;
+	ov7670_update_reg(OV7670_REG_COM3, OV7670_COM3_SCALE_MASK, OV7670_COM3_SCALE_ENABLE);
+	ov7670_update_reg(OV7670_REG_COM3, OV7670_COM3_DCW_MASK, OV7670_COM3_DCW_ENABLE);
+
+	//> step 04: enable DCW; divide PCLK by 2;
+	// because QVGA = VGA/2;
+	// see Figure 07 QVGA Frame Timing of the datasheet;
+	ov7670_write(OV7670_REG_COM14, 0x19);	//0x19 == 0b00011001;
+
+	//> step 05, 06: scaled by 1.0 (no scaling) for horizontal and vertical;
+	// use update_reg function to avoid corrupting the test pattern bit under the same reg;
+	// 0x20 == no scaling;
+	ov7670_update_reg(OV7670_REG_SCALING_XSC, OV7670_SCALING_XSC_SCALE_FACTOR_MASK, 0x20);
+	ov7670_update_reg(OV7670_REG_SCALING_YSC, OV7670_SCALING_YSC_SCALE_FACTOR_MASK, 0x20);
+
+	//> step 07: downsampling by 2 in vertical and horizontal direction
+	// so that (640, 480) => (320, 240);
+	ov7670_write(OV7670_REG_SCALING_DCWCTR, 0x11);
+
+	//> step 08; divide DSP clock divider by two to align with step 04;
+	ov7670_write(OV7670_REG_SCALING_PCLK_DIV, 0xF1);
+
+	//> step 09: frame control;
+	/*****************************
+	 * ACKNOWLEDGMENT
+	 * 1. The values here are adapted from the web;
+	 * 2. Author: Adafruit communities
+	 * 3. URL: https://github.com/adafruit/Adafruit_OV7670/blob/master/src/ov7670.c
+	 *****************************/
+	// original size: 480 x 640;
+	vstart = 10;
+	hstart = 174;
+	edge_offset = 4;
+
+	vstop = vstart + 480;
+	hstop = (hstart + 640) % 784;	// wrapped by 784; see Figure 6 of OV7670 datasheet;
+
+	ov7670_write(OV7670_REG_HSTART, hstart >> 3);
+	ov7670_write(OV7670_REG_HSTOP, hstop >> 3);
+	ov7670_write(OV7670_REG_HREF, (edge_offset << 6) | ((hstop & 0b111) << 3) | (hstart & 0b111));
+
+	ov7670_write(OV7670_REG_VSTART, vstart >> 2);
+	ov7670_write(OV7670_REG_VSTOP, vstop >> 2);
+	// need to use update_reg since VREF also set other stuffs;
+	ov7670_update_reg(OV7670_REG_VREF, OV7670_VREF_MASK, ((vstop & 0b11) << 2) | (vstart & 0b11));
+
+	//> step 10: pclk offset;
+	// recommended to use two pixels offset by the implementation guide;
+	ov7670_write(OV7670_REG_SCALING_PCLK_DELAY, 0x02);
+
+}
+
+
 
 const uint8_t ov7670_basic_init_array[][2] = {
 		/*-----------------------------------------------------------

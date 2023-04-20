@@ -48,7 +48,7 @@ extern const uint8_t ov7670_basic_init_array[][2];    // array of initial values
 
 // specific camera config;
 void user_OV7670_set_pixel_clock(void);
-
+void user_OV7670_set_QVGA_size(void);
 
 // test drivers;
 void ov7670_test(void);
