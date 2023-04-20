@@ -59,7 +59,7 @@ module mmio_sys
     /* HW pin mapping (by the constraint file) */
     input logic [SW_NUM-1:0] sw, // gpi
     output logic [LED_NUM-1:0] led,  // gpo;
-    inout tri[PORT_NUM-1:0] gpio,    // tristate for gpio;
+    inout tri[GPIO_PORT_NUM-1:0] gpio,    // tristate for gpio;
     
     // uart;
     input logic uart_rx,    // receiver;
@@ -191,7 +191,7 @@ module mmio_sys
     ); 
     
     // general purpose input and output;
-    core_gpio #(.PORT_WIDTH(PORT_NUM)) gpio_unit
+    core_gpio #(.PORT_WIDTH(GPIO_PORT_NUM)) gpio_unit
     (
         .clk(clk),
         .reset(reset),
