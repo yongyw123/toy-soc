@@ -254,12 +254,12 @@ void ov7670_read_array(const uint8_t input_array[][2]){
 }
 
 
-void user_OV7670_set_pixel_clock(void){
+void ov7670_set_pixel_clock(void){
 	/*
 	 @brief		: set the OV7670 output pixel clock to 24MHz freq;
 	 @param		: none
 	 @retval	: none
-	 @assumption:	input clock driving the camera is of 24Mhz;
+	 @assumption: input clock driving the camera is of 36Mhz;
 	 */
 
 	/*========================
@@ -298,7 +298,7 @@ void user_OV7670_set_pixel_clock(void){
 
 }
 
-void user_OV7670_set_QVGA_size(void){
+void ov7670_set_QVGA_size(void){
 	/*
 	 @brief	: set OV7670 output resolution to QVGA (320 x 240 dimension);
 	 @param	: none
@@ -385,6 +385,42 @@ void user_OV7670_set_QVGA_size(void){
 
 }
 
+void ov7670_set_output_format(uint8_t output_format){
+	/*
+	 * Purpose: set OV7670 camera output format in RGB565 and the output range;
+	 * @input: output_format
+	 * 		0: RGB565
+	 * 		1: YUV422
+	 * @output: None
+	 * @assumption: if YUV is set, it will always be UYVY order;
+	 *
+	 * Implementation Guide: https://www.haoyuelectronics.com/Attachment/OV7670%20+%20AL422B(FIFO)%20Camera%20Module(V2.0)/OV7670%20Implementation%20Guide%20(V1.0).pdf
+	 */
+
+	//> Note;
+	// to change the output format;
+	// COM7 and COM15 registers are of interest;
+	if(output_format == OV7670_OUTPUT_FORMAT_RGB565){
+		ov7670_update_reg(OV7670_REG_COM7, USER_OV7670_COM7_OUTPUT_FORMAT_MASK, USER_OV7670_COM7_OUTPUT_FORMAT_RGB565_ENABLE);
+		ov7670_update_reg(OV7670_REG_COM15, USER_OV7670_COM15_RGB565_OPTION_MASK, USER_OV7670_COM15_RGB565_OPTION_ENABLE);
+	}
+	// YUV422;
+	else{
+		// first, disable RGB option;
+		ov7670_update_reg(OV7670_REG_COM15, USER_OV7670_COM15_RGB565_OPTION_MASK, USER_OV7670_COM15_RGB565_OPTION_DISABLE);
+		ov7670_update_reg(OV7670_REG_COM7, USER_OV7670_COM7_OUTPUT_FORMAT_MASK, USER_OV7670_COM7_OUTPUT_FORMAT_YUV_ENABLE);
+
+		// ensure Y of YUV is always the second byte; eg: UYVY or VYUY;
+		// this is because the application assumes the above;
+		ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x04);
+		ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x00); // this sets UYVY;
+	}
+
+	//> common setting for both formats;
+	// use full output range: [0, 255];
+	//> to set full output range of RGB565;
+	ov7670_update_reg(OV7670_REG_COM15, USER_OV7670_COM15_OUTPUT_RANGE_MASK, USER_OV7670_COM15_OUTPUT_RANGE_FULL_SET);
+}
 
 
 const uint8_t ov7670_basic_init_array[][2] = {

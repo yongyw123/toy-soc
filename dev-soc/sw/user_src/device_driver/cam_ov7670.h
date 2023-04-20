@@ -25,7 +25,18 @@ extern "C" {
 /*-------------------------------
 * constants 
 -------------------------------*/
-#define OV7670_HW_RSTN_PIN_JA07 0       // which gpio port index used for camera hw reset;
+#define OV7670_HW_RSTN_PIN_JA07     0 // which gpio port index used for camera hw reset;
+#define OV7670_OUTPUT_FORMAT_RGB565 0 // set the camera output to RGB565
+#define OV7670_OUTPUT_FORMAT_YUV422 1 // set the camera output to YUV422
+
+#define MASK_TOGGLE_BIT_B0 0b00000001
+#define MASK_TOGGLE_BIT_B1 0b00000010
+#define MASK_TOGGLE_BIT_B2 0b00000100
+#define MASK_TOGGLE_BIT_B3 0b00001000
+#define MASK_TOGGLE_BIT_B4 0b00010000
+#define MASK_TOGGLE_BIT_B5 0b00100000
+#define MASK_TOGGLE_BIT_B6 0b01000000
+#define MASK_TOGGLE_BIT_B7 0b10000000
 
 // slave device id if left shifted one-bit plus R/W bit, this translates to 0x42 for write and 0x43 for read;
 #define OV7670_DEV_ID           0x21  
@@ -47,8 +58,9 @@ void ov7670_read_array(const uint8_t input_array[][2]);     // read an array of 
 extern const uint8_t ov7670_basic_init_array[][2];    // array of initial values to set the basic control register of the camera;
 
 // specific camera config;
-void user_OV7670_set_pixel_clock(void);
-void user_OV7670_set_QVGA_size(void);
+void ov7670_set_pixel_clock(void);  // used only when the MCO is 36Mhz;
+void ov7670_set_QVGA_size(void);    // set to QVGA: 240 x 320;
+void ov7670_set_output_format(uint8_t output_format);   // YUV422 or RGB565?
 
 // test drivers;
 void ov7670_test(void);
