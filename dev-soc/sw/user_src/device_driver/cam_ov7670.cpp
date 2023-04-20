@@ -170,8 +170,6 @@ void ov7670_update_reg(uint8_t reg_addr, uint8_t bit_mask_field, uint8_t bit_mas
 	ov7670_write(reg_addr, wr_reg_val);
 }
 
-
-
 void ov7670_write_array(const uint8_t input_array[][2]){
 	/*
 	 @brief   : initializing the OV7670 configurations based on a given array sequence;
@@ -204,5 +202,52 @@ void ov7670_write_array(const uint8_t input_array[][2]){
 
 		// setting time; not strictly required;
 		delay_busy_ms(10);
+	}
+}
+
+void ov7670_read_array(const uint8_t input_array[][2]){
+	/*
+	 @brief     : read OV7670 register value and check them against a given input array;
+	 @input     : an array of arrays: {reg address, expected reg value}
+	 @output    : None
+	 @note      : This function will serial print the result via UART. Connect to a PC to view them.
+	 @assumption: input_array has a end-of-marker: OV7670_REG_LAST; otherwise it will stuck in a loop.
+	 */
+
+	//> variable declarations;
+	uint8_t read_buffer[1];							// to read from the camera register;
+	uint8_t read_reg_address;						// which register address?
+	uint8_t read_reg_value;							// = read_buffer[0];
+	uint8_t expected_reg_value;						// compared against the expected reg value;
+	uint8_t match_status;							// read reg value == expected reg value?
+	uint8_t index;									// loop index;
+
+	//> check the register of interest;
+	index = 0;
+	read_reg_address = OV7670_REG_LAST - 1; // dummy initialized;
+
+	while(read_reg_address != OV7670_REG_LAST){
+		// setting up;
+		read_reg_address = input_array[index][0];
+		expected_reg_value = input_array[index][1];
+
+		// read from the camera register;
+		ov7670_read(read_reg_address, read_buffer);
+		read_reg_value = read_buffer[0];
+
+		// compare;
+		match_status = (read_reg_value == expected_reg_value);
+		
+        // serial print out;
+        debug_str("addr: "); debug_hex(read_reg_address);
+        debug_str("rd val: "); debug_hex(read_reg_value);
+        debug_str("ex val: "); debug_hex(expected_reg_value);
+        debug_str("matched?: "); debug_hex(match_status);
+        
+		// settling time;
+		delay_busy_ms(10);
+
+		// next;
+		index++;
 	}
 }

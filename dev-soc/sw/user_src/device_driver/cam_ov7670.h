@@ -39,8 +39,9 @@ int ov7670_write(uint8_t reg_addr, uint8_t wr_data);
 int ov7670_read(uint8_t reg_addr, uint8_t *rd_buffer);
 void ov7670_update_reg(uint8_t reg_addr, uint8_t bit_mask_field, uint8_t bit_mask_set);
 
-// initialize list of camera registers;
-void ov7670_write_array(const uint8_t input_array[][2]);
+// to deal with an array of camera control registers;
+void ov7670_write_array(const uint8_t input_array[][2]);    // write to an array of the camera control registers; 
+void ov7670_read_array(const uint8_t input_array[][2]);     // read an array of the camera control registers;
 
 // test drivers;
 void ov7670_test(void);
