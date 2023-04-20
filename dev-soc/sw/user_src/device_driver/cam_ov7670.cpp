@@ -531,6 +531,9 @@ void ov7670_init(uint8_t output_format){
 	// align the orientation; application specific;
 	debug_str("setting orientation ...\r\n");
 	ov7670_set_flip(1, 1);
+	
+	// done;
+	debug_str("done\r\n");
 
 }
 
