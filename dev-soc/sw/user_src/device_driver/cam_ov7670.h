@@ -8,7 +8,8 @@
 #include "core_timer.h"
 #include "core_spi.h"
 #include "core_i2c_master.h"
-#include "main.h"
+#include "cam_ov7670_reg.h"
+
 
 /* ------------------------------------------------
 Purpose     : app driver to configure Camera OV7670;
@@ -36,8 +37,10 @@ function prototype;
 void ov7670_hw_reset(void); // hw reset using an gpio pin;
 int ov7670_write(uint8_t reg_addr, uint8_t wr_data); 
 int ov7670_read(uint8_t reg_addr, uint8_t *rd_buffer);
-void OV7670_update_reg(uint8_t reg_addr, uint8_t bit_mask_field, uint8_t bit_mask_set);
+void ov7670_update_reg(uint8_t reg_addr, uint8_t bit_mask_field, uint8_t bit_mask_set);
 
+// initialize list of camera registers;
+void ov7670_write_array(const uint8_t input_array[][2]);
 
 // test drivers;
 void ov7670_test(void);

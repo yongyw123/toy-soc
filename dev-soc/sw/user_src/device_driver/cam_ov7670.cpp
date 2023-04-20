@@ -7,8 +7,6 @@ i2c to configure the camera;
 core_gpio obj_gpio(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S4_GPIO_PORT));
 core_i2c_master obj_i2c(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S6_I2C_MASTER));
 
-
-
 void ov7670_hw_reset(void){
     /*
     @brief  : to HW reset the camera using PIN @ JA07;
@@ -142,7 +140,7 @@ void ov7670_test(void){
     delay_busy_ms(1);
 }
 
-void OV7670_update_reg(uint8_t reg_addr, uint8_t bit_mask_field, uint8_t bit_mask_set){
+void ov7670_update_reg(uint8_t reg_addr, uint8_t bit_mask_field, uint8_t bit_mask_set){
 	/*
 	 @brief: A utility tool to update certain bit of the control register in OV7670 camera;
 	 @param:
@@ -173,3 +171,38 @@ void OV7670_update_reg(uint8_t reg_addr, uint8_t bit_mask_field, uint8_t bit_mas
 }
 
 
+
+void ov7670_write_array(const uint8_t input_array[][2]){
+	/*
+	 @brief   : initializing the OV7670 configurations based on a given array sequence;
+	 @input   : an array of arrays: {reg_address, reg_value}
+	 @output  : None
+	 @assumption: input_array has a end-of-marker: OV7670_REG_LAST; otherwise it will stuck in a loop.
+	 */
+
+	// variable declarations;
+	uint8_t row;
+	uint8_t reg_address;
+	uint8_t reg_value;
+
+	// start the machinery;
+	reg_address = OV7670_REG_LAST - 1; // dummy initialized;
+	while(reg_address != OV7670_REG_LAST){
+		reg_address = input_array[row][0];
+		reg_value = input_array[row][1];
+
+		// send the command to the camera via SCCB (i2c);
+		ov7670_write(reg_address, reg_value);
+		
+		// soft reset (SCCB register reset)takes longer settling time;
+		if((reg_address == OV7670_REG_COM7)&&(reg_value == OV7670_COM7_SOFT_RESET)){
+			delay_busy_ms(1000); // one second; arbitrarily defined;
+		}
+
+        // next;
+		row++;
+
+		// setting time; not strictly required;
+		delay_busy_ms(10);
+	}
+}
