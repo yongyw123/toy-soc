@@ -95,7 +95,7 @@ extern "C" {
 #define S2_GPO_LED      2   // general purpose output to accommodate LED;
 #define S3_GPI_SW       3   // general purpose input to accommodate switches;
 #define S4_GPIO_PORT    4   // general purpose input output for flexibility and to reduce pinout;
-#define S5_SPI_         5   // spi master controller;
+#define S5_SPI         5   // spi master controller;
 #define S6_I2C_MASTER   6   // i2c master controller;
 
 /* -------------------------------------------------
