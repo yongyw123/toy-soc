@@ -43,6 +43,9 @@ void ov7670_update_reg(uint8_t reg_addr, uint8_t bit_mask_field, uint8_t bit_mas
 void ov7670_write_array(const uint8_t input_array[][2]);    // write to an array of the camera control registers; 
 void ov7670_read_array(const uint8_t input_array[][2]);     // read an array of the camera control registers;
 
+// constants;
+extern const uint8_t ov7670_basic_init_array[][2];    // array of initial values to set the basic control register of the camera;
+
 // test drivers;
 void ov7670_test(void);
 
