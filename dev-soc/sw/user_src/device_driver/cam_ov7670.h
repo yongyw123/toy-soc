@@ -11,10 +11,8 @@
 #include "main.h"
 
 /* ------------------------------------------------
-Purpose: APP driver for Camera OV7670;
-Content:
-0. utility function;
-1. the camera registers;
+Purpose     : app driver to configure Camera OV7670;
+Protocol    : SCCB (i2C equivalent)
 --------------------------------------------------*/
 
 // c and cpp linkage;
@@ -23,13 +21,20 @@ Content:
 extern "C" {
 #endif
 
-/* constants */
-#define OV7670_HW_RSTN_PIN_JA07 0   // which gpio port index used for camera hw reset;
+/*-------------------------------
+* constants 
+-------------------------------*/
+#define OV7670_HW_RSTN_PIN_JA07 0       // which gpio port index used for camera hw reset;
 
+// slave device id if left shifted one-bit plus R/W bit, this translates to 0x42 for write and 0x43 for read;
+#define OV7670_DEV_ID           0x21  
 
-// hw reset using an gpio pin;
-void ov7670_hw_reset(core_gpio *gpio_obj);
-
+/*------------------------------
+function prototype;
+------------------------------*/
+void ov7670_hw_reset(void); // hw reset using an gpio pin;
+int ov7670_write(uint8_t reg_addr, uint8_t wr_data); 
+int ov7670_read(uint8_t reg_addr, uint8_t *rd_buffer);
 
 
 
