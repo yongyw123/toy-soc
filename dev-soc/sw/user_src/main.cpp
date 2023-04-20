@@ -9,11 +9,7 @@ core_spi obj_spi(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S5_SPI));
 int main(){
     
     // initialize camera ov7670;
-    ov7670_hw_reset();
-    delay_busy_ms(1000);    // settingly time;
-    ov7670_write_array(ov7670_basic_init_array);
-    delay_busy_ms(1000);    // settingly time;
-    ov7670_read_array(ov7670_basic_init_array);
+    ov7670_init(OV7670_OUTPUT_FORMAT_RGB565);
 
     while(1){
         ;        

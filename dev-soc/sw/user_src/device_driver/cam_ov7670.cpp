@@ -485,6 +485,55 @@ void ov7670_set_test_pattern(uint8_t test_pattern){
 }
 
 
+void ov7670_init(uint8_t output_format){
+	/* 
+	@brief	: To initialize the OV7670 before using
+	@param	: output_format
+	 			0: RGB565
+	 			1: YUV422
+	@retval	: none 
+	
+	@note: This is just a wrapper of the following functions:
+	 a. ov7670_write_array();
+	 b. ov7670_set_pixel_clock();
+	 c. ov7670_set_QVGA_size();
+	 d. ov7670_set_output_format();
+	*/
+
+	//> HW reset the camera to clear the registers to default;
+	debug_str("initializing the camera OV7670\r\n");
+	debug_str("hw resetting ... \r\n");
+	ov7670_hw_reset();
+	delay_busy_ms(1000);	// settling time;
+
+	//> start the initializations;
+	// set the basics;
+	// active LOW for both sync;
+	// rising edge pclk;
+	debug_str("basic configuring ... \r\n");
+	ov7670_write_array(ov7670_basic_init_array);
+
+	debug_str("sanity checking the basic config ...\r\n");
+	ov7670_read_array(ov7670_basic_init_array);
+	
+	//> setting the output format according to the user param;
+	debug_str("setting output format...\r\n");
+	if(output_format == OV7670_OUTPUT_FORMAT_YUV422){
+		ov7670_set_output_format(OV7670_OUTPUT_FORMAT_YUV422);
+	}else{
+		ov7670_set_output_format(OV7670_OUTPUT_FORMAT_RGB565);
+	}
+
+	//> setting the resolution to QVGA: 240 x 320;
+	debug_str("setting resolution ...\r\n");
+	ov7670_set_QVGA_size();
+
+	// align the orientation; application specific;
+	debug_str("setting orientation ...\r\n");
+	ov7670_set_flip(1, 1);
+
+}
+
 const uint8_t ov7670_basic_init_array[][2] = {
 		/*-----------------------------------------------------------
 		 * @Purpose: Defining OV7670 camera common/general initialization array sequence;
