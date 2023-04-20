@@ -36,7 +36,7 @@ int ov7670_write(uint8_t reg_addr, uint8_t wr_data){
      @retval: status of the i2c transfer;
 	 */
 
-	uint8_t wr_buffer[1];	// i2c Tx buffer; only hold one byte;
+	uint8_t wr_buffer[2];	// i2c Tx buffer; only hold one byte;
 	int i2c_no_repeat; 
     int status;
 
@@ -48,9 +48,10 @@ int ov7670_write(uint8_t reg_addr, uint8_t wr_data){
 	 * URL: https://www.waveshare.com/w/upload/1/14/OmniVision_Technologies_Seril_Camera_Control_Bus%28SCCB%29_Specification.pdf
 	 ------------------------------------------*/
 
-	wr_buffer[0] = wr_data;
+	wr_buffer[0] = reg_addr;
+    wr_buffer[1] = wr_data;
     i2c_no_repeat = 0;         // no repeat;
-    status = obj_i2c.write_transfer(OV7670_DEV_ID, wr_buffer, 1, i2c_no_repeat);
+    status = obj_i2c.write_transfer(OV7670_DEV_ID, wr_buffer, 2, i2c_no_repeat);
     return status;
 }
 
