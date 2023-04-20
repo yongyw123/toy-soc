@@ -422,6 +422,37 @@ void ov7670_set_output_format(uint8_t output_format){
 	ov7670_update_reg(OV7670_REG_COM15, USER_OV7670_COM15_OUTPUT_RANGE_MASK, USER_OV7670_COM15_OUTPUT_RANGE_FULL_SET);
 }
 
+void ov7670_set_flip(uint8_t hflip, uint8_t vflip){
+	/*
+	 @brief	: To horiontally or vertically flip the OV7670 camera
+	 @param	:
+	  		hflip:
+	  			1: mirror image
+	  			0: Otherwise
+	  		vflip:
+	  			1: vertically flipped image
+	  			0: Otherwise
+	 @retval : none
+	 */
+
+	//> MVFP (0x1E) register is responsible for the orientation;
+	// caution: use update_reg since there are other bits controlling other stuffs;
+
+	if(hflip){
+		// mirror at bit 5;
+		ov7670_update_reg(OV7670_REG_MVFP, MASK_TOGGLE_BIT_B5, OV7670_MVFP_MIRROR);
+	}else{
+		ov7670_update_reg(OV7670_REG_MVFP, MASK_TOGGLE_BIT_B5, 0x00);
+	}
+
+	if(vflip){
+		// vflip at bit 2
+		ov7670_update_reg(OV7670_REG_MVFP, MASK_TOGGLE_BIT_B4, OV7670_MVFP_VFLIP);
+	}else{
+		ov7670_update_reg(OV7670_REG_MVFP, MASK_TOGGLE_BIT_B4, 0x00);
+	}
+}
+
 
 const uint8_t ov7670_basic_init_array[][2] = {
 		/*-----------------------------------------------------------
