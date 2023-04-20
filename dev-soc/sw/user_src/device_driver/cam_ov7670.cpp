@@ -1,7 +1,13 @@
 #include "cam_ov7670.h"
 
+/* required hw core for camera ov7670;
+gpio for hw reset pin;
+i2c to configure the camera;
+*/
 core_gpio obj_gpio(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S4_GPIO_PORT));
 core_i2c_master obj_i2c(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S6_I2C_MASTER));
+
+
 
 void ov7670_hw_reset(void){
     /*
@@ -81,4 +87,59 @@ int ov7670_read(uint8_t reg_addr, uint8_t *rd_buffer){
     return status;
 }
 
+void ov7670_test(void){
+    /*
+    @brief  : to test   
+            0. ov7670_hw_reset();
+            1. ov7670_write();
+            2. ov7670_read();
+    @method : logic analyser and uart;
+    */
+
+    /*
+    1. choose a camera register to read and write;
+    2. apply a reset to set all camera reg to default;
+    3. read the cam reg; compare against the specs;
+    4. write the cam reg; compare against the specs;
+    5. read the cam reg; check against (4);
+
+    */ 
+    
+    int chosen_reg = 0x00;
+    uint8_t test_register_addr_set_00[1] = {chosen_reg};
+	uint8_t test_register_value_set_00[1] = {0x11};
+
+	uint8_t read_buffer[1];	// to store the register value read from OV7670;
+
+
+    // HW reset to clear all registers to default;
+    ov7670_hw_reset();
+    delay_busy_ms(10);
+
+    // read to make sure reg value is at default;
+    ov7670_read(test_register_addr_set_00[0], read_buffer);
+    debug_str("reset val: ");
+    debug_hex(read_buffer[0]);
+    debug_str("\r\n");
+
+    delay_busy_ms(10);
+
+    // change the register values;
+    ov7670_write(test_register_addr_set_00[0], test_register_value_set_00[0]);
+    debug_str("write val: ");
+    debug_hex(test_register_value_set_00[0]);
+    debug_str("\r\n");
+    
+    delay_busy_ms(10);
+
+    // read if the reg val has been updated;
+    ov7670_read(test_register_addr_set_00[0], read_buffer);
+    debug_str("read val after write: ");
+    debug_hex(read_buffer[0]);
+    debug_str("\r\n");
+    
+    delay_busy_ms(10);
+
+
+}
 

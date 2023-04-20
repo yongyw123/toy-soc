@@ -16,6 +16,8 @@ Purpose: top level directives;
 #include "test_util.h"
 #include "user_util.h"
 
+#include "cam_ov7670.h"
+
 
 // c and cpp linkage;
 // reference: https://igl.ethz.ch/teaching/tau/resources/cprog.htm

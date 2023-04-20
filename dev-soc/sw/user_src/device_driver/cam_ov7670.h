@@ -35,7 +35,7 @@ function prototype;
 void ov7670_hw_reset(void); // hw reset using an gpio pin;
 int ov7670_write(uint8_t reg_addr, uint8_t wr_data); 
 int ov7670_read(uint8_t reg_addr, uint8_t *rd_buffer);
-
+void ov7670_test(void);
 
 
 

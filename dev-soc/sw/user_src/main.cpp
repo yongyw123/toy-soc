@@ -8,11 +8,10 @@ core_spi obj_spi(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S5_SPI));
 
 int main(){
     
-    //test_spi_mosi(&obj_spi);
-    test_spi_device_lcd_ili9341(&obj_spi);
+    ov7670_test();
 
     while(1){
-        //test_uart();    
+        
     }
 }
 
