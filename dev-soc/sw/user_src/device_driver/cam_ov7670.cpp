@@ -243,7 +243,8 @@ void ov7670_read_array(const uint8_t input_array[][2]){
         debug_str("rd val: "); debug_hex(read_reg_value);
         debug_str("ex val: "); debug_hex(expected_reg_value);
         debug_str("matched?: "); debug_hex(match_status);
-        
+        debug_str("\r\n");
+		
 		// settling time;
 		delay_busy_ms(10);
 
