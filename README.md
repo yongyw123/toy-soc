@@ -8,18 +8,19 @@
 - [x] General Purpose Output (GPO)
 - [x] General Purpose Input (GPI)
 - [x] System Timer
-- [x] GPIO core as a single entity (GPIO)
+- [x] General Purpose Input Output (GPIO) as HW Pins for external devices
 - [x] UART interface for debugging purpose
-- [ ] SPI interface
-- [ ] i2C interface
+- [x] SPI interface to control LCD ILI9341
+- [x] i2C interface to control Camera OV7670
+- [ ] LCD Display Parallel Interface
 - [ ] Digital Camera Interface (DCMI)
-- [ ] HW accelator for (undetermined) image algorithm
+- [ ] HW accelerator for (undetermined) image algorithm
 
 ### Application
 
 - [ ] Test SW Function for each IO cores
 - [ ] IP generate FIFO dual clock
-- [ ] IP generate Clock management circuit
+- [x] IP generate Clock management circuit
 - [ ] IP generate SDRAM memory interface for Frame Buffers
 - [ ] Camera OV7670 via i2C interface
 - [ ] LCD-TFT control via SPI interface
