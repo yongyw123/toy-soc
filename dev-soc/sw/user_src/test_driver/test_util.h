@@ -129,6 +129,16 @@ IO core to test: SPI;
 */
 void test_spi_device_lcd_ili9341(core_spi *spi_obj);
 
+/*-----------------------------------------------------------
+IO core to test: i2c
+Test Method:
+1. to communicate with an actual i2c device;
+
+Device:
+1. Camera OV7670;
+-----------------------------------------------------------*/
+void test_i2c_write_ov7670(uint8_t dev_reg_addr, uint8_t wr_data);
+void test_i2c_read_ov7670(uint8_t dev_reg_addr, uint8_t *read_buffer);
 
 
 
