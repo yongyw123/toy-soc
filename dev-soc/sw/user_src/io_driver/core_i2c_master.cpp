@@ -10,7 +10,7 @@ core_i2c_master::core_i2c_master(uint32_t core_base_addr){
     @retval : none
      */
     base_addr = core_base_addr;
-    scl_freq = 10000; // default: 10kHz;
+    scl_freq = 100000; // default: 100kHz;
     set_freq(scl_freq);
 }
 
