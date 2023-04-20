@@ -22,7 +22,7 @@
 - [ ] IP generate FIFO dual clock
 - [x] IP generate Clock management circuit
 - [ ] IP generate SDRAM memory interface for Frame Buffers
-- [ ] Camera OV7670 via i2C interface
+- [x] Camera OV7670 via i2C interface
 - [ ] LCD-TFT control via SPI interface
 
 ## Extra (Nice to have)
