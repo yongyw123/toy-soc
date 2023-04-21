@@ -189,7 +189,7 @@ module mcs_top
     .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M
     
     // Status and control signals
-    .reset(reset), // input reset
+    .reset(reset_sys), // input reset
     
     // to turn off the clock for power saving;
     // not used for now;
