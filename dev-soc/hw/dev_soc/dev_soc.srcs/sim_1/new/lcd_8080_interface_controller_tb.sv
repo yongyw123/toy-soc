@@ -30,8 +30,12 @@ program lcd_8080_interface_controller_tb
         // test stimulus;
         output logic [31:0] set_wr_mod,
         output logic user_start,
-        output logic user_cmd,
+        output logic [1:0] user_cmd,
         output logic [PARALLEL_DATA_BITS-1:0] wr_data,
+        
+        // inputs;
+        input logic done_flag,
+        input logic ready_flag,
         
         // sim;
         output logic [31:0] test_index      
@@ -44,20 +48,50 @@ program lcd_8080_interface_controller_tb
      
     initial begin
     $display("test starts");
-    $display("-----------");
-    $display("test 01:");
-    $display("-----------");
+    // test 01; write only;
     @(posedge clk);
     test_index <= 0;
-    set_wr_mod <= 3;
+    set_wr_mod <= 2;
     wr_data = 8'($random);
     user_start <= 0;
     
+    // user command is unknown;
+    // expect the state to be always in idle state;
+    // until the command is specified;
+    #(30);
+    
     @(posedge clk);
+    user_cmd <= CMD_WR;
+    user_start <= 1;
+    
+    @(posedge clk);
+    user_start <= 0;
+    wait(ready_flag == 1'b1);
+    
+    @(posedge clk);
+    user_start <= 1;
+    wr_data = 8'($random);
+    
+    @(posedge clk);
+    wait(ready_flag == 1'b1);
+    
+    @(posedge clk);
+    user_start <= 0;
+    wait(ready_flag == 1'b1);
+    
+    #(100);
+    
+    // test 02: set to read; expect dinout to be hiZ;
+    @(posedge clk);
+    test_index <= 1;
+    set_wr_mod <= 2;
+    wr_data = 8'($random);
+    user_start <= 1;
+    user_cmd <= CMD_RD;
     
     
     
-    #(20);
+    #(100);
     $display("test ends");
     $stop;
     end

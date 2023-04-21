@@ -41,7 +41,7 @@ module lcd_8080_interface_controller_top_tb();
     
     // user argument;      
     logic user_start;     // start communicating with the lcd;        
-    logic user_cmd;       // read or write?
+    logic [1:0] user_cmd;       // read or write?
     
     logic [PARALLEL_DATA_BITS-1:0] wr_data;   
     logic [PARALLEL_DATA_BITS-1:0] rd_data;
@@ -90,9 +90,10 @@ module lcd_8080_interface_controller_top_tb();
     initial
     begin
         $monitor("cnt mod: %0d", set_wr_mod);
-        $monitor("time: %0t, index: %0d, cmd: %0d, start: %0b, ready,: %0b, done: %0b, wrx: %0b, rdx: %0b, wr_data: %0B, rd_data: %0B, dinout: %0B",
+        $monitor("time: %0t, index: %0d, uut.state: %s, cmd: %0d, start: %0b, ready,: %0b, done: %0b, wrx: %0b, rdx: %0b, wr_data: %0B, rd_data: %0B, dinout: %0B, uut.cmd_reg: %0d, uut.hiz: %0b",
         $time,
-        text_index,
+        test_index,
+        uut.state_reg.name,
         user_cmd,
         user_start, 
         ready_flag,
@@ -101,7 +102,9 @@ module lcd_8080_interface_controller_top_tb();
         wr_data, 
         drive_rdx,
         rd_data,
-        dinout);
+        dinout,
+        uut.cmd_reg,
+        uut.set_hiz);
     end
 
     
