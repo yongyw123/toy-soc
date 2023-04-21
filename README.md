@@ -14,7 +14,7 @@
 - [x] i2C interface to control Camera OV7670
 - [ ] LCD Display Parallel Interface
 - [ ] Digital Camera Interface (DCMI)
-- [ ] HW accelerator for (undetermined) image algorithm
+- [x] DSP block for (undetermined) image algorithm
 
 ### Application
 
