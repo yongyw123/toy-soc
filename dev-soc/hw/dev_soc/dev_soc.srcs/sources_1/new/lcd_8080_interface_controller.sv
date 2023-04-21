@@ -69,8 +69,8 @@ module lcd_8080_interface_controller
         input logic [31:0] set_rd_mod,     // set the read cycle time;
         
         // user argument;      
-        input logic user_start,            
-        input logic user_cmd,       // read or write;
+        input logic user_start,     // start communicating with the lcd;        
+        input logic user_cmd,       // read or write?
         
         input logic [PARALLEL_DATA_BITS-1:0] wr_data,   
         output logic [PARALLEL_DATA_BITS-1:0] rd_data,
@@ -105,18 +105,27 @@ module lcd_8080_interface_controller
     // registers;
     state_type state_reg, state_next;
     logic [31:0] clk_cnt_reg, clk_cnt_next; // to track the wr/rd clock cycle;
-    //logic [PARALLEL_DATA_BITS-1:0] data_reg, data_next; // buffer dinout;
+    logic [PARALLEL_DATA_BITS-1:0] wr_data_reg; // to buffer to wr_data;
+    logic cmd_reg; // to buffer the user commands;
     
+    // enabler signals;
+    logic set_hiz;      // to determine when will the bidirec line is hiZ or not;
+        
     // ff;
     always_ff @(posedge clk, posedge reset)
         if(reset) begin
             state_reg <= ST_IDLE;
             clk_cnt_reg <= 0;
-            //data_reg <= 0;
+            wr_data_reg <= 1;       // the data means nothing without wrx siignals'
+            cmd_reg <= CMD_NOP;    // nop;
         end
         else begin
             state_reg <= state_next;
-            clk_cnt_reg <= clk_cnt_next;                     
+            clk_cnt_reg <= clk_cnt_next;
+            if(user_start) begin
+                wr_data_reg <= wr_data;  
+                cmd_reg <= user_cmd;
+            end                   
         end          
     
     // fsm;
@@ -147,6 +156,8 @@ module lcd_8080_interface_controller
             ST_FHALF:
             begin
                 drive_wrx = 1'b0;
+                // no need to put up the data out here;
+                // since the data is already at the port onset;
                 if(clk_cnt_reg == set_wr_mod) begin
                     state_next = ST_SHALF;
                     clk_cnt_next = 0;
@@ -157,6 +168,8 @@ module lcd_8080_interface_controller
             
             ST_SHALF:
             begin
+                // the lcd will start sampling here at low to high transition here;
+                // hold it;
                 drive_wrx = 1'b1;
                 if(clk_cnt_reg == set_wr_mod) begin
                    state_next = ST_IDLE;
@@ -169,4 +182,9 @@ module lcd_8080_interface_controller
             default: ; // nop;
         endcase        
     end
+  
+    // logic;
+    assign set_hiz = (cmd_reg == CMD_RD);   
+    assign dinout = (set_hiz) ? {PARALLEL_DATA_BITS{1'bz}} : wr_data_reg;
+    
 endmodule
