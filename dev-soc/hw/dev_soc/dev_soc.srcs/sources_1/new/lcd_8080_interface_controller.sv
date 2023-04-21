@@ -49,6 +49,7 @@ read operation;
 6. as such, for now, the module shall not implement the read operation for the time being;
 
 
+
 construction/documenation;
 ?? tba ??
 
@@ -65,12 +66,14 @@ module lcd_8080_interface_controller
         input logic reset,  // async;
         
         /* lcd interface */
+        
+        // the mod here corresponds to the half write/read cycle period;
         input logic [31:0] set_wr_mod,     // set the write cycle time;
         input logic [31:0] set_rd_mod,     // set the read cycle time;
         
         // user argument;      
         input logic user_start,     // start communicating with the lcd;        
-        input logic user_cmd,       // read or write?
+        input logic [1:0] user_cmd,       // read or write?
         
         input logic [PARALLEL_DATA_BITS-1:0] wr_data,   
         output logic [PARALLEL_DATA_BITS-1:0] rd_data,
@@ -98,19 +101,19 @@ module lcd_8080_interface_controller
     // states;
     typedef enum{
         ST_IDLE,    // no activity;
-        ST_FHALF,   // the amount of time wrx is low;
-        ST_SHALF    // the amount of time wrx is high;
+        ST_FHALF,   // the amount of time wrx/rdx is low;
+        ST_SHALF    // the amount of time wrx/rdx is high;
     }state_type;
     
     // registers;
     state_type state_reg, state_next;
     logic [31:0] clk_cnt_reg, clk_cnt_next; // to track the wr/rd clock cycle;
     logic [PARALLEL_DATA_BITS-1:0] wr_data_reg; // to buffer to wr_data;
-    logic cmd_reg; // to buffer the user commands;
+    logic [1:0] cmd_reg; // to buffer the user commands;
     
     // enabler signals;
     logic set_hiz;      // to determine when will the bidirec line is hiZ or not;
-        
+ 
     // ff;
     always_ff @(posedge clk, posedge reset)
         if(reset) begin
@@ -147,7 +150,7 @@ module lcd_8080_interface_controller
             begin
                 ready_flag = 1'b1;
                 done_flag = 1'b1;
-                if(user_start) begin
+                if(user_start && (cmd_reg != CMD_NOP)) begin
                     clk_cnt_next = 0;
                     state_next = ST_FHALF;
                 end
@@ -160,7 +163,7 @@ module lcd_8080_interface_controller
                 // since the data is already at the port onset;
                 if(clk_cnt_reg == set_wr_mod) begin
                     state_next = ST_SHALF;
-                    clk_cnt_next = 0;
+                    clk_cnt_next = 0;   // reset for the next statel
                 end
                 else
                     clk_cnt_next = clk_cnt_reg + 1;
@@ -186,5 +189,9 @@ module lcd_8080_interface_controller
     // logic;
     assign set_hiz = (cmd_reg == CMD_RD);   
     assign dinout = (set_hiz) ? {PARALLEL_DATA_BITS{1'bz}} : wr_data_reg;
+    
+    // dummy for now;
+    assign rd_data = 1; 
+    assign drive_rdx = 1'b1;    
     
 endmodule
