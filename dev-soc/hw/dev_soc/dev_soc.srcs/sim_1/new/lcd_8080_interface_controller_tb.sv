@@ -85,6 +85,7 @@ program lcd_8080_interface_controller_tb
     // change the write clock setting;
     // longer second half of the write cycle;
     @(posedge clk);
+    test_index <= 1;
     set_wr_mod_fhalf <= 2;
     set_wr_mod_shalf <= 3;
     user_start <= 1;
@@ -109,6 +110,7 @@ program lcd_8080_interface_controller_tb
     // change the write clock setting;
     // longer first half of the write cycle;
     @(posedge clk);
+    test_index <= 2;
     set_wr_mod_fhalf <= 3;
     set_wr_mod_shalf <= 2;
     user_start <= 1;
@@ -122,11 +124,10 @@ program lcd_8080_interface_controller_tb
     wait(ready_flag == 1'b1);
     
     #(100);
-    
-    
+
     // test 02: set to read; expect dinout to be hiZ;
     @(posedge clk);
-    test_index <= 1;
+    test_index <= 3;
     
     // fhalf is always shorted than the second half during read;
     // it takes time for the lcd to prepare its output;
@@ -142,6 +143,16 @@ program lcd_8080_interface_controller_tb
     user_start <= 0;
     wait(ready_flag == 1'b1);
     
+    // change the read clock period;
+    @(posedge clk);
+    user_start <= 1;
+    test_index <= 4;
+    set_rd_mod_fhalf <= 4;  
+    set_rd_mod_shalf <= 7;
+    
+    @(posedge clk);
+    user_start <= 0;
+    wait(ready_flag == 1'b1);
     
     #(100);
     $display("test ends");
