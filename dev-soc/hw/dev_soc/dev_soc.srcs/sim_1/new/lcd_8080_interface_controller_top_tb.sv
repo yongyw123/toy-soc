@@ -36,9 +36,14 @@ module lcd_8080_interface_controller_top_tb();
     
     // uut arguments;
     // the mod here corresponds to the half write/read cycle period;
-    logic [31:0] set_wr_mod;     // set the write cycle time;
-    logic [31:0] set_rd_mod;     // set the read cycle time;
+    // set the write cycle time;
+    logic [15:0] set_wr_mod_fhalf;    // first half of the write clock;     
+    logic [15:0] set_wr_mod_shalf;    // second half of the write clockl
     
+    // set the read cycle time;
+    logic [15:0] set_rd_mod_fhalf;    // first halfl;
+    logic [15:0] set_rd_mod_shalf;    // first halfl;
+
     // user argument;      
     logic user_start;     // start communicating with the lcd;        
     logic [1:0] user_cmd;       // read or write?
@@ -89,8 +94,8 @@ module lcd_8080_interface_controller_top_tb();
     /* monitoring */
     initial
     begin
-        $monitor("cnt mod: %0d", set_wr_mod);
-        $monitor("time: %0t, index: %0d, uut.state: %s, cmd: %0d, start: %0b, ready,: %0b, done: %0b, wrx: %0b, rdx: %0b, wr_data: %0B, rd_data: %0B, dinout: %0B, uut.cmd_reg: %0d, uut.hiz: %0b",
+        $monitor("mod, wr_fhalf: %0d, wr_shalf: %0d, rd_fhalf: %0d, rd_shalf: %0d, ", set_wr_mod_fhalf, set_wr_mod_shalf, set_rd_mod_fhalf, set_rd_mod_shalf);
+        $monitor("time: %0t, index: %0d, uut.state: %s, cmd: %0d, start: %0b, ready,: %0b, done: %0b, wrx: %0b, rdx: %0b, wr_data: %0d, rd_data: %0B, dinout: %0B, uut.cmd_reg: %0d, uut.hiz: %0b, uut.data_reg: %0b, uut.data_reg: %0d",
         $time,
         test_index,
         uut.state_reg.name,
@@ -99,12 +104,14 @@ module lcd_8080_interface_controller_top_tb();
         ready_flag,
         done_flag,
         drive_wrx,
-        wr_data, 
         drive_rdx,
+        wr_data,
         rd_data,
         dinout,
         uut.cmd_reg,
-        uut.set_hiz);
+        uut.set_hiz,
+        uut.wr_data_reg,
+        uut.wr_data_reg);
     end
 
     
