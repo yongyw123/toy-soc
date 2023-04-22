@@ -38,25 +38,46 @@
 2. hwoever, user-space only uses 24-bit-byte-addressable;
 3. on word alignment, this is 22-bit-word-addressable;
 4. As of now, 24-bit-bute address space is intended
-    to host one general MMIO system and at least one 
-    specialized system;
-    where MMIO system includes core such as
+    to host one general MMIO system and a video subsystem;
+    
+    where:
+    
+    MMIO system includes core such as
     system timer, GPIO, SPI, I2C etc;
     and the other specialized system is for future
     extensibility;
+    
+    video subystem is to stream a camera to display;
 
-5. 21-bit-word-addressable is allocated for user-systems;
-6. for now to distinguish between different spaces (systems)
-    bit-23 is used;
-    LOW for MMIO system;
-    HIGH otherwise;
-7. if there are other systems integrated in the future;
+5. 21-bit-word-addressable usable memory is allocated for user-systems;
+
+6. to distinguish between the two systems, the 24th bit of the 24-bit-byte
+    addressable space is used as the select bit low for mmio; high for video;
+    
+7. mmio system;
+    1. it has 64 cores (2^6);
+    2. each core has 32 registers of 32-bit wide; (2^5);
+
+8. video system:
+    1. it has 8 cores (2^3);
+    2. each core has 2^14 word;
+    
+9. if there are other systems integrated in the future;
     more bits will be allocated for distinguishing purposes;
+    
+summary of the word-addressable memory;        
+index           : 21 | 20 | 19-16 | 15-12 | 11-8 | 7-0  |                 
+mmio system     :  0 | x  | xxxx  | xsss  | sssr | rrrr |
+video system    :  1 | x  | xxxv  | vvaa  | aaaa | aaaa |
+* s represents mmio core;
+* r represents mmio core internal registers;
+* v represents video core;
+* a represents video space of each core; where this space is used for various purposes;
 */
 
-`define BUS_MICROBLAZE_SIZE_G       32
-`define BUS_USER_SIZE_G             21  // as above; (word aligned);
-`define BUS_SYSTEM_SELECT_BIT_INDEX_G 23  // as above, to distinguish two systems;
+`define BUS_MICROBLAZE_SIZE_G           32
+`define BUS_USER_SIZE_G                 21  // as above; (word aligned);
+`define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // the 24-bit; as above, to distinguish two systems;
 
 // IO based address provided by microblaze MSC, as above;
 `define BUS_MICROBLAZE_IO_BASE_ADDR_G 32'hC0000000
