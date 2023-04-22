@@ -140,6 +140,7 @@ module lcd_8080_interface_controller
     state_type state_reg, state_next;
     logic [31:0] clk_cnt_reg, clk_cnt_next; // to track the wr/rd clock cycle;
     logic [PARALLEL_DATA_BITS-1:0] wr_data_reg; // to buffer to wr_data;
+    logic [PARALLEL_DATA_BITS-1:0] rd_data_reg; // to sample lcd data;
     logic [1:0] cmd_reg, cmd_next; // to store the user commands;
     
     // enabler signals;
@@ -151,6 +152,7 @@ module lcd_8080_interface_controller
             state_reg <= ST_IDLE;
             clk_cnt_reg <= 0;
             wr_data_reg <= 1;       // the data means nothing without wrx siignals'
+            rd_data_reg <= 1;       // again, means nothing without the rdx  signal;
             cmd_reg <= CMD_NOP;    // nop;
         end
         else begin
@@ -171,7 +173,8 @@ module lcd_8080_interface_controller
         
         // remain high if there is no activity;
         drive_wrx = 1'b1;   
-        
+        drive_rdx = 1'b1;
+           
         // default;
         state_next = state_reg;
         clk_cnt_next = clk_cnt_reg;
@@ -183,10 +186,23 @@ module lcd_8080_interface_controller
                 done_flag = 1'b1;
                 cmd_next = user_cmd;
                 if(user_start && (user_cmd != CMD_NOP)) begin
+                    /*
                     clk_cnt_next = 0;
                     state_next = ST_FHALF_W;
-                    // start update the wr_data for wrx;
                     wr_data_reg = wr_data;
+                    */
+                    
+                    case(user_cmd)
+                        CMD_WR: begin
+                            state_next = ST_FHALF_W;
+                            wr_data_reg = wr_data;
+                        end
+                        CMD_RD: 
+                            state_next = ST_FHALF_R;
+                        default: 
+                            state_next = ST_IDLE;
+                    endcase
+                   
                 end
             end
             
@@ -214,6 +230,41 @@ module lcd_8080_interface_controller
                 else
                     clk_cnt_next = clk_cnt_reg + 1;
             end
+                 
+            ST_FHALF_R:
+            begin
+            /* 
+            pull down the rdx line to allow the lcd to prepare;
+            expect the lcd to output its data in the seonc half
+            */
+                drive_rdx = 1'b0;
+                if(clk_cnt_reg == set_rd_mod_fhalf) begin
+                    state_next = ST_SHALF_R;
+                    clk_cnt_next = 0;   // reset for the next statel
+                end
+                else
+                    clk_cnt_next = clk_cnt_reg + 1;
+            
+            end
+            
+            ST_SHALF_R:
+            begin
+                /*
+                    expect the lcd data to be ready;
+                    sample it;
+                */
+                drive_rdx = 1'b1;
+                rd_data_reg = dinout;
+                if(clk_cnt_reg == set_rd_mod_shalf) begin
+                    state_next = ST_IDLE;
+                    clk_cnt_next = 0;   // reset for the next statel
+                    done_flag = 1'b1;
+                end
+                else
+                    clk_cnt_next = clk_cnt_reg + 1;
+            
+            end
+
             default: ; // nop;
         endcase        
     end
@@ -222,8 +273,8 @@ module lcd_8080_interface_controller
     assign set_hiz = (cmd_reg == CMD_RD);   
     assign dinout = (set_hiz) ? {PARALLEL_DATA_BITS{1'bz}} : wr_data_reg;
     
-    // dummy for now;
-    assign rd_data = 1; 
-    assign drive_rdx = 1'b1;    
+    // output;
+    assign rd_data = rd_data_reg; 
+        
     
 endmodule
