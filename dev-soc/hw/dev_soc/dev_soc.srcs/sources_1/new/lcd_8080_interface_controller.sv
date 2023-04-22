@@ -139,7 +139,7 @@ module lcd_8080_interface_controller
     // registers;
     state_type state_reg, state_next;
     logic [31:0] clk_cnt_reg, clk_cnt_next; // to track the wr/rd clock cycle;
-    logic [PARALLEL_DATA_BITS-1:0] wr_data_reg, wr_data_next; // to buffer to wr_data;
+    logic [PARALLEL_DATA_BITS-1:0] wr_data_reg; // to buffer to wr_data;
     logic [1:0] cmd_reg, cmd_next; // to store the user commands;
     
     // enabler signals;
@@ -156,10 +156,10 @@ module lcd_8080_interface_controller
         else begin
             state_reg <= state_next;
             clk_cnt_reg <= clk_cnt_next;
-            if(user_start) begin
-                wr_data_reg <= wr_data_next;  
-                cmd_reg <= cmd_next;
-            end                   
+            //if(user_start) begin
+            //wr_data_reg <= wr_data_next;  
+            cmd_reg <= cmd_next;
+        //end                   
         end          
     
     // fsm;
@@ -185,7 +185,8 @@ module lcd_8080_interface_controller
                 if(user_start && (user_cmd != CMD_NOP)) begin
                     clk_cnt_next = 0;
                     state_next = ST_FHALF_W;
-                    wr_data_next = wr_data;
+                    // start update the wr_data for wrx;
+                    wr_data_reg = wr_data;
                 end
             end
             
