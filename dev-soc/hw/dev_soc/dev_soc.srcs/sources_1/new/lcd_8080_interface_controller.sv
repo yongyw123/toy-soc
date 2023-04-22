@@ -48,10 +48,15 @@ read operation;
 5. specs say the reading time is not uniform depending on the data to read;
 6. as such, for now, the module shall not implement the read operation for the time being;
 
+construction;
+1. by above, this is a parallel interface, relatively easier than serial interface;
+2. for both write and read op, one needs to make sure the WRX/RDX respect the setup and hold time;
+3. tricky bit, for reading, the timing are different (longer), and different for LOW part and HIGH part of
+    of the read clock cycle;
 
-
-construction/documenation;
-?? tba ??
+assumption;
+1. by above, write minimum time is 60ns for one write clock cycle;
+2. read minimum is 100 ns for LOW and 400 ns for HIGH within one read clock cycle;
 
 */
 
@@ -67,10 +72,20 @@ module lcd_8080_interface_controller
         
         /* lcd interface */
         
-        // the mod here corresponds to the half write/read cycle period;
-        input logic [31:0] set_wr_mod,     // set the write cycle time;
-        input logic [31:0] set_rd_mod,     // set the read cycle time;
+        /* note;
+        as in the construction;
+        there is some constraint imposed on this mod setting;
+        but shall leave it to the SW to handle;
+        */
         
+        // set the write cycle time;
+        input logic [15:0] set_wr_mod_fhalf,    // first half of the write clock;     
+        input logic [15:0] set_wr_mod_shalf,    // second half of the write clockl
+        
+        // set the read cycle time;
+        input logic [15:0] set_rd_mod_fhalf,    // first halfl;
+        input logic [15:0] set_rd_mod_shalf,    // first halfl;
+
         // user argument;      
         input logic user_start,     // start communicating with the lcd;        
         input logic [1:0] user_cmd,       // read or write?
@@ -98,11 +113,27 @@ module lcd_8080_interface_controller
     localparam CMD_WR   = 2'b01;
     localparam CMD_RD   = 2'b10;
     
-    // states;
+    /* states;
+    write and read could share the same states;
+    but for clarity, shall separate;
+    */
     typedef enum{
         ST_IDLE,    // no activity;
-        ST_FHALF,   // the amount of time wrx/rdx is low;
-        ST_SHALF    // the amount of time wrx/rdx is high;
+        
+        // the first half time of the write clock cycle wrx spends on;
+        // this is where the host should have already update the data for
+        // the lcd to sample during the second half;
+        ST_FHALF_W,   
+        // the second half time of the write clock cycle wrx spends on;
+        // lcd sampling;
+        ST_SHALF_W,
+        
+        // similar to those is write;
+        // except the role is reversed;
+        // the host samples the lcd data on the second half;
+        ST_FHALF_R,
+        ST_SHALF_R
+            
     }state_type;
     
     // registers;
@@ -113,7 +144,7 @@ module lcd_8080_interface_controller
     
     // enabler signals;
     logic set_hiz;      // to determine when will the bidirec line is hiZ or not;
- 
+
     // ff;
     always_ff @(posedge clk, posedge reset)
         if(reset) begin
@@ -152,29 +183,29 @@ module lcd_8080_interface_controller
                 done_flag = 1'b1;
                 if(user_start && (cmd_reg != CMD_NOP)) begin
                     clk_cnt_next = 0;
-                    state_next = ST_FHALF;
+                    state_next = ST_FHALF_W;
                 end
             end
             
-            ST_FHALF:
+            ST_FHALF_W:
             begin
                 drive_wrx = 1'b0;
                 // no need to put up the data out here;
                 // since the data is already at the port onset;
-                if(clk_cnt_reg == set_wr_mod) begin
-                    state_next = ST_SHALF;
+                if(clk_cnt_reg == set_wr_mod_fhalf) begin
+                    state_next = ST_SHALF_W;
                     clk_cnt_next = 0;   // reset for the next statel
                 end
                 else
                     clk_cnt_next = clk_cnt_reg + 1;
             end
             
-            ST_SHALF:
+            ST_SHALF_W:
             begin
                 // the lcd will start sampling here at low to high transition here;
                 // hold it;
                 drive_wrx = 1'b1;
-                if(clk_cnt_reg == set_wr_mod) begin
+                if(clk_cnt_reg == set_wr_mod_shalf) begin
                    state_next = ST_IDLE;
                    clk_cnt_next = 0;
                    done_flag = 1'b1;
