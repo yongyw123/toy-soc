@@ -354,6 +354,7 @@ Register Map
 2. register 1 (offset 1): program write clock period
 3. register 2 (offset 2): program read clock period;
 4. register 3 (offset 3): write register;
+5. register 4 (offset 4): stream control register;
 
 Register Definition:
 1. register 0: status and read data register
@@ -383,13 +384,26 @@ Register Definition:
                         0: chip deselect;
                         1: chip select
         bit[11:10]  : to store user commands;
-
+        
+4. register 4: stream control register
+            there are two flows:
+            flow one is from thh processor (hence SW app/driver);
+            flow two is from other video source stream such as the camera;
+            flow two will be automatically completed through a feedback loop
+            via handshaking mechanism;
+             
+        bit[0]: 
+            1 for stream flow;
+            0 for processor flow; 
+            
 Register IO access:
 1. register 0: read only;
 2. register 1: write only;
 3. register 2: write only;
 4. register 3: write only;
+5. register 4: stream control register;
 ******************************************************************/
+
 // register offset;
 `define V0_DISP_LCD_REG_RD_DATA_OFFSET      0   // 000
 `define V0_DISP_LCD_REG_WR_CLOCKMOD_OFFSET  1   // 001
