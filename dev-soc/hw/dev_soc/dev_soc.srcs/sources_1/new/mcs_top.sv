@@ -93,6 +93,7 @@ module mcs_top
     
     // user-bus signals after bridging;
     logic user_mmio_cs;
+    logic user_video_cs;
     logic user_wr;
     logic user_rd;
     logic [31:0] user_wr_data;
@@ -131,7 +132,27 @@ module mcs_top
     );
 
     // bridge;
-    mcs_bus_bridge bridge_unit(.mcs_bridge_base_addr(`BUS_MICROBLAZE_IO_BASE_ADDR_G), .*);
+    mcs_bus_bridge bridge_unit
+    (.mcs_bridge_base_addr(`BUS_MICROBLAZE_IO_BASE_ADDR_G),
+    // microblaze address space;
+    .io_addr_strobe(io_addr_strobe),
+    .io_read_strobe(io_read_strobe),
+    .io_write_strobe(io_write_strobe),
+    .io_byte_enable(io_byte_enable),
+    .io_address(io_address),
+    .io_write_data(io_write_data),
+    .io_read_data(io_read_data),
+    .io_ready(io_ready),
+    
+    // on the other sie of the bridge: user-own address space
+    .user_mmio_cs(user_mmio_cs),
+    .user_video_cs(user_video_cs),
+    .user_wr(user_wr),
+    .user_rd(user_rd),
+    .user_addr(user_addr),
+    .user_wr_data(user_wr_data),
+    .user_rd_data(user_rd_data)
+    );
     
     // mmio system;
     mmio_sys 
