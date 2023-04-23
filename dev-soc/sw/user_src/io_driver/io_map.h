@@ -43,27 +43,58 @@ extern "C" {
 * Note on Address Space
 *-------------------------------------------
 1. Microblaze MCS bus address is 32-bit-byte-addressable
-2. hwoever, user-space only uses 24-bit-byte-addressable;
-3. on word alignment, this is 22-bit-word-addressable;
-4. As of now, 24-bit-bute address space is intended
-    to host one general MMIO system and at least one 
-    specialized system;
-    where MMIO system includes core such as
+2. hwoever, user-space only uses 26-bit-byte-addressable;
+3. on word alignment, this is 24-bit-word-addressable;
+4. As of now, 26-bit-byte address space is intended
+    to host one general MMIO system and a video subsystem;
+    
+    where:
+    
+    MMIO system includes core such as
     system timer, GPIO, SPI, I2C etc;
     and the other specialized system is for future
     extensibility;
+    
+    video subystem is to stream a camera to display;
 
-5. 21-bit-word-addressable is allocated for user-systems;
-6. for now to distinguish between different spaces (systems)
-    bit-23 is used;
-    LOW for MMIO system;
-    HIGH otherwise;
-7. if there are other systems integrated in the future;
+5. 23-bit-word-addressable usable memory is allocated for user-systems;
+
+6. to distinguish between the two systems, the 26th bit of the 26-bit-byte
+    addressable space is used as the select bit low for mmio; high for video;
+    
+7. mmio system;
+    1. it has 64 cores (2^6);
+    2. each core has 32 registers of 32-bit wide; (2^5);
+
+8. video system:
+    0. it has 8 video cores (2^3);
+    1. a pixel occupies 16-bit;
+    2. each core has 8 (2^3) internal registers for configuration purposes;
+    so, we have each core uses 16+3 = 19 bit space, summarized below;
+    1. 
+    1. it has 8 cores (2^3);
+    2. each core has 2^19 word;
+    
+9. if there are other systems integrated in the future;
     more bits will be allocated for distinguishing purposes;
+    
+summary of the word-addressable memory;        
+mmio system:    0xxx_xxxx_xxxx_xsss_sssr_rrrr
+video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
+
+* x represents dont-care (to accommodate frame buffer?)
+* s represents mmio core;
+* r represents mmio or video core internal registers;
+* v represents video core;
+* a represents video space of each core; where this space is used for various purposes;
+*       such as to store i=the 16-bit pixel
 */
 #define BUS_MICROBLAZE_SIZE_G           32
-#define BUS_USER_SIZE_G                 21  // as above; (word aligned);
-#define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // as above, to distinguish two systems;
+//#define BUS_USER_SIZE_G                 21  // as above; (word aligned);
+//#define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // the 24-bit; as above, to distinguish two systems;
+
+#define BUS_USER_SIZE_G                 23  // as above; (word aligned);
+#define BUS_SYSTEM_SELECT_BIT_INDEX_G   25  // the 24-bit; as above, to distinguish two systems;
 
 // IO based address provided by microblaze MSC, as above;
 #define BUS_MICROBLAZE_IO_BASE_ADDR_G 0xC0000000
