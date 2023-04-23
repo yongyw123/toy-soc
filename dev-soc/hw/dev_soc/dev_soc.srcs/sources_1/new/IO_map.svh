@@ -35,9 +35,9 @@
 * Note on Address Space
 *-------------------------------------------
 1. Microblaze MCS bus address is 32-bit-byte-addressable
-2. hwoever, user-space only uses 24-bit-byte-addressable;
-3. on word alignment, this is 22-bit-word-addressable;
-4. As of now, 24-bit-bute address space is intended
+2. hwoever, user-space only uses 26-bit-byte-addressable;
+3. on word alignment, this is 24-bit-word-addressable;
+4. As of now, 26-bit-byte address space is intended
     to host one general MMIO system and a video subsystem;
     
     where:
@@ -49,9 +49,9 @@
     
     video subystem is to stream a camera to display;
 
-5. 21-bit-word-addressable usable memory is allocated for user-systems;
+5. 23-bit-word-addressable usable memory is allocated for user-systems;
 
-6. to distinguish between the two systems, the 24th bit of the 24-bit-byte
+6. to distinguish between the two systems, the 26th bit of the 26-bit-byte
     addressable space is used as the select bit low for mmio; high for video;
     
 7. mmio system;
@@ -59,25 +59,38 @@
     2. each core has 32 registers of 32-bit wide; (2^5);
 
 8. video system:
+    0. it has 8 video cores (2^3);
+    1. a pixel occupies 16-bit;
+    2. each core has 8 (2^3) internal registers for configuration purposes;
+    so, we have each core uses 16+3 = 19 bit space, summarized below;
+    1. 
     1. it has 8 cores (2^3);
-    2. each core has 2^14 word;
+    2. each core has 2^19 word;
     
 9. if there are other systems integrated in the future;
     more bits will be allocated for distinguishing purposes;
     
 summary of the word-addressable memory;        
-index           : 21 | 20 | 19-16 | 15-12 | 11-8 | 7-0  |                 
-mmio system     :  0 | x  | xxxx  | xsss  | sssr | rrrr |
-video system    :  1 | x  | xxxv  | vvaa  | aaaa | aaaa |
+index           : | 23 | 22 | 21 | 20 | 19-16 | 15-12 | 11-8 | 7-0  |                 
+mmio system     : | 0  | x  | x  | x  | xxxx  | xsss  | sssr | rrrr |
+video system    : | 1  | x  | x  | x  | vvrr  | aaaa  | aaaa | aaaa |
+
+mmio system:    0xxx_xxxx_xxxx_xsss_sssr_rrrr
+video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
+
 * s represents mmio core;
-* r represents mmio core internal registers;
+* r represents mmio or video core internal registers;
 * v represents video core;
 * a represents video space of each core; where this space is used for various purposes;
+*       such as to store i=the 16-bit pixel
 */
 
 `define BUS_MICROBLAZE_SIZE_G           32
-`define BUS_USER_SIZE_G                 21  // as above; (word aligned);
-`define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // the 24-bit; as above, to distinguish two systems;
+//`define BUS_USER_SIZE_G                 21  // as above; (word aligned);
+//`define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // the 24-bit; as above, to distinguish two systems;
+
+`define BUS_USER_SIZE_G                 23  // as above; (word aligned);
+`define BUS_SYSTEM_SELECT_BIT_INDEX_G   25  // the 24-bit; as above, to distinguish two systems;
 
 // IO based address provided by microblaze MSC, as above;
 `define BUS_MICROBLAZE_IO_BASE_ADDR_G 32'hC0000000
@@ -90,7 +103,6 @@ video system    :  1 | x  | xxxv  | vvaa  | aaaa | aaaa |
 * 2. each core has 2^{5} = 32 internal registers 
 *   where each register is 32-bit wide;
 ----------------------------------------------------*/
-
 `define MIMO_ADDR_SIZE_G        6                   // mmio to accommodate 64 cores;
 //`define MIMO_CORE_TOTAL_G       2**MIMO_ADDR_SIZE_G // 64 cores;
 `define MIMO_CORE_TOTAL_G       64 // 64 cores;
@@ -112,8 +124,9 @@ video system    :  1 | x  | xxxv  | vvaa  | aaaa | aaaa |
 `define S5_SPI          5   // spi (mainly to test TFT-LCD);
 `define S6_I2C_MASTER   6   // i2c master (to configure ov7670 camera);
 
+
 /* -------------------------------------------------
-*  Register Map of the Individual IO core register;
+*  Register Map of the Individual MMIO core register;
 --------------------------------------------------*/
 
 /**************************************************************
