@@ -111,12 +111,30 @@ module mcs_top
     assign reset_clk = ~CPU_RESETN;
     /* -------------------
     instantiation;
+    0. clock unit   : ip-generated MMCM (mixed mode clock manager);
     1. cpu_unit     : ip-generated microblaze mcs
     2. bridge unit  : bridge between microblaze io bus and user bus;
     3. mmio_unit    : mmio system (where all the io cores reside);
-    4. clock_unit   : ip-generated MMCM (mixed mode clock manager);
+    4. video_unit   : video system; 
     -----------------*/
     
+    // ip-generated clock management circuit;
+    clk_wiz_0 clock_unit
+   (
+    // Clock out ports
+    .clkout_100M(clkout_100M),        // output clkout_100M; for the rest of the system;
+    .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M: for camera ov7670
+    
+    // Status and control signals
+    .reset(reset_clk),          // input reset
+    //.reset(0),      // allow free running? bad idea?
+    .power_down(),              // input power_down; not used;
+    .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
+   
+   // Clock in ports
+    .clk_in1(clk)
+   );      // input clk_in1: 100MHz;
+
     // cpu
     microblaze_mcs_cpu cpu_unit(
       .Clk(clkout_100M),                          // input wire Clk
@@ -172,7 +190,7 @@ module mcs_top
     .I2C_DATA_BIT(8),   // for camera control;
     .GPIO_PORT_NUM(1)   // for camera hw reset;
     )
-     
+    
     mmio_unit
     (
         .clk(clkout_100M),
@@ -207,23 +225,26 @@ module mcs_top
         
     );
     
+    // video system;
+    video_sys #(.BITS_PER_PIXEL(16))
+    video_unit
+    (
+        // general;
+        .clk_sys(clk_100M),    // 100 MHz;
+        .reset(reset_sys),  // async;
+        
+        /*
+        // user bus interface;
+        // where user bus is bridged by the microblaze MCS IO bus;
+        */
+        .video_cs(user_video_cs),        // chip select for mmio system;
+        .video_wr(user_wr),             // write enable;
+        .video_rd(user_rd),             // read enable;
+        .video_addr(user_addr),       // addr to decode for video core address and its register address;
+        .video_wr_data(user_wr_data),   // 32-bit;
+        .video_rd_data(user_rd_data)  // 32-bit;
+    );
     
-    clk_wiz_0 clock_unit
-   (
-    // Clock out ports
-    .clkout_100M(clkout_100M),        // output clkout_100M; for the rest of the system;
-    .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M: for camera ov7670
-    
-    // Status and control signals
-    .reset(reset_clk),          // input reset
-    //.reset(0),      // allow free running? bad idea?
-    .power_down(),              // input power_down; not used;
-    .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
-   
-   // Clock in ports
-    .clk_in1(clk)
-   );      // input clk_in1: 100MHz;
-
 endmodule
 
 `endif // _MCS_TOP_SV;
