@@ -101,10 +101,21 @@ program core_video_lcd_display_tb
     addr <= REG_WR_DATA_OFFSET;
     wr_data <= {20'b0, CMD_WR, csx_select, dcx_command, 8'($random)};
     
+    // terminate immediately after one write;
+    // otherwise, it will keep on writing;
+    @(posedge clk);
+    test_index <= 3;
+    cs <= 1'b1;
+    write <= 1'b1;
+    read <= 1'b1;   // dont care since there is no read multiplexing in place;
+    addr <= REG_WR_DATA_OFFSET;
+    wr_data <= {20'b0, CMD_NOP, !csx_select, !dcx_command, 8'($random)};
+    
     // expect the ready flag to change to busy then back to ready;
     @(posedge clk); // though it takes one system clock cycle to update;
-    //wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b0); 
-    //wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b1);
+    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b0); 
+    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b1);
+    
     
     
     
