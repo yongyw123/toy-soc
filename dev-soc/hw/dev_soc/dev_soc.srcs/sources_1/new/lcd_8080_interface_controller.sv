@@ -151,8 +151,8 @@ module lcd_8080_interface_controller
         if(reset) begin
             state_reg <= ST_IDLE;
             clk_cnt_reg <= 0;
-            wr_data_reg <= 1;       // the data means nothing without wrx siignals'
-            rd_data_reg <= 1;       // again, means nothing without the rdx  signal;
+            wr_data_reg <= {PARALLEL_DATA_BITS{1'b1}};       // the data means nothing without wrx siignals'
+            rd_data_reg <= {PARALLEL_DATA_BITS{1'b1}};       // again, means nothing without the rdx  signal;
             cmd_reg <= CMD_NOP;    // nop;
         end
         else begin
