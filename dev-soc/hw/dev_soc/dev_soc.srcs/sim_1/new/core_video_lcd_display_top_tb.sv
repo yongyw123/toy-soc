@@ -33,6 +33,7 @@ module core_video_lcd_display_top_tb();
     
     /* interface arguents;; */
     localparam PARALLEL_DATA_BITS = 8;
+    
     // input;
     logic cs;
     logic write;
