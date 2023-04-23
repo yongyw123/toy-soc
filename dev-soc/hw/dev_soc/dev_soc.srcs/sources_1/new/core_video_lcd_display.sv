@@ -113,7 +113,7 @@ module core_video_lcd_display
         input logic stream_in_wr_valid, 
          
         /* outputs for other video cores */
-        output logic stream_out_read_flag,     // this core is ready to accept inputs;
+        output logic stream_out_ready_flag,     // this core is ready to accept inputs;
        
         
         /* hw pin specific to the lcd controller; */
@@ -216,7 +216,7 @@ module core_video_lcd_display
     assign lcd_drive_dcx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX];
   
     // broadcast its status to other video cores;
-    assign stream_out_read_flag = lcd_ready_flag;
+    assign stream_out_ready_flag = lcd_ready_flag;
     
     // instantiation;
     lcd_8080_interface_controller
