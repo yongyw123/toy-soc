@@ -69,10 +69,9 @@ module mcs_top
         
         // output clocks @ JA jumpers;
         output CLKOUT_24M_JA03,
-        output CLKOUT_12M_JA04,
         
         // hw reset;
-        inout tri GPIO_CAM_OV7670_RESETN_JA07     // configure a pmod jumper as gpio; 
+        inout tri GPIO_CAM_OV7670_RESETN_JA04     // configure a pmod jumper as gpio; 
         
         
     );
@@ -99,9 +98,14 @@ module mcs_top
     logic [31:0] user_rd_data;
     logic [`BUS_USER_SIZE_G-1:0] user_addr;
     
+    // for ip-generated mmcm clock;
+   logic mmcm_clk_locked;   // whether the clock has stabilized or not?
+    
     // conform the signals;
     /* ?? to do ??, need to debounce this reset button; */
-    assign reset_sys = !CPU_RESETN;    // inverted since button is "active LOW";
+    // inverted since cpu reset button is "active LOW";
+    // locked=HIGH means clock has stabilized;
+    assign reset_sys = ~CPU_RESETN | ~mmcm_clk_locked;    
     
     /* -------------------
     instantiation;
@@ -113,7 +117,7 @@ module mcs_top
     
     // cpu
     microblaze_mcs_cpu cpu_unit(
-      .Clk(clk),                          // input wire Clk
+      .Clk(clkout_100M),                          // input wire Clk
       .Reset(reset_sys),                      // input wire Reset
       .IO_addr_strobe(io_addr_strobe),    // output wire IO_addr_strobe
       .IO_address(io_address),            // output wire [31 : 0] IO_address
@@ -149,7 +153,7 @@ module mcs_top
      
     mmio_unit
     (
-        .clk(clk),
+        .clk(clkout_100M),
         .reset(reset_sys),
         .mmio_addr(user_addr),
         .mmio_cs(user_mmio_cs),
@@ -177,7 +181,7 @@ module mcs_top
         */        
         .i2c_scl(I2C_SCL_JA01),
         .i2c_sda(I2C_SDA_JA02),
-        .gpio(GPIO_CAM_OV7670_RESETN_JA07)
+        .gpio(GPIO_CAM_OV7670_RESETN_JA04)
         
     );
     
@@ -185,23 +189,17 @@ module mcs_top
     clk_wiz_0 clock_unit
    (
     // Clock out ports
-    .clkout_12M(CLKOUT_12M_JA04),     // output clkout_12M
-    .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M
+    .clkout_100M(clkout_100M),        // output clkout_100M; for the rest of the system;
+    .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M: for camera ov7670
     
     // Status and control signals
-    .reset(reset_sys), // input reset
-    
-    // to turn off the clock for power saving;
-    // not used for now;
-    .power_down(),   // input power_down
-    
-    // assertion of locked here means that the output clock
-    // is stable; ready for use?
-    // LOCKED signal of MMCM will go LOW if the input clock of MMCM is unavailable?
-    // not used for now;
-    .locked(),       // output locked
+    .reset(reset_sys),          // input reset
+    .power_down(),              // input power_down; not used;
+    .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
+   
    // Clock in ports
-    .clk_in1(clk));      // system clock at 100Mhz;
+    .clk_in1(clk)
+   );      // input clk_in1: 100MHz;
 
 endmodule
 
