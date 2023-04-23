@@ -79,6 +79,7 @@ module mcs_top
     
     // general;
     logic reset_sys;    // to invert the input reset;
+    logic reset_clk;    // reset mmcm clock;
     
     // mcs io bus signals; these are fixed;
     logic io_addr_strobe;   // output wire IO_addr_strobe
@@ -106,7 +107,7 @@ module mcs_top
     // inverted since cpu reset button is "active LOW";
     // locked=HIGH means clock has stabilized;
     assign reset_sys = ~CPU_RESETN || ~mmcm_clk_locked;    
-    
+    assign reset_clk = ~CPU_RESETN;
     /* -------------------
     instantiation;
     1. cpu_unit     : ip-generated microblaze mcs
@@ -193,7 +194,8 @@ module mcs_top
     .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M: for camera ov7670
     
     // Status and control signals
-    .reset(reset_sys),          // input reset
+    .reset(reset_clk),          // input reset
+    //.reset(0),      // allow free running? bad idea?
     .power_down(),              // input power_down; not used;
     .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
    
