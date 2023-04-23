@@ -125,9 +125,9 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 * a represents video space of each core; where this space is used for various purposes;
 *       such as to store i=the 16-bit pixel
 ----------------------------------------------------*/
-`define VIDEO_ADDR_SIZE_G       3
-`define VIDEO_CORE_TOTAL_G      8
-`define VIDEO_REG_ADDR_SIZE_G   19  // each video core has 19-bit address space allocated;
+`define VIDEO_CORE_ADDR_SIZE_G       3 
+`define VIDEO_CORE_TOTAL_G           8 // 2**VIDEO_CORE_ADDR_SIZE_G;
+`define VIDEO_REG_ADDR_BIT_SIZE_G   19  // each video core has 19-bit address space allocated;
 
 
 
