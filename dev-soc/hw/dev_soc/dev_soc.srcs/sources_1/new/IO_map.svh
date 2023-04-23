@@ -129,8 +129,6 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 `define VIDEO_CORE_TOTAL_G           8 // 2**VIDEO_CORE_ADDR_SIZE_G;
 `define VIDEO_REG_ADDR_BIT_SIZE_G   19  // each video core has 19-bit address space allocated;
 
-
-
 /*----------------------------------------------------
 * IO modules/cores shall be sloted in the IO memory map;
 * module index; each module is allocated with 32 registers;
@@ -143,7 +141,6 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 `define S4_GPIO_PORT    4   // general purpose input output for flexibility and to reduce pinout;
 `define S5_SPI          5   // spi (mainly to test TFT-LCD);
 `define S6_I2C_MASTER   6   // i2c master (to configure ov7670 camera);
-
 
 /* -------------------------------------------------
 *  Register Map of the Individual MMIO core register;
@@ -339,5 +336,69 @@ Register IO access:
 `define S6_I2C_REG_WRITE_BIT_POS_CMD_OFFSET 8   
 
 
+/*----------------------------------------------------
+* video modules/cores shall be sloted in the video system;
+----------------------------------------------------*/  
+`define V0_DISP_LCD    0   // lcd ILI9341 display via mcu 8080 seris protocol;
+
+/**************************************************************
+* V0_DISP_LCD
+--------------------
+this core wraps this module: LCD display controller 8080;
+this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
+
+this has six (6) registers;
+
+background;
+
+Register Map
+1. register 0 (offset 0): status register 
+2. register 1 (offset 1): program write clock period
+3. register 2 (offset 2): program read clock period;
+4. register 3 (offset 3): write data;
+5. register 4 (offset 4): read data;
+6. register 5 (offset 5): user commands;
+
+Register Definition:
+1. register 0: status register
+        bit[0] ready flag;  // the lcd controller is 
+        bit[1] done flag;   // [optional ??] when the lcd just finishes reading or writing;
+        
+2. register 1: program the write clock period;
+        bit[15:0] defines the clock counter mod for LOW WRX period;
+        bit[31:16] defines the clock counter mod for HIGH WRX period;
+
+2. register 2: program the read clock period;
+        bit[15:0] defines the clock counter mod for LOW RDX period;
+        bit[31:16] defines the clock counter mod for HIGH RDX period;
+
+3. regisert 3: write data;
+        bit[7:0] data to write to the lcd;
+
+4. register 4: read data;
+        bit[7:0] data read from the lcd;
+   
+5. register 5: user commands;
+        bit[1:0]: to store user commands;
+        
+Register IO access:
+1. register 0: read only;
+2. register 1: write only;
+3. register 2: write only;
+4. register 3: write only;
+5. register 4: read only;
+6. register 5: write only;
+******************************************************************/
+// register offset;
+`define V0_DISP_LCD_REG_STATUS_OFFSET       0   
+`define V0_DISP_LCD_REG_WR_CLOCKMOD_OFFSET  1   
+`define V0_DISP_LCD_REG_RD_CLOCKMOD_OFFSET  2   
+`define V0_DISP_LCD_REG_WR_DATA_OFFSET      3   
+`define V0_DISP_LCD_REG_RD_DATA_OFFSET      4
+`define V0_DISP_LCD_REG_CMD_OFFSET          5
+
+// bit position;
+`define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  0  
+`define V0_DISP_LCD_REG_STATUS_BIT_POS_DONE   1
 
 `endif //_IO_MAP_SVH
