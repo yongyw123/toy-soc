@@ -377,10 +377,8 @@ Register Definition:
                         LOW for command;
                         HIGH otherwise;
         bit[9]      : chip select;
-        bit[10:11]  : to store user commands;
+        bit[11:10]  : to store user commands;
 
-   
-        
 Register IO access:
 1. register 0: read only;
 2. register 1: write only;
@@ -388,16 +386,16 @@ Register IO access:
 4. register 3: write only;
 ******************************************************************/
 // register offset;
-`define V0_DISP_LCD_REG_RD_DATA_OFFSET      0   
-`define V0_DISP_LCD_REG_WR_CLOCKMOD_OFFSET  1   
-`define V0_DISP_LCD_REG_RD_CLOCKMOD_OFFSET  2   
-`define V0_DISP_LCD_REG_WR_DATA_OFFSET      3   
+`define V0_DISP_LCD_REG_RD_DATA_OFFSET      0   // 000
+`define V0_DISP_LCD_REG_WR_CLOCKMOD_OFFSET  1   // 001
+`define V0_DISP_LCD_REG_RD_CLOCKMOD_OFFSET  2   // 010
+`define V0_DISP_LCD_REG_WR_DATA_OFFSET      3   // 011
 
 // bit position;
 `define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  8  
 `define V0_DISP_LCD_REG_STATUS_BIT_POS_DONE   9
 
-`define V0_DISP_LCD_REG_WR_DBIT_POS_DCX   8 // for data or command
+`define V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX   8 // for data or command
 `define V0_DISP_LCD_REG_WR_DATA_BIT_POS_CSX   9 // chip select;
 
 `endif //_IO_MAP_SVH
