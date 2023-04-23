@@ -189,6 +189,11 @@ module core_video_lcd_display
     assign wr_en_clockmod_wrx = wr_en && (addr[2:0] == REG_WR_CLOCKMOD_OFFSET);
     assign wr_en_clockmod_rdx = wr_en && (addr[2:0] == REG_RD_CLOCKMOD_OFFSET);
     
+    // next state;
+    assign wr_data_next = wr_data;
+    assign set_wrx_period_mod_next = wr_data;
+    assign set_rdx_period_mod_next = wr_data;
+    
     // to the lcd;
     assign lcd_wr_data = wr_data_reg[7:0];
     assign lcd_user_cmd = wr_data_reg[11:10];
@@ -210,6 +215,9 @@ module core_video_lcd_display
     assign lcd_drive_csx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_CSX];
     assign lcd_drive_dcx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX];
   
+    // broadcast its status to other video cores;
+    assign stream_out_read_flag = lcd_ready_flag;
+    
     // instantiation;
     lcd_8080_interface_controller 
     #(.PARALLEL_DATA_BITS(PARALLEL_DATA_BITS))
@@ -254,8 +262,6 @@ module core_video_lcd_display
     so no need to multiple */
     assign rd_data = {31'b0, lcd_ready_flag, lcd_done_flag, lcd_rd_data};
     
-    // broadcast its status to other video cores;
-    assign stream_out_read_flag = lcd_ready_flag;
     
 endmodule
 
