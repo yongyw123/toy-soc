@@ -96,7 +96,22 @@ module core_video_lcd_display_top_tb();
         end
     
    /* monitoring */
+   initial begin
    
+    $monitor("time: %t, #: %0d, addr: %0d, wr_data: %0B, rd_data: %0B, wrx: %0b, rdx: %0b, csx: %0b, dcx: %0b, dinout: %0B",
+    $time,
+    test_index,
+    addr,
+    wr_data,
+    rd_data,
+    lcd_drive_wrx,
+    lcd_drive_rdx,
+    lcd_drive_csx,
+    lcd_drive_dcx,
+    lcd_dinout);
+    
+    
+   end
     
 endmodule
 
