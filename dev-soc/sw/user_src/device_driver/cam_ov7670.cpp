@@ -533,7 +533,8 @@ void ov7670_init(uint8_t output_format){
 	ov7670_set_flip(1, 1);
 	
 	// done;
-	debug_str("done\r\n");
+	debug_str("camera ov7670 initialization done\r\n");
+
 
 }
 

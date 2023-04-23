@@ -12,7 +12,7 @@ int main(){
     ov7670_init(OV7670_OUTPUT_FORMAT_RGB565);
 
     while(1){
-        ;        
+        test_timer(&obj_led);
     }
 }
 
