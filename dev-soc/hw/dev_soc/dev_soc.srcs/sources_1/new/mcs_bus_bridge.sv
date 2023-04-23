@@ -66,7 +66,7 @@ module mcs_bus_bridge
     // only compare the MSB 8-bit of the address; 
     // this should be sufficient to ensure uniqueness?
     // since other bits are used for other identification purposes;
-    assign bridge_en = (io_address[31:24] == mcs_bridge_base_addr[31:24]);
+    assign bridge_en = (io_address[31:26] == mcs_bridge_base_addr[31:26]);
     
     assign user_mmio_cs = (bridge_en && (io_address[`BUS_SYSTEM_SELECT_BIT_INDEX_G] == 0));
     assign user_addr = addr_word_align[`BUS_USER_SIZE_G-1:0];   
