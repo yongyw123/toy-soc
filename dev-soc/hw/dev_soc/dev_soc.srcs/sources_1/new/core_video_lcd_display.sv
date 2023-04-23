@@ -145,7 +145,7 @@ module core_video_lcd_display
     logic lcd_ready_flag;
     logic lcd_done_flag;
     logic lcd_user_start;
-    logic lcd_user_cmd;
+    logic [1:0] lcd_user_cmd;
     logic [PARALLEL_DATA_BITS-1:0] lcd_wr_data;
     logic [PARALLEL_DATA_BITS-1:0] lcd_rd_data;
     
