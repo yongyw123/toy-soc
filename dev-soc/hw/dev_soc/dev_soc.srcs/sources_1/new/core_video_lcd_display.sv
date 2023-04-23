@@ -124,7 +124,7 @@ module core_video_lcd_display
         inout tri[PARALLEL_DATA_BITS-1:0] lcd_dinout // this is shared between the host and the lcd;
     );
     
-    // constanst;
+    // register offset constanst;
     localparam REG_WR_CLOCKMOD_OFFSET = 3'b001;
     localparam REG_RD_CLOCKMOD_OFFSET = 3'b010;
     localparam REG_WR_DATA_OFFSET = 3'b011; 
@@ -219,10 +219,11 @@ module core_video_lcd_display
     assign stream_out_read_flag = lcd_ready_flag;
     
     // instantiation;
-    lcd_8080_interface_controller 
-    #(.PARALLEL_DATA_BITS(PARALLEL_DATA_BITS))
+    lcd_8080_interface_controller
+    #(.PARALLEL_DATA_BITS(PARALLEL_DATA_BITS)) 
+    display_ctrl    
     (
-       .cll(clk),
+       .clk(clk),
        .reset(reset),
        
        // set the write cycle time;
@@ -253,9 +254,7 @@ module core_video_lcd_display
         .drive_wrx(lcd_drive_wrx),   //  to drive the lcd for write op;
         .drive_rdx(lcd_drive_rdx),   // to drive the lcd for read op;          
         .dinout(lcd_dinout) // this is shared between the host and the lcd;
-       
-       
-    );
+       );
    
     
     /* only one read register to accommodate all the data;
