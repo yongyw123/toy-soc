@@ -71,13 +71,10 @@
     more bits will be allocated for distinguishing purposes;
     
 summary of the word-addressable memory;        
-index           : | 23 | 22 | 21 | 20 | 19-16 | 15-12 | 11-8 | 7-0  |                 
-mmio system     : | 0  | x  | x  | x  | xxxx  | xsss  | sssr | rrrr |
-video system    : | 1  | x  | x  | x  | vvrr  | aaaa  | aaaa | aaaa |
-
 mmio system:    0xxx_xxxx_xxxx_xsss_sssr_rrrr
 video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 
+* x represents dont-care (to accommodate frame buffer?)
 * s represents mmio core;
 * r represents mmio or video core internal registers;
 * v represents video core;
