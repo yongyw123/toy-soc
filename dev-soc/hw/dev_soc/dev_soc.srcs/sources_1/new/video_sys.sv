@@ -97,7 +97,7 @@ module video_sys
     for vivao synthesis optimization to opt out these unused signals */
     generate
         genvar i;
-            for(i = 7; i < VIDEO_CORE_NUM_TOTAL; i++)
+            for(i = 1; i < VIDEO_CORE_NUM_TOTAL; i++)
             begin
                 // always HIGH ==> idle ==> not signals;
                 assign core_data_rd_array[i] = 32'hFFFF_FFFF;
