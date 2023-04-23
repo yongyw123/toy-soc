@@ -105,7 +105,7 @@ module mcs_top
     /* ?? to do ??, need to debounce this reset button; */
     // inverted since cpu reset button is "active LOW";
     // locked=HIGH means clock has stabilized;
-    assign reset_sys = ~CPU_RESETN | ~mmcm_clk_locked;    
+    assign reset_sys = ~CPU_RESETN || ~mmcm_clk_locked;    
     
     /* -------------------
     instantiation;
