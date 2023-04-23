@@ -349,8 +349,6 @@ this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
 
 this has four (4) registers;
 
-background;
-
 Register Map
 1. register 0 (offset 0): read register 
 2. register 1 (offset 1): program write clock period
@@ -359,9 +357,14 @@ Register Map
 
 Register Definition:
 1. register 0: status and read data register
-        bit[7:0] data read from the lcd;
-        bit[8] ready flag;  // the lcd controller is 
-        bit[9] done flag;   // [optional ??] when the lcd just finishes reading or writing;
+        bit[7:0]    : data read from the lcd;
+        bit[8]      : ready flag;  // the lcd controller is idle
+                        1: ready;
+                        0: not ready;
+                 
+        bit[9]      : done flag;   // [optional ??] when the lcd just finishes reading or writing;
+                        1: done;
+                        0: not done;
         
 2. register 1: program the write clock period;
         bit[15:0] defines the clock counter mod for LOW WRX period;
@@ -374,9 +377,11 @@ Register Definition:
 3. register 3: write data and data mode;
         bit[7:0]    : data to write to the lcd;
         bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
-                        LOW for command;
-                        HIGH otherwise;
+                        0 for data;
+                        1 for command;
         bit[9]      : chip select;
+                        0: chip deselect;
+                        1: chip select
         bit[11:10]  : to store user commands;
 
 Register IO access:
