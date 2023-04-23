@@ -48,6 +48,7 @@ module core_video_lcd_display_top_tb();
    logic lcd_drive_csx;
    logic lcd_drive_dcx;
    tri[PARALLEL_DATA_BITS-1:0] lcd_dinout;
+   logic stream_out_ready_flag;
    
    
    // sim var;
@@ -69,8 +70,9 @@ module core_video_lcd_display_top_tb();
         .lcd_drive_csx(lcd_drive_csx),
         .lcd_drive_dcx(lcd_drive_dcx),
         .lcd_dinout(lcd_dinout),
+        .stream_out_ready_flag(stream_out_ready_flag),
+
         // empty for now;
-        .stream_out_read_flag(),
         .stream_in_pixel_data(),
         .stream_in_wr_valid()
    );
@@ -99,17 +101,21 @@ module core_video_lcd_display_top_tb();
    /* monitoring */
    initial begin
    
-    $monitor("time: %t, #: %0d, addr: %0d, wr_data: %0B, rd_data: %0B, wrx: %0b, rdx: %0b, csx: %0b, dcx: %0b, dinout: %0B",
+    //$monitor("time: %t, #: %0d, addr: %0d, wr_data: %0B, rd_data: %0B, wrx: %0b, rdx: %0b, csx: %0b, dcx: %0b, dinout: %0B, uut.start: %0b, uut.cmd: %0B",
+    $monitor("time: %10t, #: %d, addr: %d, wr_data: %20B, rd_data: %10B, ready: %b, wrx: %b, rdx: %b, csx: %b, dcx: %b, dinout: %B, uut.start: %b, uut.cmd: %B",
     $time,
     test_index,
     addr,
     wr_data,
     rd_data,
+    stream_out_ready_flag,
     lcd_drive_wrx,
     lcd_drive_rdx,
     lcd_drive_csx,
     lcd_drive_dcx,
-    lcd_dinout);
+    lcd_dinout,
+    uut.lcd_user_start,
+    uut.lcd_user_cmd);
     
     
    end

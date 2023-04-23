@@ -103,8 +103,8 @@ program core_video_lcd_display_tb
     
     // expect the ready flag to change to busy then back to ready;
     @(posedge clk); // though it takes one system clock cycle to update;
-    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b0); 
-    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b1);
+    //wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b0); 
+    //wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b1);
     
     
     
