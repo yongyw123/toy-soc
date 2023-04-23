@@ -347,22 +347,21 @@ Register IO access:
 this core wraps this module: LCD display controller 8080;
 this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
 
-this has six (6) registers;
+this has four (4) registers;
 
 background;
 
 Register Map
-1. register 0 (offset 0): status register 
+1. register 0 (offset 0): read register 
 2. register 1 (offset 1): program write clock period
 3. register 2 (offset 2): program read clock period;
-4. register 3 (offset 3): write data;
-5. register 4 (offset 4): read data;
-6. register 5 (offset 5): user commands;
+4. register 3 (offset 3): write register;
 
 Register Definition:
-1. register 0: status register
-        bit[0] ready flag;  // the lcd controller is 
-        bit[1] done flag;   // [optional ??] when the lcd just finishes reading or writing;
+1. register 0: status and read data register
+        bit[7:0] data read from the lcd;
+        bit[8] ready flag;  // the lcd controller is 
+        bit[9] done flag;   // [optional ??] when the lcd just finishes reading or writing;
         
 2. register 1: program the write clock period;
         bit[15:0] defines the clock counter mod for LOW WRX period;
@@ -372,33 +371,33 @@ Register Definition:
         bit[15:0] defines the clock counter mod for LOW RDX period;
         bit[31:16] defines the clock counter mod for HIGH RDX period;
 
-3. regisert 3: write data;
-        bit[7:0] data to write to the lcd;
+3. register 3: write data and data mode;
+        bit[7:0]    : data to write to the lcd;
+        bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
+                        LOW for command;
+                        HIGH otherwise;
+        bit[9]      : chip select;
+        bit[10:11]  : to store user commands;
 
-4. register 4: read data;
-        bit[7:0] data read from the lcd;
    
-5. register 5: user commands;
-        bit[1:0]: to store user commands;
         
 Register IO access:
 1. register 0: read only;
 2. register 1: write only;
 3. register 2: write only;
 4. register 3: write only;
-5. register 4: read only;
-6. register 5: write only;
 ******************************************************************/
 // register offset;
-`define V0_DISP_LCD_REG_STATUS_OFFSET       0   
+`define V0_DISP_LCD_REG_RD_DATA_OFFSET      0   
 `define V0_DISP_LCD_REG_WR_CLOCKMOD_OFFSET  1   
 `define V0_DISP_LCD_REG_RD_CLOCKMOD_OFFSET  2   
 `define V0_DISP_LCD_REG_WR_DATA_OFFSET      3   
-`define V0_DISP_LCD_REG_RD_DATA_OFFSET      4
-`define V0_DISP_LCD_REG_CMD_OFFSET          5
 
 // bit position;
-`define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  0  
-`define V0_DISP_LCD_REG_STATUS_BIT_POS_DONE   1
+`define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  8  
+`define V0_DISP_LCD_REG_STATUS_BIT_POS_DONE   9
+
+`define V0_DISP_LCD_REG_WR_DBIT_POS_DCX   8 // for data or command
+`define V0_DISP_LCD_REG_WR_DATA_BIT_POS_CSX   9 // chip select;
 
 `endif //_IO_MAP_SVH
