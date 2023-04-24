@@ -25,7 +25,7 @@
 `include "IO_map.svh"
 
 program core_video_lcd_display_tb
-    
+    #(parameter PARALLEL_DATA_BITS = 8)
     (
         // general;
         input logic clk,    // 100 MHz;
@@ -40,6 +40,9 @@ program core_video_lcd_display_tb
       
         // output from the uut;
         input logic [31:0] rd_data,
+        
+        // inout;
+        inout tri [PARALLEL_DATA_BITS-1:0] lcd_dinout
         
        // debugging;
         output logic [31:0] test_index 
@@ -72,7 +75,7 @@ program core_video_lcd_display_tb
     
     initial begin
     $display("test starts");
-    /* setting the clock mod */
+    /* --------------- setting the clock mod ---------------------*/
     // set for wrx;
     @(posedge clk);
     test_index <= 0;
@@ -91,6 +94,7 @@ program core_video_lcd_display_tb
     addr <= REG_RD_CLOCKMOD_OFFSET;
     wr_data <= {2'b0, rdx_shalf_mod, rdx_fhalf_mod};
     
+    /*---------------- write -------------------- */
     // start a write that is a data;
     // enable chip select;
     @(posedge clk);
@@ -112,9 +116,6 @@ program core_video_lcd_display_tb
     wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b0);
     wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b1);
     
-    //wait(rd_data[REG_RD_DATA_BIT_POS_DONE] == 1'b0);
-    //wait(rd_data[REG_RD_DATA_BIT_POS_DONE] == 1'b1);
-    
     // terminate immediately after one write;
     // otherwise, it will keep on writing;
     @(posedge clk);
@@ -124,8 +125,37 @@ program core_video_lcd_display_tb
     wr_data <= {20'b0, CMD_NOP, !csx_select, !dcx_command, 8'($random)};
     
    
+    /*---------------- read -------------------- */
+    // start a read command;
+    // enable chip select;
+    // by specs; data-or-command must be DATA;
+    @(posedge clk);
+    test_index <= 3;
+    cs <= 1'b1;
+    write <= 1'b1;
+    read <= 1'b1;   // dont care since there is no read multiplexing in place;
+    addr <= REG_WR_DATA_OFFSET;
+    wr_data <= {20'b0, CMD_RD, csx_select, !dcx_command, 8'($random)};
+
+    // simulate lcd transmitting data to the host;
+    // although by construction; it will always be HiZ;
+    // this is only for the picture;
+    //@(posedge clk);
+    lcd_dinout <= 8'($random);
     
+    // issue a NOP; 
+    // same reason as above;
+    // otherwise, it will keep reading from the lcd;
+    @(posedge clk);
+    wr_data <= {20'b0, CMD_NOP, csx_select, !dcx_command, 8'($random)};
     
+    // as above; there should be change in the ready status flag;
+    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b0);
+    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b1);
+    
+    // clean up by deselecting;
+    @(posedge clk);
+    wr_data <= {20'b0, CMD_NOP, !csx_select, !dcx_command, 8'($random)};
     
     #(50); 
     $display("test ends");
