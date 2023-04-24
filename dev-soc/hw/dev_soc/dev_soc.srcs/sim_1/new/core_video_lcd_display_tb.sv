@@ -22,7 +22,6 @@
 `ifndef CORE_VIDEO_LCD_DISPLAY_TB_SV
 `define CORE_VIDEO_LCD_DISPLAY_TB_SV
 
-`include "IO_map.svh"
 
 program core_video_lcd_display_tb
     #(parameter PARALLEL_DATA_BITS = 8)
@@ -42,7 +41,7 @@ program core_video_lcd_display_tb
         input logic [31:0] rd_data,
         
         // inout;
-        inout tri [PARALLEL_DATA_BITS-1:0] lcd_dinout
+        inout tri [PARALLEL_DATA_BITS-1:0] lcd_dinout,
         
        // debugging;
         output logic [31:0] test_index 
@@ -70,8 +69,6 @@ program core_video_lcd_display_tb
     
     logic csx_select = 1'b1;
     logic dcx_command = 1'b1;
-    
-    
     
     initial begin
     $display("test starts");
@@ -137,11 +134,6 @@ program core_video_lcd_display_tb
     addr <= REG_WR_DATA_OFFSET;
     wr_data <= {20'b0, CMD_RD, csx_select, !dcx_command, 8'($random)};
 
-    // simulate lcd transmitting data to the host;
-    // although by construction; it will always be HiZ;
-    // this is only for the picture;
-    //@(posedge clk);
-    lcd_dinout <= 8'($random);
     
     // issue a NOP; 
     // same reason as above;
