@@ -249,6 +249,9 @@ module core_video_lcd_display
                 // when to start;
                 // when the fifo has valid pixel to be displayed;
                 lcd_user_start = stream_valid_flag;
+                
+                // broadcast its status to other video cores;
+                stream_ready_flag = lcd_ready_flag;
             end
         
             // cpu control;
@@ -263,13 +266,17 @@ module core_video_lcd_display
                 lcd_drive_csx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_CSX]; 
                 
                 // hw active low signal;
-                lcd_drive_dcx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX]; 
+                lcd_drive_dcx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX];
+                
+                // always disable the stream ready flag;
+                // otherwise, it will unintentionally draw out the src fifo;
+                stream_ready_flag = 1'b0; 
             end        
         endcase
     end
     
-    // broadcast its status to other video cores;
-    assign stream_ready_flag = lcd_ready_flag; 
+    
+  
     
     // instantiation;
     lcd_8080_interface_controller
