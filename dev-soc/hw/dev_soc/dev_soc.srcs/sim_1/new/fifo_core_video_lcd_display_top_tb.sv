@@ -43,11 +43,13 @@ module fifo_core_video_lcd_display_top_tb();
     // instantiation;
     fifo_core_video_lcd_display 
     #(.DATA_WIDTH(DATA_WIDTH))
+    uut
     (.*);
     
     // test stimulus;
     fifo_core_video_lcd_display_tb
     #(.DATA_WIDTH(DATA_WIDTH))
+    tb
     (.*);
     
     /* simulate clk */
@@ -62,8 +64,12 @@ module fifo_core_video_lcd_display_top_tb();
      /* reset pulse */
      initial
         begin
+            sink_ready = 1'b0;
+            src_valid = 1'b0;
+            
             reset = 1'b1;
             #(T/2);
+            #(100*T);
             reset = 1'b0;
             #(T/2);
         end

@@ -41,17 +41,15 @@ program fifo_core_video_lcd_display_tb
     
     initial begin
     $display("test starts");
+    
+    
     // idle for some time to check the reset state of the fifo;
     #(30);
     
     // fill up the buffer;
-    for(int i = 0; i < 10; i++) begin
-        wait(src_ready == 1'b1);
-        @(posedge clk);
-        src_data <= 8'($random);
-        src_valid <= 1'b1;
-    end
-    
+    @(posedge clk);
+    src_data <= 8'($random);
+    src_valid <= 1'b1;
     
     #(100);
     $display("test ends");
