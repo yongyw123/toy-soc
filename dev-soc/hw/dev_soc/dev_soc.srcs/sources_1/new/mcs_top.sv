@@ -39,40 +39,67 @@ module mcs_top
         // **important; it is active low; need to invert;
         input logic CPU_RESETN,     
         
-        /* external mapping from boards; */
+        /* **************** external mapping from boards; ***********************/
         input logic [15:0] SW,      // use all switches available on the board;
         output logic [15:0] LED,    // use all leds available on the board;
         
+        /* --------------------------------------------------------------
         // uart;
         // beware of the mix of tx and rx;
         // note: uart flow ctrl is not implemented; so no cts/rts pins;
+        -------------------------------------------------------------- */
         input logic UART_TXD_IN,  // this connects to the system uart rx;
         output logic UART_RXD_OUT, // this connects to the system uart tx;
         
+        /* --------------------------------------------------------------
         // spi;
         // uses PMOD jumper @ JC;
+        // NOT USED;
+        -------------------------------------------------------------- */
+        /*
         output logic SPI_SCLK_JC1,
         output logic SPI_MOSI_JC2,
         input logic SPI_MISO_JC3,
         output logic SPI_SS_JC4, // slave select; asset active low;
         output logic SPI_DC_JC7,  // is the current MOSI a data or command for the slave?
+        */
         
-        /* camera ov7670 control 
+        /* --------------------------------------------------------------
+        // camera ov7670 control 
         1. use i2c protocol;
         2. require a clock driver of 24 MHz (to drive the camera itself);
         3. use a HW reset;
-        */
+        -------------------------------------------------------------- */
         // i2c;
         // uses PMOD jumper @ JA;
         output tri I2C_SCL_JA01,    // spi clock; tri because we have a pull up resistor;
         inout tri I2C_SDA_JA02,      // spi data; inout becos shared between master and slaves;
         
         // output clocks @ JA jumpers;
-        output CLKOUT_24M_JA03,
+        output logic CLKOUT_24M_JA03,
         
         // hw reset;
-        inout tri GPIO_CAM_OV7670_RESETN_JA04     // configure a pmod jumper as gpio; 
+        inout tri GPIO_CAM_OV7670_RESETN_JA04,     // configure a pmod jumper as gpio; 
         
+        /* --------------------------------------------------------------
+        // LCD display (ILI9341);
+        1. it uses MCU 8080-I interface protocol;
+        2. it uses the following pin;
+        // control pins at PMOD JD;
+        a. CSX; // chip select;
+        b. DCX; // data or command?
+        c. WRX; // write strobe;
+        d. RDX; / read strobe;
+        e. RST; // HW reset; (optional or use GPIO+SW to emulate);
+        
+        // data pins at PMOD JC;
+        f. DINOUT; // parallel data bus;
+        -------------------------------------------------------------- */
+        output logic LCD_CSX_JD01,
+        output logic LCD_DCX_JD02,
+        output logic LCD_WRX_JD03,
+        output logic LCD_RDX_JD04,
+        inout tri[7:0] LCD_DATA_JC  // all JC pins;        
         
     );
     
@@ -209,24 +236,37 @@ module mcs_top
         .uart_rx(UART_TXD_IN),
         
         // spi;
+        .spi_sclk(),
+        .spi_mosi(),
+        .spi_miso(),
+        .spi_ss_n(),
+        .spi_data_or_command(),
+        /*
         .spi_sclk(SPI_SCLK_JC1),
         .spi_mosi(SPI_MOSI_JC2),
         .spi_miso(SPI_MISO_JC3),
         .spi_ss_n(SPI_SS_JC4),
         .spi_data_or_command(SPI_DC_JC7),
-        
+        */
         /* 
         i2c; 
         camera ov7670; 
         */        
         .i2c_scl(I2C_SCL_JA01),
         .i2c_sda(I2C_SDA_JA02),
-        .gpio(GPIO_CAM_OV7670_RESETN_JA04)
+        
+        /* misc: gpio; */ 
+        .gpio(GPIO_CAM_OV7670_RESETN_JA04)  
         
     );
     
     // video system;
-    video_sys #(.BITS_PER_PIXEL(16))
+    video_sys
+    #(
+        .BITS_PER_PIXEL(16),
+        .LCD_DISPLAY_DATA_WIDTH(8),
+        .FIFO_LCD_ADDR_WITH(6)
+     )
     video_unit
     (
         // general;
@@ -242,7 +282,18 @@ module mcs_top
         .video_rd(user_rd),             // read enable;
         .video_addr(user_addr),       // addr to decode for video core address and its register address;
         .video_wr_data(user_wr_data),   // 32-bit;
-        .video_rd_data(user_rd_data)  // 32-bit;
+        .video_rd_data(user_rd_data),  // 32-bit;
+        
+        /*---------- HW pin mapping ------------------*/
+        
+        /* LCD display (ILI9341) */
+        .lcd_drive_csx(LCD_CSX_JD01),     // chip select;
+        .lcd_drive_dcx(LCD_DCX_JD02),     // data or command; LOW for command;          
+        .lcd_drive_wrx(LCD_WRX_JD03),     //  to drive the lcd for write op;
+        .lcd_drive_rdx(LCD_RDX_JD04),     // to drive the lcd for read op;
+        
+        // this is shared between the host and the lcd;
+        .lcd_dinout(LCD_DATA_JC)
     );
     
 endmodule
