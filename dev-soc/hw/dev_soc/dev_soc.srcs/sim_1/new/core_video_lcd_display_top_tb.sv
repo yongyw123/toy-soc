@@ -31,7 +31,7 @@ module core_video_lcd_display_top_tb();
     logic reset;        // async system clock;
     
     
-    /* interface arguents;; */
+    /* uut interface arguents;; */
     localparam PARALLEL_DATA_BITS = 8;
     
     // input;
@@ -54,6 +54,11 @@ module core_video_lcd_display_top_tb();
    logic [PARALLEL_DATA_BITS-1:0] stream_in_pixel_data;
    logic stream_valid_flag;
    logic stream_ready_flag;
+   
+   /* fifo interface signal declare */
+   logic [PARALLEL_DATA_BITS-1:0] fifo_src_data;
+   logic fifo_src_valid;
+   logic fifo_src_ready; 
    
    
    // sim var;
@@ -84,6 +89,29 @@ module core_video_lcd_display_top_tb();
    
    // test stimulus;
    core_video_lcd_display_tb tb (.*);
+   
+   // fifo interface acting as the source;
+   // this is to test the stream control;
+   // if the control is over to the cpu;
+   // then this fifo interface src will be ignored;
+   fifo_core_video_lcd_display 
+    #(
+    .DATA_WIDTH(PARALLEL_DATA_BITS),
+    .ADDR_WIDTH(3) // could hold up to 2^3 = 8 data; 
+    )
+    fifo_src
+    (
+    .clk(clk),
+    .reset(reset),
+    .src_data(fifo_src_data),
+    .src_valid(fifo_src_valid),
+    .src_ready(fifo_src_ready),
+    .sink_data(stream_in_pixel_data),
+    .sink_valid(stream_valid_flag),
+    .sink_ready(stream_ready_flag)
+    );
+    
+   
    
     /* simulate clk */
      always

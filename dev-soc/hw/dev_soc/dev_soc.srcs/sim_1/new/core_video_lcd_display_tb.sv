@@ -43,6 +43,12 @@ program core_video_lcd_display_tb
         // inout;
         inout tri [PARALLEL_DATA_BITS-1:0] lcd_dinout,
         
+        // from other sources besides the cpu;
+        output logic [PARALLEL_DATA_BITS-1:0] fifo_src_data,
+        output logic fifo_src_valid,
+        input logic fifo_src_ready,
+        input logic stream_valid_flag,
+        
        // debugging;
         output logic [31:0] test_index 
     );
@@ -51,6 +57,7 @@ program core_video_lcd_display_tb
     localparam REG_WR_CLOCKMOD_OFFSET = 3'b001;
     localparam REG_RD_CLOCKMOD_OFFSET = 3'b010;
     localparam REG_WR_DATA_OFFSET = 3'b011; 
+    localparam REG_STREAM_CTRL_OFFSET = 3'b100;
     
     // bit pos;
     localparam REG_RD_DATA_BIT_POS_READY = 8;
@@ -149,7 +156,53 @@ program core_video_lcd_display_tb
     @(posedge clk);
     wr_data <= {20'b0, CMD_NOP, !csx_select, !dcx_command, 8'($random)};
     
-    #(50); 
+    /* ------------------- test stream control ------------------------*/
+    // setup;
+    // change the clock mod to shorter period;
+    @(posedge clk);
+    // this corresponds to 20ns;
+    wrx_fhalf_mod <= 1; 
+    // this corresponds to one 10ns; but with ready flag adding up;
+    // it will be equivalent to 20ns;
+    wrx_shalf_mod <= 0; 
+    
+    @(posedge clk);
+    cs <= 1'b1;
+    write <= 1'b1;
+    addr <= REG_WR_CLOCKMOD_OFFSET;
+    wr_data <= {2'b0, wrx_shalf_mod, wrx_fhalf_mod};
+    
+    // test 01;
+    // fill up the fifo src;
+    // but cpu is the stream;
+    // expect that the fifo stimulus to be ignored for the lcd display;
+    
+    for(int i = 0; i < 10; i++) begin
+        @(posedge clk);
+        fifo_src_data <= 8'($random);
+        fifo_src_valid <= 1'b1;    
+    end
+    
+    // stop adding more fifo source;
+    @(posedge clk);
+    fifo_src_valid <= 1'b0;
+    
+    // test 02;
+    // disable the cpu stream;
+    // expect that lcd will be driven by the fifo until all data is drawn out;
+    @(posedge clk);
+    addr  <= REG_STREAM_CTRL_OFFSET;
+    wr_data <= {31'b0, 1'b1};   // hand the control to the video streams;
+    
+    // expect that fifo will be drawn out; hence the src stream will be invalid;
+    //wait(stream_valid_flag == 1'b0);
+    
+    // test 03;
+    // disable the cpu stream;
+    // sequentially create fifo buffer source so that the lcd 
+    // is triggered everytime;
+    
+    #(1000); 
     $display("test ends");
     #(20);
     $stop;
