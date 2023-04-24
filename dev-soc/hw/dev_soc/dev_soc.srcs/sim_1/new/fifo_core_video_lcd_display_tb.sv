@@ -47,9 +47,20 @@ program fifo_core_video_lcd_display_tb
     #(30);
     
     // fill up the buffer;
+    for(int i = 0; i < 10; i++) begin
+        @(posedge clk);
+        src_data <= 8'($random);
+        src_valid <= 1'b1;
+        // expect that the fifo will signal that there is at least one data;
+        //wait(sink_ready == 1'b0);
+    end
+
+    // disable the write;
     @(posedge clk);
-    src_data <= 8'($random);
-    src_valid <= 1'b1;
+    src_valid <= 1'b0;
+    
+    // expect that the fifo will eventually be drawn out by the sink;
+    wait(sink_valid == 1'b0);
     
     #(100);
     $display("test ends");
