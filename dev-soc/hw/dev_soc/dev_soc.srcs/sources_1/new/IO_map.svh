@@ -347,7 +347,7 @@ Register IO access:
 this core wraps this module: LCD display controller 8080;
 this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
 
-this has four (4) registers;
+this has five (5) registers;
 
 Register Map
 1. register 0 (offset 0): read register 
@@ -390,7 +390,8 @@ Register Definition:
             flow one is from thh processor (hence SW app/driver);
             flow two is from other video source stream such as the camera;
             flow two will be automatically completed through a feedback loop
-            via handshaking mechanism;
+            via handshaking mechanism without any user/processor intervention
+            until this stream control is updated again;
              
         bit[0]: 
             1 for stream flow;
@@ -403,12 +404,12 @@ Register IO access:
 4. register 3: write only;
 5. register 4: stream control register;
 ******************************************************************/
-
 // register offset;
 `define V0_DISP_LCD_REG_RD_DATA_OFFSET      0   // 000
 `define V0_DISP_LCD_REG_WR_CLOCKMOD_OFFSET  1   // 001
 `define V0_DISP_LCD_REG_RD_CLOCKMOD_OFFSET  2   // 010
 `define V0_DISP_LCD_REG_WR_DATA_OFFSET      3   // 011
+`define V0_DISP_LCD_REG_STREAM_CTRL_OFFSET  4   // 100
 
 // bit position;
 `define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  8  
