@@ -30,7 +30,7 @@
 this core wraps this module: LCD display controller 8080;
 this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
 
-this has four (4) registers;
+this has five (5) registers;
 
 Register Map
 1. register 0 (offset 0): read register 
@@ -73,7 +73,8 @@ Register Definition:
             flow one is from thh processor (hence SW app/driver);
             flow two is from other video source stream such as the camera;
             flow two will be automatically completed through a feedback loop
-            via handshaking mechanism;
+            via handshaking mechanism without any user/processor intervention
+            until this stream control is updated again;
              
         bit[0]: 
             1 for stream flow;
@@ -107,39 +108,50 @@ module core_video_lcd_display
         input logic [`VIDEO_REG_ADDR_BIT_SIZE_G-1:0] addr,  //  19-bit;         
         input logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    
         output logic [`REG_DATA_WIDTH_G-1:0]  rd_data,
-        
-        /* inputs from  other video cores */
-        input logic [PARALLEL_DATA_BITS-1:0] stream_in_pixel_data,
-        input logic stream_in_wr_valid, 
-         
-        /* outputs for other video cores */
-        output logic stream_out_ready_flag,     // this core is ready to accept inputs;
-       
-        
+           
         /* hw pin specific to the lcd controller; */
         output logic lcd_drive_wrx,     //  to drive the lcd for write op;
         output logic lcd_drive_rdx,     // to drive the lcd for read op;
         output logic lcd_drive_csx,     // chip seletc;
         output logic lcd_drive_dcx,     // data or command; LOW for command;          
-        inout tri[PARALLEL_DATA_BITS-1:0] lcd_dinout // this is shared between the host and the lcd;
+        inout tri[PARALLEL_DATA_BITS-1:0] lcd_dinout, // this is shared between the host and the lcd;
+        
+        /* stream flow:
+        interface with this fifo module:
+        fifo_core_video_lcd_display();
+        
+        note that in the flow;
+        1. it is assummed to be CMD_WR;
+        2. data type is always Data (not command);
+        3. chip select will always be selected;
+        */
+        input logic [PARALLEL_DATA_BITS-1:0] stream_in_pixel_data,
+        input logic stream_valid_flag,       // a lcd start write request from the fifo;
+        output logic stream_ready_flag    // request a read from the fifo for more pixel;
+
     );
     
     // register offset constanst;
     localparam REG_WR_CLOCKMOD_OFFSET = 3'b001;
     localparam REG_RD_CLOCKMOD_OFFSET = 3'b010;
     localparam REG_WR_DATA_OFFSET = 3'b011; 
+    localparam REG_STREAM_CTRL_OFFSET = 3'b100;
     
     // available commands;
     localparam CMD_NOP  = 2'b00;
     localparam CMD_WR   = 2'b01;
     localparam CMD_RD   = 2'b10;
     
+    // stream control;
+    localparam STREAM_CTRL_CPU = 1'b0;      // from the processor;
+    localparam STREAM_CTRL_VIDEO = 1'b1;    // from other sources;
     
     // enabler signals
     logic wr_en;
     logic wr_en_data;
     logic wr_en_clockmod_wrx;
     logic wr_en_clockmod_rdx;
+    logic wr_en_stream_ctrl;
     
     /* argument for lcd_8080_interface_controller() */
     logic lcd_ready_flag;
@@ -165,6 +177,8 @@ module core_video_lcd_display
     logic [31:0] set_wrx_period_mod_reg, set_wrx_period_mod_next;
     logic [31:0] set_rdx_period_mod_reg, set_rdx_period_mod_next;
     logic [31:0] wr_data_reg, wr_data_next;  
+    logic stream_flow_reg, stream_flow_next;
+    
     
     // ff;
     always_ff @(posedge clk, posedge reset)
@@ -172,6 +186,7 @@ module core_video_lcd_display
             wr_data_reg <= 0;
             set_wrx_period_mod_reg <= 0;    // this is equivalent to disabling wrx;
             set_rdx_period_mod_reg <= 0;    // this is equivalent to disabling rdx;
+            stream_flow_reg <= 0;   // processor control;
         end
         else begin
             if(wr_en_data)
@@ -179,7 +194,9 @@ module core_video_lcd_display
             if(wr_en_clockmod_wrx)
                 set_wrx_period_mod_reg <= set_wrx_period_mod_next;
             if(wr_en_clockmod_rdx) 
-                set_rdx_period_mod_reg <= set_rdx_period_mod_next;         
+                set_rdx_period_mod_reg <= set_rdx_period_mod_next;
+            if(wr_en_stream_ctrl)
+                stream_flow_reg <= stream_flow_next;  
         end
         
     
@@ -188,35 +205,71 @@ module core_video_lcd_display
     assign wr_en_data = wr_en && (addr[2:0] == REG_WR_DATA_OFFSET);
     assign wr_en_clockmod_wrx = wr_en && (addr[2:0] == REG_WR_CLOCKMOD_OFFSET);
     assign wr_en_clockmod_rdx = wr_en && (addr[2:0] == REG_RD_CLOCKMOD_OFFSET);
+    assign wr_en_stream_ctrl = wr_en && (addr[2:0] == REG_STREAM_CTRL_OFFSET);
     
     // next state;
     assign wr_data_next = wr_data;
     assign set_wrx_period_mod_next = wr_data;
     assign set_rdx_period_mod_next = wr_data;
+    assign stream_flow_next = wr_data[0];   // only one bit;
     
-    // to the lcd;
-    assign lcd_wr_data = wr_data_reg[7:0];
-    assign lcd_user_cmd = wr_data_reg[11:10];
-    
+    // lcd configuration; requires processor for this;
     assign lcd_set_wr_mod_fhalf = set_wrx_period_mod_reg[15:0];
     assign lcd_set_wr_mod_shalf = set_wrx_period_mod_reg[31:16];
     
     assign lcd_set_rd_mod_fhalf = set_rdx_period_mod_reg[15:0];
     assign lcd_set_rd_mod_shalf = set_rdx_period_mod_reg[31:16];
     
-    // it is either start-writing-to-lcd or start-reading-from-the-lcd;
-    assign lcd_user_start = (wr_data_reg[11:10] != CMD_NOP);    
     
-    // outputs;
-    // these signals are active low;
-    // csx: low to select to select the chip;
-    // dcx: low means commands;
-    // but the register is defined the opposite; so need to negate them;
-    assign lcd_drive_csx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_CSX];
-    assign lcd_drive_dcx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX];
-  
+    // to the lcd;
+    /*
+    multiplex depending on which is the source;
+    the processor
+    or 
+    video stream (pixel generation)
+    ?
+    */
+    always_comb 
+    begin
+        case(stream_flow_reg)
+        
+            STREAM_CTRL_VIDEO: begin
+                lcd_wr_data = stream_in_pixel_data;
+                /*
+                // it is pixel generation source to be written to the lcd;
+                so it must always be:
+                1. write command;
+                2. data mode (not command);
+                3. chip select enabled (for convenience);
+                */
+                lcd_user_cmd = CMD_WR;  
+                lcd_drive_csx = 1'b0;   // active low;
+                lcd_drive_dcx = 1'b1;   // otherwise, it is interpreted as a command;
+                
+                // when to start;
+                // when the fifo has valid pixel to be displayed;
+                lcd_user_start = stream_valid_flag;
+            end
+        
+            // cpu control;
+            default: begin
+                lcd_wr_data = wr_data_reg[7:0];
+                lcd_user_cmd = wr_data_reg[11:10];
+                
+                // auto start when wr/rd cmd;
+                lcd_user_start = (wr_data_reg[11:10] != CMD_NOP);        
+                
+                // hw active low signal;
+                lcd_drive_csx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_CSX]; 
+                
+                // hw active low signal;
+                lcd_drive_dcx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX]; 
+            end        
+        endcase
+    end
+    
     // broadcast its status to other video cores;
-    assign stream_out_ready_flag = lcd_ready_flag;
+    assign stream_ready_flag = lcd_ready_flag; 
     
     // instantiation;
     lcd_8080_interface_controller
