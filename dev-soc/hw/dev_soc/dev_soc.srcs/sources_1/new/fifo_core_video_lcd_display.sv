@@ -33,8 +33,7 @@ Sink Device:
 
 module fifo_core_video_lcd_display
     #(parameter
-        DATA_WIDTH = 8,     // this corresponds to LCD parallel 8-bit;
-        ADDRESS_WIDTH = 5   // 2^5 = 32 fifo depth;
+        DATA_WIDTH = 8     // this corresponds to LCD parallel 8-bit;
     )
     (
         // general;
