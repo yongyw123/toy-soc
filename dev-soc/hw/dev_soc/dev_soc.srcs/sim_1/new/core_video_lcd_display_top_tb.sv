@@ -48,7 +48,12 @@ module core_video_lcd_display_top_tb();
    logic lcd_drive_csx;
    logic lcd_drive_dcx;
    tri[PARALLEL_DATA_BITS-1:0] lcd_dinout;
-   logic stream_out_ready_flag;
+   
+   
+   // not from or for the processor;
+   logic [PARALLEL_DATA_BITS-1:0] stream_in_pixel_data;
+   logic stream_valid_flag;
+   logic stream_ready_flag;
    
    
    // sim var;
@@ -65,16 +70,16 @@ module core_video_lcd_display_top_tb();
         .addr(addr),
         .wr_data(wr_data),
         .rd_data(rd_data),
+        
         .lcd_drive_wrx(lcd_drive_wrx),
         .lcd_drive_rdx(lcd_drive_rdx),
         .lcd_drive_csx(lcd_drive_csx),
         .lcd_drive_dcx(lcd_drive_dcx),
         .lcd_dinout(lcd_dinout),
-        .stream_out_ready_flag(stream_out_ready_flag),
 
-        // empty for now;
-        .stream_in_pixel_data(),
-        .stream_in_wr_valid()
+        .stream_ready_flag(stream_ready_flag),
+        .stream_in_pixel_data(stream_in_pixel_data),
+        .stream_valid_flag(stream_valid_flag)
    );
    
    // test stimulus;
