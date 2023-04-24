@@ -140,7 +140,7 @@ module lcd_8080_interface_controller
     state_type state_reg, state_next;
     logic [31:0] clk_cnt_reg, clk_cnt_next; // to track the wr/rd clock cycle;
     logic [PARALLEL_DATA_BITS-1:0] wr_data_reg; // to buffer to wr_data;
-    logic [PARALLEL_DATA_BITS-1:0] rd_data_reg; // to sample lcd data;
+    logic [PARALLEL_DATA_BITS-1:0] rd_data_reg, rd_data_next; // to sample lcd data;
     logic [1:0] cmd_reg, cmd_next; // to store the user commands;
     
     // enabler signals;
@@ -159,7 +159,8 @@ module lcd_8080_interface_controller
             state_reg <= state_next;
             clk_cnt_reg <= clk_cnt_next;
             //if(user_start) begin
-            //wr_data_reg <= wr_data_next;  
+            //wr_data_reg <= wr_data_next; 
+            rd_data_reg <= rd_data_next; 
             cmd_reg <= cmd_next;
         //end                   
         end          
@@ -260,7 +261,8 @@ module lcd_8080_interface_controller
                     sample it;
                 */
                 drive_rdx = 1'b1;
-                rd_data_reg = dinout;
+                //rd_data_reg = dinout;
+                rd_data_next = dinout;
                 if(clk_cnt_reg == set_rd_mod_shalf) begin
                     state_next = ST_IDLE;
                     clk_cnt_next = 0;   // reset for the next statel
