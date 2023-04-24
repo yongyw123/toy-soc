@@ -52,7 +52,10 @@ module fifo_core_video_lcd_display_top_tb();
     
     // instantiation;
     fifo_core_video_lcd_display 
-    #(.DATA_WIDTH(DATA_WIDTH))
+    #(
+    .DATA_WIDTH(DATA_WIDTH),
+    .ADDR_WIDTH(5) // could hold up to 2^5 data; 
+    )
     uut
     (
     .clk(clk),
