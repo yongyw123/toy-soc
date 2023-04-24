@@ -45,10 +45,10 @@ module fifo_core_video_lcd_display_top_tb();
     localparam CMD_WR   = 2'b01;
     logic sink_drive_wrx;
     tri[DATA_WIDTH-1:0] sink_dinout;
-    logic sink_ready_flag;
+    //logic sink_ready_flag;
     
     /* link the fifo with the sink device */
-    assign sink_ready = sink_ready_flag;
+    //assign sink_ready = sink_ready_flag;
     
     // instantiation;
     fifo_core_video_lcd_display 
@@ -88,7 +88,7 @@ module fifo_core_video_lcd_display_top_tb();
         .rd_data(),
 
         // status;
-        .ready_flag(sink_ready_flag),    // idle;
+        .ready_flag(sink_ready),    // idle;
         .done_flag(),     // just finish the rd/wr operation;
         
         .drive_wrx(sink_drive_wrx),   //  to drive the lcd for write op;
