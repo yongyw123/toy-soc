@@ -58,7 +58,7 @@ Register Definition:
         bit[15:0] defines the clock counter mod for LOW RDX period;
         bit[31:16] defines the clock counter mod for HIGH RDX period;
 
-3. register 3: write data and data mode;
+3. register 3: write data, data mode etc;
         bit[7:0]    : data to write to the lcd;
         bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
                         0 for data;
