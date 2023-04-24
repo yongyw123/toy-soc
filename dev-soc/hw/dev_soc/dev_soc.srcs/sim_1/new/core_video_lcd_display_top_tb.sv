@@ -113,7 +113,7 @@ module core_video_lcd_display_top_tb();
     addr,
     wr_data,
     rd_data,
-    stream_out_ready_flag,
+    stream_ready_flag,
     lcd_drive_wrx,
     lcd_drive_rdx,
     lcd_drive_csx,
