@@ -181,6 +181,7 @@ module lcd_8080_interface_controller
         clk_cnt_next = clk_cnt_reg;
         wr_data_next = wr_data_reg;
         rd_data_next = rd_data_reg;
+        cmd_next = cmd_reg;
         
         case(state_reg)
             ST_IDLE:
