@@ -48,8 +48,8 @@ module mcs_bus_bridge
         /* on the other side of the bridge; user-own address space; */
         output logic user_mmio_cs,  // chip select for MMIO system;
         output logic user_video_cs, // chip select for the video system;
-        output logic user_wr,      
-        output logic user_rd,
+        output logic user_wr,      // write request from the cpu;
+        output logic user_rd,      // read request from the cpu;
         output logic [`BUS_USER_SIZE_G-1:0] user_addr,      // memory address for user system such as MMIO;
         output logic [`REG_DATA_WIDTH_G-1:0] user_wr_data,  // 32-bit wide;
         input logic [`REG_DATA_WIDTH_G-1:0] user_rd_data    // 32-bit wide;
