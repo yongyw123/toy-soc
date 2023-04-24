@@ -97,7 +97,7 @@ module video_sys
     /* video controller; */
     video_ctrl ctrl_unit
     (
-        .clk(clk),
+        .clk(clk_sys),
         .reset(reset),
         
         // system control sigmals;
