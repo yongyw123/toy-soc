@@ -221,13 +221,76 @@ program core_video_lcd_display_tb
     // when the two following conditions are true;
     wait((stream_ready_flag == 1'b1) && (stream_valid_flag == 1'b0));
     #(50);
+    
     // test 04;
     // re-enable the cpu stream;
     // to test interchangeability between two streams;
+    // try both writing and reading;
     
+    // handling the control over to the cpu;
+    @(posedge clk);
+    addr  <= REG_STREAM_CTRL_OFFSET;
+    wr_data <= {31'b0, 1'b0};   
      
-    $display("test ends");
+    // pause;
+    // expect nothing happens?
+    // this depends on the existing write register;
+    #(50);
+    
+    // start writing;
+    @(posedge clk);
+    addr <= REG_WR_DATA_OFFSET;
+    wr_data <= {20'b0, CMD_WR, csx_select, dcx_command, 8'($random)};
+    
+    // issue a CMD_NOP immediately after one write;
+    // otherwise, it will keep on writing on the next ready;
+    @(posedge clk);
+    wr_data <= {20'b0, CMD_NOP, csx_select, dcx_command, 8'($random)};
+    
+    // expect the ready flag to change to busy then back to ready;
+    //@(posedge clk); // it takes one clock cycle to update the flag;
+    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b0);
+    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b1);
+    
+    // start reading;
+    @(posedge clk);
+    addr <= REG_WR_DATA_OFFSET;
+    wr_data <= {20'b0, CMD_RD, csx_select, dcx_command, 8'($random)};
+    
+    // issue a CMD_NOP immediately;
+    // otherwise, it will keep on reading on the next ready;
+    @(posedge clk);
+    wr_data <= {20'b0, CMD_NOP, csx_select, dcx_command, 8'($random)};
+    
+    // expect the ready flag to change to busy then back to ready;
+    //@(posedge clk); // it takes one clock cycle to update the flag;
+    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b0);
+    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b1);
+    
     #(20);
+    
+    // change back to disabling cpu control;
+    @(posedge clk);
+    addr  <= REG_STREAM_CTRL_OFFSET;
+    wr_data <= {31'b0, 1'b1};   // hand the control to the video streams;
+    
+    // again start the last burst fifo source;
+    for(int i = 0; i < 10; i++) begin
+        @(posedge clk);
+        fifo_src_data <= 8'($random);
+        fifo_src_valid <= 1'b1;    
+    end
+    
+    // stop adding more fifo source;
+    @(posedge clk);
+    fifo_src_valid <= 1'b0;
+    
+    // we know the transfer end to end is done;
+    // when the two following conditions are true;
+    wait((stream_ready_flag == 1'b1) && (stream_valid_flag == 1'b0));
+    #(50);
+    
+    $display("test ends");
     $stop;
     end
 endprogram 
