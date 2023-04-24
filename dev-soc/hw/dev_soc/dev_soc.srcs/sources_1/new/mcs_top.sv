@@ -99,6 +99,7 @@ module mcs_top
         output logic LCD_DCX_JD02,
         output logic LCD_WRX_JD03,
         output logic LCD_RDX_JD04,
+        inout tri GPIO_LCD_RST_JD07, // tristate because GPIO pin is used;
         inout tri[7:0] LCD_DATA_JC  // all JC pins;        
         
     );
@@ -256,7 +257,10 @@ module mcs_top
         .i2c_sda(I2C_SDA_JA02),
         
         /* misc: gpio; */ 
-        .gpio(GPIO_CAM_OV7670_RESETN_JA04)  
+        // used for HW reset pins for the following external devices;
+        // LCD ILI9341;
+        // CAMERA OV7670;
+        .gpio({GPIO_LCD_RST_JD07, GPIO_CAM_OV7670_RESETN_JA04})  
         
     );
     
