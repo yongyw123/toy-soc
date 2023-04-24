@@ -139,7 +139,7 @@ set_property -dict { PACKAGE_PIN G1    IOSTANDARD LVCMOS33 } [get_ports { LCD_WR
 #set_property -dict { PACKAGE_PIN G3    IOSTANDARD LVCMOS33 } [get_ports { JD[4] }]; #IO_L20N_T3_35 Sch=jd[4]
 set_property -dict { PACKAGE_PIN G3    IOSTANDARD LVCMOS33 } [get_ports { LCD_RDX_JD04 }]; #IO_L20N_T3_35 Sch=jd[4]
 #set_property -dict { PACKAGE_PIN H2    IOSTANDARD LVCMOS33 } [get_ports { JD[7] }]; #IO_L15P_T2_DQS_35 Sch=jd[7]
-set_property -dict { PACKAGE_PIN H2    IOSTANDARD LVCMOS33 } [get_ports { GPIO_LCD_RST_JD07 }]; #IO_L15P_T2_DQS_35 Sch=jd[7]
+#set_property -dict { PACKAGE_PIN H2    IOSTANDARD LVCMOS33 } [get_ports { GPIO_LCD_RST_JD07 }]; #IO_L15P_T2_DQS_35 Sch=jd[7]
 #set_property -dict { PACKAGE_PIN G4    IOSTANDARD LVCMOS33 } [get_ports { JD[8] }]; #IO_L20P_T3_35 Sch=jd[8]
 #set_property -dict { PACKAGE_PIN G2    IOSTANDARD LVCMOS33 } [get_ports { JD[9] }]; #IO_L15N_T2_DQS_35 Sch=jd[9]
 #set_property -dict { PACKAGE_PIN F3    IOSTANDARD LVCMOS33 } [get_ports { JD[10] }]; #IO_L13N_T2_MRCC_35 Sch=jd[10]

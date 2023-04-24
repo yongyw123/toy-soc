@@ -260,7 +260,8 @@ module mcs_top
         // used for HW reset pins for the following external devices;
         // LCD ILI9341;
         // CAMERA OV7670;
-        .gpio({GPIO_LCD_RST_JD07, GPIO_CAM_OV7670_RESETN_JA04})  
+        //.gpio({GPIO_LCD_RST_JD07, GPIO_CAM_OV7670_RESETN_JA04})
+        .gpio(GPIO_CAM_OV7670_RESETN_JA04)  
         
     );
     
