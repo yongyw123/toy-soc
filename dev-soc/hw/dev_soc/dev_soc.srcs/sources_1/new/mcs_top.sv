@@ -125,7 +125,12 @@ module mcs_top
     logic user_wr;
     logic user_rd;
     logic [31:0] user_wr_data;
-    logic [31:0] user_rd_data;
+    
+    /* need to multiplex teh rd_data from the mmio and video system; */
+    logic [31:0] user_rd_data;      // multiplexed rd_data sent to the cpu; 
+    logic [31:0] user_rd_mmio_data; // rd_data from the mmio system;
+    logic [31:0] user_rd_video_data; // rd_data from the video system;
+    
     logic [`BUS_USER_SIZE_G-1:0] user_addr;
     
     // for ip-generated mmcm clock;
@@ -200,6 +205,20 @@ module mcs_top
     .user_rd_data(user_rd_data)
     );
     
+    
+    // multiplex the read data from mmio and video systems;
+    // depending on the cpu request;
+    always_comb
+        // note that video_cs and mmio_cs are mutually exclusive;
+        case({user_video_cs, user_mmio_cs})
+            // mmio only;
+            2'b01: user_rd_data = user_rd_mmio_data;
+            // video only;
+            2'b10: user_rd_data = user_rd_video_data;
+            
+            default: ;  // nop;
+        endcase
+    
     // mmio system;
     mmio_sys 
     
@@ -228,7 +247,7 @@ module mcs_top
         .mmio_wr(user_wr),
         .mmio_rd(user_rd),
         .mmio_wr_data(user_wr_data),
-        .mmio_rd_data(user_rd_data),
+        .mmio_rd_data(user_rd_mmio_data),
         .sw(SW),
         .led(LED),
         
@@ -287,7 +306,8 @@ module mcs_top
         .video_rd(user_rd),             // read enable;
         .video_addr(user_addr),       // addr to decode for video core address and its register address;
         .video_wr_data(user_wr_data),   // 32-bit;
-        .video_rd_data(user_rd_data),  // 32-bit;
+        //.video_rd_data(user_rd_data),  // 32-bit;
+        .video_rd_data(user_rd_video_data),  // 32-bit;
         
         /*---------- HW pin mapping ------------------*/
         
@@ -300,6 +320,8 @@ module mcs_top
         // this is shared between the host and the lcd;
         .lcd_dinout(LCD_DATA_JC)
     );
+    
+    
     
 endmodule
 
