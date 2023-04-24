@@ -186,12 +186,9 @@ module lcd_8080_interface_controller
                 done_flag = 1'b1;
                 cmd_next = user_cmd;
                 if(user_start && (user_cmd != CMD_NOP)) begin
-                    /*
+                    // load the counter for the next state;
                     clk_cnt_next = 0;
-                    state_next = ST_FHALF_W;
-                    wr_data_reg = wr_data;
-                    */
-                    
+                    // determine which command
                     case(user_cmd)
                         CMD_WR: begin
                             state_next = ST_FHALF_W;
@@ -226,6 +223,15 @@ module lcd_8080_interface_controller
                    state_next = ST_IDLE;
                    clk_cnt_next = 0;
                    done_flag = 1'b1;
+                   
+                   /* signal ahead so that
+                    that the host could start setting up
+                    its data before the state here transits
+                    to ST_IDLE
+                    
+                    is this a good idea?
+                    */
+                    //ready_flag = 1'b1;
                 end
                 else
                     clk_cnt_next = clk_cnt_reg + 1;
@@ -259,6 +265,15 @@ module lcd_8080_interface_controller
                     state_next = ST_IDLE;
                     clk_cnt_next = 0;   // reset for the next statel
                     done_flag = 1'b1;
+                    
+                    /* signal ahead so that
+                    that the host could start setting up
+                    its data before the state here transits
+                    to ST_IDLE
+                    
+                    is this a good idea?
+                    */
+                    //ready_flag = 1'b1;
                 end
                 else
                     clk_cnt_next = clk_cnt_reg + 1;
