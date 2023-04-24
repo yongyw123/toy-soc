@@ -160,8 +160,8 @@ module mcs_top
     .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M: for camera ov7670
     
     // Status and control signals
-    .reset(reset_clk),          // input reset
-    //.reset(0),      // allow free running? bad idea?
+    //.reset(reset_clk),          // input reset
+    .reset(0),      // allow free running? bad idea?
     .power_down(0),   // input power_down; always powered on;
     .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
    
@@ -205,7 +205,6 @@ module mcs_top
     .user_wr_data(user_wr_data),
     .user_rd_data(user_rd_data)
     );
-    
     
     // multiplex the read data from mmio and video systems;
     // depending on the cpu request;
