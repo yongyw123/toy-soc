@@ -53,13 +53,16 @@ module fifo_core_video_lcd_display
     );
     
     
-    logic almost_empty; // not used;
-    logic almost_full;
-    logic flag_full;         // not used;
+    logic flag_full;        
     logic flag_empty;
+    
+    // only request a read if the fifo is non empty even if the sink is already ready to accept new input anytime;
+    logic read_en;      
+    assign read_en = sink_ready && !flag_empty;
     
     assign sink_valid = !flag_empty;  // as soon as the fifo has some data;
     assign src_ready = !flag_full;    
+    
     
     FIFO
     #(.DATA_WIDTH(DATA_WIDTH),
@@ -68,7 +71,7 @@ module fifo_core_video_lcd_display
     (
         .clk(clk),
         .reset(reset),
-        .ctrl_rd(sink_ready), // read request;
+        .ctrl_rd(read_en), // read request;
         .ctrl_wr(src_valid), // write request;
         .flag_empty(flag_empty),
         .flag_full(flag_full),
