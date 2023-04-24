@@ -100,7 +100,7 @@ module mcs_top
         output logic LCD_WRX_JD03,
         output logic LCD_RDX_JD04,
         inout tri GPIO_LCD_RST_JD07, // tristate because GPIO pin is used;
-        inout tri[7:0] LCD_DATA_JC  // all JC pins;        
+        inout tri [7:0] LCD_DATA_JC  // all JC pins;        
         
     );
     
@@ -134,7 +134,8 @@ module mcs_top
     logic [`BUS_USER_SIZE_G-1:0] user_addr;
     
     // for ip-generated mmcm clock;
-   logic mmcm_clk_locked;   // whether the clock has stabilized or not?
+    logic mmcm_clk_locked;   // whether the clock has stabilized or not?
+    logic clkout_100M;
     
     // conform the signals;
     /* ?? to do ??, need to debounce this reset button; */
@@ -161,7 +162,7 @@ module mcs_top
     // Status and control signals
     .reset(reset_clk),          // input reset
     //.reset(0),      // allow free running? bad idea?
-    .power_down(),              // input power_down; not used;
+    .power_down(0),   // input power_down; always powered on;
     .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
    
    // Clock in ports
@@ -294,7 +295,7 @@ module mcs_top
     video_unit
     (
         // general;
-        .clk_sys(clk_100M),    // 100 MHz;
+        .clk_sys(clkout_100M),    // 100 MHz;
         .reset(reset_sys),  // async;
         
         /*
