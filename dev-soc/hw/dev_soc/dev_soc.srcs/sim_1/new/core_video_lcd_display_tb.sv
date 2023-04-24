@@ -48,6 +48,7 @@ program core_video_lcd_display_tb
         output logic fifo_src_valid,
         input logic fifo_src_ready,
         input logic stream_valid_flag,
+        input logic stream_ready_flag,
         
        // debugging;
         output logic [31:0] test_index 
@@ -195,14 +196,36 @@ program core_video_lcd_display_tb
     wr_data <= {31'b0, 1'b1};   // hand the control to the video streams;
     
     // expect that fifo will be drawn out; hence the src stream will be invalid;
-    //wait(stream_valid_flag == 1'b0);
+    @(posedge clk);
+    wait(stream_valid_flag == 1'b0);
+    
+    // expect that the lcd controller will be ready;
+    wait(stream_ready_flag == 1'b1);
     
     // test 03;
     // disable the cpu stream;
-    // sequentially create fifo buffer source so that the lcd 
+    // burst (transfer) create fifo source;
+    // check if the each source
     // is triggered everytime;
+    for(int i = 0; i < 10; i++) begin
+        @(posedge clk);
+        fifo_src_data <= 8'($random);
+        fifo_src_valid <= 1'b1;    
+    end
     
-    #(1000); 
+    // stop adding more fifo source;
+    @(posedge clk);
+    fifo_src_valid <= 1'b0;
+    
+    // we know the transfer end to end is done;
+    // when the two following conditions are true;
+    wait((stream_ready_flag == 1'b1) && (stream_valid_flag == 1'b0));
+    #(50);
+    // test 04;
+    // re-enable the cpu stream;
+    // to test interchangeability between two streams;
+    
+     
     $display("test ends");
     #(20);
     $stop;
