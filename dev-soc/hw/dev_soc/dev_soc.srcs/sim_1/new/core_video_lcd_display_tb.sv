@@ -284,12 +284,12 @@ program core_video_lcd_display_tb
     // start reading;
     @(posedge clk);
     addr <= REG_WR_DATA_OFFSET;
-    wr_data <= {21'b0, CMD_RD, dcx_command, 8'($random)};
+    wr_data <= {21'b0, CMD_RD, !dcx_command, 8'($random)};
     
     // issue a CMD_NOP immediately;
     // otherwise, it will keep on reading on the next ready;
     @(posedge clk);
-    wr_data <= {21'b0, CMD_NOP, dcx_command, 8'($random)};
+    wr_data <= {21'b0, CMD_NOP, !dcx_command, 8'($random)};
     
     // expect the ready flag to change to busy then back to ready;
     //@(posedge clk); // it takes one clock cycle to update the flag;
