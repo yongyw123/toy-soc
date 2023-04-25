@@ -131,7 +131,39 @@ class video_core_lcd_display{
     };
 
     public:
-        
+        video_core_lcd_display(uint32_t core_base_addr);
+        ~video_core_lcd_display();
+
+        // config;
+        void set_clockmod(int usr_wrx_l, int usr_wrx_h, int usr_rdx_l, int usr_rdx_h);
+        void set_stream(int set_cpu_control);
+
+        // status;
+        void is_ready(void);
+
+        // communication setting;
+        void enable_chip(void); // chip select; active low;
+        void enable_data(void); // not command for the lcd;
+
+        // atomic commands;
+        // the data line is bidirectional;
+        // need to set HiZ depending on the transfer mode;
+        void set_read(void);  // HiZ to read from the lcd; 
+        void set_write(void); // host takes control of the line;
+
+        // rw;
+        void write_data(uint8_t data); // write to the lcd;
+        uint8_t read_data(void);        // read from the lcd;
+
+    private:
+        // this video core base address in the user-address space;
+        uint32_t base_addr;
+
+        // the clock mod setting;
+        int wrx_l;
+        int wrx_h;
+        int rdx_l;
+        int rdx_h;
 
 };
 
