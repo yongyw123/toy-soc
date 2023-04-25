@@ -91,3 +91,68 @@ void video_core_lcd_display::set_stream(int set_cpu_control){
    REG_WRITE(base_addr, REG_STREAM_CTRL_OFFSET, wr);
 }
 
+int video_core_lcd_display::is_ready(void){
+    /*
+    @brief  : check whether the lcd display controller is ready/idle;
+    @param  : none;
+    @retval : 1 if ready; 0 otherwise;
+    */
+
+   uint32_t rd_data;
+   rd_data = REG_READ(base_addr, REG_RD_DATA_OFFSET);
+   return (int)((rd_data & MASK_REG_RD_DATA_STATUS_READY) >> BIT_POS_REG_RD_DATA_STATUS_READY);
+}
+
+
+void video_core_lcd_display::enable_chip(void){
+    /*
+    @brief  : assert CS (active low) to enable the LCD;
+    @param  : none;
+    @retval : none
+    */
+
+   // note that chip select bit is in the write register;
+   // so writing this will override other settings in this register;
+   // this is ok because chip select takes precedence;
+   // if deselect; the rest of the settings will not take effect;
+   uint32_t wr = BIT_MASK(BIT_POS_REG_WR_DATA_CSX);
+   REG_WRITE(base_addr, REG_WR_DATA_OFFSET, wr);
+
+}
+
+void video_core_lcd_display::disable_chip(void){
+    /*
+    @brief  : deassert the CS (active low) to the disable the LCD chip
+    @param  : none;
+    @retval : none
+    */
+
+   // note that chip select bit is in the write register;
+   // so writing this will override other settings in this register;
+   // this is ok because chip select takes precedence;
+   // if deselect; the rest of the settings will not take effect;
+   uint32_t wr = 0;
+   REG_WRITE(base_addr, REG_WR_DATA_OFFSET, wr);
+
+}
+
+void video_core_lcd_display::write(int is_data, uint8_t data){
+    /*
+    @brief  : Host transfers to the LCD
+    @param  :
+            is_data: how should the LCD interpret the host data?
+                    1 for data;
+                    0 for command
+            data    : the data to transfer
+    @retval :
+    */
+
+   uint32_t wr;
+   uint32_t dcx;
+   
+
+}
+
+
+
+

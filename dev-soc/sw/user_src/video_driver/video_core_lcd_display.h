@@ -76,7 +76,7 @@ Register IO access:
 2. register 1: write only;
 3. register 2: write only;
 4. register 3: write only;
-5. register 4: stream control register;
+5. register 4: write only;
 --------------------------------------------------------------*/
 
 class video_core_lcd_display{
@@ -94,7 +94,7 @@ class video_core_lcd_display{
     enum{
         // lcd display controller status;
         BIT_POS_REG_RD_DATA_STATUS_READY = V0_DISP_LCD_REG_STATUS_BIT_POS_READY,
-        
+        MASK_REG_RD_DATA_STATUS_READY = BIT_MASK(BIT_POS_REG_RD_DATA_STATUS_READY),
 
         /* ------------------------------------
         the write register packed different data;
@@ -143,21 +143,15 @@ class video_core_lcd_display{
         void set_stream(int set_cpu_control);
 
         // status;
-        void is_ready(void);
+        int is_ready(void);
 
         // communication setting;
         void enable_chip(void); // chip select; active low;
-        void enable_data(void); // not command for the lcd;
-
-        // atomic commands;
-        // the data line is bidirectional;
-        // need to set HiZ depending on the transfer mode;
-        void set_read(void);  // HiZ to read from the lcd; 
-        void set_write(void); // host takes control of the line;
-
+        void disable_chip(void); 
+        
         // rw;
-        void write_data(uint8_t data); // write to the lcd;
-        uint8_t read_data(void);        // read from the lcd;
+        void write(int is_data, uint8_t data); // write to the lcd;
+        uint8_t read(void);        // read from the lcd;
 
     private:
         // this video core base address in the user-address space;
