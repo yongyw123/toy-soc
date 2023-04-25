@@ -133,7 +133,10 @@ module core_video_lcd_display_top_tb();
     
    /* monitoring */
    initial begin
+   $monitor("time: %t, addr: %3d, wr_data: %3B, uut.wr_en: %0b, uut.wr_csx_en: %0b, uut.csx_reg: %0b, uut.csx_next: %0b",
+   $time, addr, wr_data, uut.wr_en, uut.wr_en_csx, uut.csx_reg, uut.csx_next);
    
+    /*
     //$monitor("time: %t, #: %0d, addr: %0d, wr_data: %0B, rd_data: %0B, wrx: %0b, rdx: %0b, csx: %0b, dcx: %0b, dinout: %0B, uut.start: %0b, uut.cmd: %0B",
     $monitor("time: %10t, #: %d, addr: %d, wr_data: %20B, rd_data: %10B, ready: %b, wrx: %b, rdx: %b, csx: %b, dcx: %b, dinout: %B, uut.start: %b, uut.cmd: %B",
     $time,
@@ -149,7 +152,7 @@ module core_video_lcd_display_top_tb();
     lcd_dinout,
     uut.lcd_user_start,
     uut.lcd_user_cmd);
-    
+    */
     
    end
     
