@@ -1,5 +1,5 @@
-#ifndef _CORE_VIDEO_LCD_DISPLAY_H
-#define _CORE_VIDEO_LCD_DISPLAY_H
+#ifndef _VIDEO_CORE_LCD_DISPLAY_H
+#define _VIDEO_CORE_LCD_DISPLAY_H
 
 /* ---------------------------------------------
 Purpose: SW drivers for video LCD display core;
@@ -141,4 +141,4 @@ class video_core_lcd_display{
 #endif
 
 
-#endif //_CORE_VIDEO_LCD_DISPLAY_H
+#endif //_VIDEO_CORE_LCD_DISPLAY_H
