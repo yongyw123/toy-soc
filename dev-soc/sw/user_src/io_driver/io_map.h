@@ -94,7 +94,7 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 //#define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // the 24-bit; as above, to distinguish two systems;
 
 #define BUS_USER_SIZE_G                 23  // as above; (word aligned);
-#define BUS_SYSTEM_SELECT_BIT_INDEX_G   25  // the 24-bit; as above, to distinguish two systems;
+#define BUS_SYSTEM_SELECT_BIT_INDEX_G   25  // the 26-bit; as above, to distinguish two systems;
 
 // IO based address provided by microblaze MSC, as above;
 #define BUS_MICROBLAZE_IO_BASE_ADDR_G 0xC0000000

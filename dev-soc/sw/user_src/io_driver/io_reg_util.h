@@ -24,9 +24,15 @@ extern "C" {
 /*-------------------
 * Constants;
 -------------------*/
-#define REG_WORD_BYTE 4     // each register is 32-bit; hence 4-byte;
-#define TOTAL_REG_NUM 32    // each core is allocated 2^{5} internal registers;
+#define REG_WORD_BYTE       4     // each register is 32-bit; hence 4-byte;
+#define TOTAL_MMIO_REG_NUM  32    // each mmio core is allocated 2^{5} internal registers;
+#define TOTAL_VIDEO_REG_NUM 524288        // each video core has 2^{19} internal registers;
 
+// to distinguish between the mmio and video system under the same address space; 
+// the 25-indexed bit (the 26-th bit) of byte-addressable is used
+// equiv. 23-indexed bit of word-addressable
+// HIGH for video; LOW otherwise 
+#define USER_VIDEO_BYTE_SELECT_BIT  0x02000000  // this corresponds to the 25-bit of byte-addressable space;
 /* ----------------------------------------------
 * MACROS
 ----------------------------------------------*/
@@ -44,11 +50,21 @@ extern "C" {
 * @macro        : GET_IO_CORE_ADDR();
 * @purpose      : get the base address of a specified IO core;
 * @input: 
-*   mmio_addr   : base (start) address of the MMIO address space;
+*   usr_addr    : base (start) address of the user address space;
 *   core_num    : which io core of the MMIO;
 */
-#define GET_IO_CORE_ADDR(mmio_addr, core_num) ((uint32_t)((mmio_addr) + TOTAL_REG_NUM*REG_WORD_BYTE*(core_num)))
+#define GET_IO_CORE_ADDR(usr_addr, core_num) ((uint32_t)((usr_addr) + TOTAL_MMIO_REG_NUM*REG_WORD_BYTE*(core_num)))
 
+/*
+* @macro        : GET_VIDEO_CORE_ADDR();
+* @purpose      : get the base address of a specified video core;
+* @note         : video and mmio have different user address under the same space;
+*                   so need to have different macros;
+* @input: 
+*   usr_addr    : base (start) address of the user address space;
+*   core_num    : which io core of the MMIO;
+*/
+#define GET_VIDEO_CORE_ADDR(usr_addr, core_num) ((uint32_t)((usr_addr) + TOTAL_VIDEO_REG_NUM*REG_WORD_BYTE*(core_num)))
 
 
 /*
@@ -68,7 +84,7 @@ extern "C" {
 *   offset      : offset of the register;
 *   data        : 32-bit data to write;
 */
-#define REG_WRITE(base_addr, offset, wr_data) (*(volatile uint32_t *)((base_addr) + REG_WORD_BYTE*(offset)) = (wr_data))
+#define REG_WRITE(base_addr, offset, wr_data) (*(volatile uint32_t *)((base_addr + USER_VIDEO_BYTE_SELECT_BIT) + REG_WORD_BYTE*(offset)) = (wr_data))
 
 
 #ifdef __cpluscplus
