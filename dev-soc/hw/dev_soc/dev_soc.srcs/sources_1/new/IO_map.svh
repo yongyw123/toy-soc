@@ -108,27 +108,6 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 `define REG_DATA_WIDTH_G    32  // MCS uses word (32-bit);
 `define REG_ADDR_SIZE_G     5   // each mimo core has 2^{5} = 32 internal registers;
 
-
-/*----------------------------------------------------
-video address space;
-1. 2^3 = 8 video cores;
-2. each core has 19-bit address space;
-    where this 19-bit is used for internal register
-    and to store 16-bit pixel data;
-    
-summary:
-video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
-
-* x represents dont-care (to accommodate frame buffer?)
-* v represents video core;
-* r represents video core internal registers;
-* a represents video space of each core; where this space is used for various purposes;
-*       such as to store i=the 16-bit pixel
-----------------------------------------------------*/
-`define VIDEO_CORE_ADDR_SIZE_G       3 
-`define VIDEO_CORE_TOTAL_G           8 // 2**VIDEO_CORE_ADDR_SIZE_G;
-`define VIDEO_REG_ADDR_BIT_SIZE_G   19  // each video core has 19-bit address space allocated;
-
 /*----------------------------------------------------
 * IO modules/cores shall be sloted in the IO memory map;
 * module index; each module is allocated with 32 registers;
@@ -334,6 +313,26 @@ Register IO access:
 `define S6_I2C_REG_READ_BIT_POS_READY   9
 
 `define S6_I2C_REG_WRITE_BIT_POS_CMD_OFFSET 8   
+
+/*----------------------------------------------------
+video address space;
+1. 2^3 = 8 video cores;
+2. each core has 19-bit address space;
+    where this 19-bit is used for internal register
+    and to store 16-bit pixel data;
+    
+summary:
+video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
+
+* x represents dont-care (to accommodate frame buffer?)
+* v represents video core;
+* r represents video core internal registers;
+* a represents video space of each core; where this space is used for various purposes;
+*       such as to store i=the 16-bit pixel
+----------------------------------------------------*/
+`define VIDEO_CORE_ADDR_SIZE_G       3 
+`define VIDEO_CORE_TOTAL_G           8 // 2**VIDEO_CORE_ADDR_SIZE_G;
+`define VIDEO_REG_ADDR_BIT_SIZE_G   19  // each video core has 19-bit address space allocated;
 
 
 /*----------------------------------------------------
