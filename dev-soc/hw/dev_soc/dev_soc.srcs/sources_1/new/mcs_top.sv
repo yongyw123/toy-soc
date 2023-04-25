@@ -286,7 +286,7 @@ module mcs_top
         .gpio(GPIO_CAM_OV7670_RESETN_JA04)  
         
     );
-    
+    /*
     // video system;
     video_sys
     #(
@@ -300,10 +300,9 @@ module mcs_top
         .clk_sys(clk),    // 100 MHz;
         .reset(reset_sys),  // async;
         
-        /*
         // user bus interface;
         // where user bus is bridged by the microblaze MCS IO bus;
-        */
+      
         .video_cs(user_video_cs),        // chip select for mmio system;
         .video_wr(user_wr),             // write enable;
         .video_rd(user_rd),             // read enable;
@@ -311,10 +310,7 @@ module mcs_top
         .video_wr_data(user_wr_data),   // 32-bit;
         //.video_rd_data(user_rd_data),  // 32-bit;
         .video_rd_data(user_rd_video_data),  // 32-bit;
-        
-        /*---------- HW pin mapping ------------------*/
-        
-        /* LCD display (ILI9341) */
+
         .lcd_drive_csx(LCD_CSX_JD01),     // chip select;
         .lcd_drive_dcx(LCD_DCX_JD02),     // data or command; LOW for command;          
         .lcd_drive_wrx(LCD_WRX_JD03),     //  to drive the lcd for write op;
@@ -323,7 +319,7 @@ module mcs_top
         // this is shared between the host and the lcd;
         .lcd_dinout(LCD_DATA_JC)
     );
-    
+    */
     
     
 endmodule
