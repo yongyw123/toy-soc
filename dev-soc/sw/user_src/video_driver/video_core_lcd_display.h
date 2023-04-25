@@ -93,7 +93,8 @@ class video_core_lcd_display{
         REG_CLOCKMOD_WR_OFFSET = 1,
         REG_CLOCKMOD_RD_OFFSET = 2,
         REG_WR_DATA_OFFSET = 3,
-        REG_STREAM_CTRL_OFFSET = 4
+        REG_STREAM_CTRL_OFFSET = 4,
+        REG_CSX_OFFSET = 5
     };
 
     // field and bit maskings;
@@ -107,19 +108,15 @@ class video_core_lcd_display{
         so need to adjust the position;
         ------------------------------------ */
 
-        /* hw pin control;
-        data or command;
-        chip select;
-        */
+        // hw pin control: data or command;
         BIT_POS_REG_WR_DATA_DCX = V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX,
-        BIT_POS_REG_WR_DATA_CSX = V0_DISP_LCD_REG_WR_DATA_BIT_POS_CSX,
-
+        
 
         // clock mod;
         BIT_POS_REG_CLKMOD_SHALF = 16,  // second half;
 
         // user command start position;
-        BIT_POS_REG_WR_DATA_CMD_OFFSET = 10,
+        BIT_POS_REG_WR_DATA_CMD_OFFSET = 9,
 
 
         /*
@@ -127,7 +124,10 @@ class video_core_lcd_display{
         who has the control over the lcd display interface;
         the cpu or other video core (pixel src)?
         */
-        BIT_POS_STREAM_CTRL = 0
+        BIT_POS_STREAM_CTRL = 0,
+
+        // csx;
+        BIT_POS_CSX = 0
     };
 
     // commands;
@@ -135,7 +135,7 @@ class video_core_lcd_display{
         /* the write register packed different data;
         so need to adjust the position;
         */
-       CMP_NOP = ((uint32_t)0x00 << BIT_POS_REG_WR_DATA_CMD_OFFSET),
+       CMD_NOP = ((uint32_t)0x00 << BIT_POS_REG_WR_DATA_CMD_OFFSET),
        CMD_WR = ((uint32_t)0x01 << BIT_POS_REG_WR_DATA_CMD_OFFSET),
        CMD_RD = ((uint32_t)0x02 << BIT_POS_REG_WR_DATA_CMD_OFFSET)
     };

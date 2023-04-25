@@ -110,13 +110,8 @@ void video_core_lcd_display::enable_chip(void){
     @param  : none;
     @retval : none
     */
-
-   // note that chip select bit is in the write register;
-   // so writing this will override other settings in this register;
-   // this is ok because chip select takes precedence;
-   // if deselect; the rest of the settings will not take effect;
-   uint32_t wr = BIT_MASK(BIT_POS_REG_WR_DATA_CSX);
-   REG_WRITE(base_addr, REG_WR_DATA_OFFSET, wr);
+    uint32_t wr = (uint32_t)0x01;
+   REG_WRITE(base_addr, REG_CSX_OFFSET, wr);
 
 }
 
@@ -127,12 +122,8 @@ void video_core_lcd_display::disable_chip(void){
     @retval : none
     */
 
-   // note that chip select bit is in the write register;
-   // so writing this will override other settings in this register;
-   // this is ok because chip select takes precedence;
-   // if deselect; the rest of the settings will not take effect;
-   uint32_t wr = 0;
-   REG_WRITE(base_addr, REG_WR_DATA_OFFSET, wr);
+   uint32_t wr = (uint32_t)0x00;
+   REG_WRITE(base_addr, REG_CSX_OFFSET, wr);
 
 }
 
@@ -144,15 +135,93 @@ void video_core_lcd_display::write(int is_data, uint8_t data){
                     1 for data;
                     0 for command
             data    : the data to transfer
-    @retval :
+    @retval : none
+    @note   : this is a blocking method;
     */
 
-   uint32_t wr;
-   uint32_t dcx;
-   
+   /*
+   write register structure;
+    bit[7:0]    : data to write to the lcd;
+    bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
+                    0 for data;
+                    1 for command;
+    bit[10:9]  : to store user commands;
 
+   */
+    int hw_dcx; // different polarity with how the HW register is defined;
+
+    uint32_t wr;
+
+    if(is_data){
+        hw_dcx = 0;
+    }else{
+        hw_dcx = 1;
+    }
+
+    uint32_t dcx = ((uint32_t)hw_dcx << BIT_POS_REG_WR_DATA_DCX);
+    wr = (uint32_t)(dcx | CMD_WR | (uint32_t)data);
+
+    // block until the lcd interface controller is ready;
+    while(!is_ready()){};
+
+    // update the register;
+    REG_WRITE(base_addr, REG_WR_DATA_OFFSET, wr);
+
+    // due to limitation;
+    // need to issue a NOP command after a clock cyle;
+    // otherwise, the controller will keep on writing;
+    // careful not to override other setting;
+    wr = (uint32_t)(CMD_NOP | dcx | (uint32_t)data);
+    REG_WRITE(base_addr, REG_WR_DATA_OFFSET, wr);
+    
 }
 
 
+uint8_t video_core_lcd_display::read(void){
+    /* 
+    @brief  : read a byte from the lcd;
+    @param  : none;
+    @retval : none;
+    @note   : this is a blocking method;
+    */
+
+    /*
+   write register structure;
+    bit[7:0]    : data to write to the lcd;
+    bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
+                    0 for data;
+                    1 for command;
+    bit[10:9]  : to store user commands;
+
+   */
+
+    // signal declaration;
+    uint32_t req_rd;    // for issuing a read request;
+    uint32_t rd_data;   // after reading from the lcd;
+
+    // issue a read command;
+    uint32_t dcx = ((uint32_t)0x00 << BIT_POS_REG_WR_DATA_DCX);
+    uint32_t dummy_data = (uint32_t)0x00;
+    req_rd = (uint32_t)(CMD_RD | dcx | dummy_data);
+
+    // update the reg;
+    REG_WRITE(base_addr, REG_WR_DATA_OFFSET, req_rd);
+
+    // due to limitation;
+    // need to issue a NOP command after a clock cyle;
+    // otherwise, the controller will keep on 
+    // signalling to the lcd that it wants to read;
+    // careful not to override other setting;
+    req_rd = (uint32_t)(CMD_NOP | dcx | dummy_data);
+    REG_WRITE(base_addr, REG_WR_DATA_OFFSET, req_rd);
+
+    // block until the lcd is ready;
+    while(!is_ready()){};
+
+    // read;
+    rd_data = REG_READ(base_addr, REG_RD_DATA_OFFSET);
+    return (uint8_t)(rd_data & 0xFF);
+
+}
 
 
