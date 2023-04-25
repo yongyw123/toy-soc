@@ -135,8 +135,8 @@ class core_i2c_master{
         wrapper to start a complete transfer between
         the master and the slave;
         */ 
-        int write_transfer(uint8_t dev, uint8_t *wr_buffer, int num_transfer, int repeat);
-        int read_transfer(uint8_t dev, uint8_t *rd_buffer, int num_transfer, int repeat);
+        int write_transfer(uint8_t slave_id, uint8_t *wr_buffer, int num_transfer, int repeat);
+        int read_transfer(uint8_t slave_id, uint8_t *rd_buffer, int num_transfer, int repeat);
 
 
     private:
