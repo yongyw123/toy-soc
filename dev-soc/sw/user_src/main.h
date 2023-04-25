@@ -7,15 +7,24 @@ Purpose: top level directives;
 
 ---------------------------------------------*/
 
+/* general */
 #include "io_map.h"
+#include "io_reg_util.h"
+
+/* mmio system */
 #include "core_gpio.h"
 #include "core_timer.h"
 #include "core_uart.h"
 #include "core_spi.h"
 
+/* video system */
+#include "video_core_lcd_display.h"
+
+/* test drivers */
 #include "test_util.h"
 #include "user_util.h"
 
+/* device drivers */
 #include "cam_ov7670.h"
 
 

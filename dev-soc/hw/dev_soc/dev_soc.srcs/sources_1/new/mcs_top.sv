@@ -201,6 +201,8 @@ module mcs_top
     .user_rd_data(user_rd_data)
     );
     
+    assign user_rd_data = user_rd_mmio_data;
+    /*
     // multiplex the read data from mmio and video systems;
     // depending on the cpu request;
     always_comb
@@ -219,7 +221,7 @@ module mcs_top
             default: ;  // nop;
         endcase
     end
-    
+    */
     // mmio system;
     mmio_sys 
     

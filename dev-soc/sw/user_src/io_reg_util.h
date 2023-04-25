@@ -31,7 +31,7 @@ extern "C" {
 // to distinguish between the mmio and video system under the same address space; 
 // the 25-indexed bit (the 26-th bit) of byte-addressable is used
 // equiv. 23-indexed bit of word-addressable
-// HIGH for video; LOW otherwise 
+// HIGH for video; LOW otherwise    
 #define USER_VIDEO_BYTE_SELECT_BIT  0x02000000  // this corresponds to the 25-indexed bit of byte-addressable space;
 /* ----------------------------------------------
 * MACROS
