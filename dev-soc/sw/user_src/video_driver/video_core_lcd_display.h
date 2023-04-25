@@ -15,13 +15,13 @@ Device Interface Protocol: MCU 8080-I Series;
 extern "C" {
 #endif
 
-/*------------------------------------------------------------------
-core: video lcd display
+/**************************************************************
+* V0_DISP_LCD
 --------------------
 this core wraps this module: LCD display controller 8080;
 this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
 
-this has five (5) registers;
+this has six (6) registers;
 
 Register Map
 1. register 0 (offset 0): read register 
@@ -29,6 +29,7 @@ Register Map
 3. register 2 (offset 2): program read clock period;
 4. register 3 (offset 3): write register;
 5. register 4 (offset 4): stream control register;
+6. register 5 (offset 5): chip select register
 
 Register Definition:
 1. register 0: status and read data register
@@ -36,7 +37,6 @@ Register Definition:
         bit[8]      : ready flag;  // the lcd controller is idle
                         1: ready;
                         0: not ready;
-                 
         bit[9]      : done flag;   // [optional ??] when the lcd just finishes reading or writing;
                         1: done;
                         0: not done;
@@ -54,10 +54,7 @@ Register Definition:
         bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
                         0 for data;
                         1 for command;
-        bit[9]      : chip select;
-                        0: chip deselect;
-                        1: chip select
-        bit[11:10]  : to store user commands;
+        bit[10:9]  : to store user commands;
         
 4. register 4: stream control register
             there are two flows:
@@ -70,6 +67,14 @@ Register Definition:
         bit[0]: 
             1 for stream flow;
             0 for processor flow; 
+
+5. register 5: chip select;
+            this is probably not necessary;
+            since this could be done using general purpose pin;
+            and emulated through SW;
+            bit[0]  
+                0: chip deselect;
+                1: chip select
             
 Register IO access:
 1. register 0: read only;
@@ -77,7 +82,8 @@ Register IO access:
 3. register 2: write only;
 4. register 3: write only;
 5. register 4: write only;
---------------------------------------------------------------*/
+6. register 5: write only;
+******************************************************************/
 
 class video_core_lcd_display{
 
