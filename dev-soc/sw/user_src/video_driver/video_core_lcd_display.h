@@ -169,6 +169,10 @@ class video_core_lcd_display{
         int rdx_l;
         int rdx_h;
 
+        // stream control;
+        int cpu_control;    // 1 if cpu is controlling;
+
+
 };
 
 

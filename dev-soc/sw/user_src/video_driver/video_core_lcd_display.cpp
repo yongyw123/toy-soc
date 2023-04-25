@@ -36,8 +36,17 @@ video_core_lcd_display::video_core_lcd_display(uint32_t core_base_addr){
    // read is usually longer;
    rdx_l = 9;   // 100 ns;
    rdx_h = 39;  // 400 ns;
+    set_clockmod(wrx_l, wrx_h, rdx_l, rdx_h);
 
-   set_clockmod(wrx_l, wrx_h, rdx_l, rdx_h);
+    /* stream control
+
+    // when configuring; it has to be the cpu that 
+    // has the control over the lcd interface;
+    // once done; it will be handed over to other video cores;
+    // under this; it is all about writing pixels to the lcd;
+    */
+   cpu_control = 1; // cpu has the control;
+   set_stream(cpu_control);
 
 }
 
@@ -59,6 +68,13 @@ void video_core_lcd_display::set_clockmod(int usr_wrx_l, int usr_wrx_h, int usr_
    uint32_t set_wrx;
    uint32_t set_rdx;
 
+   // update the private var;
+    wrx_l = usr_wrx_l;
+    wrx_h = usr_wrx_h;
+    rdx_l = usr_rdx_l;
+    rdx_h = usr_rdx_h;
+
+    // setting up;
     set_wrx = (uint32_t)(usr_wrx_l | ((uint32_t)usr_wrx_h << BIT_POS_REG_CLKMOD_SHALF));
     set_rdx = (uint32_t)(usr_rdx_l | ((uint32_t)usr_rdx_h << BIT_POS_REG_CLKMOD_SHALF));
 
@@ -86,6 +102,9 @@ void video_core_lcd_display::set_stream(int set_cpu_control){
    if(set_cpu_control){
     wr = (uint32_t)0x00;
    }
+   
+   // update the private var;
+   cpu_control = set_cpu_control;
 
    // update the register;
    REG_WRITE(base_addr, REG_STREAM_CTRL_OFFSET, wr);
