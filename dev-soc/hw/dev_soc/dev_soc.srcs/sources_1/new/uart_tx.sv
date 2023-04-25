@@ -198,7 +198,8 @@ module uart_tx
                             nsample_next = nsample_reg + 1;
                         end
                     end
-                end            
+                end
+            default: ; // nop;            
         endcase
     end    
     // output;
