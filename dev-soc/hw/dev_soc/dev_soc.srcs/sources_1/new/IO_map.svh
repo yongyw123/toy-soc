@@ -346,7 +346,7 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 this core wraps this module: LCD display controller 8080;
 this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
 
-this has five (5) registers;
+this has six (6) registers;
 
 Register Map
 1. register 0 (offset 0): read register 
@@ -354,6 +354,7 @@ Register Map
 3. register 2 (offset 2): program read clock period;
 4. register 3 (offset 3): write register;
 5. register 4 (offset 4): stream control register;
+6. register 5 (offset 5): chip select register
 
 Register Definition:
 1. register 0: status and read data register
@@ -361,7 +362,6 @@ Register Definition:
         bit[8]      : ready flag;  // the lcd controller is idle
                         1: ready;
                         0: not ready;
-                 
         bit[9]      : done flag;   // [optional ??] when the lcd just finishes reading or writing;
                         1: done;
                         0: not done;
@@ -379,10 +379,7 @@ Register Definition:
         bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
                         0 for data;
                         1 for command;
-        bit[9]      : chip select;
-                        0: chip deselect;
-                        1: chip select
-        bit[11:10]  : to store user commands;
+        bit[10:9]  : to store user commands;
         
 4. register 4: stream control register
             there are two flows:
@@ -395,26 +392,38 @@ Register Definition:
         bit[0]: 
             1 for stream flow;
             0 for processor flow; 
+
+5. register 5: chip select;
+            this is probably not necessary;
+            since this could be done using general purpose pin;
+            and emulated through SW;
+            bit[0]  
+                0: chip deselect;
+                1: chip select
             
 Register IO access:
 1. register 0: read only;
 2. register 1: write only;
 3. register 2: write only;
 4. register 3: write only;
-5. register 4: stream control register;
+5. register 4: write only;
+6. register 5: write only;
 ******************************************************************/
+
 // register offset;
 `define V0_DISP_LCD_REG_RD_DATA_OFFSET      0   // 000
 `define V0_DISP_LCD_REG_WR_CLOCKMOD_OFFSET  1   // 001
 `define V0_DISP_LCD_REG_RD_CLOCKMOD_OFFSET  2   // 010
 `define V0_DISP_LCD_REG_WR_DATA_OFFSET      3   // 011
 `define V0_DISP_LCD_REG_STREAM_CTRL_OFFSET  4   // 100
+`define V0_DISP_LCD_REG_CSX_OFFSET          5   // 101
 
 // bit position;
 `define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  8  
 `define V0_DISP_LCD_REG_STATUS_BIT_POS_DONE   9
 
 `define V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX   8 // for data or command
-`define V0_DISP_LCD_REG_WR_DATA_BIT_POS_CSX   9 // chip select;
+
+`define V0_DISP_LCD_REG_CSX_BIT_POS           0 // chip select;
 
 `endif //_IO_MAP_SVH
