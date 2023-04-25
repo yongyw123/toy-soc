@@ -5,7 +5,7 @@ core_i2c_master::core_i2c_master(uint32_t core_base_addr){
     /*
     @brief  : constructor to instantiate an object of class: core_i2c_master;
     @param  : core_base_addr
-                - the base address of the SPI core resides
+                - the base address of the i2c core resides
                     on the microblaze IO bus address;
     @retval : none
      */
