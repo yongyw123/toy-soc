@@ -3,13 +3,22 @@
 
 #include "io_reg_util.h"
 #include "io_map.h"
+
+/* mmio system */
 #include "core_gpio.h"
 #include "core_timer.h"
 #include "user_util.h"
 #include "core_spi.h"
 
+/* video system */
+#include "video_core_lcd_display.h"
+
 /* ------------------------------------------------
 Purpose: test functions to check each HW IO cores;
+Note:
+1. There are two systems:
+    a. MMIO 
+    b. Video
 --------------------------------------------------*/
 
 // c and cpp linkage;
@@ -141,6 +150,26 @@ Device:
 1. Camera OV7670;
 -----------------------------------------------------------*/
 
+
+
+/*-----------------------------------------------------------
+Video Core to test: video_core_lcd_display
+What to Test:
+0. write/read clock setting;
+1. chip select and deselect;
+2. data-or-command signal;
+3. write-signal;
+4. read-signal;
+
+Test Method:
+1. use logic analyser;
+
+Test limitation: What could be tested;
+1. except for the read operation;
+2. data is 8-bit but logic analyser could only accommodate 8 signals;
+
+-----------------------------------------------------------*/
+void test_video_core_lcd_display(video_core_lcd_display *lcd_obj);
 
 
 #ifdef __cpluscplus
