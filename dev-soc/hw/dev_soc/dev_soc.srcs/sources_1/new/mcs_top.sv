@@ -135,8 +135,7 @@ module mcs_top
     
     // for ip-generated mmcm clock;
     logic mmcm_clk_locked;   // whether the clock has stabilized or not?
-    logic clkout_100M;
-    
+ 
     // conform the signals;
     /* ?? to do ??, need to debounce this reset button; */
     // inverted since cpu reset button is "active LOW";
@@ -156,22 +155,18 @@ module mcs_top
     clk_wiz_0 clock_unit
    (
     // Clock out ports
-    .clkout_100M(clkout_100M),        // output clkout_100M; for the rest of the system;
-    .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M: for camera ov7670
-    
+    .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M
     // Status and control signals
-    //.reset(reset_clk),          // input reset
-    .reset(0),      // allow free running? bad idea?
-    .power_down(0),   // input power_down; always powered on;
-    .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
-   
+    .reset(0), // input reset
+    .locked(mmcm_clk_locked),       // output locked
    // Clock in ports
-    .clk_in1(clk)
-   );      // input clk_in1: 100MHz;
+    .clk_in1(clk)   // input clk_in1: 100MHz;
+    );    
+
 
     // cpu
     microblaze_mcs_cpu cpu_unit(
-      .Clk(clkout_100M),                          // input wire Clk
+      .Clk(clk),                          // input wire Clk
       .Reset(reset_sys),                      // input wire Reset
       .IO_addr_strobe(io_addr_strobe),    // output wire IO_addr_strobe
       .IO_address(io_address),            // output wire [31 : 0] IO_address
@@ -240,7 +235,7 @@ module mcs_top
     
     mmio_unit
     (
-        .clk(clkout_100M),
+        .clk(clk),
         .reset(reset_sys),
         .mmio_addr(user_addr),
         .mmio_cs(user_mmio_cs),
@@ -294,7 +289,7 @@ module mcs_top
     video_unit
     (
         // general;
-        .clk_sys(clkout_100M),    // 100 MHz;
+        .clk_sys(clk),    // 100 MHz;
         .reset(reset_sys),  // async;
         
         /*
