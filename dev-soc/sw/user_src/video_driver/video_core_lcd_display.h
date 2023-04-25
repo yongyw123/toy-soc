@@ -108,6 +108,10 @@ class video_core_lcd_display{
         BIT_POS_REG_WR_DATA_DCX = V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX,
         BIT_POS_REG_WR_DATA_CSX = V0_DISP_LCD_REG_WR_DATA_BIT_POS_CSX,
 
+
+        // clock mod;
+        BIT_POS_REG_CLKMOD_SHALF = 16,  // second half;
+
         // user command start position;
         BIT_POS_REG_WR_DATA_CMD_OFFSET = 10,
 
