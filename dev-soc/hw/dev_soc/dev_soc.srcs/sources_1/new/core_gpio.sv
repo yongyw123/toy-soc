@@ -129,8 +129,8 @@ module core_gpio
     */
     always_comb 
     begin
-        // extra; not needed; pad with zero;
-        rd_data[`REG_DATA_WIDTH_G-1:PORT_WIDTH] = 0;
+        // default;
+        rd_data = 0;
         case({rd_en, addr[1:0]})
             {1'b1, REG_DATA_IN_OFFSET}          : rd_data[PORT_WIDTH-1:0] = rd_data_reg;
             {1'b1, REG_CTRL_DIRECTION_OFFSET}   : rd_data[PORT_WIDTH-1:0] = dir_data_reg; 

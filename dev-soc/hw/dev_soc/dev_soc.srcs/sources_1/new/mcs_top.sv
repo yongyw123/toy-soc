@@ -204,6 +204,11 @@ module mcs_top
     // multiplex the read data from mmio and video systems;
     // depending on the cpu request;
     always_comb
+    begin
+        // default;
+        // for video system; once configured; seldom touched;
+        // so default to read the mmio system;
+        user_rd_data = user_rd_mmio_data;  
         // note that video_cs and mmio_cs are mutually exclusive;
         case({user_video_cs, user_mmio_cs})
             // mmio only;
@@ -213,6 +218,7 @@ module mcs_top
             
             default: ;  // nop;
         endcase
+    end
     
     // mmio system;
     mmio_sys 

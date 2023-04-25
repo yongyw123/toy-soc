@@ -139,11 +139,15 @@ module core_timer/*
    // "read" input is not necessary;
    // recall that 64-bit counter is split into two 32-bit register;
    always_comb
+   begin
+        // default;
+        rd_data = 0;   // zero-intialized;
         case(addr[1:0])
             REG_CNTLOW_OFFSET:  rd_data = count_curr[31:0]; // lowerword count;
             REG_CNTHIGH_OFFSET:  rd_data = {32'h0000, count_curr[63:32]};  // upperword count;
             default: ;  // do nothing;    
         endcase
+   end
 endmodule
 
 `endif // _CORE_TIMER_SV;
