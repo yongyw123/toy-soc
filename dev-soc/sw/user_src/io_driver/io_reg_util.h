@@ -32,7 +32,7 @@ extern "C" {
 // the 25-indexed bit (the 26-th bit) of byte-addressable is used
 // equiv. 23-indexed bit of word-addressable
 // HIGH for video; LOW otherwise 
-#define USER_VIDEO_BYTE_SELECT_BIT  0x02000000  // this corresponds to the 25-bit of byte-addressable space;
+#define USER_VIDEO_BYTE_SELECT_BIT  0x02000000  // this corresponds to the 25-indexed bit of byte-addressable space;
 /* ----------------------------------------------
 * MACROS
 ----------------------------------------------*/
@@ -62,9 +62,9 @@ extern "C" {
 *                   so need to have different macros;
 * @input: 
 *   usr_addr    : base (start) address of the user address space;
-*   core_num    : which io core of the MMIO;
+*   core_num    : which io core of the video;
 */
-#define GET_VIDEO_CORE_ADDR(usr_addr, core_num) ((uint32_t)((usr_addr) + TOTAL_VIDEO_REG_NUM*REG_WORD_BYTE*(core_num)))
+#define GET_VIDEO_CORE_ADDR(usr_addr, core_num) ((uint32_t)((usr_addr + USER_VIDEO_BYTE_SELECT_BIT) + TOTAL_VIDEO_REG_NUM*REG_WORD_BYTE*(core_num)))
 
 
 /*
