@@ -67,11 +67,14 @@ module lcd_8080_interface_controller_top_tb();
 
     // sim var;
     logic [31:0] test_index;
-    
+    tri [7:0] HiZ_vector;
+    assign HiZ_vector = {PARALLEL_DATA_BITS{1'bz}};
+     
     /* instantiation */
     lcd_8080_interface_controller uut(.*);      // uut;
     lcd_8080_interface_controller_tb tb(.*);    // test stimulus;
     
+   
     /* simulate clk */
      always
         begin 
