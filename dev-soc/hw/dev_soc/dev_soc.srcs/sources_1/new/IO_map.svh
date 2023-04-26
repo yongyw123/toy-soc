@@ -87,7 +87,7 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 //`define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // the 24-bit; as above, to distinguish two systems;
 
 `define BUS_USER_SIZE_G                 23  // as above; (word aligned);
-`define BUS_SYSTEM_SELECT_BIT_INDEX_G   25  // the 24-bit; as above, to distinguish two systems;
+`define BUS_SYSTEM_SELECT_BIT_INDEX_G   25  // the 26-bit; as above, to distinguish two systems;
 
 // IO based address provided by microblaze MSC, as above;
 `define BUS_MICROBLAZE_IO_BASE_ADDR_G 32'hC0000000
@@ -107,27 +107,6 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 // register info of each core; 
 `define REG_DATA_WIDTH_G    32  // MCS uses word (32-bit);
 `define REG_ADDR_SIZE_G     5   // each mimo core has 2^{5} = 32 internal registers;
-
-
-/*----------------------------------------------------
-video address space;
-1. 2^3 = 8 video cores;
-2. each core has 19-bit address space;
-    where this 19-bit is used for internal register
-    and to store 16-bit pixel data;
-    
-summary:
-video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
-
-* x represents dont-care (to accommodate frame buffer?)
-* v represents video core;
-* r represents video core internal registers;
-* a represents video space of each core; where this space is used for various purposes;
-*       such as to store i=the 16-bit pixel
-----------------------------------------------------*/
-`define VIDEO_CORE_ADDR_SIZE_G       3 
-`define VIDEO_CORE_TOTAL_G           8 // 2**VIDEO_CORE_ADDR_SIZE_G;
-`define VIDEO_REG_ADDR_BIT_SIZE_G   19  // each video core has 19-bit address space allocated;
 
 /*----------------------------------------------------
 * IO modules/cores shall be sloted in the IO memory map;
@@ -335,6 +314,26 @@ Register IO access:
 
 `define S6_I2C_REG_WRITE_BIT_POS_CMD_OFFSET 8   
 
+/*----------------------------------------------------
+video address space;
+1. 2^3 = 8 video cores;
+2. each core has 19-bit address space;
+    where this 19-bit is used for internal register
+    and to store 16-bit pixel data;
+    
+summary:
+video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
+
+* x represents dont-care (to accommodate frame buffer?)
+* v represents video core;
+* r represents video core internal registers;
+* a represents video space of each core; where this space is used for various purposes;
+*       such as to store i=the 16-bit pixel
+----------------------------------------------------*/
+`define VIDEO_CORE_ADDR_SIZE_G       3 
+`define VIDEO_CORE_TOTAL_G           8 // 2**VIDEO_CORE_ADDR_SIZE_G;
+`define VIDEO_REG_ADDR_BIT_SIZE_G   19  // each video core has 19-bit address space allocated;
+
 
 /*----------------------------------------------------
 * video modules/cores shall be sloted in the video system;
@@ -347,7 +346,7 @@ Register IO access:
 this core wraps this module: LCD display controller 8080;
 this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
 
-this has five (5) registers;
+this has six (6) registers;
 
 Register Map
 1. register 0 (offset 0): read register 
@@ -355,6 +354,7 @@ Register Map
 3. register 2 (offset 2): program read clock period;
 4. register 3 (offset 3): write register;
 5. register 4 (offset 4): stream control register;
+6. register 5 (offset 5): chip select register
 
 Register Definition:
 1. register 0: status and read data register
@@ -362,7 +362,6 @@ Register Definition:
         bit[8]      : ready flag;  // the lcd controller is idle
                         1: ready;
                         0: not ready;
-                 
         bit[9]      : done flag;   // [optional ??] when the lcd just finishes reading or writing;
                         1: done;
                         0: not done;
@@ -380,10 +379,7 @@ Register Definition:
         bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
                         0 for data;
                         1 for command;
-        bit[9]      : chip select;
-                        0: chip deselect;
-                        1: chip select
-        bit[11:10]  : to store user commands;
+        bit[10:9]  : to store user commands;
         
 4. register 4: stream control register
             there are two flows:
@@ -396,26 +392,38 @@ Register Definition:
         bit[0]: 
             1 for stream flow;
             0 for processor flow; 
+
+5. register 5: chip select;
+            this is probably not necessary;
+            since this could be done using general purpose pin;
+            and emulated through SW;
+            bit[0]  
+                0: chip deselect;
+                1: chip select
             
 Register IO access:
 1. register 0: read only;
 2. register 1: write only;
 3. register 2: write only;
 4. register 3: write only;
-5. register 4: stream control register;
+5. register 4: write only;
+6. register 5: write only;
 ******************************************************************/
+
 // register offset;
 `define V0_DISP_LCD_REG_RD_DATA_OFFSET      0   // 000
 `define V0_DISP_LCD_REG_WR_CLOCKMOD_OFFSET  1   // 001
 `define V0_DISP_LCD_REG_RD_CLOCKMOD_OFFSET  2   // 010
 `define V0_DISP_LCD_REG_WR_DATA_OFFSET      3   // 011
 `define V0_DISP_LCD_REG_STREAM_CTRL_OFFSET  4   // 100
+`define V0_DISP_LCD_REG_CSX_OFFSET          5   // 101
 
 // bit position;
 `define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  8  
 `define V0_DISP_LCD_REG_STATUS_BIT_POS_DONE   9
 
 `define V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX   8 // for data or command
-`define V0_DISP_LCD_REG_WR_DATA_BIT_POS_CSX   9 // chip select;
+
+`define V0_DISP_LCD_REG_CSX_BIT_POS           0 // chip select;
 
 `endif //_IO_MAP_SVH
