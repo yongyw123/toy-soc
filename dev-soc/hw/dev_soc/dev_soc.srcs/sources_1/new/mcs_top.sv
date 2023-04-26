@@ -79,29 +79,7 @@ module mcs_top
         output logic CLKOUT_24M_JA03,
         
         // hw reset;
-        inout tri GPIO_CAM_OV7670_RESETN_JA04,     // configure a pmod jumper as gpio; 
-        
-        /* --------------------------------------------------------------
-        // LCD display (ILI9341);
-        1. it uses MCU 8080-I interface protocol;
-        2. it uses the following pin;
-        // control pins at PMOD JD;
-        a. CSX; // chip select;
-        b. DCX; // data or command?
-        c. WRX; // write strobe;
-        d. RDX; / read strobe;
-        e. RST; // HW reset; (optional or use GPIO+SW to emulate);
-        
-        // data pins at PMOD JC;
-        f. DINOUT; // parallel data bus;
-        -------------------------------------------------------------- */
-        output logic LCD_CSX_JD01,
-        output logic LCD_DCX_JD02,
-        output logic LCD_WRX_JD03,
-        output logic LCD_RDX_JD04,
-        inout tri GPIO_LCD_RST_JD07, // tristate because GPIO pin is used;
-        inout tri [7:0] LCD_DATA_JC  // all JC pins;        
-        
+        inout tri GPIO_CAM_OV7670_RESETN_JA04     // configure a pmod jumper as gpio;         
     );
     
     
@@ -133,16 +111,11 @@ module mcs_top
     
     logic [`BUS_USER_SIZE_G-1:0] user_addr;
     
-    // for ip-generated mmcm clock;
-    logic mmcm_clk_locked;   // whether the clock has stabilized or not?
- 
     // conform the signals;
     /* ?? to do ??, need to debounce this reset button; */
     // inverted since cpu reset button is "active LOW";
-    // locked=HIGH means clock has stabilized;
-    //assign reset_sys = ~CPU_RESETN || ~mmcm_clk_locked;
     assign reset_sys = ~CPU_RESETN;    
-    //assign reset_clk = ~CPU_RESETN;
+    
     /* -------------------
     instantiation;
     0. clock unit   : ip-generated MMCM (mixed mode clock manager);
@@ -151,21 +124,6 @@ module mcs_top
     3. mmio_unit    : mmio system (where all the io cores reside);
     4. video_unit   : video system; 
     -----------------*/
-    
-    /*
-    // ip-generated clock management circuit;
-    clk_wiz_0 clock_unit
-   (
-    // Clock out ports
-    .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M
-    // Status and control signals
-    .reset(0), // input reset
-    .locked(mmcm_clk_locked),       // output locked
-   // Clock in ports
-    .clk_in1(clk)   // input clk_in1: 100MHz;
-    );    
-    */
-
     // cpu
     microblaze_mcs_cpu cpu_unit(
       .Clk(clk),                          // input wire Clk
@@ -203,27 +161,7 @@ module mcs_top
     .user_rd_data(user_rd_data)
     );
     
-    assign user_rd_data = user_rd_mmio_data;
-    /*
-    // multiplex the read data from mmio and video systems;
-    // depending on the cpu request;
-    always_comb
-    begin
-        // default;
-        // for video system; once configured; seldom touched;
-        // so default to read the mmio system;
-        user_rd_data = user_rd_mmio_data;  
-        // note that video_cs and mmio_cs are mutually exclusive;
-        case({user_video_cs, user_mmio_cs})
-            // mmio only;
-            2'b01: user_rd_data = user_rd_mmio_data;
-            // video only;
-            2'b10: user_rd_data = user_rd_video_data;
-            
-            default: ;  // nop;
-        endcase
-    end
-    */
+    
     // mmio system;
     mmio_sys 
     
@@ -252,7 +190,7 @@ module mcs_top
         .mmio_wr(user_wr),
         .mmio_rd(user_rd),
         .mmio_wr_data(user_wr_data),
-        .mmio_rd_data(user_rd_mmio_data),
+        .mmio_rd_data(user_rd_data),
         .sw(SW),
         .led(LED),
         
@@ -287,42 +225,7 @@ module mcs_top
         //.gpio({GPIO_LCD_RST_JD07, GPIO_CAM_OV7670_RESETN_JA04})
         .gpio(GPIO_CAM_OV7670_RESETN_JA04)  
         
-    );
-    /*
-    // video system;
-    video_sys
-    #(
-        .BITS_PER_PIXEL(16),
-        .LCD_DISPLAY_DATA_WIDTH(8),
-        .FIFO_LCD_ADDR_WITH(6)
-     )
-    video_unit
-    (
-        // general;
-        .clk_sys(clk),    // 100 MHz;
-        .reset(reset_sys),  // async;
-        
-        // user bus interface;
-        // where user bus is bridged by the microblaze MCS IO bus;
-      
-        .video_cs(user_video_cs),        // chip select for mmio system;
-        .video_wr(user_wr),             // write enable;
-        .video_rd(user_rd),             // read enable;
-        .video_addr(user_addr),       // addr to decode for video core address and its register address;
-        .video_wr_data(user_wr_data),   // 32-bit;
-        //.video_rd_data(user_rd_data),  // 32-bit;
-        .video_rd_data(user_rd_video_data),  // 32-bit;
-
-        .lcd_drive_csx(LCD_CSX_JD01),     // chip select;
-        .lcd_drive_dcx(LCD_DCX_JD02),     // data or command; LOW for command;          
-        .lcd_drive_wrx(LCD_WRX_JD03),     //  to drive the lcd for write op;
-        .lcd_drive_rdx(LCD_RDX_JD04),     // to drive the lcd for read op;
-        
-        // this is shared between the host and the lcd;
-        .lcd_dinout(LCD_DATA_JC)
-    );
-    */
-    
+    );   
     
 endmodule
 
