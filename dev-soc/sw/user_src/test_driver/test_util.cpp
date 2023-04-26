@@ -466,7 +466,7 @@ void test_video_core_lcd_display(video_core_lcd_display *lcd_obj){
    rdx_l = 9;   // low period of 100ns;
    rdx_h = 9;   // high period of 110 ns incl the ready signal
    
-   lcd_obj->set_clockmod(wrx_l, wrx_h, rdx_l, rdx_l);
+   lcd_obj->set_clockmod(wrx_l, wrx_h, rdx_l, rdx_h);
     
    /* ----test chip select */
    lcd_obj->enable_chip();
@@ -479,13 +479,13 @@ void test_video_core_lcd_display(video_core_lcd_display *lcd_obj){
    /* ----test write with command */
    is_data = 0; // it is a command;
    data = 0xAA; // 0b1010_1010;
-   lcd_obj->write(is_data, 0xAA);
+   lcd_obj->write(is_data, data);
    delay_busy_ms(10);
 
     /* ----test write with non-command */
    is_data = 1; // it is a data;
    data = 0x55; // 0b0101_0101;
-   lcd_obj->write(is_data, 0xAA);
+   lcd_obj->write(is_data, data);
    delay_busy_ms(10);
 
    /* ----test read */

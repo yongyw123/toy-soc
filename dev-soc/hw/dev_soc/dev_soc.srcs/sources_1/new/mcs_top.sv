@@ -140,8 +140,9 @@ module mcs_top
     /* ?? to do ??, need to debounce this reset button; */
     // inverted since cpu reset button is "active LOW";
     // locked=HIGH means clock has stabilized;
-    assign reset_sys = ~CPU_RESETN || ~mmcm_clk_locked;    
-    assign reset_clk = ~CPU_RESETN;
+    //assign reset_sys = ~CPU_RESETN || ~mmcm_clk_locked;
+    assign reset_sys = ~CPU_RESETN;    
+    //assign reset_clk = ~CPU_RESETN;
     /* -------------------
     instantiation;
     0. clock unit   : ip-generated MMCM (mixed mode clock manager);
@@ -151,6 +152,7 @@ module mcs_top
     4. video_unit   : video system; 
     -----------------*/
     
+    /*
     // ip-generated clock management circuit;
     clk_wiz_0 clock_unit
    (
@@ -162,7 +164,7 @@ module mcs_top
    // Clock in ports
     .clk_in1(clk)   // input clk_in1: 100MHz;
     );    
-
+    */
 
     // cpu
     microblaze_mcs_cpu cpu_unit(
