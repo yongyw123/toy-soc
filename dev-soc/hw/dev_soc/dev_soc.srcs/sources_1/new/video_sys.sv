@@ -30,14 +30,11 @@ module video_sys
         // ov7670 camera pixel output is configured to be 16-bit;
         BITS_PER_PIXEL = 16,   
         
-        /*
-        // buffer between the src and the lcd display;
-        // it could hold up to 2^6 =64 data of size of 32-bit;
-        // this is equivalent to 16 pixels 
-        */
+        
+        /* buffer between the src and the lcd display; */
         // since the lcd display could only be driven by 8-bit parallel max;
         LCD_DISPLAY_DATA_WIDTH = 8,
-        FIFO_LCD_ADDR_WITH = 6      // 2^6;
+        FIFO_LCD_ADDR_WIDTH = 5      // 2^32;
     )
     (
         // general;
@@ -78,7 +75,6 @@ module video_sys
         
     /* constants */  
     localparam VIDEO_CORE_NUM_TOTAL = `VIDEO_CORE_TOTAL_G; 
-    localparam VIDEO_CORE_BIT_SIZE = $clog2(VIDEO_CORE_NUM_TOTAL);
     localparam VIDEO_REG_BIT_TOTAL = `VIDEO_REG_ADDR_BIT_SIZE_G;    // 19 bit;
     localparam REG_DATA_WIDTH = `REG_DATA_WIDTH_G;  // 32 bit;
   
@@ -97,7 +93,7 @@ module video_sys
     /* video controller; */
     video_ctrl ctrl_unit
     (
-        .clk(clk),
+        .clk(clk_sys),
         .reset(reset),
         
         // system control sigmals;
@@ -141,15 +137,16 @@ module video_sys
     fifo_core_video_lcd_display 
     #(
     .DATA_WIDTH(LCD_DISPLAY_DATA_WIDTH),
-    .ADDR_WIDTH(FIFO_LCD_ADDR_WITH)  
+    .ADDR_WIDTH(FIFO_LCD_ADDR_WIDTH)  
     )
     fifo_lcd_unit
     (
     .clk(clk_sys),
     .reset(reset),
-    .src_data(),    // empty for now;
-    .src_valid(),
-    .src_ready(),
+    
+    .src_data(0), // empty for now;    
+    .src_valid(0),
+    .src_ready(0),
     .sink_data(lcd_stream_in_pixel_data),
     .sink_valid(lcd_stream_valid_flag),
     .sink_ready(lcd_stream_ready_flag)

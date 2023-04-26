@@ -101,6 +101,10 @@ module mcs_top
     logic [31:0] user_rd_data;
     logic [`BUS_USER_SIZE_G-1:0] user_addr;
     
+    // for multiplexing the read data from mmio or video system;
+    logic [31:0] user_rd_data_mmio;
+    logic [31:0] user_rd_data_video;
+    
     // for ip-generated mmcm clock;
    logic mmcm_clk_locked;   // whether the clock has stabilized or not?
     
@@ -172,9 +176,13 @@ module mcs_top
     .user_rd_data(user_rd_data)
     );
     
+    
+    // multiplexing read data between mmio and video system;
+    // user_mmio_cs and user_video_cs should be mutually exclusive;
+    assign user_rd_data = (user_mmio_cs) ? user_rd_data_mmio : user_rd_data_video;
+    
     // mmio system;
     mmio_sys 
-    
     #(.SW_NUM(16), 
     .LED_NUM(16),
     
@@ -201,7 +209,8 @@ module mcs_top
         .mmio_wr(user_wr),
         .mmio_rd(user_rd),
         .mmio_wr_data(user_wr_data),
-        .mmio_rd_data(user_rd_data),
+        //.mmio_rd_data(user_rd_data),
+        .mmio_rd_data(user_rd_data_mmio),
         .sw(SW),
         .led(LED),
         
@@ -233,13 +242,17 @@ module mcs_top
         
     );
     
-    /*
     // video system;
-    video_sys #(.BITS_PER_PIXEL(16))
+    video_sys 
+    #(
+    .BITS_PER_PIXEL(16),
+    .LCD_DISPLAY_DATA_WIDTH(8),
+    .FIFO_LCD_ADDR_WIDTH(5)
+    )
     video_unit
     (
         // general;
-        .clk_sys(clk_100M),    // 100 MHz;
+        .clk_sys(clk),    // 100 MHz;
         .reset(reset_sys),  // async;
         
         .video_cs(user_video_cs),        // chip select for mmio system;
@@ -247,9 +260,20 @@ module mcs_top
         .video_rd(user_rd),             // read enable;
         .video_addr(user_addr),       // addr to decode for video core address and its register address;
         .video_wr_data(user_wr_data),   // 32-bit;
-        .video_rd_data(user_rd_data)  // 32-bit;
+        //.video_rd_data(user_rd_data??)  // 32-bit;
+        .video_rd_data(user_rd_data_video),
+        
+        /* --------- HW pin mapping (by the constraint file) ------------*/
+        /* LCD display (ILI9341); */
+        .lcd_drive_wrx(),     //  to drive the lcd for write op;
+        .lcd_drive_rdx(),     // to drive the lcd for read op;
+        .lcd_drive_csx(),     // chip select;
+        .lcd_drive_dcx(),     // data or command; LOW for command;          
+        
+        // this is shared between the host and the lcd;
+        .lcd_dinout()
     );
-    */
+    
     
 endmodule
 
