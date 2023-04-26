@@ -353,15 +353,14 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 this core wraps this module: LCD display controller 8080;
 this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
 
-this has six (6) registers;
-
 Register Map
 1. register 0 (offset 0): read register 
 2. register 1 (offset 1): program write clock period
 3. register 2 (offset 2): program read clock period;
 4. register 3 (offset 3): write register;
 5. register 4 (offset 4): stream control register;
-6. register 5 (offset 5): chip select register
+6. register 5 (offset 5): chip select (CSX) register
+7. register 6 (offset 6): data or command (DCX) register
 
 Register Definition:
 1. register 0: status and read data register
@@ -383,10 +382,7 @@ Register Definition:
 
 3. register 3: write data and data mode;
         bit[7:0]    : data to write to the lcd;
-        bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
-                        0 for data;
-                        1 for command;
-        bit[10:9]  : to store user commands;
+        bit[9:8]  : to store user commands;
         
 4. register 4: stream control register
             there are two flows:
@@ -407,7 +403,11 @@ Register Definition:
             bit[0]  
                 0: chip deselect;
                 1: chip select
-            
+6. register 6: data or command (DCX);
+            bit[0] : is the data to write a DATA or a COMMAND for the LCD?
+                0 for data;
+                1 for command;
+    
 Register IO access:
 1. register 0: read only;
 2. register 1: write only;
@@ -415,6 +415,7 @@ Register IO access:
 4. register 3: write only;
 5. register 4: write only;
 6. register 5: write only;
+7. register 6: write only;
 ******************************************************************/
 
 // register offset;
@@ -424,6 +425,7 @@ Register IO access:
 #define V0_DISP_LCD_REG_WR_DATA_OFFSET      3   // 011
 #define V0_DISP_LCD_REG_STREAM_CTRL_OFFSET  4   // 100
 #define V0_DISP_LCD_REG_CSX_OFFSET          5   // 101
+#define V0_DISP_LCD_REG_CSX_OFFSET          6   // 110
 
 // bit position;
 #define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  8  
@@ -432,6 +434,8 @@ Register IO access:
 #define V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX   8 // for data or command
 
 #define V0_DISP_LCD_REG_CSX_BIT_POS           0 // chip select;
+
+#define V0_DISP_LCD_REG_DCX_BIT_POS           0 // dcx;
 
 
 #ifdef __cpluscplus
