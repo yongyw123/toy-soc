@@ -191,6 +191,7 @@ module uart_rx
                         end
                     end
                 end
+            default: ; // nop;
         endcase
     end
     
