@@ -435,7 +435,6 @@ void test_video_core_lcd_display(video_core_lcd_display *lcd_obj){
         2. read strobe (RDX) could be tested 
         (but the read data is meaningless without communicating with an actual device)
     */
-
    /* signal declare */
    int is_data;     // for DCX;
    uint8_t data;    // for write;
@@ -487,6 +486,6 @@ void test_video_core_lcd_display(video_core_lcd_display *lcd_obj){
    delay_busy_ms(10);
 
    /* ----test read */
-   //lcd_obj->read();
-   //delay_busy_ms(10);
+   lcd_obj->read();
+   delay_busy_ms(10);
 }   
