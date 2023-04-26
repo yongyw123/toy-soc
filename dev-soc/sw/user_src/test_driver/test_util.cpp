@@ -456,36 +456,43 @@ void test_video_core_lcd_display(video_core_lcd_display *lcd_obj){
    // so, allows the these write/read clock cycles to be longer;
    
    // write;
-   wrx_l = 9;   // low period of 100ns;
-   wrx_h = 9;   // high period of 110 ns incl the ready signal
+   wrx_l = 10000;   // low period of 100us
+   wrx_h = 9000;   // high period of  90us incl the ready signal
    
    // read;
-   rdx_l = 9;   // low period of 100ns;
-   rdx_h = 9;   // high period of 110 ns incl the ready signal
+   rdx_l = 20000;   // low period of 200us ;
+   rdx_h = 30000;   // high period of 300us incl the ready signal
    
    lcd_obj->set_clockmod(wrx_l, wrx_h, rdx_l, rdx_h);
     
    /* ----test chip select */
    lcd_obj->enable_chip();
-   delay_busy_ms(10);
+   delay_busy_ms(1);
    lcd_obj->disable_chip();
    delay_busy_ms(10);
    lcd_obj->enable_chip();
-   delay_busy_ms(10);
+   delay_busy_ms(1);
 
    /* ----test write with command */
-   is_data = 0; // it is a command;
-   data = 0xAA; // 0b1010_1010;
-   lcd_obj->write(is_data, data);
-   delay_busy_ms(10);
+   for(int i = 0; i < 4; i++){
+        is_data = 0; // it is a command;
+        data = 0xAA; // 0b1010_1010;
+        lcd_obj->write(is_data, data);
+   }
+    delay_busy_ms(1);
 
     /* ----test write with non-command */
-   is_data = 1; // it is a data;
-   data = 0x55; // 0b0101_0101;
-   lcd_obj->write(is_data, data);
-   delay_busy_ms(10);
+    for(int i = 0; i < 4; i++){
+        is_data = 1; // it is a data;
+        data = 0x55; // 0b0101_0101;
+        lcd_obj->write(is_data, data);
+        
+    }
+    delay_busy_ms(1);
 
    /* ----test read */
-   lcd_obj->read();
-   delay_busy_ms(10);
+   for(int i = 0; i < 4; i++){
+      lcd_obj->read();        
+    }
+    delay_busy_ms(1);
 }   
