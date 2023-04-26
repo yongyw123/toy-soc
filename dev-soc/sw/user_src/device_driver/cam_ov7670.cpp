@@ -4,8 +4,8 @@
 gpio for hw reset pin;
 i2c to configure the camera;
 */
-core_gpio obj_gpio(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S4_GPIO_PORT));
-core_i2c_master obj_i2c(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S6_I2C_MASTER));
+core_gpio obj_gpio(GET_MMIO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S4_GPIO_PORT));
+core_i2c_master obj_i2c(GET_MMIO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S6_I2C_MASTER));
 
 void ov7670_hw_reset(void){
     /*

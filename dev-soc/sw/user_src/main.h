@@ -4,18 +4,26 @@
 /* ---------------------------------------------
 Purpose: top level directives;
 1. to enable debugging;
-
+2. main include file;
 ---------------------------------------------*/
 
+// general
 #include "io_map.h"
+
+// mmio system
 #include "core_gpio.h"
 #include "core_timer.h"
 #include "core_uart.h"
 #include "core_spi.h"
 
+// video system;
+#include "video_core_lcd_display.h"
+
+// test driver;
 #include "test_util.h"
 #include "user_util.h"
 
+// device drivers;
 #include "cam_ov7670.h"
 
 

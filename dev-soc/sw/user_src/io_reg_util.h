@@ -47,7 +47,7 @@ extern "C" {
 *   mmio_addr   : base (start) address of the MMIO address space;
 *   core_num    : which io core of the MMIO;
 */
-#define GET_IO_CORE_ADDR(mmio_addr, core_num) ((uint32_t)((mmio_addr) + TOTAL_MMIO_REG_NUM*REG_WORD_BYTE*(core_num)))
+#define GET_MMIO_CORE_ADDR(mmio_addr, core_num) ((uint32_t)((mmio_addr) + TOTAL_MMIO_REG_NUM*REG_WORD_BYTE*(core_num)))
 
 /*
 * @macro        : GET_VIDEO_CORE_ADDR();
