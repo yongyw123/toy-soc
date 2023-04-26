@@ -321,6 +321,118 @@ Register IO access:
 
 #define S6_I2C_REG_WRITE_BIT_POS_CMD_OFFSET 8   
 
+/*----------------------------------------------------
+video address space;
+1. 2^3 = 8 video cores;
+2. each core has 19-bit address space;
+    where this 19-bit is used for internal register
+    and to store 16-bit pixel data;
+    
+summary:
+video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
+
+* x represents dont-care (to accommodate frame buffer?)
+* v represents video core;
+* r represents video core internal registers;
+* a represents video space of each core; where this space is used for various purposes;
+*       such as to store i=the 16-bit pixel
+----------------------------------------------------*/
+#define VIDEO_CORE_ADDR_SIZE_G       3 
+#define VIDEO_CORE_TOTAL_G           8 // 2**VIDEO_CORE_ADDR_SIZE_G;
+#define VIDEO_REG_ADDR_BIT_SIZE_G   19  // each video core has 19-bit address space allocated;
+
+
+/*----------------------------------------------------
+* video modules/cores shall be sloted in the video system;
+----------------------------------------------------*/  
+#define V0_DISP_LCD    0   // lcd ILI9341 display via mcu 8080 seris protocol;
+
+/**************************************************************
+* V0_DISP_LCD
+--------------------
+this core wraps this module: LCD display controller 8080;
+this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
+
+this has six (6) registers;
+
+Register Map
+1. register 0 (offset 0): read register 
+2. register 1 (offset 1): program write clock period
+3. register 2 (offset 2): program read clock period;
+4. register 3 (offset 3): write register;
+5. register 4 (offset 4): stream control register;
+6. register 5 (offset 5): chip select register
+
+Register Definition:
+1. register 0: status and read data register
+        bit[7:0]    : data read from the lcd;
+        bit[8]      : ready flag;  // the lcd controller is idle
+                        1: ready;
+                        0: not ready;
+        bit[9]      : done flag;   // [optional ??] when the lcd just finishes reading or writing;
+                        1: done;
+                        0: not done;
+        
+2. register 1: program the write clock period;
+        bit[15:0] defines the clock counter mod for LOW WRX period;
+        bit[31:16] defines the clock counter mod for HIGH WRX period;
+
+2. register 2: program the read clock period;
+        bit[15:0] defines the clock counter mod for LOW RDX period;
+        bit[31:16] defines the clock counter mod for HIGH RDX period;
+
+3. register 3: write data and data mode;
+        bit[7:0]    : data to write to the lcd;
+        bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
+                        0 for data;
+                        1 for command;
+        bit[10:9]  : to store user commands;
+        
+4. register 4: stream control register
+            there are two flows:
+            flow one is from thh processor (hence SW app/driver);
+            flow two is from other video source stream such as the camera;
+            flow two will be automatically completed through a feedback loop
+            via handshaking mechanism without any user/processor intervention
+            until this stream control is updated again;
+             
+        bit[0]: 
+            1 for stream flow;
+            0 for processor flow; 
+
+5. register 5: chip select;
+            this is probably not necessary;
+            since this could be done using general purpose pin;
+            and emulated through SW;
+            bit[0]  
+                0: chip deselect;
+                1: chip select
+            
+Register IO access:
+1. register 0: read only;
+2. register 1: write only;
+3. register 2: write only;
+4. register 3: write only;
+5. register 4: write only;
+6. register 5: write only;
+******************************************************************/
+
+// register offset;
+#define V0_DISP_LCD_REG_RD_DATA_OFFSET      0   // 000
+#define V0_DISP_LCD_REG_WR_CLOCKMOD_OFFSET  1   // 001
+#define V0_DISP_LCD_REG_RD_CLOCKMOD_OFFSET  2   // 010
+#define V0_DISP_LCD_REG_WR_DATA_OFFSET      3   // 011
+#define V0_DISP_LCD_REG_STREAM_CTRL_OFFSET  4   // 100
+#define V0_DISP_LCD_REG_CSX_OFFSET          5   // 101
+
+// bit position;
+#define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  8  
+#define V0_DISP_LCD_REG_STATUS_BIT_POS_DONE   9
+
+#define V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX   8 // for data or command
+
+#define V0_DISP_LCD_REG_CSX_BIT_POS           0 // chip select;
+
 
 #ifdef __cpluscplus
 } // extern "C";
