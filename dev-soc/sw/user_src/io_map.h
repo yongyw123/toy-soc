@@ -431,8 +431,6 @@ Register IO access:
 #define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  8  
 #define V0_DISP_LCD_REG_STATUS_BIT_POS_DONE   9
 
-#define V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX   8 // for data or command
-
 #define V0_DISP_LCD_REG_CSX_BIT_POS           0 // chip select;
 
 #define V0_DISP_LCD_REG_DCX_BIT_POS           0 // dcx;
