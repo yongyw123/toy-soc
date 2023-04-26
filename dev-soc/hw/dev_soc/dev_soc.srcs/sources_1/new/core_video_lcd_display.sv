@@ -31,15 +31,14 @@
 this core wraps this module: LCD display controller 8080;
 this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
 
-this has six (6) registers;
-
 Register Map
 1. register 0 (offset 0): read register 
 2. register 1 (offset 1): program write clock period
 3. register 2 (offset 2): program read clock period;
 4. register 3 (offset 3): write register;
 5. register 4 (offset 4): stream control register;
-6. register 5 (offset 5): chip select register
+6. register 5 (offset 5): chip select (CSX) register
+7. register 6 (offset 6): data or command (DCX) register
 
 Register Definition:
 1. register 0: status and read data register
@@ -61,10 +60,7 @@ Register Definition:
 
 3. register 3: write data and data mode;
         bit[7:0]    : data to write to the lcd;
-        bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
-                        0 for data;
-                        1 for command;
-        bit[10:9]  : to store user commands;
+        bit[9:8]  : to store user commands;
         
 4. register 4: stream control register
             there are two flows:
@@ -85,7 +81,11 @@ Register Definition:
             bit[0]  
                 0: chip deselect;
                 1: chip select
-            
+6. register 6: data or command (DCX);
+            bit[0] : is the data to write a DATA or a COMMAND for the LCD?
+                0 for data;
+                1 for command;
+    
 Register IO access:
 1. register 0: read only;
 2. register 1: write only;
@@ -93,6 +93,7 @@ Register IO access:
 4. register 3: write only;
 5. register 4: write only;
 6. register 5: write only;
+7. register 6: write only;
 ******************************************************************/
 module core_video_lcd_display
     #(
@@ -143,14 +144,15 @@ module core_video_lcd_display
     localparam REG_WR_DATA_OFFSET       = 3'b011; 
     localparam REG_STREAM_CTRL_OFFSET   = 3'b100;
     localparam REG_CSX_OFFSET           = 3'b101;
+    localparam REG_DCX_OFFSET           = 3'b110;
     
     // available commands;
     localparam CMD_NOP  = 2'b00;
     localparam CMD_WR   = 2'b01;
     localparam CMD_RD   = 2'b10;
     
-    localparam BIT_POS_CMD_LSB = 9;
-    localparam BIT_POS_CMD_MSB = 10;
+    localparam BIT_POS_CMD_LSB = 8;
+    localparam BIT_POS_CMD_MSB = 9;
     
     // stream control;
     localparam STREAM_CTRL_CPU      = 1'b0;      // from the processor;
@@ -163,6 +165,7 @@ module core_video_lcd_display
     logic wr_en_clockmod_rdx;
     logic wr_en_stream_ctrl;
     logic wr_en_csx;
+    logic wr_en_dcx;
     
     /* argument for lcd_8080_interface_controller() */
     logic lcd_ready_flag;
@@ -190,6 +193,7 @@ module core_video_lcd_display
     logic [31:0] wr_data_reg, wr_data_next;  
     logic stream_flow_reg, stream_flow_next;
     logic csx_reg, csx_next;
+    logic dcx_reg, dcx_next;
     
     
     // ff;
@@ -200,6 +204,7 @@ module core_video_lcd_display
             set_rdx_period_mod_reg <= 0;    // this is equivalent to disabling rdx;
             stream_flow_reg <= 0;   // processor control;
             csx_reg <= 1'b0;        // chip deselect (active low);
+            dcx_reg <= 1'b0;        // it is non-command;
         end
         else begin
             if(wr_en_data)
@@ -212,6 +217,8 @@ module core_video_lcd_display
                 stream_flow_reg <= stream_flow_next;  
             if(wr_en_csx)
                 csx_reg <= csx_next;
+            if(wr_en_dcx)
+                dcx_reg <= dcx_next;
         end
         
     
@@ -222,13 +229,15 @@ module core_video_lcd_display
     assign wr_en_clockmod_rdx   = wr_en && (addr[2:0] == REG_RD_CLOCKMOD_OFFSET);
     assign wr_en_stream_ctrl    = wr_en && (addr[2:0] == REG_STREAM_CTRL_OFFSET);
     assign wr_en_csx            = wr_en && (addr[2:0] == REG_CSX_OFFSET);
-    
+    assign wr_en_dcx            = wr_en && (addr[2:0] == REG_DCX_OFFSET);
+        
     // next state;
     assign wr_data_next             = wr_data;
     assign set_wrx_period_mod_next  = wr_data;
     assign set_rdx_period_mod_next  = wr_data;
     assign stream_flow_next         = wr_data[0];   // only one bit;
     assign csx_next                 = wr_data[0];
+    assign dcx_next                 = wr_data[0];
     
     // lcd configuration; requires processor for this;
     assign lcd_set_wr_mod_fhalf = set_wrx_period_mod_reg[15:0];
@@ -284,7 +293,8 @@ module core_video_lcd_display
                 lcd_drive_csx = !csx_reg;
                 
                 // hw active low signal;
-                lcd_drive_dcx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX];
+                //lcd_drive_dcx = !wr_data_reg[`V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX];
+                lcd_drive_dcx = !dcx_reg;
                 
                 // always disable the stream ready flag;
                 // otherwise, it will unintentionally draw out the src fifo;
