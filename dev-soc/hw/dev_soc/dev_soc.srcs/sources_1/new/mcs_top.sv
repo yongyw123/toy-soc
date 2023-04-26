@@ -72,9 +72,20 @@ module mcs_top
         output CLKOUT_24M_JA03,
         
         // hw reset;
-        inout tri GPIO_CAM_OV7670_RESETN_JA04     // configure a pmod jumper as gpio; 
+        inout tri GPIO_CAM_OV7670_RESETN_JA04,     // configure a pmod jumper as gpio; 
+      
+        /*
+        LCD ili9341
+        uses PMOD jumpers @ JC and JD
+        */   
+        // control pins;
+        output logic LCD_CSX_JD01,     // chip select;
+        output logic LCD_DCX_JD02,     // data or command; LOW for command;          
+        output logic LCD_WRX_JD03,     //  to drive the lcd for write op;
+        output logic LCD_RDX_JD04,     // to drive the lcd for read op;
         
-        
+        // data bus; shared between the host and the lcd;
+        inout tri[7:0] LCD_DATA_JC
     );
     
     
@@ -265,13 +276,13 @@ module mcs_top
         
         /* --------- HW pin mapping (by the constraint file) ------------*/
         /* LCD display (ILI9341); */
-        .lcd_drive_wrx(),     //  to drive the lcd for write op;
-        .lcd_drive_rdx(),     // to drive the lcd for read op;
-        .lcd_drive_csx(),     // chip select;
-        .lcd_drive_dcx(),     // data or command; LOW for command;          
+        .lcd_drive_csx(LCD_CSX_JD01),     // chip select;
+        .lcd_drive_dcx(LCD_DCX_JD02),     // data or command; LOW for command;          
+        .lcd_drive_wrx(LCD_WRX_JD03),     //  to drive the lcd for write op;
+        .lcd_drive_rdx(LCD_RDX_JD04),     // to drive the lcd for read op;
         
         // this is shared between the host and the lcd;
-        .lcd_dinout()
+        .lcd_dinout(LCD_DATA_JC)
     );
     
     
