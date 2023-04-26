@@ -60,6 +60,7 @@ program core_video_lcd_display_tb
     localparam REG_WR_DATA_OFFSET = 3'b011; 
     localparam REG_STREAM_CTRL_OFFSET = 3'b100;
     localparam REG_CSX_OFFSET = 3'b101;
+    localparam REG_DCX_OFFSET = 3'b110;
     
     // bit pos;
     localparam REG_RD_DATA_BIT_POS_READY = 8;
@@ -106,6 +107,11 @@ program core_video_lcd_display_tb
     @(posedge clk);
     addr <= REG_CSX_OFFSET;
     wr_data <= 1;
+    
+    // assert data mode;
+    @(posedge clk);
+    addr <= REG_DCX_OFFSET;
+    wr_data <= 0;   // active low;
         
     @(posedge clk);
     test_index <= 2;
@@ -113,12 +119,12 @@ program core_video_lcd_display_tb
     write <= 1'b1;
     read <= 1'b1;   // dont care since there is no read multiplexing in place;
     addr <= REG_WR_DATA_OFFSET;
-    wr_data <= {21'b0, CMD_WR, dcx_command, 8'($random)};
+    wr_data <= {22'b0, CMD_WR, 8'($random)};
     
     // issue a CMD_NOP immediately after one write;
     // otherwise, it will keep on writing on the next ready;
     @(posedge clk);
-    wr_data <= {21'b0, CMD_NOP, dcx_command, 8'($random)};
+    wr_data <= {22'b0, CMD_NOP, 8'($random)};
     
     // expect the ready flag to change to busy then back to ready;
     //@(posedge clk); // it takes one clock cycle to update the flag;
@@ -131,13 +137,56 @@ program core_video_lcd_display_tb
     cs <= 1'b1;
     write <= 1'b1;
     addr <= REG_WR_DATA_OFFSET;
-    wr_data <= {21'b0, CMD_NOP, !dcx_command, 8'($random)};
+    wr_data <= {22'b0, CMD_NOP, 8'($random)};
 
     // deselect the chip;
     @(posedge clk);
     addr <= REG_CSX_OFFSET;
     wr_data <= 0;
         
+    /*---------------- write -------------------- */
+    // start a write that is a command;
+    // enable chip select;
+    @(posedge clk);
+    addr <= REG_CSX_OFFSET;
+    wr_data <= 1;
+    
+    // assert command mode;
+    @(posedge clk);
+    addr <= REG_DCX_OFFSET;
+    wr_data <= 1;   // active low;
+        
+    @(posedge clk);
+    test_index <= 2;
+    cs <= 1'b1;
+    write <= 1'b1;
+    read <= 1'b1;   // dont care since there is no read multiplexing in place;
+    addr <= REG_WR_DATA_OFFSET;
+    wr_data <= {22'b0, CMD_WR, 8'($random)};
+    
+    // issue a CMD_NOP immediately after one write;
+    // otherwise, it will keep on writing on the next ready;
+    @(posedge clk);
+    wr_data <= {22'b0, CMD_NOP, 8'($random)};
+    
+    // expect the ready flag to change to busy then back to ready;
+    //@(posedge clk); // it takes one clock cycle to update the flag;
+    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b0);
+    wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b1);
+
+    // terminate immediately after one write;
+    // otherwise, it will keep on writing;
+    @(posedge clk);
+    cs <= 1'b1;
+    write <= 1'b1;
+    addr <= REG_WR_DATA_OFFSET;
+    wr_data <= {22'b0, CMD_NOP, 8'($random)};
+
+    // deselect the chip;
+    @(posedge clk);
+    addr <= REG_CSX_OFFSET;
+    wr_data <= 0;
+    
    
     /*---------------- read -------------------- */
     // start a read command;
@@ -147,19 +196,24 @@ program core_video_lcd_display_tb
     wr_data <= 1;
     
     // by specs; data-or-command must be DATA;
+    // deselect the chip;
+    @(posedge clk);
+    addr <= REG_DCX_OFFSET;
+    wr_data <= 0;
+    
     @(posedge clk);
     test_index <= 3;
     cs <= 1'b1;
     write <= 1'b1;
     read <= 1'b1;   // dont care since there is no read multiplexing in place;
     addr <= REG_WR_DATA_OFFSET;
-    wr_data <= {21'b0, CMD_RD, !dcx_command, 8'($random)};
+    wr_data <= {22'b0, CMD_RD, 8'($random)};
 
     // issue a NOP; 
     // same reason as above;
     // otherwise, it will keep reading from the lcd;
     @(posedge clk);
-    wr_data <= {21'b0, CMD_NOP, !dcx_command, 8'($random)};
+    wr_data <= {22'b0, CMD_NOP, 8'($random)};
     
     // as above; there should be change in the ready status flag;
     wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b0);
@@ -212,12 +266,21 @@ program core_video_lcd_display_tb
     addr  <= REG_STREAM_CTRL_OFFSET;
     wr_data <= {31'b0, 1'b1};   // hand the control to the video streams;
     
+    
     // try deselect the chip;
     // expect that it has no effect;
-    // since the control is not with the cpi;
+    // since the control is not with the cpu;
     @(posedge clk);
     addr <= REG_CSX_OFFSET;
     wr_data <= 0;
+    
+    
+    // try asserting a command mode;
+    // expect that it has no effect;
+    // since the control is not with the cpu;
+    @(posedge clk);
+    addr <= REG_DCX_OFFSET;
+    wr_data <= 1;
     
     // expect that fifo will be drawn out; hence the src stream will be invalid;
     @(posedge clk);
@@ -266,15 +329,21 @@ program core_video_lcd_display_tb
     @(posedge clk);
     addr <= REG_CSX_OFFSET;
     wr_data <= 1;   // enable chip;
+    
+    // assert command mode;
+    @(posedge clk);
+    addr <= REG_DCX_OFFSET;
+    wr_data <= 1;
+    
 
     @(posedge clk);
     addr <= REG_WR_DATA_OFFSET;
-    wr_data <= {21'b0, CMD_WR, dcx_command, 8'($random)};
+    wr_data <= {22'b0, CMD_WR, 8'($random)};
     
     // issue a CMD_NOP immediately after one write;
     // otherwise, it will keep on writing on the next ready;
     @(posedge clk);
-    wr_data <= {21'b0, CMD_NOP, dcx_command, 8'($random)};
+    wr_data <= {22'b0, CMD_NOP, 8'($random)};
     
     // expect the ready flag to change to busy then back to ready;
     //@(posedge clk); // it takes one clock cycle to update the flag;
@@ -282,14 +351,20 @@ program core_video_lcd_display_tb
     wait(rd_data[REG_RD_DATA_BIT_POS_READY] == 1'b1);
     
     // start reading;
+    // by specs;
+    // must be data mode;
+    @(posedge clk);
+    addr <= REG_DCX_OFFSET;
+    wr_data <= 0;
+    
     @(posedge clk);
     addr <= REG_WR_DATA_OFFSET;
-    wr_data <= {21'b0, CMD_RD, !dcx_command, 8'($random)};
+    wr_data <= {22'b0, CMD_RD, 8'($random)};
     
     // issue a CMD_NOP immediately;
     // otherwise, it will keep on reading on the next ready;
     @(posedge clk);
-    wr_data <= {21'b0, CMD_NOP, !dcx_command, 8'($random)};
+    wr_data <= {22'b0, CMD_NOP, 8'($random)};
     
     // expect the ready flag to change to busy then back to ready;
     //@(posedge clk); // it takes one clock cycle to update the flag;
