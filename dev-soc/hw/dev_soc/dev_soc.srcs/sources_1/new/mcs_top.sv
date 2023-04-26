@@ -49,14 +49,15 @@ module mcs_top
         input logic UART_TXD_IN,  // this connects to the system uart rx;
         output logic UART_RXD_OUT, // this connects to the system uart tx;
         
-        // spi;
+        // spi; not used;
         // uses PMOD jumper @ JC;
+        /*
         output logic SPI_SCLK_JC1,
         output logic SPI_MOSI_JC2,
         input logic SPI_MISO_JC3,
         output logic SPI_SS_JC4, // slave select; asset active low;
         output logic SPI_DC_JC7,  // is the current MOSI a data or command for the slave?
-        
+        */
         /* camera ov7670 control 
         1. use i2c protocol;
         2. require a clock driver of 24 MHz (to drive the camera itself);
@@ -128,7 +129,6 @@ module mcs_top
     // Status and control signals
     .reset(reset_clk),          // input reset
     //.reset(0),      // allow free running? bad idea?
-    .power_down(),              // input power_down; not used;
     .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
    
    // Clock in ports
@@ -208,13 +208,19 @@ module mcs_top
         .uart_tx(UART_RXD_OUT), 
         .uart_rx(UART_TXD_IN),
         
-        // spi;
+        // spi; not used;
+        .spi_sclk(),
+        .spi_mosi(),
+        .spi_miso(),
+        .spi_ss_n(),
+        .spi_data_or_command(),
+        /*
         .spi_sclk(SPI_SCLK_JC1),
         .spi_mosi(SPI_MOSI_JC2),
         .spi_miso(SPI_MISO_JC3),
         .spi_ss_n(SPI_SS_JC4),
         .spi_data_or_command(SPI_DC_JC7),
-        
+        */
         /* 
         i2c; 
         camera ov7670; 
@@ -225,6 +231,7 @@ module mcs_top
         
     );
     
+    /*
     // video system;
     video_sys #(.BITS_PER_PIXEL(16))
     video_unit
@@ -233,10 +240,6 @@ module mcs_top
         .clk_sys(clk_100M),    // 100 MHz;
         .reset(reset_sys),  // async;
         
-        /*
-        // user bus interface;
-        // where user bus is bridged by the microblaze MCS IO bus;
-        */
         .video_cs(user_video_cs),        // chip select for mmio system;
         .video_wr(user_wr),             // write enable;
         .video_rd(user_rd),             // read enable;
@@ -244,6 +247,7 @@ module mcs_top
         .video_wr_data(user_wr_data),   // 32-bit;
         .video_rd_data(user_rd_data)  // 32-bit;
     );
+    */
     
 endmodule
 
