@@ -24,3 +24,5 @@
 **/*.vscode
 **/*user_docs/
 **/*.dcp
+**/*.str
+**/*backup.log
