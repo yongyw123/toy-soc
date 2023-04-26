@@ -248,6 +248,9 @@ module core_spi
    // read;
    assign rd_en = read && cs;   // this is actually not necessary;
    always_comb
+   begin
+        // default;
+        rd_data = 0;
         case({rd_en, addr[SPI_REG_ADDR_W-1:0]})
         //case({rd_en, addr[2:0]})
             {1'b1, SPI_REG_MISO_RD} : rd_data = {ZERO_PAD_RD_DATA_MISO, spi_miso_reassembled};
@@ -259,6 +262,7 @@ module core_spi
             //{1'b1, 3'b000} : rd_data = {31'b0, spi_ready_flag};
             default                 : ; // nop
         endcase
+    end
 endmodule
 
 `endif // CORE_SPI_SV
