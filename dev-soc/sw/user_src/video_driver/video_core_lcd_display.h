@@ -21,15 +21,14 @@ extern "C" {
 this core wraps this module: LCD display controller 8080;
 this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
 
-this has six (6) registers;
-
 Register Map
 1. register 0 (offset 0): read register 
 2. register 1 (offset 1): program write clock period
 3. register 2 (offset 2): program read clock period;
 4. register 3 (offset 3): write register;
 5. register 4 (offset 4): stream control register;
-6. register 5 (offset 5): chip select register
+6. register 5 (offset 5): chip select (CSX) register
+7. register 6 (offset 6): data or command (DCX) register
 
 Register Definition:
 1. register 0: status and read data register
@@ -51,10 +50,7 @@ Register Definition:
 
 3. register 3: write data and data mode;
         bit[7:0]    : data to write to the lcd;
-        bit[8]      : is the data to write a DATA or a COMMAND for the LCD?
-                        0 for data;
-                        1 for command;
-        bit[10:9]  : to store user commands;
+        bit[9:8]  : to store user commands;
         
 4. register 4: stream control register
             there are two flows:
@@ -75,7 +71,11 @@ Register Definition:
             bit[0]  
                 0: chip deselect;
                 1: chip select
-            
+6. register 6: data or command (DCX);
+            bit[0] : is the data to write a DATA or a COMMAND for the LCD?
+                0 for data;
+                1 for command;
+    
 Register IO access:
 1. register 0: read only;
 2. register 1: write only;
@@ -83,6 +83,7 @@ Register IO access:
 4. register 3: write only;
 5. register 4: write only;
 6. register 5: write only;
+7. register 6: write only;
 ******************************************************************/
 
 class video_core_lcd_display{
@@ -94,7 +95,8 @@ class video_core_lcd_display{
         REG_CLOCKMOD_RD_OFFSET  = 2,
         REG_WR_DATA_OFFSET      = 3,
         REG_STREAM_CTRL_OFFSET  = 4,
-        REG_CSX_OFFSET          = 5
+        REG_CSX_OFFSET          = 5,
+        REG_DCX_OFFSET          = 6
     };
 
     // field and bit maskings;
@@ -110,12 +112,8 @@ class video_core_lcd_display{
         the write register packed different data;
         so need to adjust the position;
         ------------------------------------ */
-        // hw pin control: data or command;
-        BIT_POS_REG_WR_DATA_DCX = V0_DISP_LCD_REG_WR_DATA_BIT_POS_DCX,
-        
         // user command start position;
-        BIT_POS_REG_WR_DATA_CMD_OFFSET = 9,
-        
+        BIT_POS_REG_WR_DATA_CMD_OFFSET = 8,
 
         /*-------------------------------------------------
         stream control;
@@ -126,7 +124,12 @@ class video_core_lcd_display{
 
         /*csx;
         chip select; */ 
-        BIT_POS_CSX = 0
+        BIT_POS_CSX = V0_DISP_LCD_REG_CSX_BIT_POS,
+
+        /* dcx
+        data or command;
+        */
+       BIT_POS_DCX = V0_DISP_LCD_REG_DCX_BIT_POS
     };
 
     // commands;
@@ -153,7 +156,11 @@ class video_core_lcd_display{
         // communication setting;
         void enable_chip(void); // chip select; active low;
         void disable_chip(void); 
-        
+
+        // data or command mode;
+        void assert_command_mode(void);     // command mode;
+        void deassert_command_mode(void);   // data mode;
+
         // rw;
         void write(int is_data, uint8_t data); // write to the lcd;
         uint8_t read(void);        // read from the lcd;
