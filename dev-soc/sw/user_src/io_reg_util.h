@@ -27,6 +27,13 @@ extern "C" {
 #define REG_WORD_BYTE       4     // each register is 32-bit; hence 4-byte;
 #define TOTAL_MMIO_REG_NUM  32    // each mmio core is allocated 2^{5} internal registers;
 #define TOTAL_VIDEO_REG_NUM 524288        // each video core has 2^{19} internal registers;
+
+// to distinguish between the mmio and video system under the same address space; 
+// the 25-indexed bit (the 26-th bit) of byte-addressable is used
+// equiv. 23-indexed bit of word-addressable
+// HIGH for video; LOW otherwise    
+#define USER_VIDEO_BYTE_SELECT_BIT  0x02000000  // this corresponds to the 25-indexed bit of byte-addressable space;
+
 /* ----------------------------------------------
 * MACROS
 ----------------------------------------------*/
