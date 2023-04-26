@@ -292,7 +292,7 @@ module lcd_8080_interface_controller
     end
   
     // logic;
-    assign set_hiz = (cmd_reg == CMD_RD);   
+    assign set_hiz = (cmd_reg == CMD_RD);
     assign dinout = (set_hiz) ? {PARALLEL_DATA_BITS{1'bz}} : wr_data_reg;
     
     // output;
