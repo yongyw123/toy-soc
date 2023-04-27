@@ -24,7 +24,26 @@ void lcd_ili9341_hw_reset(void){
     delay_busy_ms(1000); // take time to settle;
 } 
 
+void lcd_ili9341_enable(void){
+	/*
+	@brief	: chip select the lcd;
+	@param	: none;
+	@retval	: none;
 
+	*/
+	obj_lcd.enable_chip();
+}
+
+void lcd_ili9341_disable(void){
+	/*
+	@brief	: chip deselect the lcd;
+	@param	: none;
+	@retval	: none;
+
+	*/
+	obj_lcd.disable_chip();
+
+}
 void lcd_ili9341_read_id(void){
     /*
     @brief  : read LCD ID's
@@ -139,10 +158,10 @@ void lcd_ili9341_read_id(void){
 
 void lcd_ili9341_init(void){
     /* 
-    @brief  : basic initialization of the lcd ili9341
-    @param  : none
-    @retval : none
-    
+    @brief  	: basic initialization of the lcd ili9341
+    @param  	: none
+    @retval 	: none
+	@assumption	: the LCD has been chip selected;
     */
 
    /*
@@ -314,6 +333,7 @@ void lcd_ili9341_set_area(uint16_t column_start, uint16_t page_start, uint16_t c
 	 * 		column_end	: end column position to write
 	 * 		page_end	: end page position to write
 	 * @retval: None
+	 * @assumption	: the LCD has been chip selected;
 	 *
 	 * Reference:
 	 * 		1. Datasheet: https://cdn-shop.adafruit.com/datasheets/ILI9341.pdf
@@ -348,6 +368,7 @@ void lcd_ili9341_set_orientation(uint16_t MY, uint16_t MX, uint16_t MV, uint16_t
 	 * 		RGB_order: 0 for RGB; 1 for BGR (pixel order)
 	 * @retval:
 	 * 		None
+	 * @assumption	: the LCD has been chip selected;
 	 * @assumption:
 	 * 		1. The image to be displayed has to conform to the intended LCD display
 	 * 		orientation as specified. Otherwise, the display image will be
@@ -393,18 +414,18 @@ void lcd_ili9341_set_orientation(uint16_t MY, uint16_t MX, uint16_t MV, uint16_t
 
 void lcd_ili9341_write_pixel(uint16_t pixel){
 	/*
-	 * @brief	: Write Pixel in 16-bit using "8-bit function";
-	 * @note	: the LCD only has 8 (parallel) pins for the data;
-	 * @param	: pixel - 16-bit data to be written to the LCD as data;
-	 * @retval	: None
-	 * @note	: this is a blocking method;
+	 * @brief		: Write Pixel in 16-bit using "8-bit function";
+	 * @note		: the LCD only has 8 (parallel) pins for the data;
+	 * @param		: pixel - 16-bit data to be written to the LCD as data;
+	 * @retval		: None
+	 * @note		: this is a blocking method;
+	 * @assumption	: the LCD has been chip selected;
 	 */
 
 
 	// unpacking since only 8-bit can be sent at a time;
 	uint8_t upper_data = (uint8_t)(pixel >> 8);		// upper 8-bit;
 	uint8_t lower_data = (uint8_t)(pixel & 0x00FF); 	// lower 8-bit by masking out the upper 8-bit
-
 
 	// assumme big endian;
 	obj_lcd.write_data(upper_data);
@@ -413,10 +434,11 @@ void lcd_ili9341_write_pixel(uint16_t pixel){
 
 void lcd_ili9341_fill_colour(uint16_t mono_colour){
 	/*
-	 * @brief	: To paint the entire LCD with a single colour;
-	 * @param	: mono_colour - 16-bit RGB565 format
-	 * @retval	: None
-	 * @note	: this is a blocking method;
+	 * @brief		: To paint the entire LCD with a single colour;
+	 * @param		: mono_colour - 16-bit RGB565 format
+	 * @retval		: None
+	 * @note		: this is a blocking method;
+	 * @assumption	: the LCD has been chip selected;
 	 */
 
 	// variable declarations;

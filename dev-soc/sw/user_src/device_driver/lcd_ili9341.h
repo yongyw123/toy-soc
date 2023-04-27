@@ -31,10 +31,12 @@ extern "C" {
 * function prototype;
 ------------------------------*/
 void lcd_ili9341_hw_reset(void); // hw reset using an gpio pin;
-void lcd_ili9341_read_id(void);
-void lcd_ili9341_init(void);
+void lcd_ili9341_enable(void);  // chip select;
+void lcd_ili9341_disable(void);  // deselect the chip;
+void lcd_ili9341_read_id(void); 
+void lcd_ili9341_init(void);    // basic initialization;
 void lcd_ili9341_set_area(uint16_t column_start, uint16_t page_start, uint16_t column_end, uint16_t page_end);
-void lcd_ili9341_set_orientation(int MY, int MX, int MV, uint16_t RGB_order);
+void lcd_ili9341_set_orientation(uint16_t MY, uint16_t MX, uint16_t MV, uint16_t RGB_order);
 void lcd_ili9341_write_pixel(uint16_t pixel);
 void lcd_ili9341_fill_colour(uint16_t mono_colour);
 
