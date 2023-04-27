@@ -9,6 +9,7 @@
 #include "core_spi.h"
 #include "core_i2c_master.h"
 #include "cam_ov7670_reg.h"
+#include "device_directive.h"
 
 
 /* ------------------------------------------------
