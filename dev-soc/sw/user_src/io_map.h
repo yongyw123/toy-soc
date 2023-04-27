@@ -425,7 +425,7 @@ Register IO access:
 #define V0_DISP_LCD_REG_WR_DATA_OFFSET      3   // 011
 #define V0_DISP_LCD_REG_STREAM_CTRL_OFFSET  4   // 100
 #define V0_DISP_LCD_REG_CSX_OFFSET          5   // 101
-#define V0_DISP_LCD_REG_CSX_OFFSET          6   // 110
+#define V0_DISP_LCD_REG_DCX_OFFSET          6   // 110
 
 // bit position;
 #define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  8  
