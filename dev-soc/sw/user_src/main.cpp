@@ -12,17 +12,20 @@ int main(){
     
     // chip select the lcd;
     lcd_ili9341_enable();
-    
+
     // to read LCD ILI9341 ids;
     lcd_ili9341_read_id();
-        
+
     // initialize the lcd;
+    debug_str("initializing ... \r\n");
     lcd_ili9341_init();
 
     // orientation;
+    debug_str("setting orientation ... \r\n");
     lcd_ili9341_set_orientation(0,0,0,0);
 
     // try painting the lcd with some colours;
+    debug_str("colour filling ... \r\n");
     lcd_ili9341_fill_colour(RGB565_COLOUR_ORANGE);
 
     debug_str("done??\r\n");

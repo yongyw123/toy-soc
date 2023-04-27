@@ -405,9 +405,9 @@ void lcd_ili9341_set_orientation(uint16_t MY, uint16_t MX, uint16_t MV, uint16_t
 	// to ensure the display area aligns with the memory orientation above;
 	// if X-Y exchange, we should swap between column and page address as well;
 	if(MV == 1){
-		lcd_ili9341_set_orientation(0, 0, LCD_ILI9341_DIMENSION_HIGH_320-1 , LCD_ILI9341_DIMENSION_LOW_240-1);
+		lcd_ili9341_set_area(0, 0, LCD_ILI9341_DIMENSION_HIGH_320-1 , LCD_ILI9341_DIMENSION_LOW_240-1);
 	}else{
-		lcd_ili9341_set_orientation(0, 0, LCD_ILI9341_DIMENSION_LOW_240-1, LCD_ILI9341_DIMENSION_HIGH_320-1);
+		lcd_ili9341_set_area(0, 0, LCD_ILI9341_DIMENSION_LOW_240-1, LCD_ILI9341_DIMENSION_HIGH_320-1);
 	}
 }
 
