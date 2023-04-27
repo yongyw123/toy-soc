@@ -163,12 +163,6 @@ void lcd_ili9341_init(void){
 	 * 1.  https://cdn-shop.adafruit.com/datasheets/ILI9341.pdf
 	 */
 
-	//> variable declarations for setting up the LCD and RGB orientation;
-	uint8_t MY;	// row address order;
-	uint8_t MX; // column address order;
-	uint8_t MV; // row/columnn exchanged;
-	uint8_t RGB_order; // RGB or BGR?
-
 	//> soft reset to clear all register values to default;
 	obj_lcd.write_command(LCD_ILI9341_REG_SW_RESET);
 	delay_busy_ms(150); // take time to reset all lcd registers;
@@ -344,7 +338,7 @@ void lcd_ili9341_set_area(uint16_t column_start, uint16_t page_start, uint16_t c
 
 }
 
-void lcd_ili9341_set_orientation(uint8_t MY, uint8_t MX, uint8_t MV, uint8_t RGB_order){
+void lcd_ili9341_set_orientation(uint16_t MY, uint16_t MX, uint16_t MV, uint16_t RGB_order){
 	/*
 	 * @brief: Set LCD display and RGB pixel order orientations.
 	 * @input:
