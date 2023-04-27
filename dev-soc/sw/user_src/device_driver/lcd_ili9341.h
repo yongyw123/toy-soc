@@ -16,6 +16,12 @@
 extern "C" {
 #endif
 
+/*------------------------------
+function prototype;
+------------------------------*/
+void lcd_ili9341_hw_reset(void); // hw reset using an gpio pin;
+
+
 
 
 #ifdef __cpluscplus
