@@ -310,3 +310,88 @@ void lcd_ili9341_init(void){
 
 
 }
+
+void lcd_ili9341_set_area(uint16_t column_start, uint16_t page_start, uint16_t column_end, uint16_t page_end){
+	/*
+	 * @brief: To define the rectangular area (region) of display defined by the input positions.
+	 * @input:
+	 * 		column_start: start column position to write
+	 * 		page_start	: start page position to write
+	 * 		column_end	: end column position to write
+	 * 		page_end	: end page position to write
+	 * @retval: None
+	 *
+	 * Reference:
+	 * 		1. Datasheet: https://cdn-shop.adafruit.com/datasheets/ILI9341.pdf
+	 * 		2. Registers of interest:
+	 * 			a. Column Address Set @2Ah
+	 * 			b. Page Address Set @2Bh
+	 */
+
+	// column pointers;
+	obj_lcd.write_command(LCD_ILI9341_REG_ADDR_COL_SET);
+	obj_lcd.write_data(column_start >> 8);
+	obj_lcd.write_data(column_start & 0xff);
+	obj_lcd.write_data(column_end >> 8);
+	obj_lcd.write_data(column_end & 0xff);
+
+	// page pointers;
+	obj_lcd.write_command(LCD_ILI9341_REG_ADDR_PAGE_SET);
+	obj_lcd.write_data(page_start >> 8);
+	obj_lcd.write_data(page_start & 0xff);
+	obj_lcd.write_data(page_end >> 8);
+	obj_lcd.write_data(page_end & 0xff);
+
+}
+
+void lcd_ili9341_set_orientation(uint8_t MY, uint8_t MX, uint8_t MV, uint8_t RGB_order){
+	/*
+	 * @brief: Set LCD display and RGB pixel order orientations.
+	 * @input:
+	 * 		MY: Row Address Order
+	 * 		MX: Column Address Order
+	 * 		MV: Row/Column Exchange
+	 * 		RGB_order: 0 for RGB; 1 for BGR (pixel order)
+	 * @retval:
+	 * 		None
+	 * @assumption:
+	 * 		1. The image to be displayed has to conform to the intended LCD display
+	 * 		orientation as specified. Otherwise, the display image will be
+	 * 		distorted.
+	 * Note:
+	 * 		1. This function also setup the page and column write address to
+	 * 			setup up the area of interest to align with the orientation.
+	 * 			Otherwise, the image will be distorted as well.
+	 * Reference:
+	 *		1. Datasheet: https://cdn-shop.adafruit.com/datasheets/ILI9341.pdf
+	 *		2. See page 127 and 209 of the datasheet/
+	 *
+	 */
+
+	// dummy 8-bit placeholder to aggregate the input bits into one byte;
+	uint8_t data_placeholder = 0x00;
+
+	//> note
+	// ideally we should read the existing data from the LCD;
+	// and change the data accordingly (by bit masking for rigour);
+
+	// set the bits according to the inputs;
+	// leave the rest in default;
+	// (Vertical and Horizontal Refresh Order are zero by default);
+	data_placeholder |= (MY << 7);
+	data_placeholder |= (MX << 6);
+	data_placeholder |= (MV << 5);
+	data_placeholder |= (RGB_order << 3);
+
+	// memory access control register @36h dictates the orientation;
+	obj_lcd.write_command(LCD_ILI9341_REG_MAC);
+	obj_lcd.write_data(data_placeholder);
+
+	// to ensure the display area aligns with the memory orientation above;
+	// if X-Y exchange, we should swap between column and page address as well;
+	if(MV == 1){
+		lcd_ili9341_set_orientation(0, 0, LCD_ILI9341_DIMENSION_HIGH_320-1 , LCD_ILI9341_DIMENSION_LOW_240-1);
+	}else{
+		lcd_ili9341_set_orientation(0, 0, LCD_ILI9341_DIMENSION_LOW_240-1, LCD_ILI9341_DIMENSION_HIGH_320-1);
+	}
+}
