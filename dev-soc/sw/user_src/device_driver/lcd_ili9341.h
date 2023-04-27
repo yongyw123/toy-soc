@@ -5,6 +5,7 @@
 #include "io_map.h"
 #include "user_util.h"
 #include "video_core_lcd_display.h"
+#include "lcd_ili9341_reg.h"
 
 /* ------------------------------------------------
 * Driver for LCD ILI9341
@@ -20,6 +21,7 @@ extern "C" {
 function prototype;
 ------------------------------*/
 void lcd_ili9341_hw_reset(void); // hw reset using an gpio pin;
+void lcd_ili9341_read_id(void);
 
 
 
