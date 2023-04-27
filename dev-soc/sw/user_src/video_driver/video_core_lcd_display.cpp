@@ -256,3 +256,27 @@ uint8_t video_core_lcd_display::read(void){
 
 }
 
+
+void video_core_lcd_display::write_data(uint8_t data){
+	/* 
+	@brief	: write data to the LCD in data-mode (DCX);
+	@param	: 8-bit data to write
+	@retval	: none
+	@none	: this method is just a wrapper for write();
+
+	*/
+	write(1, data);
+
+}             
+	
+void video_core_lcd_display::write_command(uint8_t reg_command){
+	/* 
+	@brief	: write data to the LCD in command-mode (DCX);
+	@param	: reg_command - which command to issue to the LCD?
+	@retval	: none
+	@none	: this method is just a wrapper for write();
+
+	*/
+	write(0, reg_command);
+
+}   

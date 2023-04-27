@@ -165,6 +165,10 @@ class video_core_lcd_display{
         void write(int is_data, uint8_t data); // write to the lcd;
         uint8_t read(void);        // read from the lcd;
 
+        // wrapper/extended write method;
+        void write_data(uint8_t data);              // dcx: data mode;
+        void write_command(uint8_t reg_command);    // dcx: command mode;
+
     private:
         // this video core base address in the user-address space;
         uint32_t base_addr;
