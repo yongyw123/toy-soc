@@ -71,9 +71,6 @@ module mcs_top
         // output clocks @ JA jumpers;
         output CLKOUT_24M_JA03,
         
-        // hw reset;
-        inout tri GPIO_CAM_OV7670_RESETN_JA04,     // configure a pmod jumper as gpio; 
-      
         /*
         LCD ili9341
         uses PMOD jumpers @ JC and JD
@@ -85,7 +82,15 @@ module mcs_top
         output logic LCD_RDX_JD04,     // to drive the lcd for read op;
         
         // data bus; shared between the host and the lcd;
-        inout tri[7:0] LCD_DATA_JC
+        inout tri[7:0] LCD_DATA_JC,
+        
+        /* hw reset pins
+        // software controlled;
+        // configure a pmod jumper as gpio;
+        */
+        inout tri GPIO_CAM_OV7670_RESETN_JA04,  // for camera ov7670;      
+        inout tri GPIO_LCD_ILI9341_RSTN_JD07   // for lcd ili9341;
+        
     );
     
     
@@ -249,7 +254,12 @@ module mcs_top
         */        
         .i2c_scl(I2C_SCL_JA01),
         .i2c_sda(I2C_SDA_JA02),
-        .gpio(GPIO_CAM_OV7670_RESETN_JA04)
+        
+        /* hw reset pins;
+        * 1. camera : OV7670;
+        * 2. LCD    : ILI9341;
+        */
+        .gpio({GPIO_LCD_ILI9341_RSTN_JD07 ,GPIO_CAM_OV7670_RESETN_JA04})
         
     );
     
