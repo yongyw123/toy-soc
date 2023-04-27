@@ -87,3 +87,11 @@
 #define LCD_ILI9341_MADCTL_RGB 0x00
 #define LCD_ILI9341_MADCTL_BGR 0x08
 #define LCD_ILI9341_MADCTL_MH 0x04
+
+// read manufacturer id;
+#define LCD_ILI9341_RDID1   0xDA    // read id 1;
+#define LCD_ILI9341_RDID2   0xDB    // read id 2;
+#define LCD_ILI9341_RDID3   0xDC    // read id 3;
+
+// read ic device code;
+#define LCD_ILI9341_RDID4   0xD3    
