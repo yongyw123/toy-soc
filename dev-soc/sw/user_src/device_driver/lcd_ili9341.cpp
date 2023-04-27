@@ -395,3 +395,48 @@ void lcd_ili9341_set_orientation(uint8_t MY, uint8_t MX, uint8_t MV, uint8_t RGB
 		lcd_ili9341_set_orientation(0, 0, LCD_ILI9341_DIMENSION_LOW_240-1, LCD_ILI9341_DIMENSION_HIGH_320-1);
 	}
 }
+
+
+void lcd_ili9341_write_pixel(uint16_t pixel){
+	/*
+	 * @brief	: Write Pixel in 16-bit using "8-bit function";
+	 * @note	: the LCD only has 8 (parallel) pins for the data;
+	 * @param	: pixel - 16-bit data to be written to the LCD as data;
+	 * @retval	: None
+	 * @note	: this is a blocking method;
+	 */
+
+
+	// unpacking since only 8-bit can be sent at a time;
+	uint8_t upper_data = (uint8_t)(pixel >> 8);		// upper 8-bit;
+	uint8_t lower_data = (uint8_t)(pixel & 0x00FF); 	// lower 8-bit by masking out the upper 8-bit
+
+
+	// assumme big endian;
+	obj_lcd.write_data(upper_data);
+	obj_lcd.write_data(lower_data);
+}
+
+void lcd_ili9341_fill_colour(uint16_t mono_colour){
+	/*
+	 * @brief	: To paint the entire LCD with a single colour;
+	 * @param	: mono_colour - 16-bit RGB565 format
+	 * @retval	: None
+	 * @note	: this is a blocking method;
+	 */
+
+	// variable declarations;
+	uint32_t index;
+	obj_lcd.write_command(LCD_ILI9341_OP_END);
+
+	// command the LCD to accept write before writing the pixels;
+	obj_lcd.write_command(LCD_ILI9341_REG_MEM_WRITE);
+
+	// start filling up the entire LCD with the given colour;
+	for(index = 0; index < LCD_ILI9341_PIXEL_NUM; index++){
+		lcd_ili9341_write_pixel(mono_colour);
+	}
+	// terminate the memory write operation;
+	obj_lcd.write_command(LCD_ILI9341_OP_END);
+
+}
