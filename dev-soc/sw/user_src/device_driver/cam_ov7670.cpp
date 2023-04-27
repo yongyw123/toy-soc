@@ -14,15 +14,17 @@ void ov7670_hw_reset(void){
     @retval : none
     @note   : gpio core class has been instantiated as global
     */
-    obj_gpio.set_direction(OV7670_HW_RSTN_PIN_JA07, 1);
+    
+	// gpio core has been instantiated on device_directive.h
+	obj_gpio.set_direction(CAM_OV7670_HW_RSTN_PIN_JA07, 1);
     
     // apply a reset pulse;
     // active low to reset;
-    obj_gpio.write(OV7670_HW_RSTN_PIN_JA07, 1);
+    obj_gpio.write(CAM_OV7670_HW_RSTN_PIN_JA07, 1);
     delay_busy_ms(10);
-    obj_gpio.write(OV7670_HW_RSTN_PIN_JA07, 0);
+    obj_gpio.write(CAM_OV7670_HW_RSTN_PIN_JA07, 0);
     delay_busy_ms(10);
-    obj_gpio.write(OV7670_HW_RSTN_PIN_JA07, 1);
+    obj_gpio.write(CAM_OV7670_HW_RSTN_PIN_JA07, 1);
 }
 
 int ov7670_write(uint8_t reg_addr, uint8_t wr_data){
