@@ -1,0 +1,26 @@
+#ifndef _LCD_ILI9341_H
+#define _LCD_ILI9341_H
+
+#include "io_reg_util.h"
+#include "io_map.h"
+#include "user_util.h"
+#include "video_core_lcd_display.h"
+
+/* ------------------------------------------------
+* Driver for LCD ILI9341
+--------------------------------------------------*/
+
+// c and cpp linkage;
+// reference: https://igl.ethz.ch/teaching/tau/resources/cprog.htm
+#ifdef __cpluscplus
+extern "C" {
+#endif
+
+
+
+#ifdef __cpluscplus
+} // extern "C";
+#endif
+
+
+#endif //_LCD_ILI9341_H
