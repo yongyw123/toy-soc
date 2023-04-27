@@ -17,6 +17,8 @@
 
 // device driver;
 #include "cam_ov7670.h"
+#include "lcd_ili9341.h"
+
 
 /* ------------------------------------------------
 Purpose: test functions to check each HW IO cores;

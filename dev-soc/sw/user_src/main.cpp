@@ -12,10 +12,10 @@ int main(){
     // initialize camera ov7670;
     ov7670_init(OV7670_OUTPUT_FORMAT_RGB565);
 
-    debug_str("testing video core: lcd display\r\n");
+    //debug_str("testing video core: lcd display\r\n");
     while(1){
-        test_video_core_lcd_display(&obj_lcd);
-        
+        //test_video_core_lcd_display(&obj_lcd);
+        test_HW_reset_pins();    
     }
 }
 
