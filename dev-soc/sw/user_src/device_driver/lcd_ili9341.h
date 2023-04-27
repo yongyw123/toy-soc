@@ -38,14 +38,19 @@ void lcd_ili9341_set_orientation(uint8_t MY, uint8_t MX, uint8_t MV, uint8_t RGB
 void lcd_ili9341_write_pixel(uint16_t pixel);
 void lcd_ili9341_fill_colour(uint16_t mono_colour);
 
+
 /*------------------------------
-* 16-bit RGB colour samples
+* RGB 16-bit Colour Samples
 ------------------------------*/
-
-
-
-
-
+#define RGB565_COLOUR_BLACK     0x0000  //   0,   0,   0
+#define RGB565_COLOUR_BLUE      0x001F  //   0,   0, 255
+#define RGB565_COLOUR_GREEN     0x07E0  //   0, 255,   0
+#define RGB565_COLOUR_RED       0xF800  // 255,   0,   0
+#define RGB565_COLOUR_YELLOW    0xFFE0  // 255, 255,   0
+#define RGB565_COLOUR_WHITE     0xFFFF  // 255, 255, 255
+#define RGB565_COLOUR_ORANGE    0xFD20  // 255, 165,   0
+#define RGB565_COLOUR_PURPLE    0x780F  // 123,   0, 123
+#define RGB565_COLOUR_PINK      0xFC18  // 255, 130, 198
 
 
 
