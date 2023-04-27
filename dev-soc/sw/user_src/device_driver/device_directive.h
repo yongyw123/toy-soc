@@ -16,6 +16,14 @@
 extern "C" {
 #endif
 
+/* ---------------------------------
+// HW RESET PINS;
+// use HW gpio pin;
+-----------------------------------*/
+// gpio pinout;
+#define CAM_OV7670_HW_RSTN_PIN_JA07         0   // for camera; pmod jumper at JA07
+#define LCD_ILI9341_HW_RSTN_PIN_JD07        1   // for lcd; pmod jumper at JD07
+
 // global declaration;
 // gpio core is mainly for HW reset pin for the external devices;
 core_gpio obj_gpio(GET_MMIO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S4_GPIO_PORT));
