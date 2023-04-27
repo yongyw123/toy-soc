@@ -22,7 +22,7 @@ function prototype;
 ------------------------------*/
 void lcd_ili9341_hw_reset(void); // hw reset using an gpio pin;
 void lcd_ili9341_read_id(void);
-
+void lcd_ili9341_init(void);
 
 
 
