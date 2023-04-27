@@ -15,6 +15,8 @@
 // video system;
 #include "video_core_lcd_display.h"
 
+// device driver;
+#include "cam_ov7670.h"
 
 /* ------------------------------------------------
 Purpose: test functions to check each HW IO cores;
@@ -164,6 +166,15 @@ Test limitation: What could be tested;
 2. data is 8-bit but logic analyser could only accommodate 8 signals;
 -----------------------------------------------------------*/
 void test_video_core_lcd_display(video_core_lcd_display *lcd_obj);
+
+
+/*---------------------------------
+* HW Reset Pins controlled via SW;
+* all reset pins use GPIO core;
+* up to the SW to configure the core
+* for individiual pin;
+---------------------------------*/
+void test_HW_reset_pins(void);
 
 #ifdef __cpluscplus
 } // extern "C";

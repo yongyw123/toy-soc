@@ -496,3 +496,19 @@ void test_video_core_lcd_display(video_core_lcd_display *lcd_obj){
     }
     delay_busy_ms(1);
 }   
+
+
+void test_HW_reset_pins(void){
+    /*---------------------------------
+    * HW Reset Pins controlled via SW;
+    * all reset pins use GPIO core;
+    * up to the SW to configure the core
+    * for individiual pin;
+    ---------------------------------*/
+
+    // camera ov7670;
+    // PIN @ JA07;
+    ov7670_hw_reset();
+
+
+}
