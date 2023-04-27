@@ -212,7 +212,7 @@ module mcs_top
     
     /* for camera ov7670 */
     .I2C_DATA_BIT(8),   // for camera control;
-    .GPIO_PORT_NUM(1)   // for camera hw reset;
+    .GPIO_PORT_NUM(2)   // for camera, LCD hw resets;
     )
     
     mmio_unit
