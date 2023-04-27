@@ -29,9 +29,13 @@ video_core_lcd_display::video_core_lcd_display(uint32_t core_base_addr){
    for rdx; it is similar;
    
    */
-  
-   wrx_l = 1;   // this corresponds to 20 ns;
-   wrx_h = 1;   // this corresponds to 30 ns (including the done flag);
+
+  // for configuring;
+  // can afford to have longer write time;
+  // but when streaming; shall have shorted time;
+  // following is defaulted to configuring;
+   wrx_l = 2;   // this corresponds to 30 ns;
+   wrx_h = 2;   // this corresponds to 40 ns (including the done flag);
    
    // read is usually longer;
    rdx_l = 9;   // 100 ns;
