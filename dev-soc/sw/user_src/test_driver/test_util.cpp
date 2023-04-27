@@ -507,7 +507,7 @@ void test_HW_reset_pins(void){
     ---------------------------------*/
 
     // camera ov7670;
-    // PIN @ JA07;
+    // PIN @ JA04;
     ov7670_hw_reset();
     
     // lcd ili9341;

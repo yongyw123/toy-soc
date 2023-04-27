@@ -21,7 +21,7 @@ extern "C" {
 // use HW gpio pin;
 -----------------------------------*/
 // gpio pinout;
-#define CAM_OV7670_HW_RSTN_PIN_JA07         0   // for camera; pmod jumper at JA07
+#define CAM_OV7670_HW_RSTN_PIN_JA04         0   // for camera; pmod jumper at JA04
 #define LCD_ILI9341_HW_RSTN_PIN_JD07        1   // for lcd; pmod jumper at JD07
 
 // global declaration;

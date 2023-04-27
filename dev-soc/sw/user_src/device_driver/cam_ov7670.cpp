@@ -9,22 +9,22 @@ core_i2c_master obj_i2c(GET_MMIO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S6_I2C
 
 void ov7670_hw_reset(void){
     /*
-    @brief  : to HW reset the camera using PIN @ JA07;
+    @brief  : to HW reset the camera using PIN @ JA04;
     @param  : none
     @retval : none
     @note   : gpio core class has been instantiated as global
     */
     
 	// gpio core has been instantiated on device_directive.h
-	obj_gpio.set_direction(CAM_OV7670_HW_RSTN_PIN_JA07, 1);
+	obj_gpio.set_direction(CAM_OV7670_HW_RSTN_PIN_JA04, 1);
     
     // apply a reset pulse;
     // active low to reset;
-    obj_gpio.write(CAM_OV7670_HW_RSTN_PIN_JA07, 1);
+    obj_gpio.write(CAM_OV7670_HW_RSTN_PIN_JA04, 1);
     delay_busy_ms(10);
-    obj_gpio.write(CAM_OV7670_HW_RSTN_PIN_JA07, 0);
+    obj_gpio.write(CAM_OV7670_HW_RSTN_PIN_JA04, 0);
     delay_busy_ms(10);
-    obj_gpio.write(CAM_OV7670_HW_RSTN_PIN_JA07, 1);
+    obj_gpio.write(CAM_OV7670_HW_RSTN_PIN_JA04, 1);
 }
 
 int ov7670_write(uint8_t reg_addr, uint8_t wr_data){
