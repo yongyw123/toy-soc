@@ -12,7 +12,7 @@
 - [x] UART interface for debugging purpose
 - [x] SPI interface to control LCD ILI9341
 - [x] i2C interface to control Camera OV7670
-- [ ] LCD Display Parallel Interface
+- [x] LCD Display Parallel Interface
 - [ ] Digital Camera Interface (DCMI)
 - [ ] HW accelerator for (undetermined) image algorithm
 
@@ -23,7 +23,6 @@
 - [x] IP generate Clock management circuit
 - [ ] IP generate SDRAM memory interface for Frame Buffers
 - [x] Camera OV7670 via i2C interface
-- [ ] LCD-TFT control via SPI interface
 
 ## Extra (Nice to have)
 
