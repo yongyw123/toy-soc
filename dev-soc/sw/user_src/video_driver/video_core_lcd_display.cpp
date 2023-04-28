@@ -34,9 +34,56 @@ video_core_lcd_display::video_core_lcd_display(uint32_t core_base_addr){
   // can afford to have longer write time;
   // but when streaming; shall have shorted time;
   // following is defaulted to configuring;
-   wrx_l = 2;   // this corresponds to 30 ns;
-   wrx_h = 2;   // this corresponds to 40 ns (including the done flag);
-   
+   /* not ok
+   wrx_l = 4;   // this corresponds to 50 ns;
+   wrx_h = 3;   // this corresponds to 50 ns (including the done flag);
+   */
+
+
+   /* ok
+   wrx_l = 10;   // this corresponds to 30 ns;
+   wrx_h = 10;   // this corresponds to 40 ns (including the done flag);
+	*/
+
+   /* ok;
+   wrx_l = 9;
+   wrx_h = 9;
+	*/
+
+   /* ok
+   wrx_l = 7;
+   wrx_h = 7;
+	*/
+
+   /* ok;
+   wrx_l = 6;
+   wrx_h = 6;
+	*/
+
+   /* not ok
+   wrx_l = 5;
+   wrx_h = 4;
+	*/
+
+   /* not ok
+   wrx_l = 5;
+   wrx_h = 5;
+   */
+
+   /* not ok
+   wrx_l = 6;
+   wrx_h = 5;
+   */
+
+   /* not ok;
+   wrx_l = 5;
+   wrx_h = 6;
+	*/
+
+   wrx_l = 6;
+   wrx_h = 6;
+
+
    // read is usually longer;
    rdx_l = 9;   // 100 ns;
    rdx_h = 39;  // 400 ns;
