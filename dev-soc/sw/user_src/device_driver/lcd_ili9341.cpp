@@ -436,7 +436,6 @@ void lcd_ili9341_init(void){
 	obj_lcd.write_command(LCD_ILI9341_REG_DISP_ON);
 	delay_busy_ms(200);
 
-
 }
 
 void lcd_ili9341_set_area(uint16_t column_start, uint16_t page_start, uint16_t column_end, uint16_t page_end){
@@ -459,17 +458,17 @@ void lcd_ili9341_set_area(uint16_t column_start, uint16_t page_start, uint16_t c
 
 	// column pointers;
 	obj_lcd.write_command(LCD_ILI9341_REG_ADDR_COL_SET);
-	obj_lcd.write_data(column_start >> 8);
-	obj_lcd.write_data(column_start & 0xff);
-	obj_lcd.write_data(column_end >> 8);
-	obj_lcd.write_data(column_end & 0xff);
+	obj_lcd.write_data((uint8_t)(column_start >> 8));
+	obj_lcd.write_data((uint8_t)(column_start & 0xff));
+	obj_lcd.write_data((uint8_t)(column_end >> 8));
+	obj_lcd.write_data((uint8_t)(column_end & 0xff));
 
 	// page pointers;
 	obj_lcd.write_command(LCD_ILI9341_REG_ADDR_PAGE_SET);
-	obj_lcd.write_data(page_start >> 8);
-	obj_lcd.write_data(page_start & 0xff);
-	obj_lcd.write_data(page_end >> 8);
-	obj_lcd.write_data(page_end & 0xff);
+	obj_lcd.write_data((uint8_t)(page_start >> 8));
+	obj_lcd.write_data((uint8_t)(page_start & 0xff));
+	obj_lcd.write_data((uint8_t)(page_end >> 8));
+	obj_lcd.write_data((uint8_t)(page_end & 0xff));
 
 }
 
@@ -560,7 +559,7 @@ void lcd_ili9341_fill_colour(uint16_t mono_colour){
 	//uint32_t index;
 	uint32_t i;	// loop index;
 	uint32_t j;	// loop index;
-	obj_lcd.write_command(LCD_ILI9341_OP_END);
+	//obj_lcd.write_command(LCD_ILI9341_OP_END);
 
 	// command the LCD to accept write before writing the pixels;
 	obj_lcd.write_command(LCD_ILI9341_REG_MEM_WRITE);
@@ -569,10 +568,10 @@ void lcd_ili9341_fill_colour(uint16_t mono_colour){
 	//for(index = 0; index < LCD_ILI9341_PIXEL_NUM; index++){
 	for(i = 0; i < LCD_ILI9341_DIMENSION_LOW_240; i++){
 		for(j = 0; j < LCD_ILI9341_DIMENSION_HIGH_320; j++)
-		lcd_ili9341_write_pixel(mono_colour);
+			lcd_ili9341_write_pixel(mono_colour);
 	}
 	// terminate the memory write operation;
-	obj_lcd.write_command(LCD_ILI9341_OP_END);
+	//obj_lcd.write_command(LCD_ILI9341_OP_END);
 
 }
 

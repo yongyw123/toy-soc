@@ -42,6 +42,7 @@ void lcd_ili9341_read_disp_power_mode(void);
 void lcd_ili9341_read_diagnostic(void); // read display self diagnostic result;
 
 void lcd_ili9341_init(void);    // basic initialization;
+
 void lcd_ili9341_set_area(uint16_t column_start, uint16_t page_start, uint16_t column_end, uint16_t page_end);
 void lcd_ili9341_set_orientation(uint16_t MY, uint16_t MX, uint16_t MV, uint16_t RGB_order);
 
@@ -49,6 +50,7 @@ void lcd_ili9341_write_pixel(uint16_t pixel);
 void lcd_ili9341_fill_colour(uint16_t mono_colour);
 
 void lcd_ili9341_disp_inv(int to_invert);   // to invert the display or not?
+
 
 /*------------------------------
 * RGB 16-bit Colour Samples
