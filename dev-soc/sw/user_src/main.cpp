@@ -21,7 +21,17 @@ int main(){
     
     // read lcd display status;
     lcd_ili9341_read_disp_status();
+
+    // read lcd display power mode;
+    lcd_ili9341_read_disp_power_mode();
+
+    // turn it on;    
+    lcd_ili9341_disp_on();
     
+    // to invert the lcd;
+    lcd_ili9341_disp_inv(1);
+
+    /*
     // initialize the lcd;
     debug_str("initializing ... \r\n");
     lcd_ili9341_init();
@@ -34,9 +44,11 @@ int main(){
     debug_str("colour filling ... \r\n");
     lcd_ili9341_fill_colour(RGB565_COLOUR_ORANGE);
 
+    */
     debug_str("done??\r\n");
     while(1){
-        ;
+        lcd_ili9341_read_diagnostic();
+        delay_busy_ms(1000);
         
     }
 }

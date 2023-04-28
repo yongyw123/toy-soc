@@ -78,7 +78,12 @@
 
 
 /* read display status */
-#define LCD_ILI9341_RDDST   0x09
+#define LCD_ILI9341_REG_RDDST   0x09
 
+/* read display power mode */
+#define LCD_ILI9341_REG_RDDPM   0x0A 
+
+/* read display self-diagnostic result */
+#define LCD_ILI9341_REG_RDDSDR   0x0F
 
 #endif // LCD_ILI9341_REG_H

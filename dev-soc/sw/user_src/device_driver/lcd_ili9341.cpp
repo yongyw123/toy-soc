@@ -44,6 +44,17 @@ void lcd_ili9341_disable(void){
 	obj_lcd.disable_chip();
 
 }
+
+void lcd_ili9341_disp_on(void){
+	/*
+	@brief	: turn on the display;
+	@param	: none;
+	@retval	: none;
+	*/
+	obj_lcd.write_command(LCD_ILI9341_REG_DISP_ON);
+	delay_busy_ms(200);
+} 
+
 void lcd_ili9341_read_id(void){
     /*
     @brief  : read LCD ID's
@@ -204,6 +215,62 @@ void lcd_ili9341_read_disp_status(void){
 
 }
 
+void lcd_ili9341_read_disp_power_mode(void){
+	/* 
+	@brief	: read lcd display power mode @ lcd reg 0x0A;
+	@param	: none
+	@retval	: none
+	*/	
+
+	uint8_t rd_data;
+	// setting up;
+    debug_str("\r\nto read the LCD display power mode\r\n");
+    obj_lcd.enable_chip();
+    
+	// issue command;
+	debug_str("LCD ILI9341: reading reg 0x0A\r\n");
+    // there are a few parameters to read;
+    debug_str("Expected Read Values: 0x08\r\n");    
+	obj_lcd.write_command(LCD_ILI9341_REG_RDDPM);
+
+	// dummy read;
+	obj_lcd.read();
+
+	// param 01
+	rd_data = obj_lcd.read();  
+    debug_str(" Param 01 - Read Value: ");
+    debug_hex(rd_data);
+    debug_str("\r\n");
+
+}
+
+void lcd_ili9341_read_diagnostic(void){
+	/*
+	@brief	: read display self diagnostic result @ 0x0F lcd reg;
+	@param	: none
+	@retval	: none
+	*/
+	uint8_t rd_data;
+	// setting up;
+    debug_str("\r\nto read the LCD display self-diagnostic result\r\n");
+    obj_lcd.enable_chip();
+    
+	// issue command;
+	debug_str("LCD ILI9341: reading reg 0x0F\r\n");
+    // there are a few parameters to read;
+    debug_str("Expected Read Values: Not sure\r\n");    
+	obj_lcd.write_command(LCD_ILI9341_REG_RDDSDR);
+
+	// dummy read;
+	obj_lcd.read();
+
+	// param 01
+	rd_data = obj_lcd.read();  
+    debug_str(" Param 01 - Read Value: ");
+    debug_hex(rd_data);
+    debug_str("\r\n");
+
+}
 void lcd_ili9341_init(void){
     /* 
     @brief  	: basic initialization of the lcd ili9341
@@ -508,3 +575,19 @@ void lcd_ili9341_fill_colour(uint16_t mono_colour){
 	obj_lcd.write_command(LCD_ILI9341_OP_END);
 
 }
+
+
+void lcd_ili9341_disp_inv(int to_invert){
+	/*
+	@brief	: to invert the display or not?
+	@param	: to_invert: binary: 1 to invert; 0 otherwise;
+	@retval	: none
+	*/
+
+	// registers of interest: 0x20, 0x21;
+	if(to_invert){
+		obj_lcd.write_command(LCD_ILI9341_REG_DISP_INV_ON);
+	}else{
+		obj_lcd.write_command(LCD_ILI9341_REG_DISP_INV_OFF);
+	}
+}   
