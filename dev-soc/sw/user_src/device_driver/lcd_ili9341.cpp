@@ -68,11 +68,8 @@ void lcd_ili9341_read_id(void){
     uint8_t dummy_data; // dummy read;
 
     // setting up;
-    debug_str("to read the LCD ID's\r\n");
+    debug_str("\r\nto read the LCD ID's\r\n");
     obj_lcd.enable_chip();
-    
-    // hw reset;
-    lcd_ili9341_hw_reset();
     
     /* ------- read id 01; */
     debug_str("LCD ILI9341: reading ID1 @ 0xDA\r\n");
@@ -153,6 +150,57 @@ void lcd_ili9341_read_id(void){
 
     // done;
     debug_str("finish reading the LCD\r\n");
+
+}
+
+void lcd_ili9341_read_disp_status(void){
+	/* 
+	@bried	: read lcd display status @ lcd reg of 0x09;
+	@param	: none
+	@retval	: none
+	*/
+
+	uint8_t rd_data;
+	
+	// setting up;
+    debug_str("\r\nto read the LCD display status \r\n");
+    obj_lcd.enable_chip();
+    
+	// issue command;
+	debug_str("LCD ILI9341: reading reg 0x09\r\n");
+    // there are a few parameters to read;
+    debug_str("Expected Read Values: 0x00, 0x61, 0x00, 0x00\r\n");    
+	obj_lcd.write_command(LCD_ILI9341_RDDST);
+
+	// dummy read;
+	obj_lcd.read();
+
+	// param 01
+	rd_data = obj_lcd.read();  
+    debug_str(" Param 01 - Read Value: ");
+    debug_hex(rd_data);
+    debug_str("\r\n");
+
+    // param 02
+	rd_data = obj_lcd.read();  
+    debug_str(" Param 02 - Read Value: ");
+    debug_hex(rd_data);
+    debug_str("\r\n");
+
+	// param 03
+	rd_data = obj_lcd.read();  
+    debug_str(" Param 03 - Read Value: ");
+    debug_hex(rd_data);
+    debug_str("\r\n");
+
+	// param 04
+	rd_data = obj_lcd.read();  
+    debug_str(" Param 04 - Read Value: ");
+    debug_hex(rd_data);
+    debug_str("\r\n");
+
+   	// done;
+    debug_str("done\r\n");
 
 }
 

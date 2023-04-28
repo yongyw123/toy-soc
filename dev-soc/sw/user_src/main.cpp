@@ -13,9 +13,15 @@ int main(){
     // chip select the lcd;
     lcd_ili9341_enable();
 
+    // hw reset;
+    lcd_ili9341_hw_reset();
+    
     // to read LCD ILI9341 ids;
     lcd_ili9341_read_id();
-
+    
+    // read lcd display status;
+    lcd_ili9341_read_disp_status();
+    
     // initialize the lcd;
     debug_str("initializing ... \r\n");
     lcd_ili9341_init();

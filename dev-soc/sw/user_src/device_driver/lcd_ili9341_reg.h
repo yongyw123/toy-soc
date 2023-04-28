@@ -76,4 +76,9 @@
 // read ic device code;
 #define LCD_ILI9341_RDID4   0xD3  
 
+
+/* read display status */
+#define LCD_ILI9341_RDDST   0x09
+
+
 #endif // LCD_ILI9341_REG_H
