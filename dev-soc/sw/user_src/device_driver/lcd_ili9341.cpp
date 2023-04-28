@@ -75,7 +75,7 @@ void lcd_ili9341_read_id(void){
     debug_str("LCD ILI9341: reading ID1 @ 0xDA\r\n");
     debug_str("Expected Read Value: 0x00\r\n");
     is_data = 0;    // it is a command;
-    obj_lcd.write(is_data, LCD_ILI9341_RDID1);  // issue the command;
+    obj_lcd.write(is_data, LCD_ILI9341_REG_RDID1);  // issue the command;
     
     dummy_data = obj_lcd.read(); // dummy read;
     debug_str("any value read from dummy read?: ");
@@ -91,7 +91,7 @@ void lcd_ili9341_read_id(void){
     debug_str("LCD ILI9341: reading ID2 @ 0xDB\r\n");
     debug_str("Expected Read Value: 0x80\r\n");
     is_data = 0;    // it is a command;
-    obj_lcd.write(is_data, LCD_ILI9341_RDID2);  // issue the command;
+    obj_lcd.write(is_data, LCD_ILI9341_REG_RDID2);  // issue the command;
     
     dummy_data = obj_lcd.read(); // dummy read;
     debug_str("any value read from dummy read?: ");
@@ -107,7 +107,7 @@ void lcd_ili9341_read_id(void){
     debug_str("LCD ILI9341: reading ID3 @ 0xDC\r\n");
     debug_str("Expected Read Value: 0x00\r\n");
     is_data = 0;    // it is a command;
-    obj_lcd.write(is_data, LCD_ILI9341_RDID3);  // issue the command;
+    obj_lcd.write(is_data, LCD_ILI9341_REG_RDID3);  // issue the command;
     
     dummy_data = obj_lcd.read(); // dummy read;
     debug_str("any value read from dummy read?: ");
@@ -125,7 +125,7 @@ void lcd_ili9341_read_id(void){
     // there are a few parameters to read;
     debug_str("Expected Read Values: 0x00, 0x93, 0x41\r\n");
     is_data = 0;    // it is a command;
-    obj_lcd.write(is_data, LCD_ILI9341_RDID4);
+    obj_lcd.write(is_data, LCD_ILI9341_REG_RDID4);
     
     dummy_data = obj_lcd.read(); // dummy read;
     debug_str("any value read from dummy read?: ");
@@ -170,7 +170,7 @@ void lcd_ili9341_read_disp_status(void){
 	debug_str("LCD ILI9341: reading reg 0x09\r\n");
     // there are a few parameters to read;
     debug_str("Expected Read Values: 0x00, 0x61, 0x00, 0x00\r\n");    
-	obj_lcd.write_command(LCD_ILI9341_RDDST);
+	obj_lcd.write_command(LCD_ILI9341_REG_RDDST);
 
 	// dummy read;
 	obj_lcd.read();

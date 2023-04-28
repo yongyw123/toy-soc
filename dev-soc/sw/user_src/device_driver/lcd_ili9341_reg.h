@@ -69,12 +69,12 @@
 
 /* read id */
 // read manufacturer id;
-#define LCD_ILI9341_RDID1   0xDA    // read id 1;
-#define LCD_ILI9341_RDID2   0xDB    // read id 2;
-#define LCD_ILI9341_RDID3   0xDC    // read id 3;
+#define LCD_ILI9341_REG_RDID1   0xDA    // read id 1;
+#define LCD_ILI9341_REG_RDID2   0xDB    // read id 2;
+#define LCD_ILI9341_REG_RDID3   0xDC    // read id 3;
 
 // read ic device code;
-#define LCD_ILI9341_RDID4   0xD3  
+#define LCD_ILI9341_REG_RDID4   0xD3  
 
 
 /* read display status */
