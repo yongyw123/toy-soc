@@ -25,6 +25,7 @@ Purpose: top level directives;
 
 // device drivers;
 #include "cam_ov7670.h"
+#include "lcd_ili9341.h"
 
 
 // c and cpp linkage;
