@@ -23,6 +23,7 @@
 - [x] IP generate Clock management circuit
 - [ ] IP generate SDRAM memory interface for Frame Buffers
 - [x] Camera OV7670 via i2C interface
+- [x] LCD ILI9341 Configuration Interface
 
 ## Extra (Nice to have)
 
