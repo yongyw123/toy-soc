@@ -656,7 +656,10 @@ void lcd_ili9341_sw_driver::fill_colour(uint16_t mono_colour){
 	//uint32_t index;
 	uint32_t i;	// loop index;
 	uint32_t j;	// loop index;
-	//obj_lcd_controller.write_command(LCD_ILI9341_OP_END);
+	
+	// terminate any existing operations;
+	obj_lcd_controller.write_command(LCD_ILI9341_OP_END);
+
 
 	// command the LCD to accept write before writing the pixels;
 	obj_lcd_controller.write_command(LCD_ILI9341_REG_MEM_WRITE);
@@ -667,8 +670,9 @@ void lcd_ili9341_sw_driver::fill_colour(uint16_t mono_colour){
 		for(j = 0; j < LCD_ILI9341_DIMENSION_HIGH_320; j++)
 			write_pixel(mono_colour);
 	}
+	
 	// terminate the memory write operation;
-	//obj_lcd_controller.write_command(LCD_ILI9341_OP_END);
+	obj_lcd_controller.write_command(LCD_ILI9341_OP_END);
 
 }
 
