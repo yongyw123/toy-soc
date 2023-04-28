@@ -230,6 +230,8 @@ module spi_sys
                     clk_cnt_next = clk_cnt_reg + 1;
                 end
             end
+            
+            default: ; // nop;
         endcase
     end
     /* spi clock generator;

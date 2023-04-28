@@ -49,14 +49,15 @@ module mcs_top
         input logic UART_TXD_IN,  // this connects to the system uart rx;
         output logic UART_RXD_OUT, // this connects to the system uart tx;
         
-        // spi;
+        // spi; not used;
         // uses PMOD jumper @ JC;
+        /*
         output logic SPI_SCLK_JC1,
         output logic SPI_MOSI_JC2,
         input logic SPI_MISO_JC3,
         output logic SPI_SS_JC4, // slave select; asset active low;
         output logic SPI_DC_JC7,  // is the current MOSI a data or command for the slave?
-        
+        */
         /* camera ov7670 control 
         1. use i2c protocol;
         2. require a clock driver of 24 MHz (to drive the camera itself);
@@ -69,17 +70,33 @@ module mcs_top
         
         // output clocks @ JA jumpers;
         output CLKOUT_24M_JA03,
-        output CLKOUT_12M_JA04,
         
-        // hw reset;
-        inout tri GPIO_CAM_OV7670_RESETN_JA07     // configure a pmod jumper as gpio; 
+        /*
+        LCD ili9341
+        uses PMOD jumpers @ JC and JD
+        */   
+        // control pins;
+        output logic LCD_CSX_JD01,     // chip select;
+        output logic LCD_DCX_JD02,     // data or command; LOW for command;          
+        output logic LCD_WRX_JD03,     //  to drive the lcd for write op;
+        output logic LCD_RDX_JD04,     // to drive the lcd for read op;
         
+        // data bus; shared between the host and the lcd;
+        inout tri[7:0] LCD_DATA_JC,
+        
+        /* hw reset pins
+        // software controlled;
+        // configure a pmod jumper as gpio;
+        */
+        inout tri GPIO_CAM_OV7670_RESETN_JA04,  // for camera ov7670;      
+        inout tri GPIO_LCD_ILI9341_RSTN_JD07   // for lcd ili9341;
         
     );
     
     
     // general;
     logic reset_sys;    // to invert the input reset;
+    logic reset_clk;    // reset mmcm clock;
     
     // mcs io bus signals; these are fixed;
     logic io_addr_strobe;   // output wire IO_addr_strobe
@@ -93,26 +110,53 @@ module mcs_top
     
     // user-bus signals after bridging;
     logic user_mmio_cs;
+    logic user_video_cs;
     logic user_wr;
     logic user_rd;
     logic [31:0] user_wr_data;
     logic [31:0] user_rd_data;
     logic [`BUS_USER_SIZE_G-1:0] user_addr;
     
+    // for multiplexing the read data from mmio or video system;
+    logic [31:0] user_rd_data_mmio;
+    logic [31:0] user_rd_data_video;
+    
+    // for ip-generated mmcm clock;
+   logic mmcm_clk_locked;   // whether the clock has stabilized or not?
+    
     // conform the signals;
     /* ?? to do ??, need to debounce this reset button; */
-    assign reset_sys = !CPU_RESETN;    // inverted since button is "active LOW";
-    
+    // inverted since cpu reset button is "active LOW";
+    // locked=HIGH means clock has stabilized;
+    assign reset_sys = ~CPU_RESETN || ~mmcm_clk_locked;    
+    assign reset_clk = ~CPU_RESETN;
     /* -------------------
     instantiation;
+    0. clock unit   : ip-generated MMCM (mixed mode clock manager);
     1. cpu_unit     : ip-generated microblaze mcs
     2. bridge unit  : bridge between microblaze io bus and user bus;
     3. mmio_unit    : mmio system (where all the io cores reside);
-    4. clock_unit   : ip-generated MMCM (mixed mode clock manager);
+    4. video_unit   : video system; 
     -----------------*/
     
+    // ip-generated clock management circuit;
+    clk_wiz_0 clock_unit
+   (
+    // Clock out ports
+    .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M: for camera ov7670
+    
+    // Status and control signals
+    .reset(reset_clk),          // input reset
+    //.reset(0),      // allow free running? bad idea?
+    .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
+   
+   // Clock in ports
+    .clk_in1(clk) // input clk_in1: 100MHz;
+   );      
+
     // cpu
     microblaze_mcs_cpu cpu_unit(
+      //.Clk(clkout_100M),                          // input wire Clk
       .Clk(clk),                          // input wire Clk
       .Reset(reset_sys),                      // input wire Reset
       .IO_addr_strobe(io_addr_strobe),    // output wire IO_addr_strobe
@@ -126,11 +170,35 @@ module mcs_top
     );
 
     // bridge;
-    mcs_bus_bridge bridge_unit(.mcs_bridge_base_addr(`BUS_MICROBLAZE_IO_BASE_ADDR_G), .*);
+    mcs_bus_bridge bridge_unit
+    (.mcs_bridge_base_addr(`BUS_MICROBLAZE_IO_BASE_ADDR_G),
+    // microblaze address space;
+    .io_addr_strobe(io_addr_strobe),
+    .io_read_strobe(io_read_strobe),
+    .io_write_strobe(io_write_strobe),
+    .io_byte_enable(io_byte_enable),
+    .io_address(io_address),
+    .io_write_data(io_write_data),
+    .io_read_data(io_read_data),
+    .io_ready(io_ready),
+    
+    // on the other sie of the bridge: user-own address space
+    .user_mmio_cs(user_mmio_cs),
+    .user_video_cs(user_video_cs),
+    .user_wr(user_wr),
+    .user_rd(user_rd),
+    .user_addr(user_addr),
+    .user_wr_data(user_wr_data),
+    .user_rd_data(user_rd_data)
+    );
+    
+    
+    // multiplexing read data between mmio and video system;
+    // user_mmio_cs and user_video_cs should be mutually exclusive;
+    assign user_rd_data = (user_mmio_cs) ? user_rd_data_mmio : user_rd_data_video;
     
     // mmio system;
     mmio_sys 
-    
     #(.SW_NUM(16), 
     .LED_NUM(16),
     
@@ -144,11 +212,12 @@ module mcs_top
     
     /* for camera ov7670 */
     .I2C_DATA_BIT(8),   // for camera control;
-    .GPIO_PORT_NUM(1)   // for camera hw reset;
+    .GPIO_PORT_NUM(2)   // for camera, LCD hw resets;
     )
-     
+    
     mmio_unit
     (
+        //.clk(clkout_100M),
         .clk(clk),
         .reset(reset_sys),
         .mmio_addr(user_addr),
@@ -156,7 +225,8 @@ module mcs_top
         .mmio_wr(user_wr),
         .mmio_rd(user_rd),
         .mmio_wr_data(user_wr_data),
-        .mmio_rd_data(user_rd_data),
+        //.mmio_rd_data(user_rd_data),
+        .mmio_rd_data(user_rd_data_mmio),
         .sw(SW),
         .led(LED),
         
@@ -164,12 +234,19 @@ module mcs_top
         .uart_tx(UART_RXD_OUT), 
         .uart_rx(UART_TXD_IN),
         
-        // spi;
+        // spi; not used;
+        .spi_sclk(),
+        .spi_mosi(),
+        .spi_miso(),
+        .spi_ss_n(),
+        .spi_data_or_command(),
+        /*
         .spi_sclk(SPI_SCLK_JC1),
         .spi_mosi(SPI_MOSI_JC2),
         .spi_miso(SPI_MISO_JC3),
         .spi_ss_n(SPI_SS_JC4),
         .spi_data_or_command(SPI_DC_JC7),
+        */
         
         /* 
         i2c; 
@@ -177,32 +254,48 @@ module mcs_top
         */        
         .i2c_scl(I2C_SCL_JA01),
         .i2c_sda(I2C_SDA_JA02),
-        .gpio(GPIO_CAM_OV7670_RESETN_JA07)
+        
+        /* hw reset pins;
+        * 1. camera : OV7670;
+        * 2. LCD    : ILI9341;
+        */
+        .gpio({GPIO_LCD_ILI9341_RSTN_JD07 ,GPIO_CAM_OV7670_RESETN_JA04})
         
     );
     
+    // video system;
+    video_sys 
+    #(
+    .BITS_PER_PIXEL(16),
+    .LCD_DISPLAY_DATA_WIDTH(8),
+    .FIFO_LCD_ADDR_WIDTH(5)
+    )
+    video_unit
+    (
+        // general;
+        .clk_sys(clk),    // 100 MHz;
+        .reset(reset_sys),  // async;
+        
+        .video_cs(user_video_cs),        // chip select for mmio system;
+        .video_wr(user_wr),             // write enable;
+        .video_rd(user_rd),             // read enable;
+        .video_addr(user_addr),       // addr to decode for video core address and its register address;
+        .video_wr_data(user_wr_data),   // 32-bit;
+        //.video_rd_data(user_rd_data??)  // 32-bit;
+        .video_rd_data(user_rd_data_video),
+        
+        /* --------- HW pin mapping (by the constraint file) ------------*/
+        /* LCD display (ILI9341); */
+        .lcd_drive_csx(LCD_CSX_JD01),     // chip select;
+        .lcd_drive_dcx(LCD_DCX_JD02),     // data or command; LOW for command;          
+        .lcd_drive_wrx(LCD_WRX_JD03),     //  to drive the lcd for write op;
+        .lcd_drive_rdx(LCD_RDX_JD04),     // to drive the lcd for read op;
+        
+        // this is shared between the host and the lcd;
+        .lcd_dinout(LCD_DATA_JC)
+    );
     
-    clk_wiz_0 clock_unit
-   (
-    // Clock out ports
-    .clkout_12M(CLKOUT_12M_JA04),     // output clkout_12M
-    .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M
     
-    // Status and control signals
-    .reset(reset), // input reset
-    
-    // to turn off the clock for power saving;
-    // not used for now;
-    .power_down(),   // input power_down
-    
-    // assertion of locked here means that the output clock
-    // is stable; ready for use?
-    // LOCKED signal of MMCM will go LOW if the input clock of MMCM is unavailable?
-    // not used for now;
-    .locked(),       // output locked
-   // Clock in ports
-    .clk_in1(clk));      // system clock at 100Mhz;
-
 endmodule
 
 `endif // _MCS_TOP_SV;

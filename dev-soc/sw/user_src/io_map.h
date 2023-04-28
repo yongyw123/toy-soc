@@ -43,27 +43,58 @@ extern "C" {
 * Note on Address Space
 *-------------------------------------------
 1. Microblaze MCS bus address is 32-bit-byte-addressable
-2. hwoever, user-space only uses 24-bit-byte-addressable;
-3. on word alignment, this is 22-bit-word-addressable;
-4. As of now, 24-bit-bute address space is intended
-    to host one general MMIO system and at least one 
-    specialized system;
-    where MMIO system includes core such as
+2. hwoever, user-space only uses 26-bit-byte-addressable;
+3. on word alignment, this is 24-bit-word-addressable;
+4. As of now, 26-bit-byte address space is intended
+    to host one general MMIO system and a video subsystem;
+    
+    where:
+    
+    MMIO system includes core such as
     system timer, GPIO, SPI, I2C etc;
     and the other specialized system is for future
     extensibility;
+    
+    video subystem is to stream a camera to display;
 
-5. 21-bit-word-addressable is allocated for user-systems;
-6. for now to distinguish between different spaces (systems)
-    bit-23 is used;
-    LOW for MMIO system;
-    HIGH otherwise;
-7. if there are other systems integrated in the future;
+5. 23-bit-word-addressable usable memory is allocated for user-systems;
+
+6. to distinguish between the two systems, the 26th bit of the 26-bit-byte
+    addressable space is used as the select bit low for mmio; high for video;
+    
+7. mmio system;
+    1. it has 64 cores (2^6);
+    2. each core has 32 registers of 32-bit wide; (2^5);
+
+8. video system:
+    0. it has 8 video cores (2^3);
+    1. a pixel occupies 16-bit;
+    2. each core has 8 (2^3) internal registers for configuration purposes;
+    so, we have each core uses 16+3 = 19 bit space, summarized below;
+    1. 
+    1. it has 8 cores (2^3);
+    2. each core has 2^19 word;
+    
+9. if there are other systems integrated in the future;
     more bits will be allocated for distinguishing purposes;
+    
+summary of the word-addressable memory;        
+mmio system:    0xxx_xxxx_xxxx_xsss_sssr_rrrr
+video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
+
+* x represents dont-care (to accommodate frame buffer?)
+* s represents mmio core;
+* r represents mmio or video core internal registers;
+* v represents video core;
+* a represents video space of each core; where this space is used for various purposes;
+*       such as to store i=the 16-bit pixel
 */
 #define BUS_MICROBLAZE_SIZE_G           32
-#define BUS_USER_SIZE_G                 21  // as above; (word aligned);
-#define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // as above, to distinguish two systems;
+//#define BUS_USER_SIZE_G                 21  // as above; (word aligned);
+//#define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // the 24-bit; as above, to distinguish two systems;
+
+#define BUS_USER_SIZE_G                 23  // as above; (word aligned);
+#define BUS_SYSTEM_SELECT_BIT_INDEX_G   25  // the 24-bit; as above, to distinguish two systems;
 
 // IO based address provided by microblaze MSC, as above;
 #define BUS_MICROBLAZE_IO_BASE_ADDR_G 0xC0000000
@@ -289,6 +320,120 @@ Register IO access:
 #define S6_I2C_REG_READ_BIT_POS_READY   9
 
 #define S6_I2C_REG_WRITE_BIT_POS_CMD_OFFSET 8   
+
+/*----------------------------------------------------
+video address space;
+1. 2^3 = 8 video cores;
+2. each core has 19-bit address space;
+    where this 19-bit is used for internal register
+    and to store 16-bit pixel data;
+    
+summary:
+video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
+
+* x represents dont-care (to accommodate frame buffer?)
+* v represents video core;
+* r represents video core internal registers;
+* a represents video space of each core; where this space is used for various purposes;
+*       such as to store i=the 16-bit pixel
+----------------------------------------------------*/
+#define VIDEO_CORE_ADDR_SIZE_G       3 
+#define VIDEO_CORE_TOTAL_G           8 // 2**VIDEO_CORE_ADDR_SIZE_G;
+#define VIDEO_REG_ADDR_BIT_SIZE_G   19  // each video core has 19-bit address space allocated;
+
+
+/*----------------------------------------------------
+* video modules/cores shall be sloted in the video system;
+----------------------------------------------------*/  
+#define V0_DISP_LCD    0   // lcd ILI9341 display via mcu 8080 seris protocol;
+
+/**************************************************************
+* V0_DISP_LCD
+--------------------
+this core wraps this module: LCD display controller 8080;
+this is for the ILI9341 LCD display via mcu 8080 (protocol) interface;
+
+Register Map
+1. register 0 (offset 0): read register 
+2. register 1 (offset 1): program write clock period
+3. register 2 (offset 2): program read clock period;
+4. register 3 (offset 3): write register;
+5. register 4 (offset 4): stream control register;
+6. register 5 (offset 5): chip select (CSX) register
+7. register 6 (offset 6): data or command (DCX) register
+
+Register Definition:
+1. register 0: status and read data register
+        bit[7:0]    : data read from the lcd;
+        bit[8]      : ready flag;  // the lcd controller is idle
+                        1: ready;
+                        0: not ready;
+        bit[9]      : done flag;   // [optional ??] when the lcd just finishes reading or writing;
+                        1: done;
+                        0: not done;
+        
+2. register 1: program the write clock period;
+        bit[15:0] defines the clock counter mod for LOW WRX period;
+        bit[31:16] defines the clock counter mod for HIGH WRX period;
+
+2. register 2: program the read clock period;
+        bit[15:0] defines the clock counter mod for LOW RDX period;
+        bit[31:16] defines the clock counter mod for HIGH RDX period;
+
+3. register 3: write data and data mode;
+        bit[7:0]    : data to write to the lcd;
+        bit[9:8]  : to store user commands;
+        
+4. register 4: stream control register
+            there are two flows:
+            flow one is from thh processor (hence SW app/driver);
+            flow two is from other video source stream such as the camera;
+            flow two will be automatically completed through a feedback loop
+            via handshaking mechanism without any user/processor intervention
+            until this stream control is updated again;
+             
+        bit[0]: 
+            1 for stream flow;
+            0 for processor flow; 
+
+5. register 5: chip select;
+            this is probably not necessary;
+            since this could be done using general purpose pin;
+            and emulated through SW;
+            bit[0]  
+                0: chip deselect;
+                1: chip select
+6. register 6: data or command (DCX);
+            bit[0] : is the data to write a DATA or a COMMAND for the LCD?
+                0 for data;
+                1 for command;
+    
+Register IO access:
+1. register 0: read only;
+2. register 1: write only;
+3. register 2: write only;
+4. register 3: write only;
+5. register 4: write only;
+6. register 5: write only;
+7. register 6: write only;
+******************************************************************/
+
+// register offset;
+#define V0_DISP_LCD_REG_RD_DATA_OFFSET      0   // 000
+#define V0_DISP_LCD_REG_WR_CLOCKMOD_OFFSET  1   // 001
+#define V0_DISP_LCD_REG_RD_CLOCKMOD_OFFSET  2   // 010
+#define V0_DISP_LCD_REG_WR_DATA_OFFSET      3   // 011
+#define V0_DISP_LCD_REG_STREAM_CTRL_OFFSET  4   // 100
+#define V0_DISP_LCD_REG_CSX_OFFSET          5   // 101
+#define V0_DISP_LCD_REG_DCX_OFFSET          6   // 110
+
+// bit position;
+#define V0_DISP_LCD_REG_STATUS_BIT_POS_READY  8  
+#define V0_DISP_LCD_REG_STATUS_BIT_POS_DONE   9
+
+#define V0_DISP_LCD_REG_CSX_BIT_POS           0 // chip select;
+
+#define V0_DISP_LCD_REG_DCX_BIT_POS           0 // dcx;
 
 
 #ifdef __cpluscplus

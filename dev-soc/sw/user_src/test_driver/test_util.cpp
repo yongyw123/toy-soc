@@ -415,3 +415,104 @@ void test_spi_device_lcd_ili9341(core_spi *spi_obj){
 
 }
 
+
+void test_video_core_lcd_display(video_core_lcd_display *lcd_obj){
+    /*
+    @brief  : to test video core: lcd displat
+    @param  : lcd_obj - pointer to an instantiated class
+    retval  : none
+    What to Test:
+        0. write/read clock setting;
+        1. chip select and deselect;
+        2. data-or-command signal;
+        3. write strobe (WRX signal);
+        4. read strobe (RDX signa);
+  
+    Test Method:
+        1. use logic analyser;
+    Test limitation: What could be tested;
+        1. data is 8-bit but logic analyser could only accommodate 8 signals;
+        2. read strobe (RDX) could be tested 
+        (but the read data is meaningless without communicating with an actual device)
+    */
+   /* signal declare */
+   int is_data;     // for DCX;
+   uint8_t data;    // for write;
+   int enable_cpu_control; // for stream control;
+   
+   // for clock counter setting;
+    int wrx_l;
+    int wrx_h;
+    int rdx_l;
+    int rdx_h;
+
+   // stream control; cpu;
+   // for non-cpu control; it requires different setup;
+   enable_cpu_control = 1;
+   lcd_obj->set_stream(enable_cpu_control);
+
+   /* ----clock counter modulus; */
+   // take note that logic analyser max sampling rate is 24MHz;
+   // so, allows the these write/read clock cycles to be longer;
+   
+   // write;
+   wrx_l = 10000;   // low period of 100us
+   wrx_h = 9000;   // high period of  90us incl the ready signal
+   
+   // read;
+   rdx_l = 20000;   // low period of 200us ;
+   rdx_h = 30000;   // high period of 300us incl the ready signal
+   
+   lcd_obj->set_clockmod(wrx_l, wrx_h, rdx_l, rdx_h);
+    
+   /* ----test chip select */
+   lcd_obj->enable_chip();
+   delay_busy_ms(1);
+   lcd_obj->disable_chip();
+   delay_busy_ms(10);
+   lcd_obj->enable_chip();
+   delay_busy_ms(1);
+
+   /* ----test write with command */
+   for(int i = 0; i < 4; i++){
+        is_data = 0; // it is a command;
+        data = 0xAA; // 0b1010_1010;
+        lcd_obj->write(is_data, data);
+   }
+    delay_busy_ms(1);
+
+    /* ----test write with non-command */
+    for(int i = 0; i < 4; i++){
+        is_data = 1; // it is a data;
+        data = 0x55; // 0b0101_0101;
+        lcd_obj->write(is_data, data);
+        
+    }
+    delay_busy_ms(1);
+
+   /* ----test read */
+   for(int i = 0; i < 4; i++){
+      lcd_obj->read();        
+    }
+    delay_busy_ms(1);
+}   
+
+
+void test_HW_reset_pins(void){
+    /*---------------------------------
+    * HW Reset Pins controlled via SW;
+    * all reset pins use GPIO core;
+    * up to the SW to configure the core
+    * for individiual pin;
+    ---------------------------------*/
+
+    // camera ov7670;
+    // PIN @ JA04;
+    ov7670_hw_reset();
+    
+    // lcd ili9341;
+    // PIN @ JD07;
+    lcd_ili9341_hw_reset();
+
+    delay_busy_ms(10);
+}

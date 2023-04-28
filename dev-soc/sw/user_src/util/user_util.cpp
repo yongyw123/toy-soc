@@ -1,8 +1,8 @@
 #include "user_util.h"
 
 /* instantiate class; */
-core_timer sys_timer(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S0_SYS_TIMER));
-core_uart  sys_uart(GET_IO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S1_UART_DEBUG));
+core_timer sys_timer(GET_MMIO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S0_SYS_TIMER));
+core_uart  sys_uart(GET_MMIO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S1_UART_DEBUG));
 
 void delay_busy_ms(uint64_t ms){
     /*

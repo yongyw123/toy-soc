@@ -9,6 +9,7 @@
 #include "core_spi.h"
 #include "core_i2c_master.h"
 #include "cam_ov7670_reg.h"
+#include "device_directive.h"
 
 
 /* ------------------------------------------------
@@ -25,7 +26,7 @@ extern "C" {
 /*-------------------------------
 * constants 
 -------------------------------*/
-#define OV7670_HW_RSTN_PIN_JA07     0 // which gpio port index used for camera hw reset;
+
 #define OV7670_OUTPUT_FORMAT_RGB565 0 // set the camera output to RGB565
 #define OV7670_OUTPUT_FORMAT_YUV422 1 // set the camera output to YUV422
 

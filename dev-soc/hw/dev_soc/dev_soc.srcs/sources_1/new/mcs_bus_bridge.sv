@@ -45,8 +45,9 @@ module mcs_bus_bridge
         output logic [31:0] io_read_data,
         output logic io_ready,              // for handshaking;
               
-        /* on the other side of the bridge; user-own bus; */
+        /* on the other side of the bridge; user-own address space; */
         output logic user_mmio_cs,  // chip select for MMIO system;
+        output logic user_video_cs, // chip select for the video system;
         output logic user_wr,      
         output logic user_rd,
         output logic [`BUS_USER_SIZE_G-1:0] user_addr,      // memory address for user system such as MMIO;
@@ -66,9 +67,10 @@ module mcs_bus_bridge
     // only compare the MSB 8-bit of the address; 
     // this should be sufficient to ensure uniqueness?
     // since other bits are used for other identification purposes;
-    assign bridge_en = (io_address[31:24] == mcs_bridge_base_addr[31:24]);
-    
+    assign bridge_en = (io_address[31:26] == mcs_bridge_base_addr[31:26]);
     assign user_mmio_cs = (bridge_en && (io_address[`BUS_SYSTEM_SELECT_BIT_INDEX_G] == 0));
+    assign user_video_cs = (bridge_en && (io_address[`BUS_SYSTEM_SELECT_BIT_INDEX_G] == 1));
+    
     assign user_addr = addr_word_align[`BUS_USER_SIZE_G-1:0];   
     
     //> signal mapping;
