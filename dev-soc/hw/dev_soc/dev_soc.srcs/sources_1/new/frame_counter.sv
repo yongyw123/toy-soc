@@ -164,21 +164,21 @@ module frame_counter
         // default;
         pixel_sink = pixel_src[3:0]; 
         
-        // the first byte of the same 16-bit pixel;
+        // unpack the MSB for the first byte to send;
         if(unpack_pointer_reg == 0) begin
-            pixel_sink = pixel_src[3:0];
+            pixel_sink = pixel_src[15:8];
         end
         
-        // move on the second byte of the same pixel;
+        // move on to the next byte of the same pixel;
         else if(unpack_pointer_reg == 1) begin
-            pixel_sink = pixel_src[7:4];
+            pixel_sink = pixel_src[7:0];
         end                  
    end
       
    /* output; */
    // interface with the pixel source;
-   assign x_coor = x_reg;
-   assign y_coor = y_reg;
+   assign xcoor = x_reg;
+   assign ycoor = y_reg;
    
    // status;
    assign frame_start = ((x_reg == 0) && (y_reg == 0));
