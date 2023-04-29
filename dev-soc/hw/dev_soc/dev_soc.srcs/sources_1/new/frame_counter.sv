@@ -62,6 +62,9 @@ module frame_counter
         // command from the control centre to start the counter;
         input logic cmd_start,         
         
+        // synchronous clear the counter for convenience;
+        input logic sync_clr,
+        
         // status;
         output logic frame_start,
         output logic frame_end,
@@ -93,6 +96,13 @@ module frame_counter
             y_reg <= 0;                 
             unpack_pointer_reg <= 0;                  
         end
+        
+        else if(sync_clr) begin
+            x_reg <= 0;
+            y_reg <= 0;                 
+            unpack_pointer_reg <= 0;
+        end
+        
         else begin
             x_reg <= x_next;
             y_reg <= y_next;                
