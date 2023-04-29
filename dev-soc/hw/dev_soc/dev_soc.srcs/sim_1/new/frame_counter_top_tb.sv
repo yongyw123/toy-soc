@@ -28,8 +28,8 @@ module frame_counter_top_tb();
     
     /* constants */
     //  no need to go through the actual LCD dimension: 240 x 320;
-    localparam LCD_WIDTH = 7;
-    localparam LCD_HEIGHT = 3;
+    localparam LCD_WIDTH = 3;
+    localparam LCD_HEIGHT = 1;
    
     // pixel width;
     localparam SRC_BITS_PER_PIXEL = 16;    // coming from the source;
@@ -57,6 +57,11 @@ module frame_counter_top_tb();
     logic frame_sink_ready;       // sink is ready to accept new pixel; input;
     logic [SINK_BITS_PER_PIXEL-1:0] pixel_sink; // output;
 
+    /* fifo arguments */
+    logic [SINK_BITS_PER_PIXEL-1:0] fifo_sink_data;
+    logic fifo_sink_valid;
+    logic fifo_sink_ready;
+    
     /* simulate a pixel generation module driven by the uut */
     always_comb begin
         // have the upper byte different than the lower byte;
@@ -96,9 +101,9 @@ module frame_counter_top_tb();
     .src_ready(frame_sink_ready), 
     
     // not used;
-    .sink_data(),
-    .sink_valid(),
-    .sink_ready(0)
+    .sink_data(fifo_sink_data),
+    .sink_valid(fifo_sink_valid),
+    .sink_ready(fifo_sink_ready)
     );
     
     /* simulate clk */
@@ -110,9 +115,13 @@ module frame_counter_top_tb();
            #(T/2);
         end
     
-     /* reset pulse */
+     /* reset pulse and value initialization */
      initial
         begin
+           // initialize other value;
+           fifo_sink_ready = 1'b0;
+           cmd_start = 1'b0;
+           
             reset = 1'b1;
             #(T/2);
             reset = 1'b0;
@@ -122,7 +131,7 @@ module frame_counter_top_tb();
     
     /* monitoring */
     initial begin
-        $monitor("time: %t, cmd_start: %0b, frame_start: %0b, frame_end: %0b, pixel_src: %16B, xcoor: %d, ycoor: %d, sink_valid: %0b, sink_ready: %0b, pixel_sink: %8B, uut.xreg: %d, uut.yreg: %d",
+        $monitor("time: %t, cmd_start: %0b, frame_start: %0b, frame_end: %0b, pixel_src: %16B, xcoor: %d, ycoor: %d, sink_valid: %0b, sink_ready: %0b, pixel_sink: %8B, uut.xreg: %d, uut.yreg: %d, fifo_sink_data: %8B, fifo_sink_valid: %0b, fifo_sink_ready: %0b",
         $time,
         cmd_start,
         frame_start,
@@ -134,7 +143,10 @@ module frame_counter_top_tb();
         frame_sink_ready,
         pixel_sink,
         uut.x_reg,
-        uut.y_reg);
+        uut.y_reg,
+        fifo_sink_data,
+        fifo_sink_valid,
+        fifo_sink_ready);
           
     
     end
