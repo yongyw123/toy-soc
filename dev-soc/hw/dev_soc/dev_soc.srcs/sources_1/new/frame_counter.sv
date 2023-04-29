@@ -37,9 +37,9 @@ assumption + construction:
 module frame_counter
     #(parameter 
         // lcd dimension;  
-        /*assumption;
-        this assumes that the LCD scanning direction
-        is width x height;
+        /* assumption;
+            this assumes that the LCD scanning direction
+            is width x height;
         
         otherwise; the LCD display will display gibberish; 
         */
@@ -59,8 +59,8 @@ module frame_counter
         input logic reset,      // asynchronous reset;
         
         /* general interface */
-        input logic increment,
-        input logic sync_clr,   // synchrouse clear;
+        // command from the control centre to start the counter;
+        input logic cmd_start,         
         
         // status;
         output logic frame_start,
@@ -74,37 +74,40 @@ module frame_counter
                 
         /* interface with the sink; */
         output logic sink_valid,    // signal to the sink that there is output;
-        input logic sink_read,       // sink is ready to accept new pixel;
+        input logic sink_ready,       // sink is ready to accept new pixel;
         output logic [SINK_BITS_PER_PIXEL-1:0] pixel_sink
-        
     );
     
     // signal;
     logic [COUNTER_WIDTH:0] x_reg, x_next;
-    logic [COUNTER_WIDTH:0] y_reg, y_next;
+    logic [COUNTER_WIDTH:0] y_reg, y_next;        
+    logic [1:0] unpack_pointer_reg, unpack_pointer_next;    
+    
+    // enabler;
+    logic increment_counter;
     
     // register;
     always_ff @(posedge clk, posedge reset)
         if(reset) begin
             x_reg <= 0;
-            y_reg <= 0;            
-        end
-        // synchronous clear;
-        else if(sync_clr) begin
-            x_reg <= 0;
-            y_reg <= 0;
+            y_reg <= 0;                 
+            unpack_pointer_reg <= 0;                  
         end
         else begin
             x_reg <= x_next;
-            y_reg <= y_next;     
+            y_reg <= y_next;                
+            unpack_pointer_reg <= unpack_pointer_next;             
         end
    
-   // counter logic;
+   // counter next state logic;
    always_comb begin
+        // default;
+        x_next = x_reg;
+        y_next = y_reg;
         /* ----------------
         * x-coor;
         ------------------*/
-        if(increment) begin
+        if(increment_counter) begin
             // reach the boundary;
             // wrap around;
             if(x_reg == (LCD_WIDTH -1))
@@ -112,29 +115,66 @@ module frame_counter
             else
                 x_next = x_reg + 1; 
         end
-        // no increment? remain as it is;
-        else begin
-            x_next = x_reg;            
-        end
+        
         /* ----------------
         * y-coor;
         ------------------*/
-        if(increment) begin
+        // only move to the next y-line after previous x-column is complete;
+        if(increment_counter && (x_reg == (LCD_WIDTH - 1))) begin
             // reach the boundary;
             // wrap around;
             if(y_reg == (LCD_HEIGHT -1))
                 y_next = 0;
             else
                 y_next = y_reg + 1; 
+        end        
+   end
+   
+   // next state logic on when to enable the counter;
+   always_comb begin
+        // default;
+        unpack_pointer_next = unpack_pointer_reg;
+        increment_counter = 1'b0; 
+        sink_valid = 1'b0;
+        
+        // the first byte of the same 16-bit pixel;
+        if(unpack_pointer_reg == 0) begin            
+            // if the sink could still accept more data;
+            if(cmd_start && sink_ready) begin
+                sink_valid = 1'b1;
+                unpack_pointer_next = unpack_pointer_reg + 1;
+            end                       
         end
-        // no increment? remain as it is;
-        else begin
-            y_next = y_reg;            
+        
+        // move on the second byte of the same pixel;
+        else if(unpack_pointer_reg == 1) begin
+            // if the sink could still accept more data;
+            if(cmd_start && sink_ready) begin
+                sink_valid = 1'b1;
+                unpack_pointer_next = 0;    // reset;
+                
+                // current pixel is done; next pixel;            
+                increment_counter = 1'b1;
+            end
         end
    end
    
+   // unpacking for pixel sink
+   always_comb begin
+        
+        // the first byte of the same 16-bit pixel;
+        if(unpack_pointer_reg == 0) begin
+            pixel_sink = pixel_src[3:0];
+        end
+        
+        // move on the second byte of the same pixel;
+        else if(unpack_pointer_reg == 1) begin
+            pixel_sink = pixel_src[7:4];
+        end                  
+   end
+      
    /* output; */
-   // coordinate drive;
+   // interface with the pixel source;
    assign x_coor = x_reg;
    assign y_coor = y_reg;
    
