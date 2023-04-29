@@ -29,7 +29,7 @@ module frame_counter_top_tb();
     /* constants */
     //  no need to go through the actual LCD dimension: 240 x 320;
     localparam LCD_WIDTH = 3;
-    localparam LCD_HEIGHT = 1;
+    localparam LCD_HEIGHT = 2;
    
     // pixel width;
     localparam SRC_BITS_PER_PIXEL = 16;    // coming from the source;
@@ -40,6 +40,8 @@ module frame_counter_top_tb();
         
     // command from the control centre to start the counter;
     logic cmd_start;          // input;
+    
+    logic sync_clr; // synchronous clear;
     
     // status;
     logic frame_start;   // output
@@ -89,7 +91,7 @@ module frame_counter_top_tb();
    fifo_core_video_lcd_display 
     #(
     .DATA_WIDTH(SINK_BITS_PER_PIXEL),
-    .ADDR_WIDTH(8) // could hold up to 2^3 = 8 data; 
+    .ADDR_WIDTH(4) // could hold up to 2^3 = 8 data; 
     )
     fifo_src
     (
@@ -115,13 +117,9 @@ module frame_counter_top_tb();
            #(T/2);
         end
     
-     /* reset pulse and value initialization */
+     /* reset pulse */
      initial
         begin
-           // initialize other value;
-           fifo_sink_ready = 1'b0;
-           cmd_start = 1'b0;
-           
             reset = 1'b1;
             #(T/2);
             reset = 1'b0;
