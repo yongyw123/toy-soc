@@ -147,26 +147,30 @@ module frame_counter
         increment_counter = 1'b0; 
         sink_valid = 1'b0;
         
-        // the first byte of the same 16-bit pixel;
-        if(unpack_pointer_reg == 0) begin            
-            // if the sink could still accept more data;
-            if(cmd_start && sink_ready) begin
-                sink_valid = 1'b1;
-                unpack_pointer_next = unpack_pointer_reg + 1;
-            end                       
-        end
-        
-        // move on the second byte of the same pixel;
-        else if(unpack_pointer_reg == 1) begin
-            // if the sink could still accept more data;
-            if(cmd_start && sink_ready) begin
-                sink_valid = 1'b1;
-                unpack_pointer_next = 0;    // reset;
-                
-                // current pixel is done; next pixel;            
-                increment_counter = 1'b1;
+        // if sync clear persists;
+        // then no point going through the following;
+        if(!sync_clr) begin
+            // the first byte of the same 16-bit pixel;
+            if(unpack_pointer_reg == 0) begin            
+                // if the sink could still accept more data;
+                if(cmd_start && sink_ready) begin
+                    sink_valid = 1'b1;
+                    unpack_pointer_next = unpack_pointer_reg + 1;
+                end                       
             end
-        end
+            
+            // move on the second byte of the same pixel;
+            else if(unpack_pointer_reg == 1) begin
+                // if the sink could still accept more data;
+                if(cmd_start && sink_ready) begin
+                    sink_valid = 1'b1;
+                    unpack_pointer_next = 0;    // reset;
+                    
+                    // current pixel is done; next pixel;            
+                    increment_counter = 1'b1;
+                end
+            end
+       end
    end
    
    // unpacking for pixel sink
