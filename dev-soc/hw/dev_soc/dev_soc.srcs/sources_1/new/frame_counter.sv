@@ -161,6 +161,8 @@ module frame_counter
    
    // unpacking for pixel sink
    always_comb begin
+        // default;
+        pixel_sink = pixel_src[3:0]; 
         
         // the first byte of the same 16-bit pixel;
         if(unpack_pointer_reg == 0) begin
