@@ -13,6 +13,7 @@
 - [x] SPI interface to control LCD ILI9341
 - [x] i2C interface to control Camera OV7670
 - [x] LCD Display Parallel Interface
+- [ ] Pixel Test HW generation for LCD Display
 - [ ] Digital Camera Interface (DCMI)
 - [ ] Video Streaming System integrating the camera and the LCD.
 - [ ] Some basic DSP block?
