@@ -345,7 +345,7 @@ module core_video_lcd_display
     
     /* only one read register to accommodate all the data;
     so no need to multiple */
-    assign rd_data = {31'b0, lcd_ready_flag, lcd_done_flag, lcd_rd_data};
+    assign rd_data = {29'b0, lcd_ready_flag, lcd_done_flag, lcd_rd_data};
     
     
 endmodule
