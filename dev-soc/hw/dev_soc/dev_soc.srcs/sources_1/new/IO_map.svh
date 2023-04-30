@@ -440,24 +440,32 @@ this core wraps the following modules:
 2. frame_counter();
 
 Register Map
-1. register 0 (offset 0): write register; 
+1. register 0 (offset 0): write register;
+2. register 1 (offset 1): status register; 
 
 Register Definition:
 1. register 0: write register;
         bit[0]  start bit;
         HIGH to start this video core;
-        
+
+2. register 1: status register;
+        bit[0] frame start? active high assertion;
+        bit[1] frame end?   active high assertion;
         
 Register IO access:
 1. register 0: write and read;
+2. register 1: read only;
 ******************************************************************/
 
 // register offset;
-`define V1_DISP_TEST_PATTERN_REG_WR_OFFSET     0
+`define V1_DISP_TEST_PATTERN_REG_WR_OFFSET      0
+`define V1_DISP_TEST_PATTERN_REG_STATUS_OFFSET  1
 
 // bit position;
 `define V1_DISP_TEST_PATTERN_REG_WR_BIT_POS_START 0  
 
+`define V1_DISP_TEST_PATTERN_REG_STATUS_BIT_POS_START   0
+`define V1_DISP_TEST_PATTERN_REG_STATUS_BIT_POS_END     1
 /**************************************************************
 * V2_DISP_SRC_MUX
 -----------------------
