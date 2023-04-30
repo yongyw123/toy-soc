@@ -37,7 +37,8 @@ class video_core_test_pattern_gen{
 
     // field;
     enum{
-        BIT_POS_WR = 0        
+        BIT_POS_WR = 0,
+        
     };
 
     // constanst;
@@ -47,19 +48,25 @@ class video_core_test_pattern_gen{
     };
 
     public:
-        video_core_test_pattern_gen();
+        video_core_test_pattern_gen(uint32_t core_base_addr);
         ~video_core_test_pattern_gen();
 
-        void enable(void);  // enable the pattern generatorl
-        void disable(void); // disable the pattern generator;
+        // enable or disable the pattern generator;
+        void set_state(int usr_sw); 
 
-        int get_state(void);    // is the test pattern enabled or not;
+        // wrapper for the above;
+        void enable(void);  
+        void disable(void); 
+
+        // is the test pattern enabled or not;
+        // for sanity check;
+        int get_state(void);    
 
     private:
         // this video core base address in the user-address space;
         uint32_t base_addr;
 
-        int curr_state;    // keep track of the state: on or off?
+        int pcurr_state;    // keep track of the state: on or off?
 
 };
 
