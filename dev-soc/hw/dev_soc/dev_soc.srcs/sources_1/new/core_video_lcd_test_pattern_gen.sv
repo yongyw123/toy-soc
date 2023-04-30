@@ -101,7 +101,7 @@ module core_video_lcd_test_pattern_gen
     logic [SRC_BITS_PER_PIXEL-1:0] pattern_colour_bar_src;
     logic [COUNTER_WIDTH:0] pattern_xcoor;
     logic [COUNTER_WIDTH:0] pattern_ycoor;
-    logic frame_start_;
+    logic frame_start;
     logic frame_end;
     
     /* interface for the downstream */
@@ -129,11 +129,11 @@ module core_video_lcd_test_pattern_gen
     always_comb begin
         // default;
         rd_data = 32'b0;
-        case({rd_en, addr[0]})         
-            {1'b1, REG_WR_OFFSET} :  
-                rd_data = {31'b0, enable_gen_reg}; 
-            {1'b1, REG_STATUS_OFFSET} :
-                rd_data = {30'b0, frame_end, frame_start};
+        case({rd_en, addr[0]})
+            // state;         
+            2'b10 : rd_data = {31'b0, enable_gen_reg};    
+            // status
+            2'b11 : rd_data = {30'b0, frame_end, frame_start};  
             default: ; // nop
         endcase
     end
