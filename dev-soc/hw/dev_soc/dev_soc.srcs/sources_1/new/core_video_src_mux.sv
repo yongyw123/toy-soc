@@ -36,7 +36,7 @@ Register Map
         bit[2:0] for multiplexing;
         3'b001: test pattern generator;
         3'b010: camera ov7670;
-        3'b100: "gnd" by displaying mono colour (black);
+        3'b100: none;
         
 Register Definition:
 1. register 0: control register;
@@ -149,8 +149,8 @@ module core_video_src_mux
             end
                 
             SEL_NONE: begin
-                stream_out_rgb = {SINK_BITS_PER_PIXEL{1'b0}};   // black pixel;
-                sink_valid     = 1'b1;  // always ready;
+                stream_out_rgb = {SINK_BITS_PER_PIXEL{1'b0}};  // dont care; black pixel;
+                sink_valid     = 1'b0;  // always not valid;
             end
             
             default : ; // nop;
