@@ -86,14 +86,18 @@ module core_video_lcd_test_pattern_gen_top_tb();
         
     /* monitoring */
     initial begin
-        $monitor("time: %t, write: %0b, addr: %3b, wr_data: %d, rgb: %4H, sink_ready: %0b, sink_valid: %0b",
+        $monitor("time: %t, write: %0b, read: %0b, addr: %3b, wr_data: %d, rd_data: %3B, rgb: %4H, sink_ready: %0b, sink_valid: %0b, uut.frame_start: %0b, uut.frame_end: %0b",
         $time,
         write,
+        read,
         addr,
         wr_data,
+        rd_data,
         stream_out_rgb,
         sink_ready,
-        sink_valid);
+        sink_valid,
+        uut.frame_start,
+        uut.frame_end);
             
     end
     
