@@ -28,6 +28,11 @@ extern "C" {
 // gpio core is mainly for HW reset pin for the external devices;
 extern core_gpio obj_gpio;
 
+/*---------------------------
+* instantiate the video core
+* lcd controller;
+--------------------------*/
+extern video_core_lcd_display obj_lcd_controller;
 
 #ifdef __cpluscplus
 } // extern "C";
