@@ -45,8 +45,8 @@ module pixel_gen_colour_bar
         input logic reset,  // async;
         
         // input; 
-        input logic [COUNTER_WIDTH-1:0] xcoor,
-        input logic [COUNTER_WIDTH-1:0] ycoor,
+        input logic [COUNTER_WIDTH:0] xcoor,
+        input logic [COUNTER_WIDTH:0] ycoor,
         
         // output;
         output logic [BITS_PER_PIXEL-1:0] rgb565_out
