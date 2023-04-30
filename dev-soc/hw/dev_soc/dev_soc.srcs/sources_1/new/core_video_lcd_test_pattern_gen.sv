@@ -36,7 +36,7 @@ Register Definition:
         
         
 Register IO access:
-1. register 0: write only;
+1. register 0: write and read;
 ******************************************************************/
 
 
@@ -108,6 +108,9 @@ module core_video_test_pattern_gen
    // decode cpu instruction;
    // there is ony one write registerl and nothing else;
     assign wr_en = write & cs;
+    
+    // cpu read; no need to multiplex; only one reg;
+    assign rd_data = {31'b0, enable_generator};
     
     /*  instantiation; */
     frame_counter
