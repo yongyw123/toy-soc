@@ -71,14 +71,10 @@ module core_video_test_pattern_gen
         input logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    
         output logic [`REG_DATA_WIDTH_G-1:0]  rd_data,
         
-        /* from video upstream */
-        input logic [SINK_BITS_PER_PIXEL-1:0] stream_in_rgb, 
-        
         /* for video downstream */       
         output logic [SINK_BITS_PER_PIXEL-1:0] stream_out_rgb, // 8-bit for the LCD;
         input logic sink_ready, // signal from the lcd fifo;
-        output logic sink_valid // signal to the lcd fifo
-        
+        output logic sink_valid // signal to the lcd fifo       
     );
     
     
@@ -113,7 +109,7 @@ module core_video_test_pattern_gen
    // there is ony one write registerl and nothing else;
     assign wr_en = write & cs;
     
-    // instantiation;
+    /*  instantiation; */
     frame_counter
     #(
         .LCD_WIDTH(LCD_WIDTH),
@@ -122,6 +118,7 @@ module core_video_test_pattern_gen
         .SRC_BITS_PER_PIXEL(SRC_BITS_PER_PIXEL),
         .SINK_BITS_PER_PIXEL(SINK_BITS_PER_PIXEL)
     )
+    frame_counter_unit
     (
         .clk(clk),
         .reset(reset),
@@ -143,7 +140,21 @@ module core_video_test_pattern_gen
         .pixel_sink(pattern_colour_bar_sink)        
     );
     
-    
+    pixel_gen_colour_bar
+    #(
+        .BITS_PER_PIXEL(SRC_BITS_PER_PIXEL),   
+        .COUNTER_WIDTH(COUNTER_WIDTH)
+    )
+    pixel_gen_colour_bar_unit
+    (
+        .clk(clk),
+        .reset(reset),
+        
+        .xcoor(pattern_xcoor),
+        .ycoor(pattern_ycoor),
+        
+        .rgb565_out(pattern_colour_bar_src)
+    );
     
     
 endmodule
