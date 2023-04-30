@@ -65,11 +65,16 @@ module frame_counter_top_tb();
     logic fifo_sink_ready;
     
     /* simulate a pixel generation module driven by the uut */
+    // dummy test pattern colour generator that only outputs a single colour;
+    //pixel_gen_colour_bar src_unit(.*, .rgb565_out(pixel_src));
+    
+    
     always_comb begin
         // have the upper byte different than the lower byte;
         // for testing convenience;
         pixel_src = {(1'b1 + 7'(xcoor)), (8'(xcoor))};     
     end
+    
     
     /* instantiation */
     frame_counter 
