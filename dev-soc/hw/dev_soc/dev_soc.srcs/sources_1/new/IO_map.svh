@@ -436,17 +436,15 @@ Register IO access:
 this core wraps the following modules: 
 1. pixel_gen_colour_bar()
 2. frame_counter();
-3. fifo() 
 
 Register Map
 1. register 0 (offset 0): write register; 
 
 Register Definition:
 1. register 0: write register;
-        bit[0]  control bit;
-        this controls the video source stream for the LCD display;
-        HIGH to enable this test pattern generator;
-        LOW to disable;
+        bit[0]  start bit;
+        HIGH to start this video core;
+        
         
 Register IO access:
 1. register 0: write only;
@@ -455,7 +453,7 @@ Register IO access:
 `define V1_DISP_TEST_PATTERN_OFFSET     0
 
 // bit position;
-`define V1_DISP_TEST_PATTERN_BIT_POS_CTRL 0  
+`define V1_DISP_TEST_PATTERN_BIT_POS_START 0  
 
 
 
