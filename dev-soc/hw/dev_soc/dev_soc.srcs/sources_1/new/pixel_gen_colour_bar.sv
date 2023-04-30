@@ -52,9 +52,8 @@ module pixel_gen_colour_bar
         output logic [BITS_PER_PIXEL-1:0] rgb565_out
     );
     
-    
     always_comb begin
         // dummy value for now;
-        rgb565_out = 16'hD8D0;        
+        rgb565_out = {(1'b1 + 7'(xcoor)), (8'(xcoor))};        
     end
 endmodule
