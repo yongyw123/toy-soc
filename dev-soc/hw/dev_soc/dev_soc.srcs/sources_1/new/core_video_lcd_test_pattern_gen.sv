@@ -82,6 +82,9 @@ module core_video_test_pattern_gen
     // there is only one register and no read register;
     // so this simplifies;
     */
+    // the following is not necessary;
+    localparam REG_WR_OFFSET   = 1'b0;
+    
     // signals;
     logic wr_en;   
     logic enable_generator;
@@ -107,7 +110,8 @@ module core_video_test_pattern_gen
    
    // decode cpu instruction;
    // there is ony one write registerl and nothing else;
-    assign wr_en = write & cs;
+   // note that address decoding is not necessary;
+    assign wr_en = (write && cs && (addr[0] == REG_WR_OFFSET));
     
     // cpu read; no need to multiplex; only one reg;
     assign rd_data = {31'b0, enable_generator};
