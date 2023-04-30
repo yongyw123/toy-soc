@@ -431,6 +431,7 @@ Register IO access:
 `define V0_DISP_LCD_REG_DCX_BIT_POS           0 // dcx;
 
 
+
 /**************************************************************
 * V1_DISP_TEST_PATTERN
 -----------------------
@@ -448,8 +449,9 @@ Register Definition:
         
         
 Register IO access:
-1. register 0: write only;
+1. register 0: write and read;
 ******************************************************************/
+
 // register offset;
 `define V1_DISP_TEST_PATTERN_OFFSET     0
 
