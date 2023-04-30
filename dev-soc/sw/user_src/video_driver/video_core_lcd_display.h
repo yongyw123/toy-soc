@@ -142,6 +142,11 @@ class video_core_lcd_display{
        CMD_RD = ((uint32_t)0x02 << BIT_POS_REG_WR_DATA_CMD_OFFSET)
     };
 
+    enum{
+        ENABLE_CPU_CTRL = 1,    
+        DISABLE_CPU_CTRL = 0    // video stream; 
+    };
+
     public:
         video_core_lcd_display(uint32_t core_base_addr);
         ~video_core_lcd_display();
@@ -149,6 +154,10 @@ class video_core_lcd_display{
         // config;
         void set_clockmod(int usr_wrx_l, int usr_wrx_h, int usr_rdx_l, int usr_rdx_h);
         void set_stream(int set_cpu_control);
+
+        // wrapper for the set_stream;
+        void set_cpu_stream(void);
+        void set_video_stream(void);
 
         // status;
         int is_ready(void);
