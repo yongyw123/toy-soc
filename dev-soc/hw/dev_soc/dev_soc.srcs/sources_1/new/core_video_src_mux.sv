@@ -32,7 +32,7 @@ important note:
 1. all pixel sources (inc camera) are mutually exclusive;
 
 Register Map
-1. register 0 (offset 0): control register; 
+1. register 0 (offset 0): select register; 
         bit[2:0] for multiplexing;
         3'b001: test pattern generator;
         3'b010: camera ov7670;
@@ -44,6 +44,7 @@ Register Definition:
 Register IO access:
 1. register 0: write and readl
 ******************************************************************/
+
 `ifndef CORE_VIDEO_SRC_MUX_SV
 `define CORE_VIDEO_SRC_MUX_SV
 
@@ -96,9 +97,9 @@ module core_video_src_mux
     );
     
     // constants;
-    localparam SEL_TEST = `V2_DISP_SRC_MUX_TEST;
-    localparam SEL_CAM  = `V2_DISP_SRC_MUX_CAM;
-    localparam SEL_NONE = `V2_DISP_SRC_MUX_NONE;
+    localparam SEL_TEST = `V2_DISP_SRC_MUX_REG_SEL_TEST;
+    localparam SEL_CAM  = `V2_DISP_SRC_MUX_REG_SEL_CAM;
+    localparam SEL_NONE = `V2_DISP_SRC_MUX_REG_SEL_NONE;
     
     /// signals;
     logic [2:0] select;
