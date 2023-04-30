@@ -1,5 +1,5 @@
-#ifndef _VIDEO_CORE_SRC_MUX_H
-#define _VIDEO_CORE_SRC_MUX_H
+#ifndef _VIDEO_CORE_TEST_PATTERN_GEN_H
+#define _VIDEO_CORE_TEST_PATTERN_GEN_H
 
 /* ---------------------------------------------
 Purpose : SW drivers for HW module as follows
@@ -84,4 +84,4 @@ extern "C" {
 #endif
 
 
-#endif //_VIDEO_CORE_SRC_MUX_H
+#endif //_VIDEO_CORE_TEST_PATTERN_GEN_H
