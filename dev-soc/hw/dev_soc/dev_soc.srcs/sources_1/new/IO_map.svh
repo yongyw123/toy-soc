@@ -340,6 +340,7 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 ----------------------------------------------------*/  
 `define V0_DISP_LCD             0   // lcd ILI9341 display via mcu 8080 seris protocol;
 `define V1_DISP_TEST_PATTERN    1   // test pattern generator for the lcd;
+`define V2_DISP_SRC_MUX         2   // direct which pixel source to the LCD: test pattern generator or from the camera?
 
 /**************************************************************
 * V0_DISP_LCD
@@ -455,6 +456,34 @@ Register IO access:
 // bit position;
 `define V1_DISP_TEST_PATTERN_BIT_POS_START 0  
 
+/**************************************************************
+* V2_DISP_SRC_MUX
+-----------------------
+
+purpose:
+1. direct which pixel source to the LCD: test pattern generator(s) or from the camera?
+2. allocate 6 pixel sources for future purposes;
+3. in actuality; should be only between the test pattern generators and the camera;
+
+important note:
+1. all pixel sources (inc camera) are mutually exclusive;
+
+Register Map
+1. register 0 (offset 0): control register; 
+        bit[3:0] for multiplexing;
+        
+Register Definition:
+1. register 0: control register;
+        
+Register IO access:
+1. register 0: write and readl
+******************************************************************/
+// register offset;
+`define V2_DISP_SRC_MUX_OFFSET     0
+
+// multiplexing;
+`define V2_DISP_SRC_MUX_TEST     0  // from the test pattern generator;
+`define V2_DISP_SRC_MUX_CAM      1  // from the camera OV7670;
 
 
 `endif //_IO_MAP_SVH
