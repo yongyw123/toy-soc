@@ -147,12 +147,13 @@ module core_video_src_mux
                 camera_ready   = sink_ready;
                 sink_valid     = camera_valid;                    
             end
-    
-            // SEL_NONE
-            default: begin
+                
+            SEL_NONE: begin
                 stream_out_rgb = {SINK_BITS_PER_PIXEL{1'b0}};   // black pixel;
                 sink_valid     = 1'b1;  // always ready;
             end
+            
+            default : ; // nop;
         endcase    
     end
 endmodule

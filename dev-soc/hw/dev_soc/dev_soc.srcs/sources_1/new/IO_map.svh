@@ -473,7 +473,7 @@ Register Map
         bit[2:0] for multiplexing;
         3'b001: test pattern generator;
         3'b010: camera ov7670;
-        3'b100: "gnd" by displaying mono colour (black);
+        3'b100: none;
         
 Register Definition:
 1. register 0: control register;
