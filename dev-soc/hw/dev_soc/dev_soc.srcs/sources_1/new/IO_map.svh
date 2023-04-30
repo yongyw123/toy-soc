@@ -453,10 +453,10 @@ Register IO access:
 ******************************************************************/
 
 // register offset;
-`define V1_DISP_TEST_PATTERN_OFFSET     0
+`define V1_DISP_TEST_PATTERN_REG_WR_OFFSET     0
 
 // bit position;
-`define V1_DISP_TEST_PATTERN_BIT_POS_START 0  
+`define V1_DISP_TEST_PATTERN_REG_WR_BIT_POS_START 0  
 
 /**************************************************************
 * V2_DISP_SRC_MUX
@@ -471,7 +471,7 @@ important note:
 1. all pixel sources (inc camera) are mutually exclusive;
 
 Register Map
-1. register 0 (offset 0): control register; 
+1. register 0 (offset 0): select register; 
         bit[2:0] for multiplexing;
         3'b001: test pattern generator;
         3'b010: camera ov7670;
@@ -484,12 +484,12 @@ Register IO access:
 1. register 0: write and readl
 ******************************************************************/
 // register offset;
-`define V2_DISP_SRC_MUX_OFFSET     0
+`define V2_DISP_SRC_MUX_REG_SEL_OFFSET     0
 
 // multiplexing;
-`define V2_DISP_SRC_MUX_TEST     3'b001  // from the test pattern generator;
-`define V2_DISP_SRC_MUX_CAM      3'b010  // from the camera OV7670;
-`define V2_DISP_SRC_MUX_NONE     3'b100  // nothing by blanking;
+`define V2_DISP_SRC_MUX_REG_SEL_TEST     3'b001  // from the test pattern generator;
+`define V2_DISP_SRC_MUX_REG_SEL_CAM      3'b010  // from the camera OV7670;
+`define V2_DISP_SRC_MUX_REG_SEL_NONE     3'b100  // nothing by blanking;
 
 
 `endif //_IO_MAP_SVH
