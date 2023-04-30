@@ -256,7 +256,7 @@ module video_sys
     /*
      pixel test pattern generator for the LCD display
     */
-    core_video_test_pattern_gen
+    core_video_lcd_test_pattern_gen
     #(
         .LCD_WIDTH(LCD_WIDTH),   
         .LCD_HEIGHT(LCD_HEIGHT), 

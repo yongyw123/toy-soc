@@ -45,7 +45,7 @@ Register IO access:
 
 `include "IO_map.svh"
 
-module core_video_test_pattern_gen
+module core_video_lcd_test_pattern_gen
     #(parameter 
     LCD_WIDTH = 240,   
     LCD_HEIGHT = 320, 
