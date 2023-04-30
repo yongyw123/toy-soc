@@ -113,6 +113,8 @@ module core_video_test_pattern_gen
     assign rd_data = {31'b0, enable_generator};
     
     /*  instantiation; */
+    
+    // interface between the pattern generator and the downstream (lcd);
     frame_counter
     #(
         .LCD_WIDTH(LCD_WIDTH),
@@ -143,6 +145,10 @@ module core_video_test_pattern_gen
         .pixel_sink(pattern_colour_bar_sink)        
     );
     
+    // output;
+    assign stream_out_rgb = pattern_colour_bar_sink;
+    
+    // test generator;
     pixel_gen_colour_bar
     #(
         .BITS_PER_PIXEL(SRC_BITS_PER_PIXEL),   
