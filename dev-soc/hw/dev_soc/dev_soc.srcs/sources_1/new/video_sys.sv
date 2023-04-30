@@ -78,6 +78,24 @@ module video_sys
     localparam VIDEO_REG_BIT_TOTAL = `VIDEO_REG_ADDR_BIT_SIZE_G;    // 19 bit;
     localparam REG_DATA_WIDTH = `REG_DATA_WIDTH_G;  // 32 bit;
   
+    localparam LCD_WIDTH    = 240;
+    localparam LCD_HEIGHT   = 320;
+    
+    // bits per pixel;
+    localparam BPP_16B  = 16;   // 16-bit;   
+    localparam BPP_8B   = 8;    // 8-bit;
+    
+    /* signals between the LCD fifo and the core_video_src_mux unit */
+    logic pixel_src_valid;  // from the mux to the fifo;
+    logic pixel_src_ready;  // from the fifo to the mux;
+    logic [BPP_8B-1:0] pixel_src_data;   // actual data;
+    
+    
+    /* signals for the core_video_test_pattern_gen */
+    logic [BPP_8B-1:0] pattern_pixel_data;   // actual data;
+    logic pattern_valid;
+    logic pattern_ready;
+    
     /* ----- broadcasting arrays; */
     // individual control signals for each core;
     logic [VIDEO_CORE_NUM_TOTAL-1:0] core_ctrl_cs_array; // chip select;
@@ -144,11 +162,12 @@ module video_sys
     .clk(clk_sys),
     .reset(reset),
     
-    // empty for now;
-    .src_data(),     
-    .src_valid(0),
-    .src_ready(),
+    // from the pixel source end;
+    .src_data(pixel_src_data),     
+    .src_valid(pixel_src_valid),
+    .src_ready(pixel_src_ready),
     
+    // for the sink end: LCD display;
     .sink_data(lcd_stream_in_pixel_data),
     .sink_valid(lcd_stream_valid_flag),
     .sink_ready(lcd_stream_ready_flag)
@@ -185,13 +204,97 @@ module video_sys
     );
     
     
+    /* 
+    multiplexer for different HW pixel sources to drive
+    the LCD; (not from the cpu)
+    */
+    core_video_src_mux
+    #(
+        .LCD_WIDTH(LCD_WIDTH),
+        .LCD_HEIGHT(LCD_HEIGHT),
+            
+        // pixel width;
+        .SRC_BITS_PER_PIXEL(BPP_16B),    // from the test pattern generator;
+        .SINK_BITS_PER_PIXEL(BPP_8B)     // LCD only accepts 8-bit in parallel at a time;
+    )
+    video_src_mux_unit
+    (
+        // general;
+        .clk(clk_sys),
+        .reset(reset),
+        
+        // IO interface
+        .cs(core_ctrl_cs_array[`V2_DISP_SRC_MUX]),
+        .write(core_ctrl_wr_array[`V2_DISP_SRC_MUX]),
+        .read(core_ctrl_rd_array[`V2_DISP_SRC_MUX]),
+        .addr(core_addr_reg_array[`V2_DISP_SRC_MUX]),
+        .wr_data(core_data_wr_array[`V2_DISP_SRC_MUX]),
+        .rd_data(core_data_rd_array[`V2_DISP_SRC_MUX]),
+        
+        // specific;
+        /* for downstream */
+        /* for video downstream */       
+        .stream_out_rgb(pixel_src_data), // 8-bit for the LCD;
+        .sink_ready(pixel_src_ready), // signal from the lcd fifo;
+        .sink_valid(pixel_src_valid), // signal to the lcd fifo
+                
+        /* from different upstream pixel sources */
+        // from the test pattern;
+        .pattern_rgb(pattern_pixel_data),  // pixel source;
+        .pattern_ready(pattern_ready), // from lcd fifo to the test pattern generator;
+        .pattern_valid(pattern_valid),  // from the test pattern gen to the lcd fifo;
+        
+        // not constructed yet;
+        // from the camera;
+        .camera_rgb(),   // pixel source;
+        .camera_ready(), // from lcd fifo to the camera;
+        .camera_valid()   // from the camera to the lcd fifo;
+        
+    );
+    
+    
+    /*
+     pixel test pattern generator for the LCD display
+    */
+    core_video_test_pattern_gen
+    #(
+        .LCD_WIDTH(LCD_WIDTH),   
+        .LCD_HEIGHT(LCD_HEIGHT), 
+            
+        // pixel width;
+        .SRC_BITS_PER_PIXEL(BPP_16B),    // from the test pattern generator;
+        .SINK_BITS_PER_PIXEL(BPP_8B),     // LCD only accepts 8-bit in parallel at a time;
+        
+        // counter width from the frame counter
+        .COUNTER_WIDTH(10)          
+    )
+    video_test_pattern_gen_unit    
+    (
+        // general;
+        .clk(clk_sys),
+        .reset(reset),
+        
+        // IO interface
+        .cs(core_ctrl_cs_array[`V1_DISP_TEST_PATTERN]),
+        .write(core_ctrl_wr_array[`V1_DISP_TEST_PATTERN]),
+        .read(core_ctrl_rd_array[`V1_DISP_TEST_PATTERN]),
+        .addr(core_addr_reg_array[`V1_DISP_TEST_PATTERN]),
+        .wr_data(core_data_wr_array[`V1_DISP_TEST_PATTERN]),
+        .rd_data(core_data_rd_array[`V1_DISP_TEST_PATTERN]),        
+        
+        // specific;       
+        .stream_out_rgb(pattern_pixel_data), // 8-bit for the LCD;
+        .sink_ready(pattern_ready), // signal from the lcd fifo;
+        .sink_valid(pattern_valid) // signal to the lcd fifo
+    
+    );
     
     
     /* ground the the read data signals from the unconstructed video cores 
     for vivao synthesis optimization to opt out these unused signals */
     generate
         genvar i;
-            for(i = 1; i < VIDEO_CORE_NUM_TOTAL; i++)
+            for(i = 3; i < VIDEO_CORE_NUM_TOTAL; i++)
             begin
                 // always HIGH ==> idle ==> not signals;
                 assign core_data_rd_array[i] = 32'hFFFF_FFFF;
