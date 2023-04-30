@@ -144,9 +144,11 @@ module video_sys
     .clk(clk_sys),
     .reset(reset),
     
-    .src_data(0), // empty for now;    
+    // empty for now;
+    .src_data(),     
     .src_valid(0),
-    .src_ready(0),
+    .src_ready(),
+    
     .sink_data(lcd_stream_in_pixel_data),
     .sink_valid(lcd_stream_valid_flag),
     .sink_ready(lcd_stream_ready_flag)
