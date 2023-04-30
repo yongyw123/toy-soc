@@ -470,7 +470,10 @@ important note:
 
 Register Map
 1. register 0 (offset 0): control register; 
-        bit[3:0] for multiplexing;
+        bit[2:0] for multiplexing;
+        3'b001: test pattern generator;
+        3'b010: camera ov7670;
+        3'b100: "gnd" by displaying mono colour (black);
         
 Register Definition:
 1. register 0: control register;
@@ -482,8 +485,9 @@ Register IO access:
 `define V2_DISP_SRC_MUX_OFFSET     0
 
 // multiplexing;
-`define V2_DISP_SRC_MUX_TEST     0  // from the test pattern generator;
-`define V2_DISP_SRC_MUX_CAM      1  // from the camera OV7670;
+`define V2_DISP_SRC_MUX_TEST     3'b001  // from the test pattern generator;
+`define V2_DISP_SRC_MUX_CAM      3'b010  // from the camera OV7670;
+`define V2_DISP_SRC_MUX_NONE     3'b100  // nothing by blanking;
 
 
 `endif //_IO_MAP_SVH
