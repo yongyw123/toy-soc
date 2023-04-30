@@ -338,7 +338,8 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 /*----------------------------------------------------
 * video modules/cores shall be sloted in the video system;
 ----------------------------------------------------*/  
-`define V0_DISP_LCD    0   // lcd ILI9341 display via mcu 8080 seris protocol;
+`define V0_DISP_LCD             0   // lcd ILI9341 display via mcu 8080 seris protocol;
+`define V1_DISP_TEST_PATTERN    1   // test pattern generator for the lcd;
 
 /**************************************************************
 * V0_DISP_LCD
@@ -427,5 +428,35 @@ Register IO access:
 `define V0_DISP_LCD_REG_CSX_BIT_POS           0 // chip select;
 
 `define V0_DISP_LCD_REG_DCX_BIT_POS           0 // dcx;
+
+
+/**************************************************************
+* V1_DISP_TEST_PATTERN
+-----------------------
+this core wraps the following modules: 
+1. pixel_gen_colour_bar()
+2. frame_counter();
+3. fifo() 
+
+Register Map
+1. register 0 (offset 0): write register; 
+
+Register Definition:
+1. register 0: write register;
+        bit[0]  control bit;
+        this controls the video source stream for the LCD display;
+        HIGH to enable this test pattern generator;
+        LOW to disable;
+        
+Register IO access:
+1. register 0: write only;
+******************************************************************/
+// register offset;
+`define V1_DISP_TEST_PATTERN_OFFSET     0
+
+// bit position;
+`define V1_DISP_TEST_PATTERN_BIT_POS_CTRL 0  
+
+
 
 `endif //_IO_MAP_SVH
