@@ -27,16 +27,21 @@ this core wraps the following modules:
 2. frame_counter();
 
 Register Map
-1. register 0 (offset 0): write register; 
+1. register 0 (offset 0): write register;
+2. register 1 (offset 1): status register; 
 
 Register Definition:
 1. register 0: write register;
         bit[0]  start bit;
         HIGH to start this video core;
-        
+
+2. register 1: status register;
+        bit[0] frame start? active high assertion;
+        bit[1] frame end?   active high assertion;
         
 Register IO access:
 1. register 0: write and read;
+2. register 1: read only;
 ******************************************************************/
 
 
@@ -78,21 +83,26 @@ module core_video_lcd_test_pattern_gen
     );
     
     
-    /* note;
-    // there is only one register and no read register;
-    // so this simplifies;
-    */
-    // the following is not necessary;
-    localparam REG_WR_OFFSET   = 1'b0;
+    // constants;
+    localparam REG_WR_OFFSET        = 1'b0;
+    localparam REG_STATUS_OFFSET    = 1'b1;
     
     // signals;
     logic wr_en;   
-    logic enable_generator;
+    logic rd_en;
+    
+    logic rd_status_en;     // read for the frame counter status;
+    logic rd_ctrl_en;       // read whether the pattern generator has been enabled;
+    
+    // registers;
+    logic enable_gen_reg, enable_gen_next; // switch to turn on/off the pattern generator;
     
     /* interface for the test pattern generator */
     logic [SRC_BITS_PER_PIXEL-1:0] pattern_colour_bar_src;
     logic [COUNTER_WIDTH:0] pattern_xcoor;
     logic [COUNTER_WIDTH:0] pattern_ycoor;
+    logic frame_start_;
+    logic frame_end;
     
     /* interface for the downstream */
     logic [SINK_BITS_PER_PIXEL-1:0] pattern_colour_bar_sink;
@@ -100,21 +110,33 @@ module core_video_lcd_test_pattern_gen
     // ff;
    always_ff @(posedge clk, posedge reset)
         if(reset) begin
-            enable_generator <= 1'b0;   // default; disabled;
+            enable_gen_reg <= 1'b0;   // default; disabled;
         end
         
         else begin
             if(wr_en)
-                enable_generator <= wr_data[0];
+                enable_gen_reg <= enable_gen_next;
         end
    
    // decode cpu instruction;
    // there is ony one write registerl and nothing else;
    // note that address decoding is not necessary;
     assign wr_en = (write && cs && (addr[0] == REG_WR_OFFSET));
+    assign enable_gen_next = wr_data[0];
     
-    // cpu read; no need to multiplex; only one reg;
-    assign rd_data = {31'b0, enable_generator};
+    // read multiplexing;
+    assign rd_en = (read && cs);    
+    always_comb begin
+        // default;
+        rd_data = 32'b0;
+        case({rd_en, addr[0]})         
+            {1'b1, REG_WR_OFFSET} :  
+                rd_data = {31'b0, enable_gen_reg}; 
+            {1'b1, REG_STATUS_OFFSET} :
+                rd_data = {30'b0, frame_end, frame_start};
+            default: ; // nop
+        endcase
+    end
     
     /*  instantiation; */
     
@@ -133,10 +155,12 @@ module core_video_lcd_test_pattern_gen
         .reset(reset),
         .sync_clr(0),   // not used;
         
-        .cmd_start(enable_generator),
+        // user command;
+        .cmd_start(enable_gen_reg),
         
-        .frame_start(), // not used;
-        .frame_end(),   // not used;
+        // status
+        .frame_start(frame_start),
+        .frame_end(frame_end),  
         
         /* interface with the test pattern generator */
         .pixel_src(pattern_colour_bar_src),
