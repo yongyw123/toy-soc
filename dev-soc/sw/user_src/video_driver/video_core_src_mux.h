@@ -53,21 +53,29 @@ class video_core_src_mux{
     enum{
         SEL_TEST  = 1,  //   3'b001  // from the test pattern generator;
         SEL_CAM   = 2,  //  3'b010  // from the camera OV7670;
-        SEL_NONE  = 4   //   3'b100  // nothing by blanking;
+        SEL_NONE  = 4   //   3'b100  // nothing;
     };
 
     public:
         video_core_src_mux(uint32_t core_base_addr);
         ~video_core_src_mux();
 
-        void select_test(void);
-        void select_camera(void);
-        void disable_pixel_src(void);
+        // select which pixel source to display on the lcd?
+        void select_src(int usr_select);
+
+        // wrapper for the above;
+        void select_test(void);         // hw test pattern generator;
+        void select_camera(void);       // from the camera ov7670;
+        void disable_pixel_src(void);   // none;
 
         // read the hw register to check for which source is being selected;
+        // this is for sanity check;
         int read_curr_sel(void);    
 
     private:
+        // this video core base address in the user-address space;
+        uint32_t base_addr;
+
         int pselect;    // keep track of the source selection;
 
 };

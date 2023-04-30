@@ -1,59 +1,79 @@
 #include "video_core_src_mux.h"
 
-/**************************************************************
-* V2_DISP_SRC_MUX
------------------------
+video_core_src_mux::video_core_src_mux(uint32_t core_base_addr){
+    /*
+	@brief  : constructor to instantiate an object of this class;
+	@param  : core_base_addr
+				- the base address of this video core resides
+					on the microblaze IO bus address;
+	@retval : none
+	 */
 
-purpose:
-1. direct which pixel source to the LCD: test pattern generator(s) or from the camera?
-2. allocate 6 pixel sources for future purposes;
-3. in actuality; should be only between the test pattern generators and the camera;
+    base_addr = core_base_addr;
+    pselect = SEL_NONE;     // disable the pixel source by default;
+    select_src(pselect);
 
-important note:
-1. all pixel sources (inc camera) are mutually exclusive;
+}
 
-Register Map
-1. register 0 (offset 0): select register; 
-        bit[2:0] for multiplexing;
-        3'b001: test pattern generator;
-        3'b010: camera ov7670;
-        3'b100: none;
-        
-Register Definition:
-1. register 0: control register;
-        
-Register IO access:
-1. register 0: write and readl
-******************************************************************/
+// destructor;
+video_core_src_mux::~video_core_src_mux(){};
 
 
-class video_core_src_mux{
+void video_core_src_mux::select_src(int usr_select){
+    /* 
+    @brief      : select which pixel source to display to the LCD?
+    @param      : usr_select; int type;
+        1 for test pattern generator;
+        2 for the camera;
+        3 for nothing (disabled)        
+    @retval     : none
+    @assumption : param only takes this set: {1,2,3} and nothing else;
+    */
 
-    // register map;
-    enum{
-        // there is only one reg;
-        REG_SEL_OFFSET = 0  
-    };
+   //update the private var;
+   pselect = usr_select;
+   // update the register;
+   REG_WRITE(base_addr, REG_SEL_OFFSET, usr_select);
+}
 
-    // source selection;
-    enum{
-        SEL_TEST  = 1,  //   3'b001  // from the test pattern generator;
-        SEL_CAM   = 2,  //  3'b010  // from the camera OV7670;
-        SEL_NONE  = 4   //   3'b100  // nothing by blanking;
-    };
+void video_core_src_mux::select_test(void){
+    /* 
+    @brief  : select the test pattern generator as the pixel source for 
+                the lcd display;
+    @param  : none
+    @retval : none
+    */
+   select_src(SEL_TEST);
+}
 
-    public:
-        video_core_src_mux(uint32_t core_base_addr);
-        ~video_core_src_mux();
+void video_core_src_mux::select_camera(void){
+    /* 
+    @brief  : select the camera as the pixel source for the lcd display;
+    @param  : none
+    @retval : none
+    */
+   select_src(SEL_CAM);
+}
 
-        void select_test(void);
-        void select_camera(void);
-        void disable_pixel_src(void);
+void video_core_src_mux::disable_pixel_src(void){
+    /* 
+    @brief  : disable any HW pixel source (generation) for the lcd display;
+    @param  : none
+    @retval : none
+    */
+   select_src(SEL_NONE);
+}
 
-        // read the hw register to check for which source is being selected;
-        int read_curr_sel(void);    
+int video_core_src_mux::read_curr_sel(void){
+    /*
+    @brief  : read the HW register to check which pixel source is selected;
+    @param  : none
+    @note   : this is for sanity check;
+    @retval : the current selection:
+        1 for test pattern generator;
+        2 for the camera;
+        3 for nothing (disabled)                    
+    */
 
-    private:
-        int pselect;    // keep track of the source selection;
-
-};
+   return (int)REG_READ(base_addr, REG_SEL_OFFSET);
+}
