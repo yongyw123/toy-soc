@@ -73,6 +73,10 @@ module rising_edge_detector_tb();
         #(7);
         level = 1'b1;
     
+        #(50);
+        level = 1'b0;
+        #(10);
+        level = 1'b1;
         #(100);
         $stop;
     end    
