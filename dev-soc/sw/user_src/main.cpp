@@ -48,43 +48,36 @@ int main(){
     // set pixel arrangement;
     obj_lcd.set_BGR_order(1);
 
-    // turn it on;    
-    obj_lcd.disp_on();
-    
-    /* !!!!!! IMPORTANT !!!!!!
-    Need to issue the following command to the 
-    LCD in order to display anything;
-    otherwise, it wont work;
-    this command enables the transfer
-    the pixel data from the host (board)
-    to the LCD memory;
-    */
-    // enable LCD memory write mode;
-    obj_lcd.enable_memwr();
+    // turn it on;
+	obj_lcd.disp_on();
+	delay_busy_ms(100);
 
     /*---------------------------------------------
     * LCD display from HW pixel generation core(s)
     * not from the cpu;
     -------------------------------------------*/
     // slower write speed;
-    obj_lcd_controller.set_clockmod(20, 20, 20, 40);
-    
-    // hand over the control to the hw pixel generation cores;
-    obj_lcd_controller.set_video_stream();
+    //obj_lcd_controller.set_clockmod(50, 50, 50, 50);	// ok;
+    //obj_lcd_controller.set_clockmod(10, 10, 50, 50);	// ok
+    //obj_lcd_controller.set_clockmod(6, 6, 50, 50);	// ok
+    //obj_lcd_controller.set_clockmod(3, 3, 50, 50);	// ok
+    obj_lcd_controller.set_clockmod(2, 2, 50, 50);	// ok
     
 
-    // try put some colour from the processor;
-    // expect it to be ignored;
-    debug_str("expect that cpu does not have the lcd control here;\r\n");
-    obj_lcd.fill_colour(RGB565_COLOUR_ORANGE);
-    
-    // some delays;
-    delay_busy_ms(1000);
-    delay_busy_ms(1000);
-    delay_busy_ms(1000);
-    delay_busy_ms(1000);
-    delay_busy_ms(1000);
-    
+    /* !!!!!! IMPORTANT !!!!!!
+	Need to issue the following command to the
+	LCD in order to display anything;
+	otherwise, it wont work;
+	this command enables the transfer
+	the pixel data from the host (board)
+	to the LCD memory;
+	*/
+	// enable LCD memory write mode;
+	obj_lcd.enable_memwr();
+	delay_busy_ms(100);
+
+	// hand over the control to the hw pixel generation cores;
+	obj_lcd_controller.set_video_stream();
 
     // use the test pattern generator as the pixel source;
     debug_str("selecting the HW test pattern generator \r\n");
