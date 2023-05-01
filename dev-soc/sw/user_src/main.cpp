@@ -63,7 +63,6 @@ int main(){
     //obj_lcd_controller.set_clockmod(3, 3, 50, 50);	// ok
     obj_lcd_controller.set_clockmod(2, 2, 50, 50);	    // ok
     
-
     /* !!!!!! IMPORTANT !!!!!!
 	Need to issue the following command to the
 	LCD in order to display anything;
@@ -87,30 +86,7 @@ int main(){
     debug_str("enabling the HW test pattern generator \r\n");
     vid_test_pattern.enable();
     
-    // pause before switching the display;
-    for(int i = 0; i < 10; i++){
-        delay_busy_ms(1000);
-    }
-
-    // disable the hw pattern generator
-    vid_test_pattern.disable();
-
-    // pause before switching the display;
-    for(int i = 0; i < 5; i++){
-        delay_busy_ms(1000);
-    }
-
-    /*---------------------------------------------------
-    * switching back to CPU control;
-    * this is to test the interchangeability between
-    * two controls;
-    --------------------------------------------------*/
-    // hand over the control to the hw pixel generation cores;
-	obj_lcd_controller.set_cpu_stream();
-    obj_lcd_controller.set_clockmod(10, 10, 50, 50);	    // ok
-    delay_busy_ms(100);
-    obj_lcd.fill_colour(RGB565_COLOUR_PINK);
-
+    debug_str("check done\r\n");
     while(1){        
         ;
     }
