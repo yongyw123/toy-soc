@@ -61,7 +61,7 @@ int main(){
     //obj_lcd_controller.set_clockmod(10, 10, 50, 50);	// ok
     //obj_lcd_controller.set_clockmod(6, 6, 50, 50);	// ok
     //obj_lcd_controller.set_clockmod(3, 3, 50, 50);	// ok
-    obj_lcd_controller.set_clockmod(2, 2, 50, 50);	// ok
+    obj_lcd_controller.set_clockmod(2, 2, 50, 50);	    // ok
     
 
     /* !!!!!! IMPORTANT !!!!!!
@@ -72,7 +72,7 @@ int main(){
 	the pixel data from the host (board)
 	to the LCD memory;
 	*/
-	// enable LCD memory write mode;
+	// enable LCD memory write mode prior to switching the stream mode;
 	obj_lcd.enable_memwr();
 	delay_busy_ms(100);
 

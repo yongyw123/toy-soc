@@ -37,19 +37,32 @@ class video_core_test_pattern_gen{
 
     // register map;
     enum{
-        REG_WR_OFFSET = 0
+        REG_WR_OFFSET = 0,
+        REG_STATUS_OFFSET = 1   
     };
 
     // field;
     enum{
-        BIT_POS_WR = 0,
+        
+        REG_WR_BIT_POS_WR = 0,
+
+        REG_STATUS_BIT_POS_START    = 0, // frame generation has not started;
+        REG_STATUS_BIT_POS_END      = 1, // frame is complete
+
+        MASK_STATUS_FRAME_START = BIT_MASK(REG_STATUS_BIT_POS_START),
+        MASK_STATUS_FRAME_END   = BIT_MASK(REG_STATUS_BIT_POS_END)
         
     };
 
     // constanst;
     enum{
-        ENABLE_TEST_PATTERN = 1,
-        DISABLE_TEST_PATTERN = 0
+        ENABLE_TEST_PATTERN     = 1,
+        DISABLE_TEST_PATTERN    = 0,
+
+        // status;
+        STATUS_FRAME_BUSY       = -1,
+        STATUS_FRAME_IDLE       = 0,
+        STATUS_FRAME_COMPLETE   = 1
     };
 
     public:
@@ -65,8 +78,15 @@ class video_core_test_pattern_gen{
 
         // is the test pattern enabled or not;
         // for sanity check;
-        int get_state(void);    
+        int get_state(void);  
 
+        // get the frame status
+        int get_frame_status(void);  
+
+        // wrappers for the above;
+        int is_frame_idle(void);
+        int is_frame_complete(void);    
+        
     private:
         // this video core base address in the user-address space;
         uint32_t base_addr;

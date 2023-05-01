@@ -28,7 +28,7 @@ void video_core_test_pattern_gen::set_state(int usr_sw){
 
    uint32_t placeholder = 0x00;
    if(usr_sw){
-        placeholder = BIT_MASK(BIT_POS_WR);
+        placeholder = BIT_MASK(REG_WR_BIT_POS_WR);
    }
 
    // update the private var;
@@ -68,4 +68,64 @@ int video_core_test_pattern_gen::get_state(void){
     */
 
    return (int)REG_READ(base_addr, REG_WR_OFFSET);
+}
+
+int video_core_test_pattern_gen::get_frame_status(void){
+    /*
+    @brief  : get the current status of the frame generation;
+    @param  : none
+    @retval : codes
+        -1  if the frame generation is ongoing (busy);
+        0   if the frame generation is idle (at the start);
+        1   if the frame generation is complete;
+    @note   :        
+    */
+
+   uint32_t rd_data;
+   int status;
+   rd_data = REG_READ(base_addr, REG_STATUS_OFFSET);
+   
+   // check for completion;
+   status = (int)(rd_data & MASK_STATUS_FRAME_END);
+   if(status == 1){
+        return STATUS_FRAME_COMPLETE;
+   }
+
+   // check for busy or idle?
+   status = (int)(rd_data & MASK_STATUS_FRAME_START);
+   if(status == 1){
+        return STATUS_FRAME_IDLE;
+   }else{
+    return STATUS_FRAME_BUSY; 
+   }
+}
+
+int video_core_test_pattern_gen::is_frame_idle(void){
+    /*
+    @brief  : is the frame generation idle?
+    @param  : none
+    @retval : binary; HIGH if idle; LOW otherwise;
+    */
+    int status;
+    status = get_frame_status();
+    if(status != STATUS_FRAME_IDLE){
+        return 0;
+    }else{
+        return 1;
+    }
+}
+
+int video_core_test_pattern_gen::is_frame_complete(void){
+    /*
+    @brief  : is the frame generation idle?
+    @param  : none
+    @retval : binary; HIGH if completed; LOW otherwise;
+    */
+    int status;
+    status = get_frame_status();
+    if(status != STATUS_FRAME_COMPLETE){
+        return 0;
+    }else{
+        return 1;
+    }
 }
