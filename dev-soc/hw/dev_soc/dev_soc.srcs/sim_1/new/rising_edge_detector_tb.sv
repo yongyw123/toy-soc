@@ -20,44 +20,23 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module rising_edge_detector_tb();
-
-    // general;
-    localparam T = 10;  // system clock period: 10ns;
-    logic clk;          // common system clock;
-    logic reset;        // async system clock;
-    
-    // uut signals;
-    logic level;    // input to the uut to detect the edge;
-    logic detected; // detected?
-    
-    /* simulate clk */
-     always
-        begin 
-           clk = 1'b1;  
-           #(T/2); 
-           clk = 1'b0;  
-           #(T/2);
-        end
-    
-     /* reset pulse */
-     initial
-        begin
-            reset = 1'b1;
-            #(T/2);
-            reset = 1'b0;
-            #(T/2);
-        end
-    
-    
-    /* instantiation */
-    rising_edge_detector uut(.*);
-    
-    // test stimulus;
+program rising_edge_detector_tb
+    (
+        input logic clk,
+        output logic level,
+        input logic detected
+    );
     
     initial begin
         level = 1'b1;
         #(100);
+        
+        //normal stimulus?
+        @(negedge clk);
+        level = 1'b0;
+        
+        @(negedge clk);
+        level = 1'b1;
         
         // expect that the detector may or may not
         // be able to detect the edge;
@@ -85,5 +64,6 @@ module rising_edge_detector_tb();
         #(50);
         
         $stop;
-    end    
-endmodule
+    end
+        
+endprogram
