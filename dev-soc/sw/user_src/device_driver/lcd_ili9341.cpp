@@ -684,3 +684,13 @@ void lcd_ili9341_sw_driver::disp_inv(int to_invert){
 	}
 }   
 
+void lcd_ili9341_sw_driver::enable_memwr(void){
+	/*
+	@brief	: enable memory write from host to LCD memory for display to work;
+	@param	: none;
+	@retval	: none;
+	*/
+	// command the LCD to accept write before writing the pixels;
+	obj_lcd_controller.write_command(LCD_ILI9341_REG_MEM_WRITE);
+
+}

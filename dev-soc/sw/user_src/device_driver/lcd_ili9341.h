@@ -73,6 +73,7 @@ class lcd_ili9341_sw_driver{
         void write_pixel(uint16_t pixel);       // for sending a pixel to the lcd;
         void fill_colour(uint16_t mono_colour); // to fill the lcd with a single colour;
         void disp_inv(int to_invert);           // to invert the display or not?
+        void enable_memwr(void);                // enable host's data to lcd memory for display;
 
     private:
         // constants;

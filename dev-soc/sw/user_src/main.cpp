@@ -37,12 +37,6 @@ int main(){
     // read self-diagnostic report;
     obj_lcd.read_diagnostic();
         
-    // turn it on;    
-    obj_lcd.disp_on();
-    
-    // to invert the lcd;
-    obj_lcd.disp_inv(1);
-
     // initialize the lcd;
     debug_str("initializing ... \r\n");
     obj_lcd.init();
@@ -53,6 +47,20 @@ int main(){
 
     // set pixel arrangement;
     obj_lcd.set_BGR_order(1);
+
+    // turn it on;    
+    obj_lcd.disp_on();
+    
+    /* !!!!!! IMPORTANT !!!!!!
+    Need to issue the following command to the 
+    LCD in order to display anything;
+    otherwise, it wont work;
+    this command enables the transfer
+    the pixel data from the host (board)
+    to the LCD memory;
+    */
+    // enable LCD memory write mode;
+    obj_lcd.enable_memwr();
 
     /*---------------------------------------------
     * LCD display from HW pixel generation core(s)
