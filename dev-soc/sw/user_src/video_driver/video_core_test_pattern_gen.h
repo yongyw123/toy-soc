@@ -8,6 +8,7 @@ Module  : core_video_lcd_test_pattern_gen.sv
 #include "io_map.h"
 #include "io_reg_util.h"
 
+
 /**************************************************************
 * V1_DISP_TEST_PATTERN
 -----------------------
@@ -16,18 +17,22 @@ this core wraps the following modules:
 2. frame_counter();
 
 Register Map
-1. register 0 (offset 0): write register; 
+1. register 0 (offset 0): write register;
+2. register 1 (offset 1): status register; 
 
 Register Definition:
 1. register 0: write register;
         bit[0]  start bit;
         HIGH to start this video core;
-        
+
+2. register 1: status register;
+        bit[0] frame start? active high assertion;
+        bit[1] frame end?   active high assertion;
         
 Register IO access:
 1. register 0: write and read;
+2. register 1: read only;
 ******************************************************************/
-
 class video_core_test_pattern_gen{
 
     // register map;
