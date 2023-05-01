@@ -77,7 +77,13 @@ module rising_edge_detector_tb();
         level = 1'b0;
         #(10);
         level = 1'b1;
-        #(100);
+        #(50);
+        level = 1'b0;
+        @(negedge clk);
+        level = 1'b1;
+        
+        #(50);
+        
         $stop;
     end    
 endmodule
