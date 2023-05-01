@@ -65,11 +65,15 @@ Frame Timing;
 
 module dcmi_decoder
     #(parameter 
-        DATA_BITS = 8   // camera ov7670 drives 8-bit parallel data;
+        DATA_BITS = 8,   // camera ov7670 drives 8-bit parallel data;
+        COUNTER_WIDTH = 10    // for debugging;
      )
     (
         // general;
         input logic reset_sys,    // async from the system (not camera);
+        
+        // cpu command;
+        input logic cmd_start;
         
         // driving inputs from the camera ov7670;
         input logic pclk,  // fixed at 24MHz;
@@ -78,11 +82,56 @@ module dcmi_decoder
         input logic [DATA_BITS-1:0] din,
         
         // interface the dual-clock fifo;
+        /* note;
+        expect that consuming (fpga) rate is higher than the supplying (camera) rate;
+        underrun yes; but should not overrun the fifo; 
+        */
         output logic data_valid, // to the fifo;
-        input logic data_ready,  // from the fifo;
-        output logic [DATA_BITS-1:0] dout   // sampled pixel data from the cam;
+        input logic data_ready,  // from the fifo; (not used by above)
+        output logic [DATA_BITS-1:0] dout,   // sampled pixel data from the cam;
         
+        // for debugging;
+        output logic [COUNTER_WIDTH:0] cnt_vsync, // undefined yet;
+        output logic [COUNTER_WIDTH:0] cnt_href,
+        output logic [COUNTER_WIDTH:0] cnt_frame
     );
     
+    /* signal declaration */
+    logic [DATA_BITS-1:0] sampled_reg;
+    logic href_en; 
     
+    // counters;
+    logic [COUNTER_WIDTH:0] cnt_href_reg, cnt_href_next;
+    logic [COUNTER_WIDTH:0] cnt_vsync_reg, cnt_vsync_next;
+    logic [COUNTER_WIDTH:0] cnt_frame_reg, cnt_frame_next;
+    
+    always_ff @(posedge pclk, posedge reset_sys)       
+    begin 
+        if(reset_sys) begin
+            sampled_reg <= {DATA_BITS{1'b1}}; // dummy;
+            
+            // counters;
+            cnt_href_reg <= 0;
+            cnt_vsync_reg <= 0;
+            cnt_frame_reg <= 0;
+        end
+        else begin
+            // counters;
+            cnt_href_reg <= cnt_href_next;
+            cnt_vsync_reg <= cnt_vsync_next;
+            cnt_frame_reg <= cnt_frame_next;        
+        end
+        // sample as long as href is active high;
+        // this always holds since href == data valid by the datasheet;
+        if(href_en) begin
+            sampled_reg <= din;    
+        end
+    end
+   
+   assign dout = sampled_reg;
+   
+    // do not start sampling even if href is high unless user instructs to do so;
+   assign href_en = (href && cmd_start);
+   assign data_valid = (href_en) ? 1'b1 : 1'b0;
+   
 endmodule
