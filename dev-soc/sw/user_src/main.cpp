@@ -107,6 +107,8 @@ int main(){
     --------------------------------------------------*/
     // hand over the control to the hw pixel generation cores;
 	obj_lcd_controller.set_cpu_stream();
+    obj_lcd_controller.set_clockmod(10, 10, 50, 50);	    // ok
+    delay_busy_ms(100);
     obj_lcd.fill_colour(RGB565_COLOUR_PINK);
 
     while(1){        
