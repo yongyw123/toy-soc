@@ -42,9 +42,10 @@ void video_core_test_pattern_gen::enable(void){
     @brief  : enable the test pattern generator;
     @param  : none
     @retval : none
+    @note   : once enabled, the pixel generation is free running 
+            until disabled;
     */
    set_state(ENABLE_TEST_PATTERN);
-
 }
 
 void video_core_test_pattern_gen::disable(void){

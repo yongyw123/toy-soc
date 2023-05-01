@@ -87,6 +87,22 @@ int main(){
     debug_str("enabling the HW test pattern generator \r\n");
     vid_test_pattern.enable();
     
+    /*-------- note;
+    the HW pixel pattern generator, once enabled; will forever
+    be running, i.e. keep on generating the pixels to drive the LCD;
+    however, the LCD ILI9341 has its own frame buffer;
+    so, it is not necessary to keep the generator running
+    if the test pattern is a static image;
+    disable it once the pattern frame is completed;
+    */
+    // disable the pattern generator once the frame is completed;
+    // wait for the flag;
+    while(!vid_test_pattern.is_frame_complete()){};
+    debug_str("waiting for frame completion ...\r\n");
+    vid_test_pattern.disable();
+    debug_str("test pattern is generated successfully ...\r\n");
+    debug_str("done\r\n");
+
     while(1){        
         ;
     }
