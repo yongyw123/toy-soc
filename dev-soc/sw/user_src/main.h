@@ -18,6 +18,8 @@ Purpose: top level directives;
 
 // video system;
 #include "video_core_lcd_display.h"
+#include "video_core_src_mux.h"
+#include "video_core_test_pattern_gen.h"
 
 // test driver;
 #include "test_util.h"
@@ -26,6 +28,9 @@ Purpose: top level directives;
 // device drivers;
 #include "cam_ov7670.h"
 #include "lcd_ili9341.h"
+
+// user directive;
+#include "device_directive.h"
 
 
 // c and cpp linkage;

@@ -338,7 +338,9 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 /*----------------------------------------------------
 * video modules/cores shall be sloted in the video system;
 ----------------------------------------------------*/  
-`define V0_DISP_LCD    0   // lcd ILI9341 display via mcu 8080 seris protocol;
+`define V0_DISP_LCD             0   // lcd ILI9341 display via mcu 8080 seris protocol;
+`define V1_DISP_TEST_PATTERN    1   // test pattern generator for the lcd;
+`define V2_DISP_SRC_MUX         2   // direct which pixel source to the LCD: test pattern generator or from the camera?
 
 /**************************************************************
 * V0_DISP_LCD
@@ -427,5 +429,75 @@ Register IO access:
 `define V0_DISP_LCD_REG_CSX_BIT_POS           0 // chip select;
 
 `define V0_DISP_LCD_REG_DCX_BIT_POS           0 // dcx;
+
+
+
+/**************************************************************
+* V1_DISP_TEST_PATTERN
+-----------------------
+this core wraps the following modules: 
+1. pixel_gen_colour_bar()
+2. frame_counter();
+
+Register Map
+1. register 0 (offset 0): write register;
+2. register 1 (offset 1): status register; 
+
+Register Definition:
+1. register 0: write register;
+        bit[0]  start bit;
+        HIGH to start this video core;
+
+2. register 1: status register;
+        bit[0] frame start? active high assertion;
+        bit[1] frame end?   active high assertion;
+        
+Register IO access:
+1. register 0: write and read;
+2. register 1: read only;
+******************************************************************/
+
+// register offset;
+`define V1_DISP_TEST_PATTERN_REG_WR_OFFSET      0
+`define V1_DISP_TEST_PATTERN_REG_STATUS_OFFSET  1
+
+// bit position;
+`define V1_DISP_TEST_PATTERN_REG_WR_BIT_POS_START 0  
+
+`define V1_DISP_TEST_PATTERN_REG_STATUS_BIT_POS_START   0
+`define V1_DISP_TEST_PATTERN_REG_STATUS_BIT_POS_END     1
+/**************************************************************
+* V2_DISP_SRC_MUX
+-----------------------
+
+purpose:
+1. direct which pixel source to the LCD: test pattern generator(s) or from the camera?
+2. allocate 6 pixel sources for future purposes;
+3. in actuality; should be only between the test pattern generators and the camera;
+
+important note:
+1. all pixel sources (inc camera) are mutually exclusive;
+
+Register Map
+1. register 0 (offset 0): select register; 
+        bit[2:0] for multiplexing;
+        3'b001: test pattern generator;
+        3'b010: camera ov7670;
+        3'b100: none;
+        
+Register Definition:
+1. register 0: control register;
+        
+Register IO access:
+1. register 0: write and readl
+******************************************************************/
+// register offset;
+`define V2_DISP_SRC_MUX_REG_SEL_OFFSET     0
+
+// multiplexing;
+`define V2_DISP_SRC_MUX_REG_SEL_TEST     3'b001  // from the test pattern generator;
+`define V2_DISP_SRC_MUX_REG_SEL_CAM      3'b010  // from the camera OV7670;
+`define V2_DISP_SRC_MUX_REG_SEL_NONE     3'b100  // nothing by blanking;
+
 
 `endif //_IO_MAP_SVH

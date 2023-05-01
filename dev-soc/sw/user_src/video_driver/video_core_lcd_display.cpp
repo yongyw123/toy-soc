@@ -161,6 +161,26 @@ void video_core_lcd_display::set_stream(int set_cpu_control){
    REG_WRITE(base_addr, REG_STREAM_CTRL_OFFSET, wr);
 }
 
+void video_core_lcd_display::set_cpu_stream(void){
+	/*
+	@brief	: hand the control to the cpu for LCD display;
+	@param	: none
+	@retval	: none
+	*/
+	set_stream(ENABLE_CPU_CTRL);
+
+}
+
+void video_core_lcd_display::set_video_stream(void){
+	/*
+	@brief	: hand the control to the HW video core for the LCD display;
+	@param	: none
+	@retval	: none
+	*/
+	set_stream(DISABLE_CPU_CTRL);
+
+}
+
 int video_core_lcd_display::is_ready(void){
 	/*
 	@brief  : check whether the lcd display controller is ready/idle;
