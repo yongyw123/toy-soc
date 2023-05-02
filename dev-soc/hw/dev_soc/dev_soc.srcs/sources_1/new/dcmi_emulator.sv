@@ -131,6 +131,7 @@ module dcmi_emulator
             pclk = 1'b0;
     end
     
+    
     // simulate other synchronization signals based on the pclk;
     // prepare all signals at the falling edge of the pclk;
     
