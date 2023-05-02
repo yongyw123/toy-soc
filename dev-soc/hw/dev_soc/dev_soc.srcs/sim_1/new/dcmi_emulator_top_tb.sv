@@ -83,7 +83,7 @@ module dcmi_emulator_top_tb();
      /* monitoring */
      
      initial begin
-        $monitor("time: %t, start: %0b, vsync: %0b, href: %0b, dout: %8B, frame_start: %0b, frame_end: %0b, uut.state_reg: %0s, uut.vsync_low_reg: %D",
+        $monitor("time: %t, start: %0b, vsync: %0b, href: %0b, dout: %8B, frame_start: %0b, frame_end: %0b, uut.state_reg: %s",
         $time,
         start,
         vsync,
@@ -91,8 +91,7 @@ module dcmi_emulator_top_tb();
         dout,
         frame_start_tick,
         frame_complete_tick,
-        uut.state_reg.name,
-        uut.vsync_low_reg
+        uut.state_reg.name        
         );
         
         
