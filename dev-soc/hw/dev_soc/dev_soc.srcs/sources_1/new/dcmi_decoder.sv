@@ -65,9 +65,10 @@ Frame Timing;
 
 module dcmi_decoder
     #(parameter 
-        DATA_BITS = 8,          // camera ov7670 drives 8-bit parallel data;
-        COUNTER_WIDTH = 10,     // for debugging;
-        HREF_NUM = 240          // expected to have 240 href for a line;        
+        DATA_BITS           = 8, // camera ov7670 drives 8-bit parallel data;
+        HREF_COUNTER_WIDTH  = 8,  // to count href;
+        HREF_NUM            = 240, // expected to have 240 href for a line;
+        FRAME_COUNTER_WIDTH = 32    // count the number of frames;        
      )
     (
         // general;
@@ -89,86 +90,105 @@ module dcmi_decoder
         */
         output logic data_valid,             // to the fifo;
         input logic data_ready,              // from the fifo; (not used by above)
-        output logic [DATA_BITS-1:0] dout,   // sampled pixel data from the cam;
-        
-        // for debugging;
-        output logic [COUNTER_WIDTH:0] cnt_vsync,
-        output logic [COUNTER_WIDTH:0] cnt_href,
-        output logic [COUNTER_WIDTH:0] cnt_frame
+        output logic [DATA_BITS-1:0] dout   // sampled pixel data from the cam;               
     );
     
     /* signal declaration */
-    logic [DATA_BITS-1:0] sampled_reg;          // to sample din for dout;
-    logic href_en;                              // to AND with user command;    
-    logic detect_vsync_edge;                    // to detect rising edge of the vsync;
-    logic detect_href_edge;                     // to detect the rising edge of href;
+    logic [DATA_BITS-1:0] sampled_reg;          // to sample din for dout;        
+    logic detect_vsync_edge;                    // to detect rising edge of the vsync;    
     
-    // counters;
-    logic [COUNTER_WIDTH:0] cnt_href_reg, cnt_href_next;
-    logic [COUNTER_WIDTH:0] cnt_vsync_reg, cnt_vsync_next;
+    // enable signales;
+    logic sample_en;
+        
+    // registers;
+    logic [HREF_COUNTER_WIDTH-1:0] cnt_href_reg, cnt_href_next;     // count #href;
+    logic [FRAME_COUNTER_WIDTH-1:0] cnt_frame_reg, cnt_frame_next;  // count #frame;
     
-    always_ff @(posedge pclk, posedge reset_sys)       
-    begin 
+    // states;
+    /*
+    ST_IDLE         : doing nothing; waiting for user command to start the dcmi decoder;
+    ST_WAIT_VSYNC   : waiting for the rising edge of vsync;
+    ST_WAIT_HREF    : waiting for the HREF to assert;
+    ST_CNT_HREF     : count the number of href's encountered;
+    */ 
+    typedef enum{ST_IDLE, ST_WAIT_VSYNC, ST_WAIT_HREF, ST_CNT_HREF} state_type;
+    state_type state_reg, state_next;
+    
+    // ff;
+    always_ff  @(posedge pclk, posedge reset_sys) begin
         if(reset_sys) begin
-            sampled_reg <= {DATA_BITS{1'b1}}; // dummy;
-            
-            // counters;
-            cnt_href_reg <= 0;
-            cnt_vsync_reg <= 0;
+            state_reg       <= ST_IDLE;            
+            cnt_href_reg    <= 0;
+            cnt_frame_reg   <= 0;
+            sampled_reg     <= 0;       // dummy;
         end
         else begin
-            // counters;
-            
-            if(detect_vsync_edge) begin
-                cnt_vsync_reg <= cnt_vsync_next;    
-            end
-            
-            // only start counting when start of frame (vsyncs) is asserted;
-            if((detect_href_edge) && (cnt_vsync_reg > 0)) begin
-                cnt_href_reg <= cnt_href_next;
-            end 
-            
-            // only start sampling when start of frame is detected;
-            // then, sample as long as href is active high;
-            // this always holds since href == data valid by the datasheet;
-            if((cnt_vsync_reg > 0) && (href_en)) begin
-                sampled_reg <= din;    
-            end        
-        end
+            state_reg       <= state_next;
+            cnt_href_reg    <= cnt_href_next;
+            cnt_frame_reg   <= cnt_frame_next;
+            sampled_reg     <= din;            
+        end    
     end
     
-   /* instantiation of rising edge detector for the relevant signals */
-   // rising edge detector for vsync;
-   rising_edge_detector vsync_unit
-   (
-    .clk(pclk),
-    .reset(reset),
-    .level(vsync),
-    .detected(detect_vsync_edge)
-   );
-   
-   // rising edge detector for href;
-   rising_edge_detector href_unit
-   (
-    .clk(pclk),
-    .reset(reset),
-    .level(vsync),
-    .detected(detect_href_edge)
-   );
-   
-   
-   /* next state for the counter */
-   // for vsync; the second vsync is the end of frame; wrap around;
-   assign cnt_vsync_next    = (cnt_vsync_reg == 1) ? 0 : cnt_vsync_reg + 1;
-   // for href; it is mod 240 since the camera will output 240 href per line; 
-   assign cnt_href_next     = (cnt_href_reg == HREF_NUM) ? 0 : cnt_href_reg + 1;
-   
-    // do not start sampling even if href is high 
-    // unless user instructs to do so and the start of frame is detected;
-   assign href_en = (href && cmd_start && (cnt_vsync_reg > 0));
-   assign data_valid = (href_en) ? 1'b1 : 1'b0;
-   
-   // outputs;
-   assign dout = sampled_reg;
-   
+    /*  output; */    
+    // this is only asserted when the frame start is detected and href is asserted;
+    assign data_valid   = sample_en;  
+    assign dout         = sampled_reg;
+    
+    /* other helper unit: edge detector */
+    rising_edge_detector 
+    edge_unit
+    (
+        .clk(pclk),
+        .reset(reset_sys),
+        .level(vsync),
+        .detected(detec_vsync_edge)
+    );
+
+    /*  fsm; */    
+    always_comb begin
+        // default;
+        state_next = state_reg;                
+        sample_en = 1'b0;
+        
+        case(state_reg)
+            ST_IDLE: begin
+                if(cmd_start) begin
+                    state_next = ST_WAIT_VSYNC;
+                    // reset the frame counter;
+                    cnt_frame_next = 0;
+                end            
+            end
+            
+            ST_WAIT_VSYNC: begin
+                if(detect_vsync_edge) begin
+                    // reload the counter for href;
+                    cnt_href_next = 0;
+                    state_next = ST_WAIT_HREF;
+                end
+            end
+        
+            ST_WAIT_HREF: begin
+                if(href) begin
+                    state_next = ST_CNT_HREF;
+                end            
+            end
+          
+            ST_CNT_HREF: begin
+                sample_en = 1'b1;
+                // href deasserted == data not valid;
+                if(!href) begin
+                    state_next = ST_WAIT_HREF;
+                    // one href is done;
+                    cnt_href_next = cnt_href_reg + 1;
+                    // check if a frame is completed;
+                    if(cnt_href_reg == HREF_NUM) begin
+                        cnt_frame_next = cnt_frame_reg + 1;
+                    end
+                end                
+            end
+        default: ; // nop
+        endcase    
+    end
+    
 endmodule
