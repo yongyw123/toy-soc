@@ -36,7 +36,12 @@ program dcmi_decoder_tb
         input logic decoder_data_valid,  // from the decoder to the fifo;
         
         // wait for bram fifo "full boot up" before driving the test stimulus;
-        input logic start_stimulus
+        input logic start_stimulus,
+        
+        // for BRAM FIFO;
+        input logic FIFO_EMPTY,
+        output logic FIFO_RDEN 
+        
     );
     
     initial begin
@@ -92,20 +97,23 @@ program dcmi_decoder_tb
     */
     wait(frame_start_tick == 1'b1);
     #(1000);
-    wait(frame_complete_tick == 1'b1);
-    
-    
-    
-    /* test 03;
-    test fifo (sink) data ready to the decoder;
-    expect that if fifo is not ready;
-    decoder will NOT start*/
+    /// disable both emulator and decoder;
     @(posedge pclk);
-    decoder_data_ready <= 1'b0;
+    decoder_start <= 1'b0;
+    emulator_start <= 1'b0;
     
-    wait(frame_start_tick == 1'b1);
-    #(1000);
     wait(frame_complete_tick == 1'b1);
+    
+    /* tets 03;
+    enable the read the fifo sink to check if the previous data
+    has been written correctly
+    */
+    @(posedge clk_sys);
+    FIFO_RDEN <= 1'b1;
+    
+    // read all;
+    wait(FIFO_EMPTY == 1'b1);
+    
     #(100);
     $display("test ends");
     $stop;

@@ -44,8 +44,8 @@ module dcmi_decoder_top_tb();
     localparam HREF_LOW            = 3;    // hlow; 
     localparam BUFFER_START_PERIOD = 7;    // between vsync assertion and href assertion;
 	localparam BUFFER_END_PERIOD   = 1;	// between the frame end and the frame start;
-    localparam HREF_TOTAL          = 4;  // total href assertion to generate;
-    localparam PIXEL_BYTE_TOTAL    = 14;   // 320 pixels per href with bp = 16-bit;
+    localparam HREF_TOTAL          = 3;  // total href assertion to generate;
+    localparam PIXEL_BYTE_TOTAL    = 5;   // 320 pixels per href with bp = 16-bit;
     
     // signals for uut: dcmi decoder;
     localparam FRAME_COUNTER_WIDTH = 32;
@@ -233,7 +233,7 @@ module dcmi_decoder_top_tb();
         
     /* monitoring system */
     initial begin
-        $monitor("time: %t, dec_start: %0b, href: %0b, vsync: %0b, din: %8H, dec_valid: %0b, dec_dout: %8H, frame_start: %0b, frame_complete: %0b, uut.statereg: %s, uut.detect_vsync_edge: %0b",
+        $monitor("time: %t, dec_start: %0b, href: %0b, vsync: %0b, din: %8H, dec_valid: %0b, dec_dout: %8H, frame_start: %0b, frame_complete: %0b, uut.statereg: %s, uut.detect_vsync_edge: %0b, fifo_rd: %0b, fifo rd data: %8H",
         $time,
         decoder_start,
         href,
@@ -244,7 +244,10 @@ module dcmi_decoder_top_tb();
         frame_start_tick,
         frame_complete_tick,
         uut.state_reg.name,
-        uut.detect_vsync_edge
+        uut.detect_vsync_edge,
+        // fifo;
+        FIFO_RDEN,
+        FIFO_DOUT
         
         );
     end
