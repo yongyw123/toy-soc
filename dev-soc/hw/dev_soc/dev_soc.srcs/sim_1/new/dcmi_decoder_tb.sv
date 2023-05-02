@@ -33,11 +33,16 @@ program dcmi_decoder_tb
         // decoder;
         output logic decoder_start,
         output logic decoder_data_ready, // from the sinking fifo to the decoder;
-        input logic decoder_data_valid  // from the decoder to the fifo;
+        input logic decoder_data_valid,  // from the decoder to the fifo;
         
+        // wait for bram fifo "full boot up" before driving the test stimulus;
+        input logic start_stimulus
     );
     
     initial begin
+    // wait for bram fifo "full boot up" before driving the test stimulus;
+    wait(start_stimulus == 1'b1);
+    
     /* test 01:
     start the decoder 
     followed by the emulator

@@ -58,6 +58,27 @@ module dcmi_decoder_top_tb();
     logic decoder_start_tick;     // when a new frame is detected;
     logic [FRAME_COUNTER_WIDTH-1:0] decoded_frame_counter; // this will overflow;
     
+    // signals for the fifo sinking the pixel data from the dcmi decoder;
+    logic reset_FIFO;
+    localparam FIFO_DEPTH_WIDTH = 11;
+    logic FIFO_ALMOSTEMPTY; // 1-bit output almost empty
+    logic FIFO_ALMOSTFULL;   // 1-bit output almost full
+    logic [DATA_BITS-1:0] FIFO_DOUT;                   // Output data, width defined by DATA_WIDTH parameter
+    logic FIFO_EMPTY;             // 1-bit output empty
+    logic FIFO_FULL;               // 1-bit output full
+    logic [FIFO_DEPTH_WIDTH-1:0] FIFO_RDCOUNT;         // Output read count, width determined by FIFO depth
+    logic FIFO_RDERR;             // 1-bit output read error
+    logic [FIFO_DEPTH_WIDTH-1:0] FIFO_WRCOUNT;         // Output write count, width determined by FIFO depth
+    logic FIFO_WRERR;             // 1-bit output write error
+    logic FIFO_RDEN;               // 1-bit input read enable
+    
+    
+    // signals for the test stimulus;
+    // this is required because the conditions imposed
+    // by the bram fifo, which mainly requires
+    // the relevant signals to be LOW prior to/after # read/write cycles;
+    logic start_stimulus;   
+    
     /* instantiation */
     // dcmi emulator;
     dcmi_emulator
@@ -106,11 +127,59 @@ module dcmi_decoder_top_tb();
         .decoder_complete_tick(decoder_complete_tick), // when the entire frame has been decoded;
         .decoder_start_tick(decoder_start_tick),     // when a new frame is detected;
         .decoded_frame_counter(decoded_frame_counter)   
+    );
+    // mapping fifo signal with the dcm decoder;
+    assign decoder_data_ready = !FIFO_ALMOSTFULL;   // this is a stricter condition than fully full;
         
+      // test stimulus;
+     dcmi_decoder_tb tb(.*);
+     
+    /* fifo sinking the pixel decoded from the dcmi_decoder */
+    // FIFO_DUALCLOCK_MACRO: Dual Clock First-In, First-Out (FIFO) RAM Buffer
+    //                       Artix-7
+    // Xilinx HDL Language Template, version 2021.2
+    
+    /////////////////////////////////////////////////////////////////
+    // DATA_WIDTH | FIFO_SIZE | FIFO Depth | RDCOUNT/WRCOUNT Width //
+    // ===========|===========|============|=======================//
+    //   37-72    |  "36Kb"   |     512    |         9-bit         //
+    //   19-36    |  "36Kb"   |    1024    |        10-bit         //
+    //   19-36    |  "18Kb"   |     512    |         9-bit         //
+    //   10-18    |  "36Kb"   |    2048    |        11-bit         //
+    //   10-18    |  "18Kb"   |    1024    |        10-bit         //
+    //    5-9     |  "36Kb"   |    4096    |        12-bit         //
+    //    5-9     |  "18Kb"   |    2048    |        11-bit         //
+    //    1-4     |  "36Kb"   |    8192    |        13-bit         //
+    //    1-4     |  "18Kb"   |    4096    |        12-bit         //
+    /////////////////////////////////////////////////////////////////
+        
+    FIFO_DUALCLOCK_MACRO  #(
+      .ALMOST_EMPTY_OFFSET(9'h080), // Sets the almost empty threshold
+      .ALMOST_FULL_OFFSET(9'h080),  // Sets almost full threshold
+      .DATA_WIDTH(DATA_BITS),   // Valid values are 1-72 (37-72 only valid when FIFO_SIZE="36Kb")
+      .DEVICE("7SERIES"),  // Target device: "7SERIES" 
+      .FIFO_SIZE ("18Kb"), // Target BRAM: "18Kb" or "36Kb" 
+      .FIRST_WORD_FALL_THROUGH ("TRUE") // Sets the FIFO FWFT to "TRUE" or "FALSE" 
+    ) bram_fifo_dual_clock_unit (
+      .ALMOSTEMPTY(FIFO_ALMOSTEMPTY), // 1-bit output almost empty
+      .ALMOSTFULL(FIFO_ALMOSTFULL),   // 1-bit output almost full
+      .DO(FIFO_DOUT),                   // Output data, width defined by DATA_WIDTH parameter
+      .EMPTY(FIFO_EMPTY),             // 1-bit output empty
+      .FULL(FIFO_FULL),               // 1-bit output full
+      .RDCOUNT(FIFO_RDCOUNT),         // Output read count, width determined by FIFO depth
+      .RDERR(FIFO_RDERR),             // 1-bit output read error
+      .WRCOUNT(FIFO_WRCOUNT),         // Output write count, width determined by FIFO depth
+      .WRERR(FIFO_WRERR),             // 1-bit output write error
+      .DI(decoder_dout),                   // Input data, width defined by DATA_WIDTH parameter
+      .RDCLK(clk_sys),             // 1-bit input read clock
+      .RDEN(FIFO_RDEN),               // 1-bit input read enable      
+      .RST(reset_FIFO),                 // 1-bit input reset
+      .WRCLK(pclk),             // 1-bit input write clock
+      .WREN(decoder_data_valid)                // 1-bit input write enable
     );
     
-    // test stimulus;
-     dcmi_decoder_tb tb(.*);
+   // End of FIFO_DUALCLOCK_MACRO_inst instantiation
+				
     
     /* simulate system clk */
      always
@@ -120,14 +189,45 @@ module dcmi_decoder_top_tb();
            clk_sys = 1'b0;  
            #(T/2);
         end
-    
-     /* reset pulse */
-     initial
+    //reset pulse fo the user-systems;
+    initial
         begin
+            decoder_data_valid = 1'b0;
+            FIFO_RDEN = 1'b0;
+            start_stimulus = 1'b0;
+            
             reset_sys = 1'b1;
             #(T/2);
             reset_sys = 1'b0;
             #(T/2);
+        end
+     
+     /* reset pulse for the fifo;
+     bram fifo uses different reset because
+     it requires different conditions
+     ;*/
+     initial
+        begin
+            /* to satisfy the bram fifo condition 
+            1. RESET must be asserted for at least five read clock cycles;
+            2. RDEN must be low before RESET is active HIGH;
+            3. RDEN must remain low during this reset cycle
+            */
+            
+            /* another bram fifo condition
+            RST must be held high for at least five WRCLK clock cycles,
+             and WREN must be low before RST becomes active high, 
+             and WREN remains low during this reset cycle.
+            */
+            decoder_data_valid = 1'b0;
+            FIFO_RDEN = 1'b0;
+            reset_FIFO = 1'b1;
+            #(40*20);
+            #(T/2);
+            reset_FIFO = 1'b0;
+            #(40*10);
+            start_stimulus = 1'b1;
+            
         end
         
         
