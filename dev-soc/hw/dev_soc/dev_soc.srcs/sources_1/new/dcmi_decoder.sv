@@ -90,13 +90,17 @@ module dcmi_decoder
         */
         output logic data_valid,             // to the fifo;
         input logic data_ready,              // from the fifo; (not used by above)
-        output logic [DATA_BITS-1:0] dout   // sampled pixel data from the cam;               
+        output logic [DATA_BITS-1:0] dout,   // sampled pixel data from the cam;
+        
+        // debugging;
+        output logic debug_detect_vsync_edge               
     );
     
     /* signal declaration */
-    logic [DATA_BITS-1:0] sampled_reg;          // to sample din for dout;        
+    //logic [DATA_BITS-1:0] sampled_reg;          // to sample din for dout;        
     logic detect_vsync_edge;                    // to detect rising edge of the vsync;    
-    
+    assign debug_detect_vsync_edge = detect_vsync_edge;
+     
     // enable signales;
     logic sample_en;
         
@@ -120,20 +124,21 @@ module dcmi_decoder
             state_reg       <= ST_IDLE;            
             cnt_href_reg    <= 0;
             cnt_frame_reg   <= 0;
-            sampled_reg     <= 0;       // dummy;
+            //sampled_reg     <= 0;       // dummy;
         end
         else begin
             state_reg       <= state_next;
             cnt_href_reg    <= cnt_href_next;
             cnt_frame_reg   <= cnt_frame_next;
-            sampled_reg     <= din;            
+            //sampled_reg     <= din;            
         end    
     end
     
     /*  output; */    
     // this is only asserted when the frame start is detected and href is asserted;
-    assign data_valid   = sample_en;  
-    assign dout         = sampled_reg;
+    assign data_valid   = (sample_en && href);  
+    //assign dout         = sampled_reg;
+    assign dout = din;
     
     /* other helper unit: edge detector */
     rising_edge_detector 
@@ -170,6 +175,14 @@ module dcmi_decoder
         
             ST_WAIT_HREF: begin
                 if(href) begin
+                    // need to assert here the moment href is asserted;
+                    // otherwise it will only change at the next
+                    // rising edge of pclk;
+                    // which is undesirable since it could
+                    // mean that other input is clocked to the sink
+                    // register at this edge, if not becareful;
+                    sample_en = 1'b1;
+                    
                     state_next = ST_CHECK_HREF;
                 end            
             end
@@ -184,6 +197,8 @@ module dcmi_decoder
                     // check if a frame is completed;
                     if(cnt_href_reg == (HREF_TOTAL-1)) begin
                         cnt_frame_next = cnt_frame_reg + 1;
+                        // done;
+                        state_next = ST_IDLE;
                     end
                 end                
             end
