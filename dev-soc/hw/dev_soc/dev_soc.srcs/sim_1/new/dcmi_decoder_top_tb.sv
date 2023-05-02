@@ -172,7 +172,7 @@ module dcmi_decoder_top_tb();
       .WRERR(FIFO_WRERR),             // 1-bit output write error
       .DI(decoder_dout),                   // Input data, width defined by DATA_WIDTH parameter
       .RDCLK(clk_sys),             // 1-bit input read clock
-      .RDEN(FIFO_RDEN),               // 1-bit input read enable      
+      .RDEN((FIFO_RDEN&&!FIFO_EMPTY)),               // 1-bit input read enable      
       .RST(reset_FIFO),                 // 1-bit input reset
       .WRCLK(pclk),             // 1-bit input write clock
       .WREN(decoder_data_valid)                // 1-bit input write enable

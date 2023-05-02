@@ -51,10 +51,7 @@ program dcmi_decoder_tb
     /* test 01:
     start the decoder 
     followed by the emulator
-    */
-    @(posedge clk_sys);
-    decoder_data_ready <= 1'b1;
-    
+    */   
     @(posedge clk_sys);
     decoder_start <= 1'b1;
     
@@ -112,6 +109,42 @@ program dcmi_decoder_tb
     FIFO_RDEN <= 1'b1;
     
     // read all;
+    wait(FIFO_EMPTY == 1'b1);
+    
+    /* test 04;
+    enable the emulator and decoder;
+    once the fifo is non-empty; enable fifo read;
+    expect to see both supplying and consuming working
+    at the same time */
+    /* test 01:
+    start the decoder 
+    followed by the emulator
+    */
+    
+    @(posedge clk_sys);
+    decoder_start <= 1'b1;
+    
+    #(100);
+    @(posedge clk_sys);
+    emulator_start <= 1'b1;
+    
+    // disable both emulator and the decoder; 
+    // otherwise they will keep going forever;     
+    wait(frame_start_tick == 1'b1);
+    @(posedge clk_sys);
+    emulator_start <= 1'b0;
+    decoder_start <= 1'b0;
+    
+    // fifo has some content;
+    wait(FIFO_EMPTY == 1'b0);
+    @(posedge clk_sys);
+    FIFO_RDEN <= 1'b1;
+    
+    // not sure which side will finish first;
+    // but expect the dcmi to be slower since it is operating at 25MHz;
+    // slower than the fifo read side which operates at 100Mhz;
+    @(posedge clk_sys);
+    wait(frame_complete_tick == 1'b1);
     wait(FIFO_EMPTY == 1'b1);
     
     #(100);
