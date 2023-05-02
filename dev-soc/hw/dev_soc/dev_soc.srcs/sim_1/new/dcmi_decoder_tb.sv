@@ -36,6 +36,10 @@ program dcmi_decoder_tb
     );
     
     initial begin
+    /* test 01:
+    start the decoder 
+    followed by the emulator
+    */
     @(posedge clk_sys);
     decoder_start <= 1'b1;
     
@@ -43,15 +47,44 @@ program dcmi_decoder_tb
     @(posedge clk_sys);
     emulator_start <= 1'b1;
     
-    // deassert the emulator start otherwise it will 
-    // keep going forever;
+    // disable both emulator and the decoder; 
+    // otherwise they will keep going forever;     
     wait(frame_start_tick == 1'b1);
     @(posedge clk_sys);
-    emulator_start <= 1'b0; 
+    emulator_start <= 1'b0;
+    decoder_start <= 1'b0;
+     
     
     #(1000);
     wait(frame_complete_tick == 1'b1);
     #(100);
+    
+    /* test 02:
+    start the emulator;
+    halfway start the decoder after vsync has been asserted;
+    expect the decoder will not decode
+    anything since it misses the assertion of a start frame (i.e. vsync);
+    */
+    @(posedge pclk);
+    emulator_start <= 1'b1;
+    
+    wait(frame_start_tick == 1'b1);
+    @(posedge pclk);
+    decoder_start <= 1'b1;
+    
+    #(1000);
+    wait(frame_complete_tick == 1'b1);
+    #(100);
+    
+    /* test 02.1 
+    expect that here the decoder 
+    will NOT miss
+    */
+    wait(frame_start_tick == 1'b1);
+    #(1000);
+    wait(frame_complete_tick == 1'b1);
+    #(100);
+    
     
     $display("test ends");
     $stop;

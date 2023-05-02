@@ -52,6 +52,7 @@ module dcmi_decoder_top_tb();
     logic decoder_data_valid;
     logic decoder_data_ready;
     logic [DATA_BITS-1:0] decoder_dout;
+    logic debug_detect_vsync_edge;
     
     /* instantiation */
     // dcmi emulator;
@@ -96,7 +97,8 @@ module dcmi_decoder_top_tb();
         .din(emulator_dout),
         .data_valid(decoder_data_valid),
         .data_ready(decoder_data_ready),
-        .dout(decoder_dout)
+        .dout(decoder_dout),
+        .debug_detect_vsync_edge(debug_detect_vsync_edge)
         
     );
     
@@ -124,7 +126,7 @@ module dcmi_decoder_top_tb();
         
     /* monitoring system */
     initial begin
-        $monitor("time: %t, dec_start: %0b, href: %0b, vsync: %0b, din: %8H, dec_valid: %0b, dec_dout: %8H, uut.statereg: %s",
+        $monitor("time: %t, dec_start: %0b, href: %0b, vsync: %0b, din: %8H, dec_valid: %0b, dec_dout: %8H, frame_start: %0b, frame_complete: %0b, uut.statereg: %s, uut.detect_vsync_edge: %0b",
         $time,
         decoder_start,
         href,
@@ -132,7 +134,10 @@ module dcmi_decoder_top_tb();
         emulator_dout,
         decoder_data_valid,
         decoder_dout,
-        uut.state_reg.name
+        frame_start_tick,
+        frame_complete_tick,
+        uut.state_reg.name,
+        uut.detect_vsync_edge
         
         );
     end
