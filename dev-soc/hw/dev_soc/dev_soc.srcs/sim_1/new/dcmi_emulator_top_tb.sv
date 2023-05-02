@@ -43,7 +43,9 @@ module dcmi_emulator_top_tb();
     localparam BUFFER_START_PERIOD = 10;    // between vsync assertion and href assertion;
     localparam BUFFER_END_PERIOD   = 1;	    // between the frame end and the frame start;
     localparam HREF_TOTAL          = 5;     // total href assertion to generate;
-    localparam PIXEL_BYTE_TOTAL    = 10;    // 320 pixels per href with bp = 16-bit; 
+    //localparam HREF_TOTAL          = 240;     // total href assertion to generate;
+    localparam PIXEL_BYTE_TOTAL    = 10;    // 320 pixels per href with bp = 16-bit;
+    //localparam PIXEL_BYTE_TOTAL    = 640;    // 320 pixels per href with bp = 16-bit; 
     
     
     /* simulate clk */
