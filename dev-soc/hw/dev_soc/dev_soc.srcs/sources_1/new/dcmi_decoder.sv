@@ -93,7 +93,11 @@ module dcmi_decoder
         output logic [DATA_BITS-1:0] dout,   // sampled pixel data from the cam;
         
         // debugging;
-        output logic debug_detect_vsync_edge               
+        output logic debug_detect_vsync_edge,
+        
+        // status
+        output logic decoder_complete_tick, // when the entire frame has been decoded;
+        output logic decoder_start_tick     // when a new frame is detected;               
     );
     
     /* signal declaration */
@@ -153,8 +157,14 @@ module dcmi_decoder
     /*  fsm; */    
     always_comb begin
         // default;
-        state_next = state_reg;                
+        state_next = state_reg;
+        cnt_frame_next = cnt_frame_reg;
+        cnt_href_next = cnt_href_reg;
+        
         sample_en = 1'b0;
+       
+        decoder_complete_tick   = 1'b0;
+        decoder_start_tick      = 1'b0;
         
         case(state_reg)
             ST_IDLE: begin
