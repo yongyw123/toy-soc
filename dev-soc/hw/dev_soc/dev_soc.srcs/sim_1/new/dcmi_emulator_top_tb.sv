@@ -37,12 +37,13 @@ module dcmi_emulator_top_tb();
     logic frame_start_tick;
     
     /* uut parameters; */
-    localparam PCLK_MOD            = 4;    // 100/4 = 25;
-    localparam VSYNC_LOW           = 10;   //vlow;
-    localparam HREF_LOW            = 5;    // hlow; 
-    localparam BUFFER_PERIOD       = 7;    // between vsync assertion and href assertion;
-    localparam HREF_TOTAL          = 5;  // total href assertion to generate;
-    localparam PIXEL_BYTE_TOTAL    = 10;  // 320 pixels per href with bp = 16-bit; 
+    localparam PCLK_MOD            = 4;     // 100/4 = 25;
+    localparam VSYNC_LOW           = 10;    //vlow;
+    localparam HREF_LOW            = 5;     // hlow; 
+    localparam BUFFER_START_PERIOD = 10;    // between vsync assertion and href assertion;
+    localparam BUFFER_END_PERIOD   = 1;	    // between the frame end and the frame start;
+    localparam HREF_TOTAL          = 5;     // total href assertion to generate;
+    localparam PIXEL_BYTE_TOTAL    = 10;    // 320 pixels per href with bp = 16-bit; 
     
     
     /* simulate clk */
@@ -70,7 +71,8 @@ module dcmi_emulator_top_tb();
      .PCLK_MOD(PCLK_MOD),
      .VSYNC_LOW(VSYNC_LOW),
      .HREF_LOW(HREF_LOW),
-     .BUFFER_PERIOD(BUFFER_PERIOD),
+     .BUFFER_START_PERIOD(BUFFER_START_PERIOD),
+     .BUFFER_END_PERIOD(BUFFER_END_PERIOD),
      .HREF_TOTAL(HREF_TOTAL),
      .PIXEL_BYTE_TOTAL(PIXEL_BYTE_TOTAL)
      )
@@ -93,24 +95,5 @@ module dcmi_emulator_top_tb();
         frame_complete_tick,
         uut.state_reg.name        
         );
-        
-        
-     end
-     /*
-     initial begin
-        $monitor("time: %t, start: %0b, vsync: %0b, href: %0b, dout: %8B, frame_start: %0b, frame_end: %0b, uut.state_reg: %0s, uut.pixel_byte_reg: %D",
-        $time,
-        start,
-        vsync,
-        href,
-        dout,
-        frame_start_tick,
-        frame_complete_tick,
-        uut.state_reg.name,
-        uut.pixel_byte_reg
-        );
-        
-        
-     end
-     */
+     end     
 endmodule
