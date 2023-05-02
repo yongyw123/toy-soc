@@ -96,6 +96,7 @@ module dcmi_decoder
         output logic debug_detect_vsync_edge,
         
         // status
+        output logic [FRAME_COUNTER_WIDTH-1:0] decoded_frame_counter, // this will overflow;
         output logic decoder_complete_tick, // when the entire frame has been decoded;
         output logic decoder_start_tick     // when a new frame is detected;               
     );
@@ -133,15 +134,24 @@ module dcmi_decoder
         else begin
             state_reg       <= state_next;
             cnt_href_reg    <= cnt_href_next;
+            
+            // this will forever add up until overflow or reset;
             cnt_frame_reg   <= cnt_frame_next;
             //sampled_reg     <= din;            
         end    
     end
     
     /*  output; */    
+    /* when is the data valid for the sinking fifo to accept new pixel data? */
     // this is only asserted when the frame start is detected and href is asserted;
-    assign data_valid   = (sample_en && href);  
+    // it is unlikely to have the sink not ready since the sink (consuming)
+    // rate is 100Mhz; higher than the camera output rate (24MHz)?
+    assign data_valid   = (sample_en && href && data_ready);  
     //assign dout         = sampled_reg;
+    
+    /* just pass it through the data from the camera directly;
+    this is ok since the sinking fifo will only 
+    accept at the assertion of data valid */
     assign dout = din;
     
     /* other helper unit: edge detector */
@@ -169,9 +179,7 @@ module dcmi_decoder
         case(state_reg)
             ST_IDLE: begin
                 if(cmd_start) begin
-                    state_next = ST_WAIT_VSYNC;
-                    // reset the frame counter;
-                    cnt_frame_next = 0;
+                    state_next = ST_WAIT_VSYNC;                    
                 end            
             end
             
@@ -215,4 +223,8 @@ module dcmi_decoder
         default: ; // nop
         endcase    
     end
+    
+    // output;
+    assign decoded_frame_counter = cnt_frame_reg;
+     
 endmodule
