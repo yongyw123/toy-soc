@@ -41,12 +41,11 @@ module dcmi_decoder_top_tb();
     
     localparam PCLK_MOD            = 4;   // 100/4 = 25;
     localparam VSYNC_LOW           = 10;   //vlow;
-    localparam HREF_LOW            = 5;    // hlow; 
+    localparam HREF_LOW            = 3;    // hlow; 
     localparam BUFFER_START_PERIOD = 7;    // between vsync assertion and href assertion;
-	localparam BUFFER_END_PERIOD   = 5;	// between the frame end and the frame start;
+	localparam BUFFER_END_PERIOD   = 1;	// between the frame end and the frame start;
     localparam HREF_TOTAL          = 4;  // total href assertion to generate;
     localparam PIXEL_BYTE_TOTAL    = 14;   // 320 pixels per href with bp = 16-bit;
-     
     
     // signals for uut: dcmi decoder;
     logic decoder_start;
@@ -94,7 +93,7 @@ module dcmi_decoder_top_tb();
         .pclk(pclk),
         .href(href),
         .vsync(vsync),
-        .din(emulated_dout),
+        .din(emulator_dout),
         .data_valid(decoder_data_valid),
         .data_ready(decoder_data_ready),
         .dout(decoder_dout)
@@ -103,8 +102,6 @@ module dcmi_decoder_top_tb();
     
     // test stimulus;
      dcmi_decoder_tb tb(.*);
-     
-    
     
     /* simulate system clk */
      always
@@ -123,6 +120,22 @@ module dcmi_decoder_top_tb();
             reset_sys = 1'b0;
             #(T/2);
         end
+        
+        
+    /* monitoring system */
+    initial begin
+        $monitor("time: %t, dec_start: %0b, href: %0b, vsync: %0b, din: %8H, dec_valid: %0b, dec_dout: %8H, uut.statereg: %s",
+        $time,
+        decoder_start,
+        href,
+        vsync,
+        emulator_dout,
+        decoder_data_valid,
+        decoder_dout,
+        uut.state_reg.name
+        
+        );
+    end
         
 
 endmodule
