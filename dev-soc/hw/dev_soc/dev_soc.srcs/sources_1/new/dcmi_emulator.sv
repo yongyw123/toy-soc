@@ -56,14 +56,33 @@ Frame Timing;
 
 /* assumption;
 1. 24MHz pclk cannot be emulated using 100Mhz system clock;
-2. instead, we shall emulate 25Mhz
+2. instead, we shall emulate 25Mhz;
+3. also, the timing parameters above will not be emulated exactly;
+    instead, dummy values are replaced;
+    for example; instead of having vlow as 2496*pclk; we have 10*pclk;
+    nonetheless; we shall respect the relative difference among
+    different timing parameters;
 */
 
 module dcmi_emulator
-    #(parameter DATA_BITS = 8)
+    #(parameter 
+    DATA_BITS = 8, // camera could only transmit 8-bit in parallel at at time;
+    
+    // dcmi sync;
+    PCLK_MOD            = 4,    // 100/4 = 25;
+    VSYNC_LOW           = 10,   //vlow;
+    HREF_LOW            = 5,    // hlow; 
+    BUFFER_PERIOD       = 7,    // between vsync assertion and href assertion;
+    HREF_TOTAL          = 240,  // total href assertion to generate;
+    PIXEL_BYTE_TOTAL    = 640   // 320 pixels per href with bp = 16-bit; 
+    
+    )
     (
         input logic clk_sys,    // 100 MHz;
         input logic reset_sys,  // async;
+        
+        // user command;
+        input logic start,
         
         // output; sycnhronization signals + dummy pixel data byte;
         output logic pclk,  // fixed at 25 MHz (cannot emulate 24MHz using 100MHz clock);
@@ -72,11 +91,17 @@ module dcmi_emulator
         output logic [DATA_BITS-1:0] dout        
     );
     
-    // constants;
-    localparam PCLK_MOD = 4; // 100/4 = 25;
-        
+    // state;
+    typedef enum{ST_IDLE, ST_VSYNC, ST_BUFFER, ST_HREF_ACTIVE, ST_HREF_REST, ST_BUFFER_END} state_type;
+    state_type state_reg, state_next;
+      
     // registers;
-    logic [3:0] cnt_pclk_reg, cnt_pclk_next;    
+    logic [3:0] cnt_pclk_reg, cnt_pclk_next;        // simulate 25 pclk from 100Mhz system clock;    
+    logic [31:0] vsync_low_reg, vsync_low_next;             // simulate vsync low period before becoming active;
+    logic [31:0] href_cnt_reg, href_cnt_next;       // count how many href asserted so far; should match with HREF_TOTAL;
+    logic [31:0] href_low_reg, href_low_next;       // simulate href low period in between data valid;
+    logic [31:0] buffer_reg, buffer_next;           // simulate buffer zone after vsync is asserted but before href asserted;
+    logic [31:0] pixel_byte_reg, pixel_byte_next;   // simulate pixel out in 8-bit;
     
     // simulate the pclk;
     always_ff @(posedge clk_sys, posedge reset_sys) begin
@@ -95,6 +120,120 @@ module dcmi_emulator
             pclk = 1'b1;
         else
             pclk = 1'b0;
+    end
+    
+    // simulate other synchronization signals based on the pclk;
+    // prepare all signals at the falling edge of the pclk;
+    
+    always_ff @(negedge pclk, posedge reset_sys) begin
+        if(reset_sys) begin
+            vsync_low_reg   <= 0;
+            href_cnt_reg    <= 0;
+            href_low_reg    <= 0;        
+            buffer_reg      <= 0;
+            pixel_byte_reg  <= 0;
+            state_reg       <= ST_IDLE;
+        end
+        else begin
+            vsync_low_reg   <= vsync_low_next;
+            href_cnt_reg    <= href_cnt_next;
+            href_low_reg    <= href_low_next;
+            buffer_reg      <= buffer_next;
+            pixel_byte_reg  <= pixel_byte_next;
+            state_reg       <= state_next;                    
+        end
+    
+    end
+    
+    always_comb begin
+        // default;
+        vsync   = 1'b1;    
+        href    = 1'b0;    // active high;
+        
+        vsync_low_next  = vsync_low_reg;
+        href_cnt_next   = href_cnt_reg;
+        href_low_next   = href_low_reg;
+        buffer_next     = buffer_reg;
+        pixel_byte_next = pixel_byte_reg;
+        state_next      = state_reg;
+        
+        case(state_reg)
+            ST_IDLE: begin
+                if(start) begin
+                    state_next = ST_VSYNC;
+                    vsync_low_next = 0;     // reload the counter;
+                end
+           end
+                
+            ST_VSYNC: begin
+                vsync = 1'b0;
+                if(vsync_low_reg == VSYNC_LOW) begin
+                    state_next      = ST_BUFFER;
+                    vsync_low_next  = 0; // reset;
+                    buffer_next     = 0;    // reload;
+                end    
+                else begin
+                    vsync_low_next = vsync_low_reg + 1;
+                end            
+            end
+            
+            ST_BUFFER: begin
+                // this state is the buffer zone between the vsync de/assertion and href de/assertion;
+                if(buffer_reg == BUFFER_PERIOD) begin
+                    state_next       = ST_HREF_ACTIVE;
+                    buffer_next      = 0; // reset;
+                    pixel_byte_next  = 0;
+                    href_cnt_next    = 0;
+                end
+                else begin
+                    buffer_next = buffer_reg + 1;                
+                end
+            end
+            
+            ST_HREF_ACTIVE: begin
+                href = 1'b1;
+                if(pixel_byte_reg == PIXEL_BYTE_TOTAL) begin
+                    state_next      = ST_HREF_REST;
+                    href_low_next   = 0;
+                end
+                else begin
+                    pixel_byte_next = pixel_byte_reg + 1;
+                end
+            end
+            
+            ST_HREF_REST: begin
+                href = 1'b0;
+                if(href_low_reg == HREF_LOW) begin
+                   state_next       = ST_HREF_ACTIVE;
+                   pixel_byte_next  = 0;     
+                   
+                   // check if all href has been processed;
+                   /// if so, the frame is comoplete;
+                   if(href_cnt_reg == HREF_TOTAL) begin
+                        state_next  = ST_BUFFER_END;
+                        buffer_next = 0;
+                   end   
+                   else begin
+                        href_cnt_next = href_cnt_reg + 1;
+                   end               
+                end
+                else begin
+                    href_low_next = href_low_reg + 1;                
+                end            
+            end
+            
+            ST_BUFFER_END: begin
+                if(buffer_reg == BUFFER_PERIOD) begin
+                    // done;
+                    state_next = ST_IDLE;
+                end
+                else begin
+                    buffer_next = buffer_reg + 1;
+                end
+            end
+            
+        default: ;  // nop;
+        endcase
     end
     
 endmodule
