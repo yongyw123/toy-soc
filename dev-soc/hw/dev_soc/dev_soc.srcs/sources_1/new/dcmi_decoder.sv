@@ -142,7 +142,7 @@ module dcmi_decoder
         .clk(pclk),
         .reset(reset_sys),
         .level(vsync),
-        .detected(detec_vsync_edge)
+        .detected(detect_vsync_edge)
     );
 
     /*  fsm; */    
