@@ -179,7 +179,7 @@ module dcmi_emulator
                 
             ST_VSYNC: begin
                 vsync = 1'b0;               
-                if(vsync_low_reg == VSYNC_LOW) begin
+                if(vsync_low_reg == (VSYNC_LOW-1)) begin
                     state_next      = ST_BUFFER;
                     buffer_next     = 0;    // reload;
                 end    
@@ -191,7 +191,7 @@ module dcmi_emulator
             ST_BUFFER: begin
                 frame_start_tick = 1'b1;
                 // this state is the buffer zone between the vsync de/assertion and href de/assertion;
-                if(buffer_reg == BUFFER_PERIOD) begin
+                if(buffer_reg == (BUFFER_PERIOD-1)) begin
                     state_next       = ST_HREF_ACTIVE;
                     buffer_next      = 0; // reset;
                     pixel_byte_next  = 0;
@@ -204,7 +204,7 @@ module dcmi_emulator
             
             ST_HREF_ACTIVE: begin
                 href = 1'b1;                
-                if(pixel_byte_reg == PIXEL_BYTE_TOTAL) begin
+                if(pixel_byte_reg == (PIXEL_BYTE_TOTAL-1)) begin
                     state_next      = ST_HREF_REST;
                     href_low_next   = 0;
                 end
@@ -215,13 +215,13 @@ module dcmi_emulator
             
             ST_HREF_REST: begin
                 href = 1'b0;                
-                if(href_low_reg == HREF_LOW) begin
+                if(href_low_reg == (HREF_LOW-1)) begin
                    state_next       = ST_HREF_ACTIVE;
                    pixel_byte_next  = 0;     
                    
                    // check if all href has been processed;
                    /// if so, the frame is comoplete;
-                   if(href_cnt_reg == HREF_TOTAL) begin
+                   if(href_cnt_reg == (HREF_TOTAL-1)) begin
                     
                         state_next  = ST_BUFFER_END;
                         buffer_next = 0;
@@ -236,10 +236,11 @@ module dcmi_emulator
             end
             
             ST_BUFFER_END: begin
-                frame_complete_tick = 1'b1;
-                if(buffer_reg == BUFFER_PERIOD) begin
+                
+                if(buffer_reg == (BUFFER_PERIOD-1)) begin
                     // done;
                     state_next = ST_IDLE;
+                    frame_complete_tick = 1'b1;
                 end
                 else begin
                     buffer_next = buffer_reg + 1;
