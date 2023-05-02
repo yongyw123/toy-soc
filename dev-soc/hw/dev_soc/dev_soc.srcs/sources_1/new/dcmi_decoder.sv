@@ -67,7 +67,7 @@ module dcmi_decoder
     #(parameter 
         DATA_BITS           = 8, // camera ov7670 drives 8-bit parallel data;
         HREF_COUNTER_WIDTH  = 8,  // to count href;
-        HREF_NUM            = 240, // expected to have 240 href for a line;
+        HREF_TOTAL          = 240, // expected to have 240 href for a line;
         FRAME_COUNTER_WIDTH = 32    // count the number of frames;        
      )
     (
@@ -182,7 +182,7 @@ module dcmi_decoder
                     // one href is done;
                     cnt_href_next = cnt_href_reg + 1;
                     // check if a frame is completed;
-                    if(cnt_href_reg == HREF_NUM) begin
+                    if(cnt_href_reg == (HREF_TOTAL-1)) begin
                         cnt_frame_next = cnt_frame_reg + 1;
                     end
                 end                
