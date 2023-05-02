@@ -188,6 +188,8 @@ module dcmi_decoder
                     // reload the counter for href;
                     cnt_href_next = 0;
                     state_next = ST_WAIT_HREF;
+                    // flag it;
+                    decoder_start_tick = 1'b1;
                 end
             end
         
@@ -217,6 +219,10 @@ module dcmi_decoder
                         cnt_frame_next = cnt_frame_reg + 1;
                         // done;
                         state_next = ST_IDLE;
+                        
+                        // flag it;
+                        decoder_complete_tick = 1'b1;
+                        
                     end
                 end                
             end
