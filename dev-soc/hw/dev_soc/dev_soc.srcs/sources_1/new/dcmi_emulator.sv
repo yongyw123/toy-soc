@@ -88,7 +88,12 @@ module dcmi_emulator
         output logic pclk,  // fixed at 25 MHz (cannot emulate 24MHz using 100MHz clock);
         output logic vsync, 
         output logic href,
-        output logic [DATA_BITS-1:0] dout        
+        output logic [DATA_BITS-1:0] dout,
+        
+        // status;
+        output logic frame_start_tick,
+        output logic frame_complete_tick
+              
     );
     
     // state;
@@ -115,7 +120,7 @@ module dcmi_emulator
     
     assign cnt_pclk_next = (cnt_pclk_reg == PCLK_MOD-1) ? 0 : (cnt_pclk_reg + 1);
     always_comb begin
-        pclk = 1'b0;
+        //pclk = 1'b0;
         if(cnt_pclk_reg < 2)
             pclk = 1'b1;
         else
@@ -133,6 +138,7 @@ module dcmi_emulator
             buffer_reg      <= 0;
             pixel_byte_reg  <= 0;
             state_reg       <= ST_IDLE;
+            
         end
         else begin
             vsync_low_reg   <= vsync_low_next;
@@ -140,15 +146,20 @@ module dcmi_emulator
             href_low_reg    <= href_low_next;
             buffer_reg      <= buffer_next;
             pixel_byte_reg  <= pixel_byte_next;
-            state_reg       <= state_next;                    
+            state_reg       <= state_next;   
+                 
         end
     
     end
+    
     
     always_comb begin
         // default;
         vsync   = 1'b1;    
         href    = 1'b0;    // active high;
+        
+        frame_complete_tick = 1'b0;
+        frame_start_tick    = 1'b0;
         
         vsync_low_next  = vsync_low_reg;
         href_cnt_next   = href_cnt_reg;
@@ -157,6 +168,7 @@ module dcmi_emulator
         pixel_byte_next = pixel_byte_reg;
         state_next      = state_reg;
         
+            
         case(state_reg)
             ST_IDLE: begin
                 if(start) begin
@@ -166,10 +178,9 @@ module dcmi_emulator
            end
                 
             ST_VSYNC: begin
-                vsync = 1'b0;
+                vsync = 1'b0;               
                 if(vsync_low_reg == VSYNC_LOW) begin
                     state_next      = ST_BUFFER;
-                    vsync_low_next  = 0; // reset;
                     buffer_next     = 0;    // reload;
                 end    
                 else begin
@@ -178,6 +189,7 @@ module dcmi_emulator
             end
             
             ST_BUFFER: begin
+                frame_start_tick = 1'b1;
                 // this state is the buffer zone between the vsync de/assertion and href de/assertion;
                 if(buffer_reg == BUFFER_PERIOD) begin
                     state_next       = ST_HREF_ACTIVE;
@@ -191,7 +203,7 @@ module dcmi_emulator
             end
             
             ST_HREF_ACTIVE: begin
-                href = 1'b1;
+                href = 1'b1;                
                 if(pixel_byte_reg == PIXEL_BYTE_TOTAL) begin
                     state_next      = ST_HREF_REST;
                     href_low_next   = 0;
@@ -202,7 +214,7 @@ module dcmi_emulator
             end
             
             ST_HREF_REST: begin
-                href = 1'b0;
+                href = 1'b0;                
                 if(href_low_reg == HREF_LOW) begin
                    state_next       = ST_HREF_ACTIVE;
                    pixel_byte_next  = 0;     
@@ -210,6 +222,7 @@ module dcmi_emulator
                    // check if all href has been processed;
                    /// if so, the frame is comoplete;
                    if(href_cnt_reg == HREF_TOTAL) begin
+                    
                         state_next  = ST_BUFFER_END;
                         buffer_next = 0;
                    end   
@@ -223,6 +236,7 @@ module dcmi_emulator
             end
             
             ST_BUFFER_END: begin
+                frame_complete_tick = 1'b1;
                 if(buffer_reg == BUFFER_PERIOD) begin
                     // done;
                     state_next = ST_IDLE;
@@ -232,7 +246,7 @@ module dcmi_emulator
                 end
             end
             
-        default: ;  // nop;
+            default: ;  // nop;
         endcase
     end
     
