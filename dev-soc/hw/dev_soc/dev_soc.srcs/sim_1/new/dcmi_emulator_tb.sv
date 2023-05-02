@@ -20,46 +20,34 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module dcmi_emulator_tb();
-    // general;
-    localparam T = 10;  // system clock period: 10ns;
-    logic clk_sys;          // common system clock;
-    logic reset_sys;        // async system clock;
+program dcmi_emulator_tb
+    (
+        input logic pclk,
+        output logic start,
+        input logic frame_complete_tick,
+        input logic frame_start_tick
+       
+    );
     
-    // uut signals
-    localparam DATA_BITS = 8;
-    logic pclk;  // fixed at 25 MHz (cannot emulate 24MHz using 100MHz clock);
-    logic vsync; 
-    logic href;
-    logic [DATA_BITS-1:0] dout;
     
-    /* simulate clk */
-     always
-        begin 
-           clk_sys = 1'b1;  
-           #(T/2); 
-           clk_sys = 1'b0;  
-           #(T/2);
-        end
-    
-     /* reset pulse */
-     initial
-        begin
-            reset_sys = 1'b1;
-            #(T/2);
-            reset_sys = 1'b0;
-            #(T/2);
-        end
+    initial begin
+     @(posedge pclk);
+     start <= 1'b0;
      
-     // uut;
-     dcmi_emulator uut(.*);
+     @(posedge pclk);
+     start <= 1'b1;
      
-     initial begin
-     
+     wait(frame_start_tick == 1'b1);     
+     @(posedge pclk);
+     start <= 1'b0;
      
      #(1000);
+     
+     wait(frame_complete_tick == 1'b1);
+     
+     $display("test ends");
+     #(50);
      $stop;
      end
-     
     
-endmodule
+endprogram
