@@ -31,6 +31,7 @@ program dcmi_emulator_tb
     
     
     initial begin
+     /* first start */
      @(posedge pclk);
      start <= 1'b0;
      
@@ -44,6 +45,20 @@ program dcmi_emulator_tb
      #(1000);
      
      wait(frame_complete_tick == 1'b1);
+     
+     /* second start */
+     @(posedge pclk);
+     start <= 1'b1;
+     
+     wait(frame_start_tick == 1'b1);     
+     @(posedge pclk);
+     start <= 1'b0;
+     
+     #(1000);
+     
+     wait(frame_complete_tick == 1'b1);
+     
+     
      
      $display("test ends");
      #(50);
