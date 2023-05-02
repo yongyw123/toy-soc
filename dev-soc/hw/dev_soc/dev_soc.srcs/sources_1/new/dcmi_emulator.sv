@@ -96,6 +96,9 @@ module dcmi_emulator
               
     );
     
+    // constanst;
+    localparam INVALID_DATA = {DATA_BITS{1'b0}};    // when href is not asserted, data is always LOW:
+    
     // state;
     typedef enum{ST_IDLE, ST_VSYNC, ST_BUFFER, ST_HREF_ACTIVE, ST_HREF_REST, ST_BUFFER_END} state_type;
     state_type state_reg, state_next;
@@ -137,7 +140,7 @@ module dcmi_emulator
             href_low_reg    <= 0;        
             buffer_reg      <= 0;
             pixel_byte_reg  <= 0;
-            state_reg       <= ST_IDLE;
+            state_reg       <= ST_IDLE;         
             
         end
         else begin
@@ -147,16 +150,15 @@ module dcmi_emulator
             buffer_reg      <= buffer_next;
             pixel_byte_reg  <= pixel_byte_next;
             state_reg       <= state_next;   
-                 
         end
-    
     end
-    
     
     always_comb begin
         // default;
         vsync   = 1'b1;    
         href    = 1'b0;    // active high;
+        
+        dout = INVALID_DATA;
         
         frame_complete_tick = 1'b0;
         frame_start_tick    = 1'b0;
@@ -167,8 +169,7 @@ module dcmi_emulator
         buffer_next     = buffer_reg;
         pixel_byte_next = pixel_byte_reg;
         state_next      = state_reg;
-        
-            
+
         case(state_reg)
             ST_IDLE: begin
                 if(start) begin
@@ -203,18 +204,24 @@ module dcmi_emulator
             end
             
             ST_HREF_ACTIVE: begin
-                href = 1'b1;                
+                href = 1'b1;
+                dout = (DATA_BITS'($random));
+                // within an active HREF, there should be a fixed (targeted) number of bytes sent;                
                 if(pixel_byte_reg == (PIXEL_BYTE_TOTAL-1)) begin
                     state_next      = ST_HREF_REST;
                     href_low_next   = 0;
                 end
+                // start loading the data for the sink to sample;
+                // and start counting the pxiel sents within an active HREF;
                 else begin
                     pixel_byte_next = pixel_byte_reg + 1;
+                    
                 end
             end
             
             ST_HREF_REST: begin
-                href = 1'b0;                
+                // there should be no data in this period;
+                href = 1'b0;
                 if(href_low_reg == (HREF_LOW-1)) begin
                    state_next       = ST_HREF_ACTIVE;
                    pixel_byte_next  = 0;     
@@ -249,6 +256,5 @@ module dcmi_emulator
             
             default: ;  // nop;
         endcase
-    end
-    
+    end    
 endmodule
