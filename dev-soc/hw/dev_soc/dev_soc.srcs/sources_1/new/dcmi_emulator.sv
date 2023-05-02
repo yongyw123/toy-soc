@@ -72,7 +72,8 @@ module dcmi_emulator
     PCLK_MOD            = 4,    // 100/4 = 25;
     VSYNC_LOW           = 10,   //vlow;
     HREF_LOW            = 5,    // hlow; 
-    BUFFER_PERIOD       = 7,    // between vsync assertion and href assertion;
+    BUFFER_START_PERIOD = 7,    // between vsync assertion and href assertion;
+	BUFFER_END_PERIOD 	= 5,	// between the frame end and the frame start;
     HREF_TOTAL          = 240,  // total href assertion to generate;
     PIXEL_BYTE_TOTAL    = 640   // 320 pixels per href with bp = 16-bit; 
     
@@ -192,7 +193,7 @@ module dcmi_emulator
             ST_BUFFER: begin
                 frame_start_tick = 1'b1;
                 // this state is the buffer zone between the vsync de/assertion and href de/assertion;
-                if(buffer_reg == (BUFFER_PERIOD-1)) begin
+                if(buffer_reg == (BUFFER_START_PERIOD-1)) begin
                     state_next       = ST_HREF_ACTIVE;
                     buffer_next      = 0; // reset;
                     pixel_byte_next  = 0;
@@ -244,7 +245,7 @@ module dcmi_emulator
             
             ST_BUFFER_END: begin
                 
-                if(buffer_reg == (BUFFER_PERIOD-1)) begin
+                if(buffer_reg == (BUFFER_END_PERIOD-1)) begin
                     // done;
                     state_next = ST_IDLE;
                     frame_complete_tick = 1'b1;
