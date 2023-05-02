@@ -55,12 +55,12 @@ Frame Timing;
 2. define;
     tpclk   : the time period of PCLK;
     tp      : if YUV/RGB, tp = 2*tpclk; 
-    tline   : a constant: tline = 784*tp;
+    tline   : a constant: tline = 624*tp (approx.)
 
 4. we have:
     tpclk   : 41.67 ns
-    vlow    : 3*tline = 4704*tpclk;
-    hlow    : at least >= 2*144*tp = 244*tpclk;  
+    vlow    : at least, 3*tline = 2496*tpclk;
+    hlow    : at least, 2*144*tp = 244*tpclk;  
 */
 
 module dcmi_decoder
@@ -190,5 +190,4 @@ module dcmi_decoder
         default: ; // nop
         endcase    
     end
-    
 endmodule
