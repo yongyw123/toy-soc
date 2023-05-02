@@ -48,11 +48,15 @@ module dcmi_decoder_top_tb();
     localparam PIXEL_BYTE_TOTAL    = 14;   // 320 pixels per href with bp = 16-bit;
     
     // signals for uut: dcmi decoder;
+    localparam FRAME_COUNTER_WIDTH = 32;
     logic decoder_start;
     logic decoder_data_valid;
     logic decoder_data_ready;
     logic [DATA_BITS-1:0] decoder_dout;
     logic debug_detect_vsync_edge;
+    logic decoder_complete_tick; // when the entire frame has been decoded;
+    logic decoder_start_tick;     // when a new frame is detected;
+    logic [FRAME_COUNTER_WIDTH-1:0] decoded_frame_counter; // this will overflow;
     
     /* instantiation */
     // dcmi emulator;
@@ -76,7 +80,7 @@ module dcmi_decoder_top_tb();
         .href(href),
         .dout(emulator_dout),
         .frame_start_tick(frame_start_tick),
-        .frame_complete_tick(frame_complete_tick)    
+        .frame_complete_tick(frame_complete_tick)        
     );
     
     // uut;
@@ -85,7 +89,7 @@ module dcmi_decoder_top_tb();
         .DATA_BITS(DATA_BITS),
         .HREF_COUNTER_WIDTH(8),
         .HREF_TOTAL(HREF_TOTAL),
-        .FRAME_COUNTER_WIDTH(32) 
+        .FRAME_COUNTER_WIDTH(FRAME_COUNTER_WIDTH) 
     )
     uut
     (
@@ -98,7 +102,10 @@ module dcmi_decoder_top_tb();
         .data_valid(decoder_data_valid),
         .data_ready(decoder_data_ready),
         .dout(decoder_dout),
-        .debug_detect_vsync_edge(debug_detect_vsync_edge)
+        .debug_detect_vsync_edge(debug_detect_vsync_edge),
+        .decoder_complete_tick(decoder_complete_tick), // when the entire frame has been decoded;
+        .decoder_start_tick(decoder_start_tick),     // when a new frame is detected;
+        .decoded_frame_counter(decoded_frame_counter)   
         
     );
     

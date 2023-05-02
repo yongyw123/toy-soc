@@ -31,7 +31,9 @@ program dcmi_decoder_tb
         input logic frame_complete_tick,
         
         // decoder;
-        output logic decoder_start
+        output logic decoder_start,
+        output logic decoder_data_ready, // from the sinking fifo to the decoder;
+        input logic decoder_data_valid  // from the decoder to the fifo;
         
     );
     
@@ -40,6 +42,9 @@ program dcmi_decoder_tb
     start the decoder 
     followed by the emulator
     */
+    @(posedge clk_sys);
+    decoder_data_ready <= 1'b1;
+    
     @(posedge clk_sys);
     decoder_start <= 1'b1;
     
@@ -83,9 +88,20 @@ program dcmi_decoder_tb
     wait(frame_start_tick == 1'b1);
     #(1000);
     wait(frame_complete_tick == 1'b1);
+    
+    
+    
+    /* test 03;
+    test fifo (sink) data ready to the decoder;
+    expect that if fifo is not ready;
+    decoder will NOT start*/
+    @(posedge pclk);
+    decoder_data_ready <= 1'b0;
+    
+    wait(frame_start_tick == 1'b1);
+    #(1000);
+    wait(frame_complete_tick == 1'b1);
     #(100);
-    
-    
     $display("test ends");
     $stop;
     end
