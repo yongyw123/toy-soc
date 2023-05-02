@@ -109,9 +109,9 @@ module dcmi_decoder
     ST_IDLE         : doing nothing; waiting for user command to start the dcmi decoder;
     ST_WAIT_VSYNC   : waiting for the rising edge of vsync;
     ST_WAIT_HREF    : waiting for the HREF to assert;
-    ST_CNT_HREF     : count the number of href's encountered;
+    ST_CHECK_HREF   : check for HREF to deassert;
     */ 
-    typedef enum{ST_IDLE, ST_WAIT_VSYNC, ST_WAIT_HREF, ST_CNT_HREF} state_type;
+    typedef enum{ST_IDLE, ST_WAIT_VSYNC, ST_WAIT_HREF, ST_CHECK_HREF} state_type;
     state_type state_reg, state_next;
     
     // ff;
@@ -170,11 +170,11 @@ module dcmi_decoder
         
             ST_WAIT_HREF: begin
                 if(href) begin
-                    state_next = ST_CNT_HREF;
+                    state_next = ST_CHECK_HREF;
                 end            
             end
           
-            ST_CNT_HREF: begin
+            ST_CHECK_HREF: begin
                 sample_en = 1'b1;
                 // href deasserted == data not valid;
                 if(!href) begin
