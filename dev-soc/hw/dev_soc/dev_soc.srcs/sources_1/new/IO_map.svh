@@ -532,16 +532,26 @@ Issue + Constraint:
     ensure all internal states are reset to correct values. During Reset, both RDEN and WREN
     must be deasserted (held Low).
     
-4. As such, a dedicated FIFO reset register is created for the above;
-5. This is controlled by the SW driver; and the HW is responsible
-    to return whether the FIFO is OK to use; (hence the whole
-    system is ready to use);
+        Summary: 
+            // read;
+            1. RESET must be asserted for at least five read clock cycles;
+            2. RDEN must be low before RESET is active HIGH;
+            3. RDEN must remain low during this reset cycle
+            4. RDEN must be low for at least two RDCLK clock cycles after RST deasserted
+            
+            // write;
+            1. RST must be held high for at least five WRCLK clock cycles,
+            2. WREN must be low before RST becomes active high, 
+            3. WREN remains low during this reset cycle.
+            4. WREN must be low for at least two WRCLK clock cycles after RST deasserted;
     
-    Flow:
-    a. SW, assert RST register; 
-    b. HW, use counter to track the reset conditions; wait and flag once satisfied;
-    c. SW, read the status and deassert the RST register;
-    
+4. as such, this core will have a FSM just for the above;
+    this FSM will use the reset_system to create a reset_FIFO
+    that satisfies the conditions above;
+    once satistifed, the FSM will assert that the entire system is ready to use;
+    the SW is responsible to check this syste readiness;
+
+5. by above, a register shall be created to store the system readiness;            
 6. reference: "7 Series FPGAs Memory Resources User Guide (UG473);
 
 ------------
@@ -551,8 +561,7 @@ Register Map
 3. register 2 (offset 2): frame counter read register;
 4. register 3 (offset 3): BRAM FIFO status register;
 5. register 4 (offset 4): BRAM FIFO read and write counter;  
-6. register 5 (offset 5): BRAM FIFO reset register;
-7. register 6 (offset 6): BRAM FIFO (and system) readiness state
+6. register 5 (offset 5): BRAM FIFO (and system) readiness state
         
 Register Definition:
 1. register 0: control register;
@@ -594,12 +603,7 @@ Register Definition:
         bit[10:0]   - read count;
         bit[21:11]  - write count;      
        
-6. register 5: BRAM FIFO reset register;   
-        bit[0] - RST; 
-            1 to reset;
-            0 otherwise;
-
-7. register 6: BRAM FIFO (and system) readiness state
+6. register 5: BRAM FIFO (and system) readiness state
         bit[0] 
             1 - system is ready to use;
             0 - otheriwse            
@@ -610,9 +614,7 @@ Register IO access:
 3. register 2: read only;
 4. register 3: read only;
 5. register 4: read only;
-6. register 5: write only;
-7. register 6: read only;
-
+6. register 6: read only;
 ******************************************************************/
 // register offset;
 `define V3_CAM_DCMI_IF_REG_CTRL_OFFSET                  0   // 3'b000;
@@ -620,8 +622,7 @@ Register IO access:
 `define V3_CAM_DCMI_IF_REG_FRAME_RD_OFFSET              2   // 3'b010;
 `define V3_CAM_DCMI_IF_REG_FIFO_STATUS_OFFSET           3   // 3'b011;
 `define V3_CAM_DCMI_IF_REG_FIFO_CNT_OFFSET              4   // 3'b100;
-`define V3_CAM_DCMI_IF_REG_FIFO_RST_OFFSET              5   // 3'b101;
-`define V3_CAM_DCMI_IF_REG_SYS_INIT_STATUS_OFFSET       6   // 3'b110;
+`define V3_CAM_DCMI_IF_REG_SYS_INIT_STATUS_OFFSET       5   // 3'b101;
 
 
 // bit pos;
@@ -629,8 +630,8 @@ Register IO access:
 `define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START   1   // start the dcmi decoder;
 `define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_EM_START    2   // start the hw emulator;
 
-`define V3_CAM_DCMI_IF_REG_STATUS_BIT_POS_START 0   
-`define V3_CAM_DCMI_IF_REG_STATUS_BIT_POS_END   1
+`define V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_START 0   
+`define V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_END   1
 
 `define V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_AEMPTY   0 // almost empty;
 `define V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_AFULL    1 // almost full;
