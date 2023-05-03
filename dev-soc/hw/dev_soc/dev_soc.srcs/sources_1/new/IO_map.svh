@@ -575,6 +575,9 @@ Register Definition:
     bit[2] start the HW emulator;
             0 disabled;
             1 enabled;
+    bit[3] synchronously clear decoder frame counter;
+            1 yes;
+            0 no;
              
 2. register 1: status register;
     bit[0] detect the start of a frame
@@ -627,9 +630,10 @@ Register IO access:
 
 
 // bit pos;
-`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX         0   // select which source;
-`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START   1   // start the dcmi decoder;
-`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_EM_START    2   // start the hw emulator;
+`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX             0   // select which source;
+`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START       1   // start the dcmi decoder;
+`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_EM_START        2   // start the hw emulator;
+`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FRAME_RST   3   // reset decoder frame counter;
 
 `define V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_START 0   
 `define V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_END   1
