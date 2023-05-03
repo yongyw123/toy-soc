@@ -28,12 +28,35 @@ program FIFO_DUALCLOCK_MACRO_reset_system_reset_test_stimulus_tb
         );
 
     initial begin
+        
+        /* test 01; normal stimulus;
+        allow the reset system to finish;
+        */
         reset_sys = 1'b1;
         #(10);
         reset_sys = 1'b0;
         #(10);
         
-        #(1000);
+        wait(FIFO_rst_ready == 1'b1);
+        #(50);
+        /* test 02; apply a reset
+        during the resetting operation halfway;
+        */
+        reset_sys = 1'b1;
+        #(10);
+        reset_sys = 1'b0;
+        #(10);
+        
+        #(100); // this is the system clock; so ok;
+        
+        reset_sys = 1'b1;
+        #(10);
+        reset_sys = 1'b0;
+        #(10);
+        
+        wait(FIFO_rst_ready == 1'b1);
+        
+        #(100);
         $stop;
     end 
 endprogram
