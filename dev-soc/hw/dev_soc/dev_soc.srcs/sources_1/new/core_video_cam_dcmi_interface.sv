@@ -43,7 +43,9 @@ Assumptions:
 Register Map
 1. register 0 (offset 0): control register;
 2. register 1 (offset 1): status register;
-3. register 2 (offset 2): frame counter read register;  
+3. register 2 (offset 2): frame counter read register;
+4. register 3 (offset 3): BRAM FIFO status register;
+5. register 4 (offset 4): BRAM FIFO read and write counter;  
 
 Register Definition:
 1. register 0: control register;
@@ -72,6 +74,18 @@ Register Definition:
         *note: 
             - this will overflow and wrap around;
             - will clear to zero after a system reset;
+
+4. register 3: BRAM FIFO status register;
+        bit[0] - almost empty;
+        bit[1] - almost full;
+        bit[2] - empty;
+        bit[3] - full;
+        bit[4] - read error;
+        bit[5] - write error;
+
+5. register 4: BRAM FIFO read and write counter;
+        bit[10:0]   - read count;
+        bit[21:11]  - write count;      
             
 
 Register IO access:
@@ -79,6 +93,7 @@ Register IO access:
 2. register 1: read only;
 3. register 2: read only;
 ******************************************************************/
+
 
 `ifndef CORE_VIDEO_CAM_DCMI_INTERFACE_SV
 `define CORE_VIDEO_CAM_DCMI_INTERFACE_SV
@@ -130,9 +145,11 @@ module core_video_cam_dcmi_interface
     );
     
     // constanst
-    localparam REG_CTRL_OFFSET      = 3'b000;
-    localparam REG_STATUS_OFFSET    = 3'b001;
-    localparam REG_FRAME_OFFSET     = 3'b010;
+    localparam REG_CTRL_OFFSET          = 3'b000;
+    localparam REG_STATUS_OFFSET        = 3'b001;
+    localparam REG_FRAME_OFFSET         = 3'b010;
+    localparam REG_FIFO_STATUS_OFFSET   = 3'b011;
+    localparam REG_FIFO_CNT_OFFSET      = 3'b100;
     
     // enablers;
     logic wr_en;
@@ -155,6 +172,8 @@ module core_video_cam_dcmi_interface
     logic [DATA_BITS-1:0] decoder_dout;
     
     // signals for dual clock bram fifo;
+    localparam FIFO_DEPTH_BIT = 11;
+    
     logic FIFO_almost_empty;
     logic FIFO_almost_full;
     logic [DATA_BITS-1:0] FIFO_dout;
@@ -163,7 +182,13 @@ module core_video_cam_dcmi_interface
     logic [DATA_BITS-1:0] FIFO_din;
     logic FIFO_rd_en;
     logic FIFO_wr_en;
-        
+    
+    logic FIFO_rd_error;    
+    logic [FIFO_DEPTH_BIT-1:0] FIFO_rd_count;
+    
+    logic FIFO_wr_error;    
+    logic [FIFO_DEPTH_BIT-1:0] FIFO_wr_count;
+    
     /* registers;
     1. no need to explicitly create for frame counter read register;
         this has already been registered in the dcmi_decoder module;
@@ -171,17 +196,25 @@ module core_video_cam_dcmi_interface
     */
     logic [`REG_DATA_WIDTH_G-1:0] ctrl_reg, ctrl_next;
     logic [`REG_DATA_WIDTH_G-1:0] status_reg, status_next;
+    logic [`REG_DATA_WIDTH_G-1:0] fifo_status_reg, fifo_status_next;
+    logic [`REG_DATA_WIDTH_G-1:0] fifo_cnt_reg, fifo_cnt_next;
+    
     
     always_ff @(posedge clk_sys, reset_sys) begin
         if(reset_sys) begin
             ctrl_reg    <= 0;
-            status_reg  <= 0;                
+            status_reg  <= 0;
+            fifo_status_reg <= 0;
+            fifo_cnt_reg    <= 0;                
         end
         else begin
             if(wr_ctrl_en) begin
                 ctrl_reg    <= ctrl_next;
             end
-            status_reg  <= status_next;
+            status_reg      <= status_next;
+            fifo_status_reg <= fifo_status_next;
+            fifo_cnt_reg    <= fifo_cnt_next;
+            
         end
     end
     
@@ -199,13 +232,17 @@ module core_video_cam_dcmi_interface
     /* ------ reading */
     assign rd_en = (read && cs);
     assign status_next = {30'b0, decoder_complete_tick, decoder_start_tick};
+    assign fifo_status_next = {26'b0, FIFO_wr_error, FIFO_rd_error, FIFO_full, FIFO_empty, FIFO_almost_full, FIFO_almost_empty};
+    assign fifo_cnt_next = {10'b0, FIFO_wr_count, FIFO_rd_count};
 
     always_comb begin
         // default;
         rd_data = {32{1'b0}};
         case({rd_en, addr[2:0]})
-            {1'b1, REG_STATUS_OFFSET}   : rd_data = status_reg;
-            {1'b1, REG_FRAME_OFFSET}    : rd_data = decoded_frame_counter;
+            {1'b1, REG_STATUS_OFFSET}       : rd_data = status_reg;
+            {1'b1, REG_FRAME_OFFSET}        : rd_data = decoded_frame_counter;
+            {1'b1, REG_FIFO_STATUS_OFFSET}  : rd_data = fifo_status_reg;
+            {1'b1, REG_FIFO_CNT_OFFSET}     : rd_data = fifo_cnt_reg;            
             default: ; // nop;
         endcase
     end
@@ -288,10 +325,10 @@ module core_video_cam_dcmi_interface
       .DO(FIFO_dout),                   // Output data, width defined by DATA_WIDTH parameter
       .EMPTY(FIFO_empty),             // 1-bit output empty
       .FULL(FIFO_full),               // 1-bit output full
-      .RDCOUNT(),         // Output read count, width determined by FIFO depth
-      .RDERR(),             // 1-bit output read error
-      .WRCOUNT(),         // Output write count, width determined by FIFO depth
-      .WRERR(),             // 1-bit output write error
+      .RDCOUNT(FIFO_rd_count),         // Output read count, width determined by FIFO depth
+      .RDERR(FIFO_rd_error),             // 1-bit output read error
+      .WRCOUNT(FIFO_wr_count),         // Output write count, width determined by FIFO depth
+      .WRERR(FIFO_wr_error),             // 1-bit output write error
       .DI(FIFO_din),                   // Input data, width defined by DATA_WIDTH parameter
       .RDCLK(clk_sys),             // 1-bit input read clock
       .RDEN(FIFO_rd_en),               // 1-bit input read enable      
