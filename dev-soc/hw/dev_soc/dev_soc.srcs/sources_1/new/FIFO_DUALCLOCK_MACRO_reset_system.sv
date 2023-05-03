@@ -64,9 +64,9 @@ module FIFO_DUALCLOCK_MACRO_reset_system
         // counter to track how long FIFO reset signal has spent on HIGH/LOW;
         CNT_WIDTH = 4,
         // instead of 5 wr/rd clk cycles during HIGH RST; add some buffer;
-        TARGET_HIGH = 8,
+        FIFO_RST_HIGH = 8,
         // instead of 2 wr/rd clk cycles after RST goes LOW; add some buffer;
-        TARGET_LOW = 5    
+        FIFO_RST_LOW = 5    
     )
     (
         
@@ -95,10 +95,9 @@ module FIFO_DUALCLOCK_MACRO_reset_system
     ST_IDLE             : wait for the system reset to go LOW from HIGH;                 
     ST_CHECK_RST_HIGH   : count the clock cycle requirement during HIGH RST;
     ST_CHECK_RST_LOW    : count the clock cycle requirement after RST goes LOW;
-    ST_DONE             : for flagging; 
-    */
-    
-    typedef enum {ST_IDLE, ST_CHECK_RST_HIGH, ST_CHECK_RST_LOW} state_type;
+    ST_DONE             : for flagging; will forever stuck here if reached; unless system reset;
+    */    
+    typedef enum {ST_IDLE, ST_CHECK_RST_HIGH, ST_CHECK_RST_LOW, ST_DONE} state_type;
             
     state_type state_reg, state_next;
         
@@ -178,7 +177,7 @@ module FIFO_DUALCLOCK_MACRO_reset_system
                 ready_next = 1'b0;
                 
                 // satsfy the FIFO req?
-                if(count_high_reg == TARGET_HIGH) begin
+                if(count_high_reg == FIFO_RST_HIGH) begin
                     state_next = ST_CHECK_RST_LOW;
                     // load the counter;
                     count_low_next = 0;
@@ -193,8 +192,8 @@ module FIFO_DUALCLOCK_MACRO_reset_system
             ST_CHECK_RST_LOW: begin
                 reset_fifo_next = 1'b0;
                 /// satisfy the fifo req?
-                if(count_low_reg == TARGET_LOW) begin
-                    state_next = ST_IDLE;
+                if(count_low_reg == FIFO_RST_LOW) begin
+                    state_next = ST_DONE;
                     ready_next = 1'b1;
                 end 
                 else begin
@@ -203,6 +202,12 @@ module FIFO_DUALCLOCK_MACRO_reset_system
                         count_low_next = count_low_reg + 1;
                 end
             end 
+            
+            // forever stuck here, once reached;
+            // the only way out is a system reset;
+            ST_DONE: begin
+                ready_next = 1'b1;                
+            end                
          
             default: ;  // nop;
         endcase    
