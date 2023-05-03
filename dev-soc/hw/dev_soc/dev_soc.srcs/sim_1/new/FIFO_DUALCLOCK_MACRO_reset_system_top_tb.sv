@@ -66,7 +66,7 @@ module FIFO_DUALCLOCK_MACRO_reset_system_top_tb();
         
     /* monitoring system */
     initial begin
-        $monitor("time: %t, reset_sys: %0b, RST_FIFO: %0b, FIFO_rst_ready: %0b, rst_edge: %0b, slowclk_edge: %0b, uut.statereg: %s, uut.uut.detected_slow_clk_rising: %0b, slower_clk: %0b",
+        $monitor("time: %t, reset_sys: %0b, RST_FIFO: %0b, FIFO_rst_ready: %0b, rst_edge: %0b, slowclk_edge: %0b, uut.statereg: %s, uut.uut.detected_slow_clk_rising: %0b",
         $time,
         reset_sys,
         RST_FIFO,
@@ -74,8 +74,7 @@ module FIFO_DUALCLOCK_MACRO_reset_system_top_tb();
         debug_detected_rst_sys_falling,
         debug_detected_slow_clk_rising,
         uut.state_reg.name,
-        uut.detected_slow_clk_rising,
-        slower_clk
+        uut.detected_slow_clk_rising        
         );
        
     
