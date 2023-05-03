@@ -155,7 +155,15 @@ module core_video_cam_dcmi_interface
         HREF_LOW            = 5,    // hlow; 
         BUFFER_START_PERIOD = 7,    // between vsync assertion and href assertion;
         BUFFER_END_PERIOD 	= 5,	// between the frame end and the frame start;
-        PIXEL_BYTE_TOTAL    = 640   // 320 pixels per href with bp = 16-bit; 
+        PIXEL_BYTE_TOTAL    = 640,   // 320 pixels per href with bp = 16-bit;
+        
+        // for macro bram fifo reset condition;
+        // instead of 2 wr/rd clk cycles after RST goes LOW; add some buffer;
+        FIFO_RST_LOW_CYCLES = 5,        
+    
+        // instead of 5 wr/rd clk cycles during HIGH RST; add some buffer;
+        FIFO_RST_HIGH_CYCLES = 8
+     
         
     )
     (
@@ -248,13 +256,6 @@ module core_video_cam_dcmi_interface
     logic [DATA_BITS-1:0] pixel_din_main;
     
     /* signals for FIFO reset requirement; */
-    
-    // instead of 2 wr/rd clk cycles after RST goes LOW; add some buffer;
-    localparam FIFO_RST_LOW = 5;        
-    
-    // instead of 5 wr/rd clk cycles during HIGH RST; add some buffer;
-    localparam FIFO_RST_HIGH = 8;
-    
     logic RST_FIFO;         // reset signal for fifo;
     logic FIFO_rst_ready;   // status;
     
@@ -391,9 +392,9 @@ module core_video_cam_dcmi_interface
         // counter to track how long FIFO reset signal has spent on HIGH/LOW;
         .CNT_WIDTH(4),
         // instead of 5 wr/rd clk cycles during HIGH RST; add some buffer;
-        .FIFO_RST_HIGH(FIFO_RST_HIGH),
+        .FIFO_RST_HIGH(FIFO_RST_HIGH_CYCLES),
         // instead of 2 wr/rd clk cycles after RST goes LOW; add some buffer;
-        .FIFO_RST_LOW(FIFO_RST_LOW)
+        .FIFO_RST_LOW(FIFO_RST_LOW_CYCLES)
      )
      FIFO_reset_system_unit
      (
