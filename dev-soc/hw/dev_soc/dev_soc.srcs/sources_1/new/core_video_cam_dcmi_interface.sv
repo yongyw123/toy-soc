@@ -20,6 +20,39 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 /**************************************************************
+* V2_DISP_SRC_MUX
+-----------------------
+
+purpose:
+1. direct which pixel source to the LCD: test pattern generator(s) or from the camera?
+2. allocate 6 pixel sources for future purposes;
+3. in actuality; should be only between the test pattern generators and the camera;
+
+important note:
+1. all pixel sources (inc camera) are mutually exclusive;
+
+Register Map
+1. register 0 (offset 0): select register; 
+        bit[2:0] for multiplexing;
+        3'b001: test pattern generator;
+        3'b010: camera ov7670;
+        3'b100: none;
+        
+Register Definition:
+1. register 0: control register;
+        
+Register IO access:
+1. register 0: write and readl
+******************************************************************/
+// register offset;
+`define V2_DISP_SRC_MUX_REG_SEL_OFFSET     0
+
+// multiplexing;
+`define V2_DISP_SRC_MUX_REG_SEL_TEST     3'b001  // from the test pattern generator;
+`define V2_DISP_SRC_MUX_REG_SEL_CAM      3'b010  // from the camera OV7670;
+`define V2_DISP_SRC_MUX_REG_SEL_NONE     3'b100  // nothing by blanking;
+
+/**************************************************************
 * V3_CAM_DCMI_IF
 -----------------------
 Camera DCMI Interface
@@ -68,6 +101,7 @@ Issue + Constraint:
     that satisfies the conditions above;
     once satistifed, the FSM will assert that the entire system is ready to use;
     the SW is responsible to check this syste readiness;
+    the SW should not start the DCMI decoder until the system is ready!
 
 5. by above, a register shall be created to store the system readiness;            
 6. reference: "7 Series FPGAs Memory Resources User Guide (UG473);
@@ -132,7 +166,7 @@ Register IO access:
 3. register 2: read only;
 4. register 3: read only;
 5. register 4: read only;
-6. register 6: read only;
+6. register 5: read only;
 ******************************************************************/
 
 `ifndef CORE_VIDEO_CAM_DCMI_INTERFACE_SV
@@ -243,7 +277,8 @@ module core_video_cam_dcmi_interface
     logic [DATA_BITS-1:0] pixel_din_main;
     
     // signals for FIFO reset requirement;
-    //logic [
+    logic RST_FIFO;
+    
     
     
     /* registers;
@@ -452,7 +487,7 @@ module core_video_cam_dcmi_interface
       .DI(FIFO_din),                   // Input data, width defined by DATA_WIDTH parameter
       .RDCLK(clk_sys),             // 1-bit input read clock
       .RDEN(FIFO_rd_en),               // 1-bit input read enable      
-      .RST(fifo_reset_reg),                 // 1-bit input reset
+      .RST(?),                 // 1-bit input reset
       .WRCLK(CAM_PCLK),             // 1-bit input write clock
       .WREN(FIFO_wr_en)                // 1-bit input write enable
     );
