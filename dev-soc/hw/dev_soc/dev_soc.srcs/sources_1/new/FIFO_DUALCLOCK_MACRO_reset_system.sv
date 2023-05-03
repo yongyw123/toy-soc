@@ -193,8 +193,7 @@ module FIFO_DUALCLOCK_MACRO_reset_system
                 reset_fifo_next = 1'b0;
                 /// satisfy the fifo req?
                 if(count_low_reg == FIFO_RST_LOW) begin
-                    state_next = ST_DONE;
-                    ready_next = 1'b1;
+                    state_next = ST_DONE;                    
                 end 
                 else begin
                     // only increment if a change in the fifo clock is detected;
