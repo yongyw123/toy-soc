@@ -41,23 +41,9 @@ module FIFO_DUALCLOCK_MACRO_reset_system_top_tb();
            clk_sys = 1'b0;  
            #(T/2);
         end
-        
-     always
-        begin 
-           slower_clk = 1'b0;  
-           #(2*T); 
-           slower_clk = 1'b1;  
-           #(2*T);
-        end
-     
+      
+          
      //reset pulse fo the user-systems;
-    initial
-        begin
-            reset_sys = 1'b1;
-            #(T/2);
-            reset_sys = 1'b0;
-            #(T/2);
-        end
     
      /* instantiation */
      FIFO_DUALCLOCK_MACRO_reset_system 
@@ -72,12 +58,15 @@ module FIFO_DUALCLOCK_MACRO_reset_system_top_tb();
         .debug_detected_slow_clk_rising(debug_detected_slow_clk_rising)
      );
      
-     FIFO_DUALCLOCK_MACRO_reset_system_tb tb(.*);
+     // reset signal test stimulus;
+     FIFO_DUALCLOCK_MACRO_reset_system_reset_test_stimulus_tb reset_tb(.*);
      
+     // slower clock test stimulus;
+     FIFO_DUALCLOCK_MACRO_reset_system_pclk_test_stimulus_tb clk_tb(.*);
         
     /* monitoring system */
     initial begin
-        $monitor("time: %t, reset_sys: %0b, RST_FIFO: %0b, FIFO_rst_ready: %0b, rst_edge: %0b, slowclk_edge: %0b, uut.statereg: %s, uut.uut.detected_slow_clk_rising: %0b",
+        $monitor("time: %t, reset_sys: %0b, RST_FIFO: %0b, FIFO_rst_ready: %0b, rst_edge: %0b, slowclk_edge: %0b, uut.statereg: %s, uut.uut.detected_slow_clk_rising: %0b, slower_clk: %0b",
         $time,
         reset_sys,
         RST_FIFO,
@@ -85,7 +74,8 @@ module FIFO_DUALCLOCK_MACRO_reset_system_top_tb();
         debug_detected_rst_sys_falling,
         debug_detected_slow_clk_rising,
         uut.state_reg.name,
-        uut.detected_slow_clk_rising
+        uut.detected_slow_clk_rising,
+        slower_clk
         );
        
     

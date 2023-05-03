@@ -129,6 +129,7 @@ module FIFO_DUALCLOCK_MACRO_reset_system
     
     /* ------------- helper units */
     // to detect the falling edge of the system reset signal;
+    /*
     rising_edge_detector
     edge_detector_reset_unit
     (
@@ -137,6 +138,9 @@ module FIFO_DUALCLOCK_MACRO_reset_system
         .level(!(reset_sys)),
         .detected(detected_rst_sys_falling)
     );
+    
+    */
+    assign detected_rst_sys_falling = 1'b0;
     
     // helper unit to detect the slower clk; use a rising/falling edge detector;
     rising_edge_detector
