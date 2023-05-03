@@ -20,39 +20,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 /**************************************************************
-* V2_DISP_SRC_MUX
------------------------
-
-purpose:
-1. direct which pixel source to the LCD: test pattern generator(s) or from the camera?
-2. allocate 6 pixel sources for future purposes;
-3. in actuality; should be only between the test pattern generators and the camera;
-
-important note:
-1. all pixel sources (inc camera) are mutually exclusive;
-
-Register Map
-1. register 0 (offset 0): select register; 
-        bit[2:0] for multiplexing;
-        3'b001: test pattern generator;
-        3'b010: camera ov7670;
-        3'b100: none;
-        
-Register Definition:
-1. register 0: control register;
-        
-Register IO access:
-1. register 0: write and readl
-******************************************************************/
-// register offset;
-`define V2_DISP_SRC_MUX_REG_SEL_OFFSET     0
-
-// multiplexing;
-`define V2_DISP_SRC_MUX_REG_SEL_TEST     3'b001  // from the test pattern generator;
-`define V2_DISP_SRC_MUX_REG_SEL_CAM      3'b010  // from the camera OV7670;
-`define V2_DISP_SRC_MUX_REG_SEL_NONE     3'b100  // nothing by blanking;
-
-/**************************************************************
 * V3_CAM_DCMI_IF
 -----------------------
 Camera DCMI Interface
@@ -276,9 +243,13 @@ module core_video_cam_dcmi_interface
     logic href_main;
     logic [DATA_BITS-1:0] pixel_din_main;
     
-    // signals for FIFO reset requirement;
-    logic RST_FIFO;
-    
+    /* signals for FIFO reset requirement; */
+    // instead of 2 wr/rd clk cycles after RST goes LOW; add some buffer;
+    localparam FIFO_RST_LOW = 5;    
+    // instead of 5 wr/rd clk cycles during HIGH RST; add some buffer;
+    localparam FIFO_RST_HIGH = 8;
+    logic RST_FIFO;         // reset signal for fifo;
+    logic FIFO_rst_ready;   // status;
     
     
     /* registers;
@@ -290,17 +261,15 @@ module core_video_cam_dcmi_interface
     logic [`REG_DATA_WIDTH_G-1:0] dec_status_reg, dec_status_next;
     logic [`REG_DATA_WIDTH_G-1:0] fifo_status_reg, fifo_status_next;
     logic [`REG_DATA_WIDTH_G-1:0] fifo_cnt_reg, fifo_cnt_next;    
-    logic sys_init_status_reg, sys_init_status_next;
-    
+    logic sys_ready_status_reg, sys_ready_status_next; // to filter for fifo system ready flag;
     
     always_ff @(posedge clk_sys, reset_sys) begin
         if(reset_sys) begin
             ctrl_reg        <= 0;
             dec_status_reg  <= 0;
             fifo_status_reg <= 0;
-            fifo_cnt_reg    <= 0;   
-            
-            sys_init_status_reg    <= 0;
+            fifo_cnt_reg    <= 0;               
+            sys_ready_status_reg  <= 1'b0;
                          
         end
         else begin
@@ -311,16 +280,15 @@ module core_video_cam_dcmi_interface
             dec_status_reg  <= dec_status_next;
             fifo_status_reg <= fifo_status_next;
             fifo_cnt_reg    <= fifo_cnt_next;
-                        
-            sys_init_status_reg <= sys_init_status_next;
             
+            sys_ready_status_reg <= sys_ready_status_next;
         end
     end
     
     /* -------- writing */
     // decoding;
     assign wr_en = write && cs;
-    assign wr_ctrl_en       = (wr_en && addr[2:0] == REG_CTRL_OFFSET);
+    assign wr_ctrl_en = (wr_en && addr[2:0] == REG_CTRL_OFFSET);
     
     // next state;
     assign ctrl_next = wr_data;
@@ -335,7 +303,8 @@ module core_video_cam_dcmi_interface
     assign status_next = {30'b0, decoder_complete_tick, decoder_start_tick};
     assign fifo_status_next = {26'b0, FIFO_wr_error, FIFO_rd_error, FIFO_full, FIFO_empty, FIFO_almost_full, FIFO_almost_empty};
     assign fifo_cnt_next = {10'b0, FIFO_wr_count, FIFO_rd_count};
-
+    assign sys_ready_status_next = (FIFO_rst_ready) ? 1'b1 : sys_ready_status_reg;
+      
     always_comb begin
         // default;
         rd_data = {32{1'b0}};
@@ -345,7 +314,7 @@ module core_video_cam_dcmi_interface
             {1'b1, REG_FRAME_OFFSET}            : rd_data = decoded_frame_counter;
             {1'b1, REG_FIFO_STATUS_OFFSET}      : rd_data = fifo_status_reg;
             {1'b1, REG_FIFO_CNT_OFFSET}         : rd_data = fifo_cnt_reg;
-                        
+            {1'b1, REG_FIFO_SYS_INIT_STATUS_OFFSET} : rd_data = {31'b0, sys_ready_status_reg};
             default: ; // nop;
         endcase
     end
@@ -408,6 +377,28 @@ module core_video_cam_dcmi_interface
         .debug_detect_vsync_edge()
      );
      
+     
+     // reset system for FIFO;
+     FIFO_DUALCLOCK_MACRO_reset_system
+     #(
+        // counter to track how long FIFO reset signal has spent on HIGH/LOW;
+        .CNT_WIDTH(4),
+        // instead of 5 wr/rd clk cycles during HIGH RST; add some buffer;
+        .FIFO_RST_HIGH(FIFO_RST_HIGH),
+        // instead of 2 wr/rd clk cycles after RST goes LOW; add some buffer;
+        .FIFO_RST_LOW(FIFO_RST_LOW)
+     )
+     (
+        .clk_sys(clk_sys),
+        .reset_sys(reset_sys),
+        .slower_clk(pclk_main),
+        .RST_FIFO(RST_FIFO),
+        .FIFO_rst_ready(FIFO_rst_ready),
+        
+        // not used;
+        .debug_detected_rst_sys_falling(),
+        .debug_detected_slow_clk_rising()
+     );
      
      // HW DCMI emulator;
      dcmi_emulator
@@ -487,7 +478,7 @@ module core_video_cam_dcmi_interface
       .DI(FIFO_din),                   // Input data, width defined by DATA_WIDTH parameter
       .RDCLK(clk_sys),             // 1-bit input read clock
       .RDEN(FIFO_rd_en),               // 1-bit input read enable      
-      .RST(?),                 // 1-bit input reset
+      .RST(RST_FIFO),                 // 1-bit input reset
       .WRCLK(CAM_PCLK),             // 1-bit input write clock
       .WREN(FIFO_wr_en)                // 1-bit input write enable
     );
