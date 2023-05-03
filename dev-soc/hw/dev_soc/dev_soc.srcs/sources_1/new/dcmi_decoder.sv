@@ -76,6 +76,7 @@ module dcmi_decoder
         
         // cpu command;
         input logic cmd_start,
+        input logic sync_clr_frame_cnt, // clear the frame counter, synchronously;
         
         // driving inputs from the camera ov7670;
         input logic pclk,  // fixed at 24MHz;
@@ -130,6 +131,9 @@ module dcmi_decoder
             cnt_href_reg    <= 0;
             cnt_frame_reg   <= 0;
             //sampled_reg     <= 0;       // dummy;
+        end
+        else if(sync_clr_frame_cnt) begin
+            cnt_frame_reg   <= 0;
         end
         else begin
             state_reg       <= state_next;
