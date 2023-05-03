@@ -56,7 +56,7 @@ program FIFO_DUALCLOCK_MACRO_reset_system_reset_test_stimulus_tb
         
         wait(FIFO_rst_ready == 1'b1);
         
-        #(100);
+        #(500);
         $stop;
     end 
 endprogram
