@@ -50,6 +50,7 @@ module dcmi_decoder_top_tb();
     // signals for uut: dcmi decoder;
     localparam FRAME_COUNTER_WIDTH = 32;
     logic decoder_start;
+    logic decoder_sync_clr_frame_cnt;
     logic decoder_data_valid;
     logic decoder_data_ready;
     logic [DATA_BITS-1:0] decoder_dout;
@@ -116,6 +117,7 @@ module dcmi_decoder_top_tb();
     (
         .reset_sys(reset_sys),
         .cmd_start(decoder_start),
+        .sync_clr_frame_cnt(0),
         .pclk(pclk),
         .href(href),
         .vsync(vsync),
