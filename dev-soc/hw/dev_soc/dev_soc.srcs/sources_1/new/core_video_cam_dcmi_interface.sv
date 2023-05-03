@@ -93,6 +93,9 @@ Register Definition:
     bit[2] start the HW emulator;
             0 disabled;
             1 enabled;
+    bit[3] synchronously clear decoder frame counter;
+            1 yes;
+            0 no;
              
 2. register 1: status register;
     bit[0] detect the start of a frame
@@ -135,6 +138,7 @@ Register IO access:
 5. register 4: read only;
 6. register 5: read only;
 ******************************************************************/
+
 `ifndef CORE_VIDEO_CAM_DCMI_INTERFACE_SV
 `define CORE_VIDEO_CAM_DCMI_INTERFACE_SV
 
@@ -215,6 +219,7 @@ module core_video_cam_dcmi_interface
     logic emulator_cmd_start;
     
     // signals for decoder;
+    logic decoder_clr_frame_cnt;
     logic decoder_complete_tick;
     logic decoder_start_tick;
     logic [FRAME_COUNTER_WIDTH-1:0] decoded_frame_counter;
@@ -298,13 +303,17 @@ module core_video_cam_dcmi_interface
     // next state;
     assign ctrl_next = wr_data;
     
-    // mapping;
+    /* mapping; */
+    // for decoder frame counter clearing;
+    assign decoder_clr_frame_cnt = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FRAME_RST];    
+    // for emulator/cam selection;
     assign select_emulator_or_cam   = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX];   // HIGH for cam;    
     // for decoder; one more condition: fifo reset must be OK; this 
     // is to meet the dual-clock bram macro fifo requirements;
     assign decoder_cmd_start        = (FIFO_rst_ready && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START]);
     // do not start the emulator unless selected;
     assign emulator_cmd_start       = (!select_emulator_or_cam && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_EM_START]);
+    
      
     /* ------ reading */
     assign rd_en = (read && cs);
@@ -363,6 +372,7 @@ module core_video_cam_dcmi_interface
         // system;
         .reset_sys(reset_sys),
         .cmd_start(decoder_cmd_start),
+        .sync_clr_frame_cnt(decoder_clr_frame_cnt),
         
         // dcmi interface;
         .pclk(pclk_main),        // not 100MHz (asynchronous to the system);
