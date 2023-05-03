@@ -181,7 +181,11 @@ module core_video_cam_dcmi_interface
         // for downstream signals;
         output logic [DATA_BITS-1:0] stream_out_data,
         input logic sink_ready,     // signal from the sink to this interface;
-        output logic sink_valid     // signal from this interface to the sink;
+        output logic sink_valid,     // signal from this interface to the sink;
+        
+        // for debugging;
+        output logic debug_RST_FIFO,
+        output logic debug_FIFO_rst_ready
          
     );
     
@@ -244,13 +248,19 @@ module core_video_cam_dcmi_interface
     logic [DATA_BITS-1:0] pixel_din_main;
     
     /* signals for FIFO reset requirement; */
+    
     // instead of 2 wr/rd clk cycles after RST goes LOW; add some buffer;
-    localparam FIFO_RST_LOW = 5;    
+    localparam FIFO_RST_LOW = 5;        
+    
     // instead of 5 wr/rd clk cycles during HIGH RST; add some buffer;
     localparam FIFO_RST_HIGH = 8;
+    
     logic RST_FIFO;         // reset signal for fifo;
     logic FIFO_rst_ready;   // status;
     
+    // debugging;
+    assign debug_RST_FIFO = RST_FIFO;
+    assign debug_FIFO_rst_ready = FIFO_rst_ready;
     
     /* registers;
     some do not have register explicitly created here
@@ -282,7 +292,7 @@ module core_video_cam_dcmi_interface
     
     /* -------- writing */
     // decoding;
-    assign wr_en = write && cs;
+    assign wr_en = (write && cs);
     assign wr_ctrl_en = (wr_en && addr[2:0] == REG_CTRL_OFFSET);
     
     // next state;
@@ -385,6 +395,7 @@ module core_video_cam_dcmi_interface
         // instead of 2 wr/rd clk cycles after RST goes LOW; add some buffer;
         .FIFO_RST_LOW(FIFO_RST_LOW)
      )
+     FIFO_reset_system_unit
      (
         .clk_sys(clk_sys),
         .reset_sys(reset_sys),
@@ -411,6 +422,7 @@ module core_video_cam_dcmi_interface
         .HREF_TOTAL(HREF_TOTAL),            // total href assertion to generate;
         .PIXEL_BYTE_TOTAL(PIXEL_BYTE_TOTAL)     // 320 pixels per href with bp = 16-bit;     
      )
+     dcmi_emulator_unit
      (
         .clk_sys(clk_sys),
         .reset_sys(reset_sys),
@@ -426,16 +438,17 @@ module core_video_cam_dcmi_interface
      );
     
     /* ----- mapping between the dcmi decoder and the fifo; */
-    assign FIFO_wr_en           = (decoder_data_valid && !FIFO_full && !FIFO_wr_error);        
+    // need tp ensure the fifo macro is reset successfully; otherwise, do not write it;
+    assign FIFO_wr_en           = (FIFO_rst_ready && decoder_data_valid && !FIFO_full && !FIFO_wr_error);        
     assign FIFO_din             = decoder_dout;   
-    assign decoder_data_ready   = !FIFO_almost_full;
+    assign decoder_data_ready   = (FIFO_rst_ready && !FIFO_almost_full);
     
     // mapping between the fifo with the downstream ;
     
     // need tp ensure the fifo macro is reset successfully; otherwise, do not read it;
     assign FIFO_rd_en       = (FIFO_rst_ready && sink_ready && !FIFO_empty && !FIFO_rd_error);
     assign stream_out_data  = FIFO_dout;
-    assign sink_valid       = !FIFO_empty;     
+    assign sink_valid       = (FIFO_rst_ready && !FIFO_empty);     
     
     // dual clock bram fifo;
     /* fifo sinking the pixel decoded from the dcmi_decoder */
