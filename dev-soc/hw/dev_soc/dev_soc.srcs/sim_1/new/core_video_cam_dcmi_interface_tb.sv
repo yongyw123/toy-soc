@@ -114,6 +114,21 @@ program core_video_cam_dcmi_interface_tb
     read <= 1'b1;
     addr <= REG_FRAME_OFFSET;
     
+    /*-------------------------------
+    // clear the frame counter;
+    // and read it thereafter; expect it to reset to zero;
+    -----------------------------*/
+    @(posedge clk_sys);    
+    write <= 1'b1;
+    read <= 1'b0;
+    addr <= REG_CTRL_OFFSET;
+    // {LSB: choose emulator; disable decoder; emulator active; MSB: clear}; 
+    wr_data <= 4'b1100;
+    
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_FRAME_OFFSET;
     
     #(100);
     $display("test ends");
