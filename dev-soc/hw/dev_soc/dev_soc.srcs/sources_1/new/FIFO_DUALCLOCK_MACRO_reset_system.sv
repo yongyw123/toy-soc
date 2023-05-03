@@ -69,7 +69,11 @@ module FIFO_DUALCLOCK_MACRO_reset_system
                 
         // output;
         output logic RST_FIFO,       // the reset signal for FIFO;
-        output logic FIFO_rst_ready // status; 
+        output logic FIFO_rst_ready, // status;
+        
+        // debugging;
+        output logic debug_detected_rst_sys_falling,
+        output logic debug_detected_slow_clk_rising
     );
     
     /* constants; */
@@ -84,6 +88,9 @@ module FIFO_DUALCLOCK_MACRO_reset_system
     /* signals */
     logic detected_rst_sys_falling; // to detect the falling edge of the system reset;
     logic detected_slow_clk_rising; // to detect the rising edge of the slower clock;
+    
+    assign debug_detected_rst_sys_falling = detected_rst_sys_falling;
+    assign debug_detected_slow_clk_rising = detected_slow_clk_rising;
     
     /* state
     ST_IDLE             : wait for the system reset to go LOW from HIGH;                 
