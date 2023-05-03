@@ -524,7 +524,9 @@ Assumptions:
 Register Map
 1. register 0 (offset 0): control register;
 2. register 1 (offset 1): status register;
-3. register 2 (offset 2): frame counter read register;  
+3. register 2 (offset 2): frame counter read register;
+4. register 3 (offset 3): BRAM FIFO status register;
+5. register 4 (offset 4): BRAM FIFO read and write counter;  
 
 Register Definition:
 1. register 0: control register;
@@ -553,6 +555,18 @@ Register Definition:
         *note: 
             - this will overflow and wrap around;
             - will clear to zero after a system reset;
+
+4. register 3: BRAM FIFO status register;
+        bit[0] - almost empty;
+        bit[1] - almost full;
+        bit[2] - empty;
+        bit[3] - full;
+        bit[4] - read error;
+        bit[5] - write error;
+
+5. register 4: BRAM FIFO read and write counter;
+        bit[10:0]   - read count;
+        bit[21:11]  - write count;      
             
 
 Register IO access:
@@ -561,9 +575,11 @@ Register IO access:
 3. register 2: read only;
 ******************************************************************/
 // register offset;
-`define V3_CAM_DCMI_IF_REG_CTRL_OFFSET      0   // 3'b000;
-`define V3_CAM_DCMI_IF_REG_STATUS_OFFSET    1   // 3'b001;
-`define V3_CAM_DCMI_IF_REG_FRAME_RD_OFFSET  2   // 3'b010;
+`define V3_CAM_DCMI_IF_REG_CTRL_OFFSET          0   // 3'b000;
+`define V3_CAM_DCMI_IF_REG_STATUS_OFFSET        1   // 3'b001;
+`define V3_CAM_DCMI_IF_REG_FRAME_RD_OFFSET      2   // 3'b010;
+`define V3_CAM_DCMI_IF_REG_FIFO_STATUS_OFFSET   3   // 3'b011;
+`define V3_CAM_DCMI_IF_REG_FIFO_CNT_OFFSET      4   // 3'b100;
 
 // bit pos;
 `define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX         0   // select which source;
@@ -572,5 +588,14 @@ Register IO access:
 
 `define V3_CAM_DCMI_IF_REG_STATUS_BIT_POS_START 0   
 `define V3_CAM_DCMI_IF_REG_STATUS_BIT_POS_END   1
+
+`define V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_AEMPTY   0 // almost empty;
+`define V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_AFULL    1 // almost full;
+`define V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_EMPTY    2 
+`define V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_FULL     3 
+`define V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_RD_ERROR 4 
+`define V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_WR_ERROR 5 
+
+
 
 `endif //_IO_MAP_SVH
