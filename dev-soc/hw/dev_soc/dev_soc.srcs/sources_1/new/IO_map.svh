@@ -601,8 +601,8 @@ Register Definition:
         bit[5] - write error;
 
 5. register 4: BRAM FIFO read and write counter;
-        bit[10:0]   - read count;
-        bit[21:11]  - write count;      
+        bit[15:0]   - read count;
+        bit[31:16]  - write count;      
        
 6. register 5: BRAM FIFO (and system) readiness state
         bit[0] 
