@@ -60,6 +60,14 @@ Reference: "7 Series FPGAs Memory Resources User Guide (UG473);
 */
 
 module FIFO_DUALCLOCK_MACRO_reset_system
+    #(parameter
+        // counter to track how long FIFO reset signal has spent on HIGH/LOW;
+        CNT_WIDTH = 4,
+        // instead of 5 wr/rd clk cycles during HIGH RST; add some buffer;
+        TARGET_HIGH = 8,
+        // instead of 2 wr/rd clk cycles after RST goes LOW; add some buffer;
+        TARGET_LOW = 5    
+    )
     (
         
         input logic clk_sys,    // 100MHz;
@@ -75,15 +83,6 @@ module FIFO_DUALCLOCK_MACRO_reset_system
         output logic debug_detected_rst_sys_falling,
         output logic debug_detected_slow_clk_rising
     );
-    
-    /* constants; */
-    localparam CNT_WIDTH = 4;   // for the counter; 4-bit is more than enough;
-    
-    // instead of 5 wr/rd clk cycles during HIGH RST; add some buffer;
-    localparam TARGET_HIGH = 10;    
-    
-    // instead of 2 wr/rd clk cycles after RST goes LOW; add some buffer;
-    localparam TARGET_LOW = 2;    
     
     /* signals */
     logic detected_rst_sys_falling; // to detect the falling edge of the system reset;
@@ -115,7 +114,7 @@ module FIFO_DUALCLOCK_MACRO_reset_system
             state_reg       <= ST_IDLE;
             count_high_reg  <= 0;
             count_low_reg   <= 0;
-            reset_fifo_reg  <= 1'b1;
+            reset_fifo_reg  <= 1'b0;
             ready_reg       <= 1'b0;
         end
         else begin
@@ -129,7 +128,7 @@ module FIFO_DUALCLOCK_MACRO_reset_system
     
     /* ------------- helper units */
     // to detect the falling edge of the system reset signal;
-    /*
+    
     rising_edge_detector
     edge_detector_reset_unit
     (
@@ -138,9 +137,6 @@ module FIFO_DUALCLOCK_MACRO_reset_system
         .level(!(reset_sys)),
         .detected(detected_rst_sys_falling)
     );
-    
-    */
-    assign detected_rst_sys_falling = 1'b0;
     
     // helper unit to detect the slower clk; use a rising/falling edge detector;
     rising_edge_detector
@@ -167,7 +163,7 @@ module FIFO_DUALCLOCK_MACRO_reset_system
         
         case(state_reg) 
             ST_IDLE: begin
-                reset_fifo_next = 1'b1;
+                reset_fifo_next = 1'b0;
                 ready_next = 1'b0;
                 
                 if(detected_rst_sys_falling) begin
