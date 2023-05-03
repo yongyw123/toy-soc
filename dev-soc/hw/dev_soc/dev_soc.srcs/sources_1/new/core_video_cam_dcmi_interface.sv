@@ -144,12 +144,26 @@ module core_video_cam_dcmi_interface
     logic decoder_cmd_start;
     logic emulator_cmd_start;
     
+    // signals for decoder;
+    logic decoder_complete_tick;
+    logic decoder_start_tick;
+    logic [FRAME_COUNTER_WIDTH-1:0] decoded_frame_counter;
+    
     // interface signals between decoder and the sinking dual-clock fifo;
     logic decoder_data_valid;
     logic decoder_data_ready;
     logic [DATA_BITS-1:0] decoder_dout;
     
-    
+    // signals for dual clock bram fifo;
+    logic FIFO_almost_empty;
+    logic FIFO_almost_full;
+    logic [DATA_BITS-1:0] FIFO_dout;
+    logic FIFO_empty;
+    logic FIFO_full;
+    logic [DATA_BITS-1:0] FIFO_din;
+    logic FIFO_rd_en;
+    logic FIFO_wr_en;
+        
     /* registers;
     1. no need to explicitly create for frame counter read register;
         this has already been registered in the dcmi_decoder module;
@@ -182,7 +196,20 @@ module core_video_cam_dcmi_interface
     assign decoder_cmd_start        = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START];
     assign emulator_cmd_start       = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_EM_START];
      
-     
+    /* ------ reading */
+    assign rd_en = (read && cs);
+    assign status_next = {30'b0, decoder_complete_tick, decoder_start_tick};
+
+    always_comb begin
+        // default;
+        rd_data = {32{1'b0}};
+        case({rd_en, addr[2:0]})
+            {1'b1, REG_STATUS_OFFSET}   : rd_data = status_reg;
+            {1'b1, REG_FRAME_OFFSET}    : rd_data = decoded_frame_counter;
+            default: ; // nop;
+        endcase
+    end
+    
      /* --------------  instantiations */
      // decoder;
      dcmi_decoder
@@ -208,19 +235,72 @@ module core_video_cam_dcmi_interface
         .data_valid(decoder_data_valid),
         .data_ready(decoder_data_ready),
         .dout(decoder_dout),
-        
+                
         // status;
-        .decoded_frame_counter(),
-        .decoder_complete_tick(),
-        .decoder_start_tick(),
+        .decoded_frame_counter(decoded_frame_counter),
+        .decoder_complete_tick(decoder_complete_tick),
+        .decoder_start_tick(decoder_start_tick),
         
         // not used;
         .debug_detect_vsync_edge()
      );
      
-
+    /* ----- mapping between the dcmi decoder and the fifo; */
+    assign FIFO_wr_en           = (decoder_data_valid && !FIFO_full);        
+    assign FIFO_din             = decoder_dout;   
+    assign decoder_data_ready   = !FIFO_almost_full;
+    
+    // mapping between the fifo with the downstream ;
+    assign FIFO_rd_en   = (sink_ready && !FIFO_empty);
+    assign stream_out_data = FIFO_dout;
+    
+    
     // dual clock bram fifo;
-         
+    /* fifo sinking the pixel decoded from the dcmi_decoder */
+    // FIFO_DUALCLOCK_MACRO: Dual Clock First-In, First-Out (FIFO) RAM Buffer
+    //                       Artix-7
+    // Xilinx HDL Language Template, version 2021.2
+    
+    /////////////////////////////////////////////////////////////////
+    // DATA_WIDTH | FIFO_SIZE | FIFO Depth | RDCOUNT/WRCOUNT Width //
+    // ===========|===========|============|=======================//
+    //   37-72    |  "36Kb"   |     512    |         9-bit         //
+    //   19-36    |  "36Kb"   |    1024    |        10-bit         //
+    //   19-36    |  "18Kb"   |     512    |         9-bit         //
+    //   10-18    |  "36Kb"   |    2048    |        11-bit         //
+    //   10-18    |  "18Kb"   |    1024    |        10-bit         //
+    //    5-9     |  "36Kb"   |    4096    |        12-bit         //
+    //    5-9     |  "18Kb"   |    2048    |        11-bit         //
+    //    1-4     |  "36Kb"   |    8192    |        13-bit         //
+    //    1-4     |  "18Kb"   |    4096    |        12-bit         //
+    /////////////////////////////////////////////////////////////////
+
+    FIFO_DUALCLOCK_MACRO  #(
+      .ALMOST_EMPTY_OFFSET(9'h080), // Sets the almost empty threshold
+      .ALMOST_FULL_OFFSET(9'h080),  // Sets almost full threshold
+      .DATA_WIDTH(DATA_BITS),   // Valid values are 1-72 (37-72 only valid when FIFO_SIZE="36Kb")
+      .DEVICE("7SERIES"),  // Target device: "7SERIES" 
+      .FIFO_SIZE ("18Kb"), // Target BRAM: "18Kb" or "36Kb" 
+      .FIRST_WORD_FALL_THROUGH ("TRUE") // Sets the FIFO FWFT to "TRUE" or "FALSE" 
+    ) bram_fifo_dual_clock_unit (
+      .ALMOSTEMPTY(FIFO_almost_empty), // 1-bit output almost empty
+      .ALMOSTFULL(FIFO_almost_full),   // 1-bit output almost full
+      .DO(FIFO_dout),                   // Output data, width defined by DATA_WIDTH parameter
+      .EMPTY(FIFO_empty),             // 1-bit output empty
+      .FULL(FIFO_full),               // 1-bit output full
+      .RDCOUNT(),         // Output read count, width determined by FIFO depth
+      .RDERR(),             // 1-bit output read error
+      .WRCOUNT(),         // Output write count, width determined by FIFO depth
+      .WRERR(),             // 1-bit output write error
+      .DI(FIFO_din),                   // Input data, width defined by DATA_WIDTH parameter
+      .RDCLK(clk_sys),             // 1-bit input read clock
+      .RDEN(FIFO_rd_en),               // 1-bit input read enable      
+      .RST(reset_sys),                 // 1-bit input reset
+      .WRCLK(PCLK),             // 1-bit input write clock
+      .WREN(FIFO_wr_en)                // 1-bit input write enable
+    );
+           
+      
     
 endmodule
 
