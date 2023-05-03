@@ -288,9 +288,9 @@ module core_video_cam_dcmi_interface
     assign decoder_data_ready   = !FIFO_almost_full;
     
     // mapping between the fifo with the downstream ;
-    assign FIFO_rd_en   = (sink_ready && !FIFO_empty);
-    assign stream_out_data = FIFO_dout;
-    
+    assign FIFO_rd_en       = (sink_ready && !FIFO_empty);
+    assign stream_out_data  = FIFO_dout;
+    assign sink_valid       = !FIFO_empty;     
     
     // dual clock bram fifo;
     /* fifo sinking the pixel decoded from the dcmi_decoder */
