@@ -528,12 +528,15 @@ Register Map
 Register Definition:
 1. register 0: control register;
     bit[0] select which to source: the HW emulator or the camera;
-            0 for HW emulator;
+            0 for HW emulator; 
             1 for camera OV7670;
     bit[1] start the decoder;
             0 to disable the decoder;
             1 to enable the decoder;
-     
+    bit[2] start the HW emulator;
+            0 disabled;
+            1 enabled;
+             
 2. register 1: status register;
     bit[0] detect the start of a frame
         1 yes; 
@@ -562,10 +565,11 @@ Register IO access:
 `define V3_CAM_DCMI_IF_REG_FRAME_RD_OFFSET  2
 
 // bit pos;
-`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX       0
-`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_START     1
+`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX         0   // select which source;
+`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START   1   // start the dcmi decoder;
+`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_EM_START    2   // start the hw emulator;
 
-`define V3_CAM_DCMI_IF_REG_STATUS_BIT_POS_START 0
+`define V3_CAM_DCMI_IF_REG_STATUS_BIT_POS_START 0   
 `define V3_CAM_DCMI_IF_REG_STATUS_BIT_POS_END   1
 
 `endif //_IO_MAP_SVH
