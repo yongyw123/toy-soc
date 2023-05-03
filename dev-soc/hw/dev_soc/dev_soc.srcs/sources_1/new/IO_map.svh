@@ -522,26 +522,50 @@ Assumptions:
 
 Register Map
 1. register 0 (offset 0): control register;
-        
+2. register 1 (offset 1): status register;
+3. register 2 (offset 2): frame counter read register;  
+
 Register Definition:
-1. control register;
+1. register 0: control register;
     bit[0] select which to source: the HW emulator or the camera;
             0 for HW emulator;
             1 for camera OV7670;
     bit[1] start the decoder;
             0 to disable the decoder;
             1 to enable the decoder;
+     
+2. register 1: status register;
+    bit[0] detect the start of a frame
+        1 yes; 
+        0 otherwise
+        *this will clear by itself;
+    bit[1] detect the end of a frame (finish decoding);
+        1 yes;
+        0 otherwise;
+        *this will clear by itself;
         
+3. register 2: frame counter read register;
+        bit[31:0] to store the number of frame detected;
+        *note: 
+            - this will overflow and wrap around;
+            - will clear to zero after a system reset;
+            
+
 Register IO access:
 1. register 0: write and read;
-
+2. register 1: read only;
+3. register 2: read only;
 ******************************************************************/
 // register offset;
-`define V3_CAM_DCMI_IF_REG_CTRL_OFFSET     0
+`define V3_CAM_DCMI_IF_REG_CTRL_OFFSET      0
+`define V3_CAM_DCMI_IF_REG_STATUS_OFFSET    1
+`define V3_CAM_DCMI_IF_REG_FRAME_RD_OFFSET  2
 
 // bit pos;
 `define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX       0
 `define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_START     1
 
+`define V3_CAM_DCMI_IF_REG_STATUS_BIT_POS_START 0
+`define V3_CAM_DCMI_IF_REG_STATUS_BIT_POS_END   1
 
 `endif //_IO_MAP_SVH
