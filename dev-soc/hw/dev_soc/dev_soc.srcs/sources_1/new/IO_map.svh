@@ -341,6 +341,7 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 `define V0_DISP_LCD             0   // lcd ILI9341 display via mcu 8080 seris protocol;
 `define V1_DISP_TEST_PATTERN    1   // test pattern generator for the lcd;
 `define V2_DISP_SRC_MUX         2   // direct which pixel source to the LCD: test pattern generator or from the camera?
+`define V3_CAM_DCMI_IF          3    // camera dcmi interface (with a dual-clock fifo embedded);
 
 /**************************************************************
 * V0_DISP_LCD
@@ -466,6 +467,7 @@ Register IO access:
 
 `define V1_DISP_TEST_PATTERN_REG_STATUS_BIT_POS_START   0
 `define V1_DISP_TEST_PATTERN_REG_STATUS_BIT_POS_END     1
+
 /**************************************************************
 * V2_DISP_SRC_MUX
 -----------------------
@@ -498,6 +500,49 @@ Register IO access:
 `define V2_DISP_SRC_MUX_REG_SEL_TEST     3'b001  // from the test pattern generator;
 `define V2_DISP_SRC_MUX_REG_SEL_CAM      3'b010  // from the camera OV7670;
 `define V2_DISP_SRC_MUX_REG_SEL_NONE     3'b100  // nothing by blanking;
+
+`define V3_CAM_DCMI_IF          3    // camera dcmi interface (with a dual-clock fifo embedded);
+/**************************************************************
+* V3_CAM_DCMI_IF
+-----------------------
+Camera DCMI Interface
+
+Purpose:
+1. Mainly, to interface with camera OV7670 which drives the synchronization signals;
+2. Note that this is asynchronous since this module is driven by OV7670 24MHz PCLK;
+
+Constituent Block:
+1. A dual-clock BRAM FIFO for the cross time domain;
+2. A mux to select between the actual camera ov7670 OR
+     a HW testing-circuit which emulates the DCMI signals;
+      
+Assumptions:
+1. The synchronization signal settings are fixed; 
+    thus; require the camera to be configured apriori;
+    
+
+Register Map
+1. register 0 (offset 0): control register;
+        
+Register Definition:
+1. control register;
+    bit[0] select which to source: the HW emulator or the camera;
+            0 for HW emulator;
+            1 for camera OV7670;
+    bit[1] start the decoder;
+            0 to disable the decoder;
+            1 to enable the decoder;
+        
+Register IO access:
+1. register 0: write and read;
+
+******************************************************************/
+// register offset;
+`define V3_CAM_DCMI_IF_REG_CTRL_OFFSET     0
+
+// bit pos;
+`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX       0
+`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_START     1
 
 
 `endif //_IO_MAP_SVH
