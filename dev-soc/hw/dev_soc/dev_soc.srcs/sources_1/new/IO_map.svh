@@ -520,14 +520,40 @@ Assumptions:
 1. The synchronization signal settings are fixed; 
     thus; require the camera to be configured apriori;
     
+Issue + Constraint:
+1. The DUAL-CLOCK BRAM FIFO is a MACRO;
+2. there are conditions to meet before this FIFO could operate;
+3. Mainly, its RESET needs to satisfy the following:  
+    Condition: A reset synchronizer circuit has been introduced to 7 series FPGAs. RST must be asserted
+    for five cycles to reset all read and write address counters and initialize flags after
+    power-up. RST does not clear the memory, nor does it clear the output register. When RST
+    is asserted High, EMPTY and ALMOSTEMPTY are set to 1, FULL and ALMOSTFULL are
+    reset to 0. The RST signal must be High for at least five read clock and write clock cycles to
+    ensure all internal states are reset to correct values. During Reset, both RDEN and WREN
+    must be deasserted (held Low).
+    
+4. As such, a dedicated FIFO reset register is created for the above;
+5. This is controlled by the SW driver; and the HW is responsible
+    to return whether the FIFO is OK to use; (hence the whole
+    system is ready to use);
+    
+    Flow:
+    a. SW, assert RST register; 
+    b. HW, use counter to track the reset conditions; wait and flag once satisfied;
+    c. SW, read the status and deassert the RST register;
+    
+6. reference: "7 Series FPGAs Memory Resources User Guide (UG473);
 
+------------
 Register Map
 1. register 0 (offset 0): control register;
 2. register 1 (offset 1): status register;
 3. register 2 (offset 2): frame counter read register;
 4. register 3 (offset 3): BRAM FIFO status register;
 5. register 4 (offset 4): BRAM FIFO read and write counter;  
-
+6. register 5 (offset 5): BRAM FIFO reset register;
+7. register 6 (offset 6): BRAM FIFO (and system) readiness state
+        
 Register Definition:
 1. register 0: control register;
     bit[0] select which to source: the HW emulator or the camera;
@@ -567,19 +593,36 @@ Register Definition:
 5. register 4: BRAM FIFO read and write counter;
         bit[10:0]   - read count;
         bit[21:11]  - write count;      
-            
+       
+6. register 5: BRAM FIFO reset register;   
+        bit[0] - RST; 
+            1 to reset;
+            0 otherwise;
+
+7. register 6: BRAM FIFO (and system) readiness state
+        bit[0] 
+            1 - system is ready to use;
+            0 - otheriwse            
 
 Register IO access:
 1. register 0: write and read;
 2. register 1: read only;
 3. register 2: read only;
+4. register 3: read only;
+5. register 4: read only;
+6. register 5: write only;
+7. register 6: read only;
+
 ******************************************************************/
 // register offset;
-`define V3_CAM_DCMI_IF_REG_CTRL_OFFSET          0   // 3'b000;
-`define V3_CAM_DCMI_IF_REG_STATUS_OFFSET        1   // 3'b001;
-`define V3_CAM_DCMI_IF_REG_FRAME_RD_OFFSET      2   // 3'b010;
-`define V3_CAM_DCMI_IF_REG_FIFO_STATUS_OFFSET   3   // 3'b011;
-`define V3_CAM_DCMI_IF_REG_FIFO_CNT_OFFSET      4   // 3'b100;
+`define V3_CAM_DCMI_IF_REG_CTRL_OFFSET                  0   // 3'b000;
+`define V3_CAM_DCMI_IF_REG_DECODER_STATUS_OFFSET        1   // 3'b001;
+`define V3_CAM_DCMI_IF_REG_FRAME_RD_OFFSET              2   // 3'b010;
+`define V3_CAM_DCMI_IF_REG_FIFO_STATUS_OFFSET           3   // 3'b011;
+`define V3_CAM_DCMI_IF_REG_FIFO_CNT_OFFSET              4   // 3'b100;
+`define V3_CAM_DCMI_IF_REG_FIFO_RST_OFFSET              5   // 3'b101;
+`define V3_CAM_DCMI_IF_REG_SYS_INIT_STATUS_OFFSET       6   // 3'b110;
+
 
 // bit pos;
 `define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX         0   // select which source;
