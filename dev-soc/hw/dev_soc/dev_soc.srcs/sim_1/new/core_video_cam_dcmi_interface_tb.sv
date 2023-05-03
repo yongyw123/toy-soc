@@ -49,16 +49,57 @@ program core_video_cam_dcmi_interface_tb
     
     initial begin
     @(posedge clk_sys);
+    sink_ready <= 1'b1; // always sinking;
     cs <= 1'b1;
     write <= 1'b1;
     read <= 1'b0;
     addr <= REG_CTRL_OFFSET;
+    // choose emulator, start the emulator; but not the decoder;
+    wr_data <= 3'b100;  
+    
+    // read the fifo status;
+    @(posedge clk_sys);
+    addr <= REG_FIFO_SYS_INIT_STATUS_OFFSET;
+    read <= 1'b1;
+    // expect the macro fifo eventually resets successfully;
+    wait(rd_data[0] == 1'b1);
+    
+    // start the decoder;
+    @(posedge clk_sys);
+    cs <= 1'b1;
+    write <= 1'b1;
+    read <= 1'b0;
+    addr <= REG_CTRL_OFFSET;
+    // choose emulator; enable decoder; do not disable emulator;
     wr_data <= 3'b110;
     
+    // read the decoder status;
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_DECODER_STATUS_OFFSET;
     
+    // expect the decoder detects a frame start eventually;
+    // disable the decoder once detected; otherwise; it will 
+    // keep going foreverl
+    wait(rd_data[0] == 1'b1);
+    @(posedge clk_sys);
+    write <= 1'b1;
+    read <= 1'b1;
+    addr <= REG_CTRL_OFFSET;
+    wr_data <= 3'b100;
     
+    // expect the decoder to eventually end at the frame end;
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_DECODER_STATUS_OFFSET;
+    wait(rd_data[1] == 1'b1);
     
-    #(1000);
+    // read the fifo statistics;
+    // ??
+    
+    #(100);
     $display("test ends");
     $stop;
     

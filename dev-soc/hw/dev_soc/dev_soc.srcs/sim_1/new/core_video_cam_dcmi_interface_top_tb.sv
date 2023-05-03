@@ -33,7 +33,7 @@ module core_video_cam_dcmi_interface_top_tb();
     // uut signals;
     localparam DATA_BITS = 8;
     localparam HREF_COUNTER_WIDTH  = 8;    // to count href;
-    localparam HREF_TOTAL          = 240;  // expected to have 240 href for a line;
+    localparam HREF_TOTAL          = 3;  // expected to have 240 href for a line;
     localparam FRAME_COUNTER_WIDTH = 32;    // count the number of frames;
     
     // for HW DCMI emulator;
@@ -42,8 +42,10 @@ module core_video_cam_dcmi_interface_top_tb();
     localparam HREF_LOW            = 5;    // hlow; 
     localparam BUFFER_START_PERIOD = 7;    // between vsync assertion and href assertion;
     localparam BUFFER_END_PERIOD   = 5;	// between the frame end and the frame start;
-    localparam PIXEL_BYTE_TOTAL    = 640;   // 320 pixels per href with bp = 16-bit; 
-
+    localparam PIXEL_BYTE_TOTAL    = 4;   // 320 pixels per href with bp = 16-bit; 
+    localparam FIFO_RST_LOW_CYCLES = 3; // for macro fifo reset req;
+    localparam FIFO_RST_HIGH_CYCLES = 6; // for macro fifo reset req;
+     
     logic cs;    
     logic write;              
     logic read;               
@@ -80,7 +82,11 @@ module core_video_cam_dcmi_interface_top_tb();
         .HREF_LOW(HREF_LOW),            
         .BUFFER_START_PERIOD(BUFFER_START_PERIOD), 
         .BUFFER_END_PERIOD(BUFFER_END_PERIOD),
-        .PIXEL_BYTE_TOTAL(PIXEL_BYTE_TOTAL)
+        .PIXEL_BYTE_TOTAL(PIXEL_BYTE_TOTAL),
+        
+        // for macro bram fifo reset req;
+        .FIFO_RST_LOW_CYCLES(FIFO_RST_LOW_CYCLES),
+        .FIFO_RST_HIGH_CYCLES(FIFO_RST_HIGH_CYCLES)
      )
      uut
      (
@@ -132,7 +138,24 @@ module core_video_cam_dcmi_interface_top_tb();
             reset_sys = 1'b0;
             #(T/2);
         end
-    
+
+    /* monitoring system */
+    initial begin
+        $monitor("time: %t, cs; %0b, write: %0b, read: %0b, addr: %D, wr_data: %8B, rd_data: %22B, stream_out_rgb: %8B, sink_ready: %0b, sink_vald: %0b, debug_fifo_ready: %0b",
+        $time,
+        cs,
+        write,
+        read,
+        addr,
+        wr_data,
+        rd_data,
+        stream_out_data,
+        sink_ready,
+        sink_valid,
+        debug_FIFO_rst_ready
+        );
+       
+    end    
 endmodule
 
 `endif //CORE_VIDEO_CAM_DCMI_INTERFACE_TOP_TB_SV
