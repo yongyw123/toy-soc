@@ -130,6 +130,19 @@ program core_video_cam_dcmi_interface_tb
     read <= 1'b1;
     addr <= REG_FRAME_OFFSET;
     
+    /* ----------------------------
+    
+    ??????
+    TO DO
+    
+    1. allow the decoder and emulator run over more than say 4 frames;
+    2. toggle sink ready to test the fifo sinking;
+    3. figure out how to check the fifo content as a way to check emulator generated
+        content;
+         
+    ???
+    *---------------------------------------*/    
+    
     #(100);
     $display("test ends");
     $stop;
