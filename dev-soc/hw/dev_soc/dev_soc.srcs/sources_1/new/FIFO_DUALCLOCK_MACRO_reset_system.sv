@@ -92,7 +92,7 @@ module FIFO_DUALCLOCK_MACRO_reset_system
     ST_DONE             : for flagging; 
     */
     
-    typedef enum {ST_IDLE, ST_CHECK_RST_HIGH, ST_CHECK_RST_LOW, ST_DONE} state_type;
+    typedef enum {ST_IDLE, ST_CHECK_RST_HIGH, ST_CHECK_RST_LOW} state_type;
             
     state_type state_reg, state_next;
         
@@ -187,7 +187,7 @@ module FIFO_DUALCLOCK_MACRO_reset_system
                 reset_fifo_next = 1'b0;
                 /// satisfy the fifo req?
                 if(count_low_reg == TARGET_LOW) begin
-                    state_next = ST_DONE;
+                    state_next = ST_IDLE;
                     ready_next = 1'b1;
                 end 
                 else begin
@@ -198,8 +198,6 @@ module FIFO_DUALCLOCK_MACRO_reset_system
             end 
          
             default: ;  // nop;
-        endcase
-    
-    end
-            
+        endcase    
+    end            
 endmodule
