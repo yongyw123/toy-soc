@@ -119,8 +119,8 @@ Register Definition:
         bit[5] - write error;
 
 5. register 4: BRAM FIFO read and write counter;
-        bit[10:0]   - read count;
-        bit[21:11]  - write count;      
+        bit[15:0]   - read count;
+        bit[31:16]  - write count;      
        
 6. register 5: BRAM FIFO (and system) readiness state
         bit[0] 
@@ -135,7 +135,6 @@ Register IO access:
 5. register 4: read only;
 6. register 5: read only;
 ******************************************************************/
-
 `ifndef CORE_VIDEO_CAM_DCMI_INTERFACE_SV
 `define CORE_VIDEO_CAM_DCMI_INTERFACE_SV
 
@@ -311,7 +310,7 @@ module core_video_cam_dcmi_interface
     assign rd_en = (read && cs);
     assign dec_status_next = {30'b0, decoder_complete_tick, decoder_start_tick};
     assign fifo_status_next = {26'b0, FIFO_wr_error, FIFO_rd_error, FIFO_full, FIFO_empty, FIFO_almost_full, FIFO_almost_empty};
-    assign fifo_cnt_next = {10'b0, FIFO_wr_count, FIFO_rd_count};
+    assign fifo_cnt_next = {5'b0, FIFO_wr_count, 5'b0, FIFO_rd_count};
 
     always_comb begin
         // default;
