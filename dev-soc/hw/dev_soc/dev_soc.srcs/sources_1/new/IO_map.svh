@@ -514,6 +514,7 @@ Constituent Block:
 1. A dual-clock BRAM FIFO for the cross time domain;
 2. A mux to select between the actual camera ov7670 OR
      a HW testing-circuit which emulates the DCMI signals;
+3. the HW DCMI emulator itself;
       
 Assumptions:
 1. The synchronization signal settings are fixed; 
@@ -560,9 +561,9 @@ Register IO access:
 3. register 2: read only;
 ******************************************************************/
 // register offset;
-`define V3_CAM_DCMI_IF_REG_CTRL_OFFSET      0
-`define V3_CAM_DCMI_IF_REG_STATUS_OFFSET    1
-`define V3_CAM_DCMI_IF_REG_FRAME_RD_OFFSET  2
+`define V3_CAM_DCMI_IF_REG_CTRL_OFFSET      0   // 3'b000;
+`define V3_CAM_DCMI_IF_REG_STATUS_OFFSET    1   // 3'b001;
+`define V3_CAM_DCMI_IF_REG_FRAME_RD_OFFSET  2   // 3'b010;
 
 // bit pos;
 `define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX         0   // select which source;
