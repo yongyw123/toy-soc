@@ -132,10 +132,10 @@ module core_video_cam_dcmi_interface
         output logic [`REG_DATA_WIDTH_G-1:0]  rd_data,
         
         // specific external input signals;
-        input logic PCLK,
-        input logic HREF,
-        input logic VSYNC,
-        input logic [DATA_BITS-1:0] DIN,
+        input logic CAM_PCLK,
+        input logic CAM_HREF,
+        input logic CAM_VSYNC,
+        input logic [DATA_BITS-1:0] CAM_DIN,
         
         // for downstream signals;
         output logic [DATA_BITS-1:0] stream_out_data,
@@ -189,6 +189,19 @@ module core_video_cam_dcmi_interface
     logic FIFO_wr_error;    
     logic [FIFO_DEPTH_BIT-1:0] FIFO_wr_count;
     
+    // signals for HW DCMI emulator;
+    logic EMULATOR_pclk;
+    logic EMULATOR_vsync;
+    logic EMULATOR_href;
+    logic [DATA_BITS-1:0] EMULATOR_dout;
+    
+    // general to distinguish between the HW emulator and the actual Camera signasl;
+    logic pclk_main;
+    logic vsync_main;
+    logic href_main;
+    logic [DATA_BITS-1:0] pixel_din_main;
+    
+    
     /* registers;
     1. no need to explicitly create for frame counter read register;
         this has already been registered in the dcmi_decoder module;
@@ -225,9 +238,9 @@ module core_video_cam_dcmi_interface
     // next state;
     assign ctrl_next = wr_data;
     // mapping;
-    assign select_emulator_or_cam   = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX];
-    assign decoder_cmd_start        = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START];
-    assign emulator_cmd_start       = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_EM_START];
+    assign select_emulator_or_cam   = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX];   // HIGH for cam;
+    assign decoder_cmd_start        = (select_emulator_or_cam && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START]);
+    assign emulator_cmd_start       = (!select_emulator_or_cam && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_EM_START]);
      
     /* ------ reading */
     assign rd_en = (read && cs);
@@ -239,11 +252,35 @@ module core_video_cam_dcmi_interface
         // default;
         rd_data = {32{1'b0}};
         case({rd_en, addr[2:0]})
+            {1'b1, REG_CTRL_OFFSET}         : rd_data = ctrl_reg;
             {1'b1, REG_STATUS_OFFSET}       : rd_data = status_reg;
             {1'b1, REG_FRAME_OFFSET}        : rd_data = decoded_frame_counter;
             {1'b1, REG_FIFO_STATUS_OFFSET}  : rd_data = fifo_status_reg;
             {1'b1, REG_FIFO_CNT_OFFSET}     : rd_data = fifo_cnt_reg;            
             default: ; // nop;
+        endcase
+    end
+    
+    
+    /* ---- mux for HW emulator and camera ov7670 */
+    always_comb begin
+        // the lsb first bit is for selecting;
+        case(ctrl_reg[0])
+            // HW DCMI emulator is chosen;
+            1'b0: begin
+                pclk_main       = EMULATOR_pclk;
+                vsync_main      = EMULATOR_vsync;
+                href_main       = EMULATOR_href;
+                pixel_din_main  = EMULATOR_dout;
+            end
+            
+            // Camera DCMI is chosen;
+            default: begin
+                pclk_main       = CAM_PCLK;
+                vsync_main      = CAM_VSYNC;
+                href_main       = CAM_HREF;
+                pixel_din_main  = CAM_DIN;
+            end
         endcase
     end
     
@@ -263,10 +300,10 @@ module core_video_cam_dcmi_interface
         .cmd_start(decoder_cmd_start),
         
         // dcmi interface;
-        .pclk(PCLK),        // not 100MHz (asynchronous to the system);
-        .href(HREF),
-        .vsync(VSYNC),
-        .din(DIN),
+        .pclk(pclk_main),        // not 100MHz (asynchronous to the system);
+        .href(href_main),
+        .vsync(vsync_main),
+        .din(pixel_din_main),
         
         // interface with the internal dual clock fifo write port;
         .data_valid(decoder_data_valid),
@@ -282,13 +319,42 @@ module core_video_cam_dcmi_interface
         .debug_detect_vsync_edge()
      );
      
+     
+     // HW DCMI emulator;
+     dcmi_emulator
+     #(
+        .DATA_BITS(DATA_BITS), // camera could only transmit 8-bit in parallel at at time;
+    
+        // dcmi sync;
+        .PCLK_MOD(PCLK_MOD),                // 100/4 = 25;
+        .VSYNC_LOW(VSYNC_LOW),              //vlow;
+        .HREF_LOW(HREF_LOW),                // hlow; 
+        .BUFFER_START_PERIOD(BUFFER_START_PERIOD),     // between vsync assertion and href assertion;
+        .BUFFER_END_PERIOD(BUFFER_END_PERIOD), 		// between the frame end and the frame start;
+        .HREF_TOTAL(HREF_TOTAL),            // total href assertion to generate;
+        .PIXEL_BYTE_TOTAL(PIXEL_BYTE_TOTAL)     // 320 pixels per href with bp = 16-bit;     
+     )
+     (
+        .clk_sys(clk_sys),
+        .reset_sys(reset_sys),
+        .start(emulator_cmd_start),
+        .pclk(EMULATOR_pclk),       // 25 MHz;
+        .vsync(EMULATOR_vsync),
+        .href(EMULATOR_href),
+        .dout(EMULATOR_dout),
+        
+        // not used;
+        .frame_start_tick(),
+        .frame_complete_tick()        
+     );
+    
     /* ----- mapping between the dcmi decoder and the fifo; */
-    assign FIFO_wr_en           = (decoder_data_valid && !FIFO_full);        
+    assign FIFO_wr_en           = (decoder_data_valid && !FIFO_full && !FIFO_wr_error);        
     assign FIFO_din             = decoder_dout;   
     assign decoder_data_ready   = !FIFO_almost_full;
     
     // mapping between the fifo with the downstream ;
-    assign FIFO_rd_en       = (sink_ready && !FIFO_empty);
+    assign FIFO_rd_en       = (sink_ready && !FIFO_empty && !FIFO_rd_error);
     assign stream_out_data  = FIFO_dout;
     assign sink_valid       = !FIFO_empty;     
     
@@ -333,7 +399,7 @@ module core_video_cam_dcmi_interface
       .RDCLK(clk_sys),             // 1-bit input read clock
       .RDEN(FIFO_rd_en),               // 1-bit input read enable      
       .RST(reset_sys),                 // 1-bit input reset
-      .WRCLK(PCLK),             // 1-bit input write clock
+      .WRCLK(CAM_PCLK),             // 1-bit input write clock
       .WREN(FIFO_wr_en)                // 1-bit input write enable
     );
            
