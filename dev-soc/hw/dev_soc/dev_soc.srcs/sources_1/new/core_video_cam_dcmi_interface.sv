@@ -19,7 +19,6 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
 /**************************************************************
 * V3_CAM_DCMI_IF
 -----------------------
@@ -39,14 +38,49 @@ Assumptions:
 1. The synchronization signal settings are fixed; 
     thus; require the camera to be configured apriori;
     
+Issue + Constraint:
+1. The DUAL-CLOCK BRAM FIFO is a MACRO;
+2. there are conditions to meet before this FIFO could operate;
+3. Mainly, its RESET needs to satisfy the following:  
+    Condition: A reset synchronizer circuit has been introduced to 7 series FPGAs. RST must be asserted
+    for five cycles to reset all read and write address counters and initialize flags after
+    power-up. RST does not clear the memory, nor does it clear the output register. When RST
+    is asserted High, EMPTY and ALMOSTEMPTY are set to 1, FULL and ALMOSTFULL are
+    reset to 0. The RST signal must be High for at least five read clock and write clock cycles to
+    ensure all internal states are reset to correct values. During Reset, both RDEN and WREN
+    must be deasserted (held Low).
+    
+        Summary: 
+            // read;
+            1. RESET must be asserted for at least five read clock cycles;
+            2. RDEN must be low before RESET is active HIGH;
+            3. RDEN must remain low during this reset cycle
+            4. RDEN must be low for at least two RDCLK clock cycles after RST deasserted
+            
+            // write;
+            1. RST must be held high for at least five WRCLK clock cycles,
+            2. WREN must be low before RST becomes active high, 
+            3. WREN remains low during this reset cycle.
+            4. WREN must be low for at least two WRCLK clock cycles after RST deasserted;
+    
+4. as such, this core will have a FSM just for the above;
+    this FSM will use the reset_system to create a reset_FIFO
+    that satisfies the conditions above;
+    once satistifed, the FSM will assert that the entire system is ready to use;
+    the SW is responsible to check this syste readiness;
 
+5. by above, a register shall be created to store the system readiness;            
+6. reference: "7 Series FPGAs Memory Resources User Guide (UG473);
+
+------------
 Register Map
 1. register 0 (offset 0): control register;
 2. register 1 (offset 1): status register;
 3. register 2 (offset 2): frame counter read register;
 4. register 3 (offset 3): BRAM FIFO status register;
 5. register 4 (offset 4): BRAM FIFO read and write counter;  
-
+6. register 5 (offset 5): BRAM FIFO (and system) readiness state
+        
 Register Definition:
 1. register 0: control register;
     bit[0] select which to source: the HW emulator or the camera;
@@ -86,14 +120,20 @@ Register Definition:
 5. register 4: BRAM FIFO read and write counter;
         bit[10:0]   - read count;
         bit[21:11]  - write count;      
-            
+       
+6. register 5: BRAM FIFO (and system) readiness state
+        bit[0] 
+            1 - system is ready to use;
+            0 - otheriwse            
 
 Register IO access:
 1. register 0: write and read;
 2. register 1: read only;
 3. register 2: read only;
+4. register 3: read only;
+5. register 4: read only;
+6. register 6: read only;
 ******************************************************************/
-
 
 `ifndef CORE_VIDEO_CAM_DCMI_INTERFACE_SV
 `define CORE_VIDEO_CAM_DCMI_INTERFACE_SV
@@ -145,11 +185,12 @@ module core_video_cam_dcmi_interface
     );
     
     // constanst
-    localparam REG_CTRL_OFFSET          = 3'b000;
-    localparam REG_STATUS_OFFSET        = 3'b001;
-    localparam REG_FRAME_OFFSET         = 3'b010;
-    localparam REG_FIFO_STATUS_OFFSET   = 3'b011;
-    localparam REG_FIFO_CNT_OFFSET      = 3'b100;
+    localparam REG_CTRL_OFFSET                  = 3'b000;
+    localparam REG_DECODER_STATUS_OFFSET        = 3'b001;
+    localparam REG_FRAME_OFFSET                 = 3'b010;
+    localparam REG_FIFO_STATUS_OFFSET           = 3'b011;
+    localparam REG_FIFO_CNT_OFFSET              = 3'b100;    
+    localparam REG_FIFO_SYS_INIT_STATUS_OFFSET  = 3'b101;
     
     // enablers;
     logic wr_en;
@@ -201,6 +242,9 @@ module core_video_cam_dcmi_interface
     logic href_main;
     logic [DATA_BITS-1:0] pixel_din_main;
     
+    // signals for FIFO reset requirement;
+    //logic [
+    
     
     /* registers;
     1. no need to explicitly create for frame counter read register;
@@ -208,25 +252,32 @@ module core_video_cam_dcmi_interface
     2. need to create for the rest;
     */
     logic [`REG_DATA_WIDTH_G-1:0] ctrl_reg, ctrl_next;
-    logic [`REG_DATA_WIDTH_G-1:0] status_reg, status_next;
+    logic [`REG_DATA_WIDTH_G-1:0] dec_status_reg, dec_status_next;
     logic [`REG_DATA_WIDTH_G-1:0] fifo_status_reg, fifo_status_next;
-    logic [`REG_DATA_WIDTH_G-1:0] fifo_cnt_reg, fifo_cnt_next;
+    logic [`REG_DATA_WIDTH_G-1:0] fifo_cnt_reg, fifo_cnt_next;    
+    logic sys_init_status_reg, sys_init_status_next;
     
     
     always_ff @(posedge clk_sys, reset_sys) begin
         if(reset_sys) begin
-            ctrl_reg    <= 0;
-            status_reg  <= 0;
+            ctrl_reg        <= 0;
+            dec_status_reg  <= 0;
             fifo_status_reg <= 0;
-            fifo_cnt_reg    <= 0;                
+            fifo_cnt_reg    <= 0;   
+            
+            sys_init_status_reg    <= 0;
+                         
         end
         else begin
             if(wr_ctrl_en) begin
                 ctrl_reg    <= ctrl_next;
             end
-            status_reg      <= status_next;
+            
+            dec_status_reg  <= dec_status_next;
             fifo_status_reg <= fifo_status_next;
             fifo_cnt_reg    <= fifo_cnt_next;
+                        
+            sys_init_status_reg <= sys_init_status_next;
             
         end
     end
@@ -234,9 +285,11 @@ module core_video_cam_dcmi_interface
     /* -------- writing */
     // decoding;
     assign wr_en = write && cs;
-    assign wr_ctrl_en = (wr_en && addr[2:0] == REG_CTRL_OFFSET);
+    assign wr_ctrl_en       = (wr_en && addr[2:0] == REG_CTRL_OFFSET);
+    
     // next state;
     assign ctrl_next = wr_data;
+    
     // mapping;
     assign select_emulator_or_cam   = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX];   // HIGH for cam;
     assign decoder_cmd_start        = (select_emulator_or_cam && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START]);
@@ -252,11 +305,12 @@ module core_video_cam_dcmi_interface
         // default;
         rd_data = {32{1'b0}};
         case({rd_en, addr[2:0]})
-            {1'b1, REG_CTRL_OFFSET}         : rd_data = ctrl_reg;
-            {1'b1, REG_STATUS_OFFSET}       : rd_data = status_reg;
-            {1'b1, REG_FRAME_OFFSET}        : rd_data = decoded_frame_counter;
-            {1'b1, REG_FIFO_STATUS_OFFSET}  : rd_data = fifo_status_reg;
-            {1'b1, REG_FIFO_CNT_OFFSET}     : rd_data = fifo_cnt_reg;            
+            {1'b1, REG_CTRL_OFFSET}             : rd_data = ctrl_reg;
+            {1'b1, REG_DECODER_STATUS_OFFSET}   : rd_data = dec_status_reg;
+            {1'b1, REG_FRAME_OFFSET}            : rd_data = decoded_frame_counter;
+            {1'b1, REG_FIFO_STATUS_OFFSET}      : rd_data = fifo_status_reg;
+            {1'b1, REG_FIFO_CNT_OFFSET}         : rd_data = fifo_cnt_reg;
+                        
             default: ; // nop;
         endcase
     end
@@ -398,7 +452,7 @@ module core_video_cam_dcmi_interface
       .DI(FIFO_din),                   // Input data, width defined by DATA_WIDTH parameter
       .RDCLK(clk_sys),             // 1-bit input read clock
       .RDEN(FIFO_rd_en),               // 1-bit input read enable      
-      .RST(reset_sys),                 // 1-bit input reset
+      .RST(fifo_reset_reg),                 // 1-bit input reset
       .WRCLK(CAM_PCLK),             // 1-bit input write clock
       .WREN(FIFO_wr_en)                // 1-bit input write enable
     );
