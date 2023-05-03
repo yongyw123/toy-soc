@@ -141,7 +141,7 @@ module core_video_cam_dcmi_interface_top_tb();
 
     /* monitoring system */
     initial begin
-        $monitor("time: %t, cs; %0b, write: %0b, read: %0b, addr: %D, wr_data: %8B, rd_data: %22B, stream_out_rgb: %8B, sink_ready: %0b, sink_vald: %0b, debug_fifo_ready: %0b",
+        $monitor("time: %t, cs; %0b, write: %0b, read: %0b, addr: %D, wr_data: %8B, rd_data: %8H, stream_out_rgb: %8B, sink_ready: %0b, sink_vald: %0b, debug_fifo_ready: %0b",
         $time,
         cs,
         write,

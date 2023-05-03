@@ -97,7 +97,23 @@ program core_video_cam_dcmi_interface_tb
     wait(rd_data[1] == 1'b1);
     
     // read the fifo statistics;
-    // ??
+    // the write and read counts;
+    // expect write == read count;
+    // because sink_ready is always enabled;
+    // so the write rate == read rate;
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_FIFO_CNT_OFFSET;
+    
+    // read the frame counter;
+    // expect it to be one only;
+    // because we only enable the decoder once previously;
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_FRAME_OFFSET;
+    
     
     #(100);
     $display("test ends");
