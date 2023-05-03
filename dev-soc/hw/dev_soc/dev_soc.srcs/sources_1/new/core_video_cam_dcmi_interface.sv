@@ -253,15 +253,15 @@ module core_video_cam_dcmi_interface
     
     
     /* registers;
-    1. no need to explicitly create for frame counter read register;
-        this has already been registered in the dcmi_decoder module;
-    2. need to create for the rest;
+    some do not have register explicitly created here
+    because it has been created within the 
+    instantiated sub-modules;
     */
     logic [`REG_DATA_WIDTH_G-1:0] ctrl_reg, ctrl_next;
     logic [`REG_DATA_WIDTH_G-1:0] dec_status_reg, dec_status_next;
     logic [`REG_DATA_WIDTH_G-1:0] fifo_status_reg, fifo_status_next;
     logic [`REG_DATA_WIDTH_G-1:0] fifo_cnt_reg, fifo_cnt_next;    
-    logic sys_ready_status_reg, sys_ready_status_next; // to filter for fifo system ready flag;
+    
     
     always_ff @(posedge clk_sys, reset_sys) begin
         if(reset_sys) begin
@@ -269,19 +269,14 @@ module core_video_cam_dcmi_interface
             dec_status_reg  <= 0;
             fifo_status_reg <= 0;
             fifo_cnt_reg    <= 0;               
-            sys_ready_status_reg  <= 1'b0;
-                         
         end
         else begin
             if(wr_ctrl_en) begin
                 ctrl_reg    <= ctrl_next;
             end
-            
             dec_status_reg  <= dec_status_next;
             fifo_status_reg <= fifo_status_next;
             fifo_cnt_reg    <= fifo_cnt_next;
-            
-            sys_ready_status_reg <= sys_ready_status_next;
         end
     end
     
@@ -294,17 +289,19 @@ module core_video_cam_dcmi_interface
     assign ctrl_next = wr_data;
     
     // mapping;
-    assign select_emulator_or_cam   = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX];   // HIGH for cam;
-    assign decoder_cmd_start        = (select_emulator_or_cam && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START]);
+    assign select_emulator_or_cam   = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX];   // HIGH for cam;    
+    // for decoder; one more condition: fifo reset must be OK; this 
+    // is to meet the dual-clock bram macro fifo requirements;
+    assign decoder_cmd_start        = (FIFO_rst_ready && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START]);
+    // do not start the emulator unless selected;
     assign emulator_cmd_start       = (!select_emulator_or_cam && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_EM_START]);
      
     /* ------ reading */
     assign rd_en = (read && cs);
-    assign status_next = {30'b0, decoder_complete_tick, decoder_start_tick};
+    assign dec_status_next = {30'b0, decoder_complete_tick, decoder_start_tick};
     assign fifo_status_next = {26'b0, FIFO_wr_error, FIFO_rd_error, FIFO_full, FIFO_empty, FIFO_almost_full, FIFO_almost_empty};
     assign fifo_cnt_next = {10'b0, FIFO_wr_count, FIFO_rd_count};
-    assign sys_ready_status_next = (FIFO_rst_ready) ? 1'b1 : sys_ready_status_reg;
-      
+
     always_comb begin
         // default;
         rd_data = {32{1'b0}};
@@ -314,7 +311,7 @@ module core_video_cam_dcmi_interface
             {1'b1, REG_FRAME_OFFSET}            : rd_data = decoded_frame_counter;
             {1'b1, REG_FIFO_STATUS_OFFSET}      : rd_data = fifo_status_reg;
             {1'b1, REG_FIFO_CNT_OFFSET}         : rd_data = fifo_cnt_reg;
-            {1'b1, REG_FIFO_SYS_INIT_STATUS_OFFSET} : rd_data = {31'b0, sys_ready_status_reg};
+            {1'b1, REG_FIFO_SYS_INIT_STATUS_OFFSET} : rd_data = {31'b0, FIFO_rst_ready};
             default: ; // nop;
         endcase
     end
@@ -434,7 +431,9 @@ module core_video_cam_dcmi_interface
     assign decoder_data_ready   = !FIFO_almost_full;
     
     // mapping between the fifo with the downstream ;
-    assign FIFO_rd_en       = (sink_ready && !FIFO_empty && !FIFO_rd_error);
+    
+    // need tp ensure the fifo macro is reset successfully; otherwise, do not read it;
+    assign FIFO_rd_en       = (FIFO_rst_ready && sink_ready && !FIFO_empty && !FIFO_rd_error);
     assign stream_out_data  = FIFO_dout;
     assign sink_valid       = !FIFO_empty;     
     
@@ -479,7 +478,7 @@ module core_video_cam_dcmi_interface
       .RDCLK(clk_sys),             // 1-bit input read clock
       .RDEN(FIFO_rd_en),               // 1-bit input read enable      
       .RST(RST_FIFO),                 // 1-bit input reset
-      .WRCLK(CAM_PCLK),             // 1-bit input write clock
+      .WRCLK(pclk_main),             // 1-bit input write clock
       .WREN(FIFO_wr_en)                // 1-bit input write enable
     );
            
