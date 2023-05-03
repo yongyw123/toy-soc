@@ -501,7 +501,6 @@ Register IO access:
 `define V2_DISP_SRC_MUX_REG_SEL_CAM      3'b010  // from the camera OV7670;
 `define V2_DISP_SRC_MUX_REG_SEL_NONE     3'b100  // nothing by blanking;
 
-`define V3_CAM_DCMI_IF          3    // camera dcmi interface (with a dual-clock fifo embedded);
 /**************************************************************
 * V3_CAM_DCMI_IF
 -----------------------
