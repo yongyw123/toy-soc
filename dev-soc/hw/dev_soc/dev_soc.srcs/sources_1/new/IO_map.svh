@@ -550,6 +550,7 @@ Issue + Constraint:
     that satisfies the conditions above;
     once satistifed, the FSM will assert that the entire system is ready to use;
     the SW is responsible to check this syste readiness;
+    the SW should not start the DCMI decoder until the system is ready!
 
 5. by above, a register shall be created to store the system readiness;            
 6. reference: "7 Series FPGAs Memory Resources User Guide (UG473);
@@ -614,7 +615,7 @@ Register IO access:
 3. register 2: read only;
 4. register 3: read only;
 5. register 4: read only;
-6. register 6: read only;
+6. register 5: read only;
 ******************************************************************/
 // register offset;
 `define V3_CAM_DCMI_IF_REG_CTRL_OFFSET                  0   // 3'b000;
