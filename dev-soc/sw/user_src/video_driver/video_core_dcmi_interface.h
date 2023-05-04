@@ -193,8 +193,9 @@ class video_core_dcmi_interface{
     enum{
         // control;
         MASK_CTRL_DEC_START = BIT_MASK(BIT_POS_DEC_START),
-        
-        
+        MASK_CTRL_FRAME_RST = BIT_MASK(BIT_POS_DEC_FRAME_RST),
+        MASK_CTRL_FIFO_RST = BIT_MASK(BIT_POS_FIFO_RST),
+
         // decoder status;
         MASK_DEC_STATUS_START   = BIT_MASK(BIT_POS_DECODER_STATUS_START),
         MASK_DEC_STATUS_END     = BIT_MASK(BIT_POS_DECODER_STATUS_END),
@@ -236,9 +237,11 @@ class video_core_dcmi_interface{
         void clear_decoder_counter(void);   // resetting the decoder frame counter;
         void reset_fifo(void); // manual resetting the internal fifo if all goes wrong;
 
+
         /* decoder status */
         int detect_frame_start(void);   // detect the start of a frame;
         int detect_frame_end(void); // detect the completion of a frame;
+        uint32_t get_frame_counter(void);   // get the number of frame detected so far;
 
         /* check the macro fifo status; */
         fifo_status_t get_fifo_status(void);
@@ -249,13 +252,9 @@ class video_core_dcmi_interface{
         int is_fifo_empty(void);    // fully empty?
         int is_fifo_ok(void);       // any errors reported?
 
-        
-        
-
         /* check fifo counters */
         uint16_t get_fifo_rd_count(void);
-        uint16_t get_fifo_wr_count(void);
-    
+        uint16_t get_fifo_wr_count(void);    
 
     private:
         // this video core base address in the user-address space;
