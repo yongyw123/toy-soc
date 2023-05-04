@@ -36,6 +36,7 @@ module dcmi_decoder_top_tb();
     logic vsync;
     logic href;
     logic [DATA_BITS-1:0] emulator_dout;
+    logic decoder_ready_flag;
     logic frame_start_tick;
     logic frame_complete_tick;
     
@@ -117,7 +118,7 @@ module dcmi_decoder_top_tb();
     (
         .reset_sys(reset_sys),
         .cmd_start(decoder_start),
-        .sync_clr_frame_cnt(0),
+        .sync_clr_frame_cnt(decoder_sync_clr_frame_cnt),
         .pclk(pclk),
         .href(href),
         .vsync(vsync),
@@ -126,6 +127,7 @@ module dcmi_decoder_top_tb();
         .data_ready(decoder_data_ready),
         .dout(decoder_dout),
         .debug_detect_vsync_edge(debug_detect_vsync_edge),
+        .decoder_ready_flag(decoder_ready_flag),
         .decoder_complete_tick(decoder_complete_tick), // when the entire frame has been decoded;
         .decoder_start_tick(decoder_start_tick),     // when a new frame is detected;
         .decoded_frame_counter(decoded_frame_counter)   
@@ -194,10 +196,12 @@ module dcmi_decoder_top_tb();
     //reset pulse fo the user-systems;
     initial
         begin
+        
             decoder_data_valid = 1'b0;
             FIFO_RDEN = 1'b0;
             start_stimulus = 1'b0;
-            
+            decoder_sync_clr_frame_cnt = 1'b0;
+                
             reset_sys = 1'b1;
             #(T/2);
             reset_sys = 1'b0;
