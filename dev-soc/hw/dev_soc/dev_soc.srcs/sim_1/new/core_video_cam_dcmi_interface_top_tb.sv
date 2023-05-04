@@ -57,12 +57,12 @@ module core_video_cam_dcmi_interface_top_tb();
     logic debug_detect_vsync_edge;
       
     /* ----- signals for HW DCMI emulator; */
-    localparam PCLK_MOD            = 2;    // 100/2 = 50;
+    localparam PCLK_MOD            = 4;    // 100/4;
     localparam VSYNC_LOW           = 10;   //vlow;
     localparam HREF_LOW            = 5;    // hlow; 
     localparam BUFFER_START_PERIOD = 7;    // between vsync assertion and href assertion;
     localparam BUFFER_END_PERIOD   = 5;	// between the frame end and the frame start;
-    localparam PIXEL_BYTE_TOTAL    = 4;   // 320 pixels per href with bp = 16-bit; 
+    localparam PIXEL_BYTE_TOTAL    = 8;   // 320 pixels per href with bp = 16-bit; 
     localparam FIFO_RST_LOW_CYCLES = 3; // for macro fifo reset req;
     localparam FIFO_RST_HIGH_CYCLES = 6; // for macro fifo reset req;
     logic DCMI_PCLK;

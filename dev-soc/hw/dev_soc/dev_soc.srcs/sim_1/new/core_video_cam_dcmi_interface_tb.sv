@@ -97,7 +97,7 @@ program core_video_cam_dcmi_interface_tb
     addr <= REG_CTRL_OFFSET;
     wr_data <= 2'b00;    
     
-    /*
+    
     // expect the decoder to eventually end at the frame end;
     @(posedge clk_sys);    
     write <= 1'b0;
@@ -126,19 +126,17 @@ program core_video_cam_dcmi_interface_tb
     
     // clear the frame counter;
     // and read it thereafter; expect it to reset to zero;
-    
     @(posedge clk_sys);    
     write <= 1'b1;
     read <= 1'b0;
     addr <= REG_CTRL_OFFSET;
-    // {LSB: choose emulator; disable decoder; emulator active; MSB: clear}; 
-    wr_data <= 4'b1100;
+    wr_data <= 2'b10;
     
     @(posedge clk_sys);    
     write <= 1'b0;
     read <= 1'b1;
     addr <= REG_FRAME_OFFSET;
-    */
+    
     
     #(100);
     $display("test ends");
@@ -149,16 +147,11 @@ endprogram
 
 `endif //CORE_VIDEO_CAM_DCMI_INTERFACE_TB_SV
 
-/* ----------------------------
-    
-    ??????
-    TO DO
-    
-    1. allow the decoder and emulator run over more than say 4 frames;
-    2. toggle sink ready to test the fifo sinking;
-    3. figure out how to check the fifo content as a way to check emulator generated
-        content;
-         
-    ???
-    *---------------------------------------*/    
-    
+/* ----------------------------    
+??????
+TO DO
+1. allow the decoder and emulator run over more than say 4 frames;
+2. toggle sink ready to test the fifo sinking;
+???
+*---------------------------------------*/    
+
