@@ -576,6 +576,7 @@ Register Definition:
     bit[1] synchronously clear decoder frame counter;
             1 yes;
             0 no;
+    bit[2] reset the internal fifo in case if the fifo has unresolved errors;
              
 2. register 1: status register;
     bit[0] detect the start of a frame
@@ -629,6 +630,7 @@ Register IO access:
 // bit pos;
 #define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START       0   // start the dcmi decoder;
 #define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FRAME_RST   1   // reset decoder frame counter;
+#define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FIFO_RST    2    // reset the internal fifo;
 
 #define V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_START 0   
 #define V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_END   1

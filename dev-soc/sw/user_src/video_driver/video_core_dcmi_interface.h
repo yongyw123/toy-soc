@@ -83,6 +83,7 @@ Register Definition:
     bit[1] synchronously clear decoder frame counter;
             1 yes;
             0 no;
+    bit[2] reset the internal fifo in case if the fifo has unresolved errors;
              
 2. register 1: status register;
     bit[0] detect the start of a frame
@@ -126,6 +127,16 @@ Register IO access:
 6. register 5: read only;
 ******************************************************************/
 
+typedef struct{
+    int empty;
+    int almost_empty;
+    int full;
+    int almost_full;
+    int rd_error;
+    int wr_error;
+}fifo_status_t;
+
+
 class video_core_dcmi_interface{
     // register map;
     enum{
@@ -143,7 +154,9 @@ class video_core_dcmi_interface{
         BIT_POS_DEC_START = V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START,
         // decoder frame counter clear;
         BIT_POS_DEC_FRAME_RST = V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FRAME_RST,
-        
+        // reset the fifo;
+        BIT_POS_FIFO_RST = V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FIFO_RST,
+         
         // decoder start status;
         BIT_POS_DECODER_STATUS_START = V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_START,
         // decoder completion status;
@@ -189,11 +202,42 @@ class video_core_dcmi_interface{
     public:
         video_core_dcmi_interface(uint32_t core_base_addr);
         ~video_core_dcmi_interface();
+        
+        // to wait for the macro fifo to steady before using this dcmi interface system;
+        int is_sys_ready(void); 
 
+        void enable_decoder(void);
+        void disable_decoder(void);
+        void clear_decoder_counter(void);
+
+        /* decoder status */
+        int detect_frame_start(void);   // detect the start of a frame;
+        int detect_frame_end(void); // detect the completion of a frame;
+
+        /* check the macro fifo status; */
+        fifo_status_t read_fifo_status(void);
+
+        // wrapper for the above;    
+        // almost full, almost empty not constructed;
+        int is_fifo_full(void);     // fully full?;
+        int is_fifo_empty(void);    // fully empty?
+        int is_fifo_ok(void);       // any errors reported?
+
+        /* check fifo counters */
+        uint16_t get_fifo_rd_count(void);
+        uint16_t get_fifo_wr_count(void);
+    
 
     private:
         // this video core base address in the user-address space;
         uint32_t base_addr;
+        
+        // state of the decoder: running or disabled?
+        int decoder_state_p;  // +1 if running; 0 otherwise;
+
+        // state of the fifo:  any errors, etc?
+        fifo_status_t fifo_status_p;
+
 };
 
 
