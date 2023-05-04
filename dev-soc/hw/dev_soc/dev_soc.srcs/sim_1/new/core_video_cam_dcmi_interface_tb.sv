@@ -36,6 +36,7 @@ program core_video_cam_dcmi_interface_tb
         output logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    
         input logic [`REG_DATA_WIDTH_G-1:0]  rd_data,
         
+        input logic sink_valid,
         output logic sink_ready
             
     );
@@ -216,11 +217,21 @@ program core_video_cam_dcmi_interface_tb
     read <= 1'b1;
     addr <= REG_FIFO_CNT_OFFSET;
     
+    // now enable the fifo read;
+    // expect the stream out data to be changing as the fifo is being read;
+    // expect the tally between the read count and the write count to match;
+    @(posedge clk_sys);
+    sink_ready <= 1'b1;
     
+    // expect the sink to be invalid since no data is left in the fifo;
+    wait(sink_valid == 1'b0);
     
-    
-    
-    
+    // check for fifo stats;
+    // expect write count != read count;
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_FIFO_CNT_OFFSET;
     #(100);
     $display("test ends");
     $stop;
@@ -229,12 +240,3 @@ program core_video_cam_dcmi_interface_tb
 endprogram
 
 `endif //CORE_VIDEO_CAM_DCMI_INTERFACE_TB_SV
-
-/* ----------------------------    
-??????
-TO DO
-1. allow the decoder and emulator run over more than say 4 frames;
-2. toggle sink ready to test the fifo sinking;
-???
-*---------------------------------------*/    
-
