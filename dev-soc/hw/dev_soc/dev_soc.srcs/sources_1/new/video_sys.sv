@@ -34,7 +34,7 @@ module video_sys
         /* buffer between the src and the lcd display; */
         // since the lcd display could only be driven by 8-bit parallel max;
         LCD_DISPLAY_DATA_WIDTH = 8,
-        FIFO_LCD_ADDR_WIDTH = 5      // 2^32;
+        FIFO_LCD_ADDR_WIDTH = 8      // 2^8;
     )
     (
         // general;
@@ -96,6 +96,19 @@ module video_sys
     logic pattern_valid;
     logic pattern_ready;
     
+    
+    /* signals for core_video_cam_dcmi_interface */
+    // synchronization signals;
+    logic DCMI_PCLK;
+    logic DCMI_HREF;
+    logic DCMI_VSYNC;
+    logic [LCD_DISPLAY_DATA_WIDTH-1:0] DCMI_DIN;
+    // for downstream;
+    logic [LCD_DISPLAY_DATA_WIDTH-1:0] DCMI_stream_out_data;
+    logic DCMI_sink_ready;     // signal from the sink to this interface;
+    logic DCMI_sink_valid;     // signal from this interface to the sink;
+    
+    
     /* ----- broadcasting arrays; */
     // individual control signals for each core;
     logic [VIDEO_CORE_NUM_TOTAL-1:0] core_ctrl_cs_array; // chip select;
@@ -107,8 +120,10 @@ module video_sys
     logic [REG_DATA_WIDTH-1:0] core_data_rd_array[VIDEO_CORE_NUM_TOTAL-1:0]; // read data from each core;
     logic [REG_DATA_WIDTH-1:0] core_data_wr_array[VIDEO_CORE_NUM_TOTAL-1:0]; // write data from each core;
     
-    /* -------------------- instantiation ------------------------*/
-    /* video controller; */
+    /************************ instantiation *****************************/
+    /*------------------------------------------------
+    * video controller; 
+    ------------------------------------------------*/
     video_ctrl ctrl_unit
     (
         .clk(clk_sys),
@@ -136,7 +151,8 @@ module video_sys
     );
     
      
-    /* fifo interfaceing the lcd display
+    /*------------------------------------------------ 
+    fifo interfaceing the lcd display
     this fifo is buffering between the pixel source
     and the lcd display;
     
@@ -151,7 +167,7 @@ module video_sys
     
     so a buffer is necessary;
     
-    */
+    ------------------------------------------------*/
     fifo_core_video_lcd_display 
     #(
     .DATA_WIDTH(LCD_DISPLAY_DATA_WIDTH),
@@ -173,7 +189,9 @@ module video_sys
     .sink_ready(lcd_stream_ready_flag)
     );
     
-    /* lcd display interface (ILI9341); */
+    /* ------------------------------------------------
+    * lcd display interface (ILI9341); 
+    ------------------------------------------------*/
     core_video_lcd_display
     #(.PARALLEL_DATA_BITS(LCD_DISPLAY_DATA_WIDTH))
     lcd_display_unit
@@ -204,10 +222,10 @@ module video_sys
     );
     
     
-    /* 
+    /* ------------------------------------------------
     multiplexer for different HW pixel sources to drive
     the LCD; (not from the cpu)
-    */
+    ------------------------------------------------*/
     core_video_src_mux
     #(
         .LCD_WIDTH(LCD_WIDTH),
@@ -244,18 +262,16 @@ module video_sys
         .pattern_ready(pattern_ready), // from lcd fifo to the test pattern generator;
         .pattern_valid(pattern_valid),  // from the test pattern gen to the lcd fifo;
         
-        // not constructed yet;
-        // from the camera;
-        .camera_rgb(),   // pixel source;
-        .camera_ready(), // from lcd fifo to the camera;
-        .camera_valid()   // from the camera to the lcd fifo;
-        
+        // from the camera or a HW emulator;
+        .camera_rgb(DCMI_stream_out_data),   // pixel source;
+        .camera_ready(DCMI_sink_ready), // from lcd fifo to the camera;
+        .camera_valid(DCMI_sink_valid)   // from the camera to the lcd fifo;                       
     );
     
     
-    /*
+    /*------------------------------------------------
      pixel test pattern generator for the LCD display
-    */
+    ------------------------------------------------*/
     core_video_lcd_test_pattern_gen
     #(
         .LCD_WIDTH(LCD_WIDTH),   
@@ -289,12 +305,67 @@ module video_sys
     
     );
     
+    /*---------------------------------------
+    * DCMI interface with camera ov7670;
+    ----------------------------------------*/
+    core_video_cam_dcmi_interface
+    #(
+        .DATA_BITS(BPP_8B),
+        .HREF_COUNTER_WIDTH(8),      // to count for href assertions (max at 240);
+        .HREF_TOTAL(LCD_WIDTH),     // href should correspond to the LCD width;
+        .FRAME_COUNTER_WIDTH(32),   // frame counter; ok to overflow;    
+        .FIFO_RST_LOW_CYCLES(5),     // for macro fifo reset conditions;
+        .FIFO_RST_HIGH_CYCLES(8)     // for macro fifo reset conditions;
+    )
+    video_cam_dcmi_interface_unit
+    (
+        // general;
+        .clk_sys(clk_sys),
+        .reset(reset),
+        
+        // IO interface
+        .cs(core_ctrl_cs_array[`V3_CAM_DCMI_IF]),
+        .write(core_ctrl_wr_array[`V3_CAM_DCMI_IF]),
+        .read(core_ctrl_rd_array[`V3_CAM_DCMI_IF]),
+        .addr(core_addr_reg_array[`V3_CAM_DCMI_IF]),
+        .wr_data(core_data_wr_array[`V3_CAM_DCMI_IF]),
+        .rd_data(core_data_rd_array[`V3_CAM_DCMI_IF]),
+                
+        /* specific; */
+        // specific external  signals;
+        .DCMI_PCLK(DCMI_PCLK),
+        .DCMI_HREF(DCMI_HREF),
+        .DCMI_VSYNC(DCMI_VSYNC),
+        .DCMI_DIN(DCMI_DIN),
+        
+        // for downstream signals;
+        .stream_out_data(DCMI_stream_out_data),
+        .sink_ready(DCMI_sink_ready),     // signal from the sink to this interface;
+        .sink_valid(DCMI_sink_valid),     // signal from this interface to the sink;
+        
+        // [not used] for debugging;
+        .debug_RST_FIFO(),
+        .debug_FIFO_rst_ready(),
+        .debug_decoder_complete_tick(),
+        .debug_decoder_start_tick(),
+        .debug_detect_vsync_edge
+    );
     
-    /* ground the the read data signals from the unconstructed video cores 
-    for vivao synthesis optimization to opt out these unused signals */
+    /*---------------------------------------
+    * HW emulator for DCMI signals
+    * this is a temporary replacement
+    * for the actual camera OV7670;
+    ----------------------------------------*/
+    
+    
+    
+    /* -------------------------------------------------------------------
+    ground the the read data signals from the unconstructed video cores 
+    for vivao synthesis optimization to opt out these unused signals 
+     -------------------------------------------------------------------*/
     generate
         genvar i;
-            for(i = 3; i < VIDEO_CORE_NUM_TOTAL; i++)
+            for(i = 4; i < VIDEO_CORE_NUM_TOTAL; i++)
             begin
                 // always HIGH ==> idle ==> not signals;
                 assign core_data_rd_array[i] = 32'hFFFF_FFFF;
