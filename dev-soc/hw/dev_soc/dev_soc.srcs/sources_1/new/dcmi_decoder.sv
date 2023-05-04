@@ -98,7 +98,7 @@ module dcmi_decoder
         
         // status
         output logic decoder_ready_flag,    // is the decoder idle?
-        output logic [FRAME_COUNTER_WIDTH-1:0] decoded_frame_counter, // this will overflow;
+        output logic [FRAME_COUNTER_WIDTH-1:0] decoder_frame_counter, // this will overflow;
         output logic decoder_complete_tick, // when the entire frame has been decoded;
         output logic decoder_start_tick     // when a new frame is detected;               
     );
@@ -238,6 +238,6 @@ module dcmi_decoder
     end
     
     // output;
-    assign decoded_frame_counter = cnt_frame_reg;
+    assign decoder_frame_counter = cnt_frame_reg;
      
 endmodule

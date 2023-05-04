@@ -58,7 +58,7 @@ module dcmi_decoder_top_tb();
     logic debug_detect_vsync_edge;
     logic decoder_complete_tick; // when the entire frame has been decoded;
     logic decoder_start_tick;     // when a new frame is detected;
-    logic [FRAME_COUNTER_WIDTH-1:0] decoded_frame_counter; // this will overflow;
+    logic [FRAME_COUNTER_WIDTH-1:0] decoder_frame_counter; // this will overflow;
     
     // signals for the fifo sinking the pixel data from the dcmi decoder;
     logic reset_FIFO;
@@ -130,7 +130,7 @@ module dcmi_decoder_top_tb();
         .decoder_ready_flag(decoder_ready_flag),
         .decoder_complete_tick(decoder_complete_tick), // when the entire frame has been decoded;
         .decoder_start_tick(decoder_start_tick),     // when a new frame is detected;
-        .decoded_frame_counter(decoded_frame_counter)   
+        .decoder_frame_counter(decoder_frame_counter)   
     );
     // mapping fifo signal with the dcm decoder;
     assign decoder_data_ready = !FIFO_ALMOSTFULL;   // this is a stricter condition than fully full;
