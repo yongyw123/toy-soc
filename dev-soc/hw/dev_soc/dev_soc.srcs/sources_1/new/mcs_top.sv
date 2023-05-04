@@ -268,7 +268,7 @@ module mcs_top
     #(
     .BITS_PER_PIXEL(16),
     .LCD_DISPLAY_DATA_WIDTH(8),
-    .FIFO_LCD_ADDR_WIDTH(5)
+    .FIFO_LCD_ADDR_WIDTH(8)
     )
     video_unit
     (
