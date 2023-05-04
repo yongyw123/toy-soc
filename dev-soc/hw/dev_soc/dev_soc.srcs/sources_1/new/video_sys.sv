@@ -323,7 +323,7 @@ module video_sys
     (
         // general;
         .clk_sys(clk_sys),
-        .reset(reset),
+        .reset_sys(reset),
         
         // IO interface
         .cs(core_ctrl_cs_array[`V3_CAM_DCMI_IF]),
