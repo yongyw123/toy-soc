@@ -135,8 +135,8 @@ int main(){
     debug_str("\r\n");
     
     // dcmi snapshot;
-    //debug_str("enabling the DCMI decoder \r\n");
-    //??
+    debug_str("take a DCMI snapshot \r\n");
+    vid_dcmi.snapshot();
     
     debug_str("check done\r\n");
     while(1){        
