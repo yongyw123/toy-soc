@@ -211,7 +211,8 @@ module dcmi_emulator
                 //dout = (DATA_BITS'($random)); // this is not supported in synthesis;
                 
                 // driven by the pixel count;
-                dout = DATA_BITS'(pixel_byte_reg);
+                //dout = DATA_BITS'(pixel_byte_reg);
+                dout = 8'b11110000;
                 
                 // within an active HREF, there should be a fixed (targeted) number of bytes sent;                
                 if(pixel_byte_reg == (PIXEL_BYTE_TOTAL-1)) begin
