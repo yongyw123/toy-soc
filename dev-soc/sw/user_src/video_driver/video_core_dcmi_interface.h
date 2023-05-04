@@ -165,6 +165,8 @@ class video_core_dcmi_interface{
         BIT_POS_DECODER_STATUS_START = V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_START,
         // decoder completion status;
         BIT_POS_DECODER_STATUS_END = V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_END,
+        // decoder idle status;
+        BIT_POS_DECODER_STATUS_READY = V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_READY,
 
         // macro dual-clock fifo status;
         BIT_POS_FIFO_STATUS_AEMPTY = V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_AEMPTY, // almost empty;
@@ -194,6 +196,7 @@ class video_core_dcmi_interface{
         // decoder status;
         MASK_DEC_STATUS_START   = BIT_MASK(BIT_POS_DECODER_STATUS_START),
         MASK_DEC_STATUS_END     = BIT_MASK(BIT_POS_DECODER_STATUS_END),
+        MASK_DEC_STATUS_READY   = BIT_MASK(BIT_POS_DECODER_STATUS_READY),
 
         // fifo status;
         MASK_FIFO_STATUS_AEMPTY = BIT_MASK(BIT_POS_FIFO_STATUS_AEMPTY),
@@ -222,6 +225,9 @@ class video_core_dcmi_interface{
         // to wait for the macro fifo to steady before using this dcmi interface system;
         int is_sys_ready(void); 
         
+        // is the decoder idle?
+        int is_decoder_idle(void);
+
         // decoder specific;
         void set_decoder(int to_enable);
         // wrapper for the above;
