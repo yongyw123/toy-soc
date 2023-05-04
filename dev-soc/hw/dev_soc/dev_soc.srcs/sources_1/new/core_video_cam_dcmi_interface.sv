@@ -30,9 +30,6 @@ Purpose:
 
 Constituent Block:
 1. A dual-clock BRAM FIFO for the cross time domain;
-2. A mux to select between the actual camera ov7670 OR
-     a HW testing-circuit which emulates the DCMI signals;
-3. the HW DCMI emulator itself;
       
 Assumptions:
 1. The synchronization signal settings are fixed; 
@@ -84,16 +81,10 @@ Register Map
         
 Register Definition:
 1. register 0: control register;
-    bit[0] select which to source: the HW emulator or the camera;
-            0 for HW emulator; 
-            1 for camera OV7670;
-    bit[1] start the decoder;
+    bit[0] start the decoder;
             0 to disable the decoder;
             1 to enable the decoder;
-    bit[2] start the HW emulator;
-            0 disabled;
-            1 enabled;
-    bit[3] synchronously clear decoder frame counter;
+    bit[1] synchronously clear decoder frame counter;
             1 yes;
             0 no;
              
@@ -146,19 +137,11 @@ Register IO access:
 
 module core_video_cam_dcmi_interface
     #(parameter
-        // for dcmi;
+        // for dcmi decoder;
         DATA_BITS           = 8,    // camera ov7670 drives 8-bit parallel data;
         HREF_COUNTER_WIDTH  = 8,    // to count href;
         HREF_TOTAL          = 240,  // expected to have 240 href for a line;
         FRAME_COUNTER_WIDTH = 32,    // count the number of frames;
-        
-        // for HW DCMI emulator;
-        PCLK_MOD            = 4,    // 100/4 = 25;
-        VSYNC_LOW           = 10,   //vlow;
-        HREF_LOW            = 5,    // hlow; 
-        BUFFER_START_PERIOD = 7,    // between vsync assertion and href assertion;
-        BUFFER_END_PERIOD 	= 5,	// between the frame end and the frame start;
-        PIXEL_BYTE_TOTAL    = 640,   // 320 pixels per href with bp = 16-bit;
         
         // for macro bram fifo reset condition;
         // instead of 2 wr/rd clk cycles after RST goes LOW; add some buffer;
@@ -166,8 +149,6 @@ module core_video_cam_dcmi_interface
     
         // instead of 5 wr/rd clk cycles during HIGH RST; add some buffer;
         FIFO_RST_HIGH_CYCLES = 8
-     
-        
     )
     (
         // system input;
@@ -184,10 +165,10 @@ module core_video_cam_dcmi_interface
         output logic [`REG_DATA_WIDTH_G-1:0]  rd_data,
         
         // specific external input signals;
-        input logic CAM_PCLK,
-        input logic CAM_HREF,
-        input logic CAM_VSYNC,
-        input logic [DATA_BITS-1:0] CAM_DIN,
+        input logic DCMI_PCLK,
+        input logic DCMI_HREF,
+        input logic DCMI_VSYNC,
+        input logic [DATA_BITS-1:0] DCMI_DIN,
         
         // for downstream signals;
         output logic [DATA_BITS-1:0] stream_out_data,
@@ -196,7 +177,11 @@ module core_video_cam_dcmi_interface
         
         // for debugging;
         output logic debug_RST_FIFO,
-        output logic debug_FIFO_rst_ready
+        output logic debug_FIFO_rst_ready,
+        output logic debug_decoder_complete_tick,
+        output logic debug_decoder_start_tick,
+        output logic debug_detect_vsync_edge
+        
          
     );
     
@@ -214,9 +199,7 @@ module core_video_cam_dcmi_interface
     logic rd_en;    
     
     // user command signals;
-    logic select_emulator_or_cam;
-    logic decoder_cmd_start;
-    logic emulator_cmd_start;
+    logic decoder_cmd_start;    
     
     // signals for decoder;
     logic decoder_clr_frame_cnt;
@@ -275,8 +258,7 @@ module core_video_cam_dcmi_interface
     logic [`REG_DATA_WIDTH_G-1:0] ctrl_reg, ctrl_next;
     logic [`REG_DATA_WIDTH_G-1:0] dec_status_reg, dec_status_next;
     logic [`REG_DATA_WIDTH_G-1:0] fifo_status_reg, fifo_status_next;
-    logic [`REG_DATA_WIDTH_G-1:0] fifo_cnt_reg, fifo_cnt_next;    
-    
+    logic [`REG_DATA_WIDTH_G-1:0] fifo_cnt_reg, fifo_cnt_next;        
     
     always_ff @(posedge clk_sys, reset_sys) begin
         if(reset_sys) begin
@@ -306,14 +288,9 @@ module core_video_cam_dcmi_interface
     /* mapping; */
     // for decoder frame counter clearing;
     assign decoder_clr_frame_cnt = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FRAME_RST];    
-    // for emulator/cam selection;
-    assign select_emulator_or_cam   = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX];   // HIGH for cam;    
     // for decoder; one more condition: fifo reset must be OK; this 
     // is to meet the dual-clock bram macro fifo requirements;
-    assign decoder_cmd_start        = (FIFO_rst_ready && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START]);
-    // do not start the emulator unless selected;
-    assign emulator_cmd_start       = (!select_emulator_or_cam && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_EM_START]);
-    
+    assign decoder_cmd_start        = (FIFO_rst_ready && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START]);   
      
     /* ------ reading */
     assign rd_en = (read && cs);
@@ -334,30 +311,17 @@ module core_video_cam_dcmi_interface
             default: ; // nop;
         endcase
     end
+
+    /* wire-mapping for the DCMI inputs */ 
+    assign pclk_main       = DCMI_PCLK;
+    assign vsync_main      = DCMI_VSYNC;
+    assign href_main       = DCMI_HREF;
+    assign pixel_din_main  = DCMI_DIN;
     
-    
-    /* ---- mux for HW emulator and camera ov7670 */
-    always_comb begin
-        // the lsb first bit is for selecting;
-        case(ctrl_reg[0])
-            // HW DCMI emulator is chosen;
-            1'b0: begin
-                pclk_main       = EMULATOR_pclk;
-                vsync_main      = EMULATOR_vsync;
-                href_main       = EMULATOR_href;
-                pixel_din_main  = EMULATOR_dout;
-            end
-            
-            // Camera DCMI is chosen;
-            default: begin
-                pclk_main       = CAM_PCLK;
-                vsync_main      = CAM_VSYNC;
-                href_main       = CAM_HREF;
-                pixel_din_main  = CAM_DIN;
-            end
-        endcase
-    end
-    
+    // debugging;
+    assign debug_decoder_complete_tick = decoder_complete_tick;    
+    assign debug_decoder_start_tick = decoder_start_tick;
+
      /* --------------  instantiations */
      // decoder;
      dcmi_decoder
@@ -391,7 +355,7 @@ module core_video_cam_dcmi_interface
         .decoder_start_tick(decoder_start_tick),
         
         // not used;
-        .debug_detect_vsync_edge()
+        .debug_detect_vsync_edge(debug_detect_vsync_edge)
      );
      
      
@@ -418,35 +382,6 @@ module core_video_cam_dcmi_interface
         .debug_detected_slow_clk_rising()
      );
      
-     // HW DCMI emulator;
-     dcmi_emulator
-     #(
-        .DATA_BITS(DATA_BITS), // camera could only transmit 8-bit in parallel at at time;
-    
-        // dcmi sync;
-        .PCLK_MOD(PCLK_MOD),                // 100/4 = 25;
-        .VSYNC_LOW(VSYNC_LOW),              //vlow;
-        .HREF_LOW(HREF_LOW),                // hlow; 
-        .BUFFER_START_PERIOD(BUFFER_START_PERIOD),     // between vsync assertion and href assertion;
-        .BUFFER_END_PERIOD(BUFFER_END_PERIOD), 		// between the frame end and the frame start;
-        .HREF_TOTAL(HREF_TOTAL),            // total href assertion to generate;
-        .PIXEL_BYTE_TOTAL(PIXEL_BYTE_TOTAL)     // 320 pixels per href with bp = 16-bit;     
-     )
-     dcmi_emulator_unit
-     (
-        .clk_sys(clk_sys),
-        .reset_sys(reset_sys),
-        .start(emulator_cmd_start),
-        .pclk(EMULATOR_pclk),       // 25 MHz;
-        .vsync(EMULATOR_vsync),
-        .href(EMULATOR_href),
-        .dout(EMULATOR_dout),
-        
-        // not used;
-        .frame_start_tick(),
-        .frame_complete_tick()        
-     );
-    
     /* ----- mapping between the dcmi decoder and the fifo; */
     // need tp ensure the fifo macro is reset successfully; otherwise, do not write it;
     assign FIFO_wr_en           = (FIFO_rst_ready && decoder_data_valid && !FIFO_full && !FIFO_wr_error);        
