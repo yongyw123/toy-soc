@@ -19,6 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+
 /**************************************************************
 * V3_CAM_DCMI_IF
 -----------------------
@@ -87,7 +88,10 @@ Register Definition:
     bit[1] synchronously clear decoder frame counter;
             1 yes;
             0 no;
-             
+    bit[2] reset the internal fifo in case if the fifo has unresolved errors;
+            1 to reset;
+            0 otherwise;
+            
 2. register 1: status register;
     bit[0] detect the start of a frame
         1 yes; 
@@ -198,14 +202,16 @@ module core_video_cam_dcmi_interface
     logic wr_ctrl_en;
     logic rd_en;    
     
-    // user command signals;
+    // user command / control signals;
     logic decoder_cmd_start;    
-    
-    // signals for decoder;
     logic decoder_clr_frame_cnt;
+    logic decoder_cmd_fifo_rst;
+    
+    // signals for decoder;    
     logic decoder_complete_tick;
     logic decoder_start_tick;
     logic [FRAME_COUNTER_WIDTH-1:0] decoded_frame_counter;
+    
     
     // interface signals between decoder and the sinking dual-clock fifo;
     logic decoder_data_valid;
@@ -214,7 +220,6 @@ module core_video_cam_dcmi_interface
     
     // signals for dual clock bram fifo;
     localparam FIFO_DEPTH_BIT = 11;
-    
     logic FIFO_almost_empty;
     logic FIFO_almost_full;
     logic [DATA_BITS-1:0] FIFO_dout;
@@ -291,6 +296,8 @@ module core_video_cam_dcmi_interface
     // for decoder; one more condition: fifo reset must be OK; this 
     // is to meet the dual-clock bram macro fifo requirements;
     assign decoder_cmd_start        = (FIFO_rst_ready && ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START]);   
+    // for fifo manual resetting
+    assign decoder_cmd_fifo_rst = ctrl_reg[`V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FIFO_RST];
      
     /* ------ reading */
     assign rd_en = (read && cs);
@@ -372,7 +379,7 @@ module core_video_cam_dcmi_interface
      FIFO_reset_system_unit
      (
         .clk_sys(clk_sys),
-        .reset_sys(reset_sys),
+        .reset_sys((reset_sys || decoder_cmd_fifo_rst)),
         .slower_clk(pclk_main),
         .RST_FIFO(RST_FIFO),
         .FIFO_rst_ready(FIFO_rst_ready),
