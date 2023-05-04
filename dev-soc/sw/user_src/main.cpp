@@ -86,7 +86,8 @@ int main(){
     -----------------------------------------------*/
     
     // use the HW DCMI emulator as the pixel source
-    debug_str("selecting the HW DCMI emulator \r\n");
+    debug_str("\r\n\r\n");
+	debug_str("selecting the HW DCMI emulator \r\n");
     vid_src_mux.select_camera();
 
     /*-----------------------------------------------
@@ -94,7 +95,12 @@ int main(){
     * before starting any capture;
     * check the status and states;
     -----------------------------------------------*/
+    debug_str("\r\n\r\n");
     // check the system boot up state;
+
+    // block until it becomes ready?
+    while(!(vid_dcmi.is_sys_ready())){};
+
     dcmi_sys_ready_status = vid_dcmi.is_sys_ready();
     debug_str("checking dcmi sys init state ... \r\n");
     debug_str("sys init status: ");
