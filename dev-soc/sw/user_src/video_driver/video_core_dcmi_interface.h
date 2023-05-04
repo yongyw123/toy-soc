@@ -14,7 +14,6 @@ Device Interface Protocol:  DCMI synchronization signals
 #ifdef __cpluscplus
 extern "C" {
 #endif
-
 /**************************************************************
 * V3_CAM_DCMI_IF
 -----------------------
@@ -80,10 +79,20 @@ Register Definition:
     bit[0] start the decoder;
             0 to disable the decoder;
             1 to enable the decoder;
+            *SW may need to apply a pulse: HIGH then LOW otherwise 
+            the decoder will run forever;
+            
     bit[1] synchronously clear decoder frame counter;
             1 yes;
             0 no;
+            *SW needs to apply a pulse: HIGH then LOW otherwise 
+            this clearing will forever in effect;
+            
     bit[2] reset the internal fifo in case if the fifo has unresolved errors;
+            1 to reset;
+            0 otherwise;
+            *SW needs to apply a pulse: HIGH then LOW otherwise it will
+            be forever in reset-state;
              
 2. register 1: status register;
     bit[0] detect the start of a frame
@@ -126,7 +135,6 @@ Register IO access:
 5. register 4: read only;
 6. register 5: read only;
 ******************************************************************/
-
 typedef struct{
     int empty;
     int almost_empty;
@@ -156,7 +164,7 @@ class video_core_dcmi_interface{
         BIT_POS_DEC_FRAME_RST = V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FRAME_RST,
         // reset the fifo;
         BIT_POS_FIFO_RST = V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FIFO_RST,
-         
+
         // decoder start status;
         BIT_POS_DECODER_STATUS_START = V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_START,
         // decoder completion status;
