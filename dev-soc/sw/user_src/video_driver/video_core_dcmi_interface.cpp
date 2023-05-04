@@ -9,27 +9,9 @@ video_core_dcmi_interface::video_core_dcmi_interface(uint32_t core_base_addr){
 	 */
 
    base_addr = core_base_addr;
-
-   // expect that the system (fifo) is already ready
-   // by the time the board is booted up;
-   system_ready_p = is_sys_ready();
-   if(!system_ready_p){
-        debug_str("dcmi system is failing ... \r\n!!!");   
-   }
-   
-   // future;
-   // need to have a timeout mechanism;
-   // and a way to reset the system if something goes wrong;
-   // currently, there is a register to manually reset the fifo;
-   // but not roboust;
-   // also, may need to have an physical error indication;
-   // such as flashing a LED?
-
-   fifo_status_p = get_fifo_status();
-   
-   // by default; everything is disabled;
-   ctrl_state_p = 0;
-
+   system_ready_p = is_sys_ready(); // check the initial status;
+   is_decoder_idle_p = is_decoder_idle(); // by default; everything is disabled;
+   fifo_status_p = get_fifo_status();   // check the fifo initial status;
 }
 
 // destructor; not used;
@@ -80,7 +62,7 @@ void video_core_dcmi_interface::set_decoder(int to_enable){
    }
 
    // update the private var;
-   ctrl_state_p = get_curr;
+   is_decoder_idle_p = (int)((get_curr & MASK_DEC_STATUS_READY) >> BIT_POS_DECODER_STATUS_READY);
 
    // update the register;
    REG_WRITE(base_addr, REG_CTRL_OFFSET, get_curr);
@@ -91,8 +73,24 @@ void video_core_dcmi_interface::enable_decoder(void){
     @brief  : to enable the decoder;
     @param  : none
     @retval : none;
+    @note   : once enabled; the decoder will be forever running until disabled;
+    @note   : there is a blocking part;
     */
 
+   // need to ensure the fifo (system) is in ok state;
+   // otherwise, the entire system will break down;
+   
+   while(!(is_sys_ready())){};
+   
+   /* note 
+   // future;
+   // need to have a timeout mechanism;
+   // and a way to reset the system if something goes wrong;
+   // currently, there is a register to manually reset the fifo;
+   // but not robust;
+   // also, may need to have an physical error indication;
+   // such as flashing a LED?
+   */   
    set_decoder(ENABLE_DEC);   
    
 }
@@ -130,9 +128,6 @@ void video_core_dcmi_interface::clear_decoder_counter(void){
    // LOW;
    get_curr &= ~MASK_CTRL_FRAME_RST;
    REG_WRITE(base_addr, REG_CTRL_OFFSET, get_curr);
-
-    // update the private var;
-    ctrl_state_p = get_curr;       
 }
 
 
@@ -160,8 +155,6 @@ void video_core_dcmi_interface::reset_fifo(void){
    get_curr &= ~MASK_CTRL_FIFO_RST;
    REG_WRITE(base_addr, REG_CTRL_OFFSET, get_curr);
 
-    // update the private var;
-    ctrl_state_p = get_curr;       
 }
 
 
@@ -274,4 +267,27 @@ uint16_t video_core_dcmi_interface::get_fifo_wr_count(void){
 
 }
 
+void video_core_dcmi_interface::snapshot(void){
+    /*
+    @brief  : capture a single frame (only);
+    @param  : none;
+    @retval : none;    
+    @note   : this is a blocking method;
+    */
+   // enable the decoder;
+   enable_decoder();
+   // wait for the decoder to detect the start of a frame;
+   // then disable the decoder;
+   while(!detect_frame_start()){};
+   disable_decoder();
+}
 
+void video_core_dcmi_interface::cont_grab(void){
+    /*
+    @brief  : set up the decoder to continuously grab the dcmi device frame;
+    @param  : none;
+    @retval : none;
+
+    */
+   enable_decoder();
+}

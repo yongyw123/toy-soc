@@ -222,14 +222,17 @@ class video_core_dcmi_interface{
         video_core_dcmi_interface(uint32_t core_base_addr);
         ~video_core_dcmi_interface();
         
-        // to wait for the macro fifo to steady before using this dcmi interface system;
+        /* important 
+        // must wait for the macro fifo 
+        // to stabilize after a system reset
+        // before using this dcmi interface system;
+        */
         int is_sys_ready(void); 
         
-        // is the decoder idle?
-        int is_decoder_idle(void);
-
-        // decoder specific;
+        /* decoder specific; */
+        int is_decoder_idle(void);         // is the decoder idle?
         void set_decoder(int to_enable);
+
         // wrapper for the above;
         void enable_decoder(void);
         void disable_decoder(void);
@@ -238,10 +241,9 @@ class video_core_dcmi_interface{
         void clear_decoder_counter(void);   // resetting the decoder frame counter;
         void reset_fifo(void); // manual resetting the internal fifo if all goes wrong;
 
-
         /* decoder status */
-        int detect_frame_start(void);   // detect the start of a frame;
-        int detect_frame_end(void); // detect the completion of a frame;
+        int detect_frame_start(void);       // detect the start of a frame;
+        int detect_frame_end(void);         // detect the completion of a frame;
         uint32_t get_frame_counter(void);   // get the number of frame detected so far;
 
         /* check the macro fifo status; */
@@ -257,6 +259,10 @@ class video_core_dcmi_interface{
         uint16_t get_fifo_rd_count(void);
         uint16_t get_fifo_wr_count(void);    
 
+        /* application specific */
+        void snapshot(void);    // only capture the camera frame once;
+        void cont_grab(void);   // continuous capture the camera frame until disabled;
+
     private:
         // this video core base address in the user-address space;
         uint32_t base_addr;
@@ -265,8 +271,8 @@ class video_core_dcmi_interface{
         // will break down;
         int system_ready_p;
 
-        // state of the control register;
-        int ctrl_state_p;  
+        // the state of the decoder; running or idle?
+        int is_decoder_idle_p;
 
         // state of the fifo:  any errors, etc?
         fifo_status_t fifo_status_p;
