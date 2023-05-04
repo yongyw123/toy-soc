@@ -56,7 +56,7 @@ program core_video_cam_dcmi_interface_tb
     read <= 1'b0;
     addr <= REG_CTRL_OFFSET;
     // do not start the decoder;
-    wr_data <= 2'b00;  
+    wr_data <= 3'b000;  
     
     // read the system init status;
     @(posedge clk_sys);
@@ -75,7 +75,7 @@ program core_video_cam_dcmi_interface_tb
     write <= 1'b1;
     read <= 1'b0;
     addr <= REG_CTRL_OFFSET;
-    wr_data <= 2'b01;   // the msb is for counter-clearing;
+    wr_data <= 3'b001;   // the msb is for counter-clearing;
     
     // read the decoder status;
     @(posedge clk_sys);    
@@ -96,7 +96,7 @@ program core_video_cam_dcmi_interface_tb
     write <= 1'b1;
     read <= 1'b1;
     addr <= REG_CTRL_OFFSET;
-    wr_data <= 2'b00;    
+    wr_data <= 3'b000;    
     
     
     // expect the decoder to eventually end at the frame end;
@@ -131,7 +131,7 @@ program core_video_cam_dcmi_interface_tb
     write <= 1'b1;
     read <= 1'b0;
     addr <= REG_CTRL_OFFSET;
-    wr_data <= 2'b10;
+    wr_data <= 3'b010;
     
     @(posedge clk_sys);    
     write <= 1'b0;
@@ -143,7 +143,7 @@ program core_video_cam_dcmi_interface_tb
     write <= 1'b1;
     read <= 1'b0;
     addr <= REG_CTRL_OFFSET;
-    wr_data <= 2'b01;
+    wr_data <= 3'b001;
     
     // check the frame counter;
     // disable the decoder once the target is reached;
@@ -158,7 +158,7 @@ program core_video_cam_dcmi_interface_tb
     write <= 1'b1;
     read <= 1'b0;
     addr <= REG_CTRL_OFFSET;
-    wr_data <= 2'b00;
+    wr_data <= 3'b000;
     
     // read the fifo stats;
     // expect it to be four times more in terms of the read and write counts;
@@ -185,7 +185,7 @@ program core_video_cam_dcmi_interface_tb
     write <= 1'b1;
     read <= 1'b0;
     addr <= REG_CTRL_OFFSET;
-    wr_data <= 2'b01;
+    wr_data <= 3'b001;
     
     // disable the decoder after it has started;
     // otherwise it will keep going;
@@ -201,7 +201,7 @@ program core_video_cam_dcmi_interface_tb
     write <= 1'b1;
     read <= 1'b0;
     addr <= REG_CTRL_OFFSET;
-    wr_data <= 2'b00;   
+    wr_data <= 3'b000;   
         
     // wait for the decoder to finish;
     @(posedge clk_sys);    
@@ -233,8 +233,44 @@ program core_video_cam_dcmi_interface_tb
     read <= 1'b1;
     addr <= REG_FIFO_CNT_OFFSET;
     #(100);
+    
+    // test the fifo manual resetting control option;
+    @(posedge clk_sys);    
+    write <= 1'b1;
+    read <= 1'b0;
+    addr <= REG_CTRL_OFFSET;
+    wr_data <= 3'b100;  // reset the fifo manually;
+    
+    // expect the fifo ready state will be reset;
+    // read the system init status;
+    @(posedge clk_sys);
+    addr <= REG_FIFO_SYS_INIT_STATUS_OFFSET;
+    write <= 1'b0;
+    read <= 1'b1;
+    // expect the macro fifo eventually resets successfully;
+    wait(rd_data[0] == 1'b0);
+       
+    // disable the reset, otherwise the fifo will forever
+    // be in resetting mode;
+    @(posedge clk_sys);    
+    write <= 1'b1;
+    read <= 1'b0;
+    addr <= REG_CTRL_OFFSET;
+    wr_data <= 3'b000;  // reset the fifo manually;
+    
+    // expect the fifo will be ready eventually;
+    @(posedge clk_sys);
+    addr <= REG_FIFO_SYS_INIT_STATUS_OFFSET;
+    write <= 1'b0;
+    read <= 1'b1;
+    // expect the macro fifo eventually resets successfully;
+    wait(rd_data[0] == 1'b1);
+   
+    #(100);
     $display("test ends");
     $stop;
+    
+    
     
     end
 endprogram
