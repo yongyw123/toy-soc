@@ -512,9 +512,6 @@ Purpose:
 
 Constituent Block:
 1. A dual-clock BRAM FIFO for the cross time domain;
-2. A mux to select between the actual camera ov7670 OR
-     a HW testing-circuit which emulates the DCMI signals;
-3. the HW DCMI emulator itself;
       
 Assumptions:
 1. The synchronization signal settings are fixed; 
@@ -566,16 +563,10 @@ Register Map
         
 Register Definition:
 1. register 0: control register;
-    bit[0] select which to source: the HW emulator or the camera;
-            0 for HW emulator; 
-            1 for camera OV7670;
-    bit[1] start the decoder;
+    bit[0] start the decoder;
             0 to disable the decoder;
             1 to enable the decoder;
-    bit[2] start the HW emulator;
-            0 disabled;
-            1 enabled;
-    bit[3] synchronously clear decoder frame counter;
+    bit[1] synchronously clear decoder frame counter;
             1 yes;
             0 no;
              
@@ -626,14 +617,11 @@ Register IO access:
 `define V3_CAM_DCMI_IF_REG_FRAME_RD_OFFSET              2   // 3'b010;
 `define V3_CAM_DCMI_IF_REG_FIFO_STATUS_OFFSET           3   // 3'b011;
 `define V3_CAM_DCMI_IF_REG_FIFO_CNT_OFFSET              4   // 3'b100;
-`define V3_CAM_DCMI_IF_REG_SYS_INIT_STATUS_OFFSET       5   // 3'b101;
-
+`define V3_CAM_DCMI_IF_REG_SYS_READY_STATUS_OFFSET      5   // 3'b101;
 
 // bit pos;
-`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_MUX             0   // select which source;
-`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START       1   // start the dcmi decoder;
-`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_EM_START        2   // start the hw emulator;
-`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FRAME_RST   3   // reset decoder frame counter;
+`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_START       0   // start the dcmi decoder;
+`define V3_CAM_DCMI_IF_REG_CTRL_BIT_POS_DEC_FRAME_RST   1   // reset decoder frame counter;
 
 `define V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_START 0   
 `define V3_CAM_DCMI_IF_REG_DECODER_STATUS_BIT_POS_END   1
