@@ -97,6 +97,7 @@ module dcmi_decoder
         output logic debug_detect_vsync_edge,
         
         // status
+        output logic decoder_ready_flag,    // is the decoder idle?
         output logic [FRAME_COUNTER_WIDTH-1:0] decoded_frame_counter, // this will overflow;
         output logic decoder_complete_tick, // when the entire frame has been decoded;
         output logic decoder_start_tick     // when a new frame is detected;               
@@ -177,11 +178,13 @@ module dcmi_decoder
         
         sample_en = 1'b0;
        
+        decoder_ready_flag      = 1'b0;   
         decoder_complete_tick   = 1'b0;
         decoder_start_tick      = 1'b0;
         
         case(state_reg)
             ST_IDLE: begin
+                decoder_ready_flag = 1'b1;
                 if(cmd_start) begin
                     state_next = ST_WAIT_VSYNC;                    
                 end            
