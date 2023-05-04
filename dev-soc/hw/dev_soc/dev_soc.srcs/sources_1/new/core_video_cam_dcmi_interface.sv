@@ -101,6 +101,9 @@ Register Definition:
         1 yes;
         0 otherwise;
         *this will clear by itself;
+    bit[2]: is the decoder idle?
+        1 yes;
+        0 otherwise;
         
 3. register 2: frame counter read register;
         bit[31:0] to store the number of frame detected;
@@ -208,9 +211,10 @@ module core_video_cam_dcmi_interface
     logic decoder_cmd_fifo_rst;
     
     // signals for decoder;    
+    logic decoder_ready_flag;       
     logic decoder_complete_tick;
     logic decoder_start_tick;
-    logic [FRAME_COUNTER_WIDTH-1:0] decoded_frame_counter;
+    logic [FRAME_COUNTER_WIDTH-1:0] decoder_frame_counter;
     
     
     // interface signals between decoder and the sinking dual-clock fifo;
@@ -301,7 +305,7 @@ module core_video_cam_dcmi_interface
      
     /* ------ reading */
     assign rd_en = (read && cs);
-    assign dec_status_next = {30'b0, decoder_complete_tick, decoder_start_tick};
+    assign dec_status_next = {29'b0, decoder_ready_flag, decoder_complete_tick, decoder_start_tick};
     assign fifo_status_next = {26'b0, FIFO_wr_error, FIFO_rd_error, FIFO_full, FIFO_empty, FIFO_almost_full, FIFO_almost_empty};
     assign fifo_cnt_next = {5'b0, FIFO_wr_count, 5'b0, FIFO_rd_count};
 
@@ -311,7 +315,7 @@ module core_video_cam_dcmi_interface
         case({rd_en, addr[2:0]})
             {1'b1, REG_CTRL_OFFSET}             : rd_data = ctrl_reg;
             {1'b1, REG_DECODER_STATUS_OFFSET}   : rd_data = dec_status_reg;
-            {1'b1, REG_FRAME_OFFSET}            : rd_data = decoded_frame_counter;
+            {1'b1, REG_FRAME_OFFSET}            : rd_data = decoder_frame_counter;
             {1'b1, REG_FIFO_STATUS_OFFSET}      : rd_data = fifo_status_reg;
             {1'b1, REG_FIFO_CNT_OFFSET}         : rd_data = fifo_cnt_reg;
             {1'b1, REG_FIFO_SYS_INIT_STATUS_OFFSET} : rd_data = {31'b0, FIFO_rst_ready};
@@ -357,7 +361,8 @@ module core_video_cam_dcmi_interface
         .dout(decoder_dout),
                 
         // status;
-        .decoded_frame_counter(decoded_frame_counter),
+        .decoder_ready_flag(decoder_ready_flag),
+        .decoder_frame_counter(decoder_frame_counter),
         .decoder_complete_tick(decoder_complete_tick),
         .decoder_start_tick(decoder_start_tick),
         
