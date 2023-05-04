@@ -260,7 +260,7 @@ module core_video_cam_dcmi_interface
     logic [`REG_DATA_WIDTH_G-1:0] fifo_status_reg, fifo_status_next;
     logic [`REG_DATA_WIDTH_G-1:0] fifo_cnt_reg, fifo_cnt_next;        
     
-    always_ff @(posedge clk_sys, reset_sys) begin
+    always_ff @(posedge clk_sys, posedge reset_sys) begin
         if(reset_sys) begin
             ctrl_reg        <= 0;
             dec_status_reg  <= 0;
