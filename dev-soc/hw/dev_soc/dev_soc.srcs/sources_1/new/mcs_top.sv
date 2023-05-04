@@ -122,7 +122,7 @@ module mcs_top
     logic [31:0] user_rd_data_video;
     
     // for ip-generated mmcm clock;
-   logic mmcm_clk_locked;   // whether the clock has stabilized or not?
+    logic mmcm_clk_locked;   // whether the clock has stabilized or not?
     
     // conform the signals;
     /* ?? to do ??, need to debounce this reset button; */
@@ -171,25 +171,26 @@ module mcs_top
 
     // bridge;
     mcs_bus_bridge bridge_unit
-    (.mcs_bridge_base_addr(`BUS_MICROBLAZE_IO_BASE_ADDR_G),
-    // microblaze address space;
-    .io_addr_strobe(io_addr_strobe),
-    .io_read_strobe(io_read_strobe),
-    .io_write_strobe(io_write_strobe),
-    .io_byte_enable(io_byte_enable),
-    .io_address(io_address),
-    .io_write_data(io_write_data),
-    .io_read_data(io_read_data),
-    .io_ready(io_ready),
-    
-    // on the other sie of the bridge: user-own address space
-    .user_mmio_cs(user_mmio_cs),
-    .user_video_cs(user_video_cs),
-    .user_wr(user_wr),
-    .user_rd(user_rd),
-    .user_addr(user_addr),
-    .user_wr_data(user_wr_data),
-    .user_rd_data(user_rd_data)
+    (
+        .mcs_bridge_base_addr(`BUS_MICROBLAZE_IO_BASE_ADDR_G),
+        // microblaze address space;
+        .io_addr_strobe(io_addr_strobe),
+        .io_read_strobe(io_read_strobe),
+        .io_write_strobe(io_write_strobe),
+        .io_byte_enable(io_byte_enable),
+        .io_address(io_address),
+        .io_write_data(io_write_data),
+        .io_read_data(io_read_data),
+        .io_ready(io_ready),
+        
+        // on the other sie of the bridge: user-own address space
+        .user_mmio_cs(user_mmio_cs),
+        .user_video_cs(user_video_cs),
+        .user_wr(user_wr),
+        .user_rd(user_rd),
+        .user_addr(user_addr),
+        .user_wr_data(user_wr_data),
+        .user_rd_data(user_rd_data)
     );
     
     
@@ -200,19 +201,19 @@ module mcs_top
     // mmio system;
     mmio_sys 
     #(.SW_NUM(16), 
-    .LED_NUM(16),
-    
-    /* uart for serial console debugging */
-    .UART_DATA_BIT(8),      
-    .UART_STOP_BIT_SAMPLING_NUM(16),
-    
-    /* for lcd sanity control */
-    .SPI_DATA_BIT(8),
-    .SPI_SLAVE_NUM(1),
-    
-    /* for camera ov7670 */
-    .I2C_DATA_BIT(8),   // for camera control;
-    .GPIO_PORT_NUM(2)   // for camera, LCD hw resets;
+        .LED_NUM(16),
+        
+        /* uart for serial console debugging */
+        .UART_DATA_BIT(8),      
+        .UART_STOP_BIT_SAMPLING_NUM(16),
+        
+        /* for lcd sanity control */
+        .SPI_DATA_BIT(8),
+        .SPI_SLAVE_NUM(1),
+        
+        /* for camera ov7670 */
+        .I2C_DATA_BIT(8),   // for camera control;
+        .GPIO_PORT_NUM(2)   // for camera, LCD hw resets;
     )
     
     mmio_unit
@@ -266,9 +267,9 @@ module mcs_top
     // video system;
     video_sys 
     #(
-    .BITS_PER_PIXEL(16),
-    .LCD_DISPLAY_DATA_WIDTH(8),
-    .FIFO_LCD_ADDR_WIDTH(8)
+        .BITS_PER_PIXEL(16),
+        .LCD_DISPLAY_DATA_WIDTH(8),
+        .FIFO_LCD_ADDR_WIDTH(8)
     )
     video_unit
     (
