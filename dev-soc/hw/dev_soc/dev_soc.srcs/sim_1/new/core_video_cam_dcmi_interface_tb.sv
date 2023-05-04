@@ -54,24 +54,27 @@ program core_video_cam_dcmi_interface_tb
     write <= 1'b1;
     read <= 1'b0;
     addr <= REG_CTRL_OFFSET;
-    // choose emulator, start the emulator; but not the decoder;
-    wr_data <= 3'b100;  
+    // do not start the decoder;
+    wr_data <= 2'b00;  
     
-    // read the fifo status;
+    // read the system init status;
     @(posedge clk_sys);
     addr <= REG_FIFO_SYS_INIT_STATUS_OFFSET;
     read <= 1'b1;
     // expect the macro fifo eventually resets successfully;
     wait(rd_data[0] == 1'b1);
     
+    // read the bram fifo status;
+    @(posedge clk_sys);
+    addr <= REG_FIFO_STATUS_OFFSET;
+    read <= 1'b1;
+    
     // start the decoder;
     @(posedge clk_sys);
-    cs <= 1'b1;
     write <= 1'b1;
     read <= 1'b0;
     addr <= REG_CTRL_OFFSET;
-    // choose emulator; enable decoder; do not disable emulator;
-    wr_data <= 3'b110;
+    wr_data <= 2'b01;   // the msb is for counter-clearing;
     
     // read the decoder status;
     @(posedge clk_sys);    
@@ -79,16 +82,22 @@ program core_video_cam_dcmi_interface_tb
     read <= 1'b1;
     addr <= REG_DECODER_STATUS_OFFSET;
     
+    // checking for decoder start bit;
+    // depending on at which point the decoder is enabled;
+    // it may miss the current vsync;
+    // if so, it will NOT miss the second one;
     // expect the decoder detects a frame start eventually;
     // disable the decoder once detected; otherwise; it will 
     // keep going foreverl
     wait(rd_data[0] == 1'b1);
+    
     @(posedge clk_sys);
     write <= 1'b1;
     read <= 1'b1;
     addr <= REG_CTRL_OFFSET;
-    wr_data <= 3'b100;
+    wr_data <= 2'b00;    
     
+    /*
     // expect the decoder to eventually end at the frame end;
     @(posedge clk_sys);    
     write <= 1'b0;
@@ -114,10 +123,10 @@ program core_video_cam_dcmi_interface_tb
     read <= 1'b1;
     addr <= REG_FRAME_OFFSET;
     
-    /*-------------------------------
+    
     // clear the frame counter;
     // and read it thereafter; expect it to reset to zero;
-    -----------------------------*/
+    
     @(posedge clk_sys);    
     write <= 1'b1;
     read <= 1'b0;
@@ -129,8 +138,18 @@ program core_video_cam_dcmi_interface_tb
     write <= 1'b0;
     read <= 1'b1;
     addr <= REG_FRAME_OFFSET;
+    */
     
-    /* ----------------------------
+    #(100);
+    $display("test ends");
+    $stop;
+    
+    end
+endprogram
+
+`endif //CORE_VIDEO_CAM_DCMI_INTERFACE_TB_SV
+
+/* ----------------------------
     
     ??????
     TO DO
@@ -143,11 +162,3 @@ program core_video_cam_dcmi_interface_tb
     ???
     *---------------------------------------*/    
     
-    #(100);
-    $display("test ends");
-    $stop;
-    
-    end
-endprogram
-
-`endif //CORE_VIDEO_CAM_DCMI_INTERFACE_TB_SV

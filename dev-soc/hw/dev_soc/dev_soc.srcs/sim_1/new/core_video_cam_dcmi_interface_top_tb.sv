@@ -30,22 +30,13 @@ module core_video_cam_dcmi_interface_top_tb();
     logic clk_sys;          // common system clock;
     logic reset_sys;        // async system clock;
     
-    // uut signals;
+    /* ------ uut signals; */
     localparam DATA_BITS = 8;
     localparam HREF_COUNTER_WIDTH  = 8;    // to count href;
     localparam HREF_TOTAL          = 3;  // expected to have 240 href for a line;
     localparam FRAME_COUNTER_WIDTH = 32;    // count the number of frames;
     
-    // for HW DCMI emulator;
-    localparam PCLK_MOD            = 4;    // 100/4 = 25;
-    localparam VSYNC_LOW           = 10;   //vlow;
-    localparam HREF_LOW            = 5;    // hlow; 
-    localparam BUFFER_START_PERIOD = 7;    // between vsync assertion and href assertion;
-    localparam BUFFER_END_PERIOD   = 5;	// between the frame end and the frame start;
-    localparam PIXEL_BYTE_TOTAL    = 4;   // 320 pixels per href with bp = 16-bit; 
-    localparam FIFO_RST_LOW_CYCLES = 3; // for macro fifo reset req;
-    localparam FIFO_RST_HIGH_CYCLES = 6; // for macro fifo reset req;
-     
+    // uut bus interface signals;
     logic cs;    
     logic write;              
     logic read;               
@@ -53,36 +44,68 @@ module core_video_cam_dcmi_interface_top_tb();
     logic [`REG_DATA_WIDTH_G-1:0]  wr_data;    
     logic [`REG_DATA_WIDTH_G-1:0]  rd_data;
     
-    // specific external  signals;
-    logic CAM_PCLK;
-    logic CAM_HREF;
-    logic CAM_VSYNC;
-    logic [DATA_BITS-1:0] CAM_DIN;
-    
     // for downstream signals;
     logic [DATA_BITS-1:0] stream_out_data;
     logic sink_ready;     // signal from the sink to this interface;
     logic sink_valid;     // signal from this interface to the sink;
     
-    // for debugging;
+      // for debugging;
     logic debug_RST_FIFO;
     logic debug_FIFO_rst_ready;
-    
+    logic debug_decoder_complete_tick;
+    logic debug_decoder_start_tick;
+    logic debug_detect_vsync_edge;
+      
+    /* ----- signals for HW DCMI emulator; */
+    localparam PCLK_MOD            = 2;    // 100/2 = 50;
+    localparam VSYNC_LOW           = 10;   //vlow;
+    localparam HREF_LOW            = 5;    // hlow; 
+    localparam BUFFER_START_PERIOD = 7;    // between vsync assertion and href assertion;
+    localparam BUFFER_END_PERIOD   = 5;	// between the frame end and the frame start;
+    localparam PIXEL_BYTE_TOTAL    = 4;   // 320 pixels per href with bp = 16-bit; 
+    localparam FIFO_RST_LOW_CYCLES = 3; // for macro fifo reset req;
+    localparam FIFO_RST_HIGH_CYCLES = 6; // for macro fifo reset req;
+    logic DCMI_PCLK;
+    logic DCMI_VSYNC;
+    logic DCMI_HREF;
+    logic [DATA_BITS-1:0] DCMI_DOUT;    
+     
     /* instantiation */
-    core_video_cam_dcmi_interface
+    // dcmi emulator to drive the DCMI sync signals for the uut;
+    dcmi_emulator
     #(
-        .DATA_BITS(DATA_BITS),           
-        .HREF_COUNTER_WIDTH(HREF_COUNTER_WIDTH),  
-        .HREF_TOTAL(HREF_TOTAL),          
-        .FRAME_COUNTER_WIDTH(FRAME_COUNTER_WIDTH), 
-        
         // for HW DCMI emulator;
         .PCLK_MOD(PCLK_MOD),            
         .VSYNC_LOW(VSYNC_LOW),           
         .HREF_LOW(HREF_LOW),            
         .BUFFER_START_PERIOD(BUFFER_START_PERIOD), 
         .BUFFER_END_PERIOD(BUFFER_END_PERIOD),
-        .PIXEL_BYTE_TOTAL(PIXEL_BYTE_TOTAL),
+        .HREF_TOTAL(HREF_TOTAL),
+        .PIXEL_BYTE_TOTAL(PIXEL_BYTE_TOTAL)             
+    )
+    dcmi_emulator_unit
+    (
+        .clk_sys(clk_sys),
+        .reset_sys(reset_sys),
+        .start(1),  // free running to simulate the actual cam ov7670 setting;
+        .pclk(DCMI_PCLK),
+        .vsync(DCMI_VSYNC),
+        .href(DCMI_HREF),
+        .dout(DCMI_DOUT),
+               
+        // not used;
+        .frame_start_tick(),
+        .frame_complete_tick()
+        
+    );
+    
+    // uut; dcmi decoder;
+    core_video_cam_dcmi_interface
+    #(
+        .DATA_BITS(DATA_BITS),           
+        .HREF_COUNTER_WIDTH(HREF_COUNTER_WIDTH),  
+        .HREF_TOTAL(HREF_TOTAL),          
+        .FRAME_COUNTER_WIDTH(FRAME_COUNTER_WIDTH), 
         
         // for macro bram fifo reset req;
         .FIFO_RST_LOW_CYCLES(FIFO_RST_LOW_CYCLES),
@@ -103,10 +126,10 @@ module core_video_cam_dcmi_interface_top_tb();
         .rd_data(rd_data),
         
         // specific external  signals;
-        .CAM_PCLK(),
-        .CAM_HREF(),
-        .CAM_VSYNC(),
-        .CAM_DIN(),
+        .DCMI_PCLK(DCMI_PCLK),
+        .DCMI_HREF(DCMI_HREF),
+        .DCMI_VSYNC(DCMI_VSYNC),
+        .DCMI_DIN(DCMI_DOUT),
         
         // for downstream signals;
         .stream_out_data(stream_out_data),
@@ -115,7 +138,11 @@ module core_video_cam_dcmi_interface_top_tb();
         
         // for debugging;
         .debug_RST_FIFO(debug_RST_FIFO),
-        .debug_FIFO_rst_ready(debug_FIFO_rst_ready)
+        .debug_FIFO_rst_ready(debug_FIFO_rst_ready),
+        .debug_decoder_complete_tick(debug_decoder_complete_tick),
+        .debug_decoder_start_tick(debug_decoder_start_tick),
+        .debug_detect_vsync_edge(debug_detect_vsync_edge)
+    
      );
      
      // test stimulus;
@@ -141,7 +168,7 @@ module core_video_cam_dcmi_interface_top_tb();
 
     /* monitoring system */
     initial begin
-        $monitor("time: %t, cs; %0b, write: %0b, read: %0b, addr: %D, wr_data: %8B, rd_data: %8H, stream_out_rgb: %8B, sink_ready: %0b, sink_vald: %0b, debug_fifo_ready: %0b",
+        $monitor("time: %t, cs; %0b, write: %0b, read: %0b, addr: %D, wr_data: %8B, rd_data: %8H, stream_out_rgb: %8B, sink_ready: %0b, sink_vald: %0b, debug_fifo_ready: %0b, uut.decstart: %0b, uut.decend: %0b, uut.decoder_cmd_start: %0b",
         $time,
         cs,
         write,
@@ -152,7 +179,10 @@ module core_video_cam_dcmi_interface_top_tb();
         stream_out_data,
         sink_ready,
         sink_valid,
-        debug_FIFO_rst_ready
+        debug_FIFO_rst_ready,
+        uut.decoder_start_tick,
+        uut.decoder_complete_tick,
+        uut.decoder_cmd_start
         );
        
     end    
