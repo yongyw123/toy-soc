@@ -76,6 +76,15 @@ int main(){
 	// hand over the control to the hw pixel generation cores;
 	obj_lcd_controller.set_video_stream();
 
+    
+    /*-----------------------------------------------
+    * Note:
+    * under the current setup, there is no actual DCMI device
+    * that is, the OV7670 camera;
+    * instead, we use a HW DCMI emulator to 
+    * simulate the real camera;
+    -----------------------------------------------*/
+    
     // use the HW DCMI emulator as the pixel source
     debug_str("selecting the HW DCMI emulator \r\n");
     vid_src_mux.select_camera();

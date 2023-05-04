@@ -1,4 +1,5 @@
 #include "video_core_dcmi_interface.h"
+
 video_core_dcmi_interface::video_core_dcmi_interface(uint32_t core_base_addr){
 	/*
 	@brief  : constructor to instantiate an object of class: video_core_dcmi_interface()
@@ -38,7 +39,8 @@ int video_core_dcmi_interface::is_decoder_idle(void){
             1 if idle;
             0 otherwise;
     */
-   return (int)((REG_READ(base_addr, REG_DECODER_STATUS_OFFSET) && MASK_DEC_STATUS_READY) >> BIT_POS_DECODER_STATUS_READY);
+   uint32_t rd_data = REG_READ(base_addr, REG_DECODER_STATUS_OFFSET);
+   return (int)((rd_data & MASK_DEC_STATUS_READY) >> BIT_POS_DECODER_STATUS_READY);
 }
 
 void video_core_dcmi_interface::set_decoder(int to_enable){
@@ -60,9 +62,6 @@ void video_core_dcmi_interface::set_decoder(int to_enable){
    if(to_enable){
         get_curr |= MASK_CTRL_DEC_START;
    }
-
-   // update the private var;
-   is_decoder_idle_p = (int)((get_curr & MASK_DEC_STATUS_READY) >> BIT_POS_DECODER_STATUS_READY);
 
    // update the register;
    REG_WRITE(base_addr, REG_CTRL_OFFSET, get_curr);
@@ -166,7 +165,9 @@ int video_core_dcmi_interface::detect_frame_start(void){
             1 if detected;
             0 otherwise
     */
-   return (int) ((REG_READ(base_addr, REG_DECODER_STATUS_OFFSET) & MASK_DEC_STATUS_START) >> BIT_POS_DECODER_STATUS_START);
+   uint32_t rd_data;
+   rd_data = REG_READ(base_addr, REG_DECODER_STATUS_OFFSET);
+   return (int) ((rd_data & MASK_DEC_STATUS_START) >> BIT_POS_DECODER_STATUS_START);
 }
 
 int video_core_dcmi_interface::detect_frame_end(void){
@@ -177,7 +178,9 @@ int video_core_dcmi_interface::detect_frame_end(void){
             1 if detected;
             0 otherwise
     */
-   return (int) ((REG_READ(base_addr, REG_DECODER_STATUS_OFFSET) & MASK_DEC_STATUS_START) >> BIT_POS_DECODER_STATUS_START);
+   uint32_t rd_data;
+   rd_data = REG_READ(base_addr, REG_DECODER_STATUS_OFFSET);
+   return (int) ((rd_data & MASK_DEC_STATUS_END) >> BIT_POS_DECODER_STATUS_END);
 }
 
 uint32_t video_core_dcmi_interface::get_frame_counter(void){
@@ -202,13 +205,12 @@ fifo_status_t video_core_dcmi_interface::get_fifo_status(void){
    uint32_t rd_data;    
 
    rd_data = REG_READ(base_addr, REG_FIFO_STATUS_OFFSET);
-   fifo_status.almost_empty = (int)((rd_data && MASK_FIFO_STATUS_AEMPTY) >> BIT_POS_FIFO_STATUS_AEMPTY);
-   fifo_status.empty        = (int)((rd_data && MASK_FIFO_STATUS_EMPTY) >> BIT_POS_FIFO_STATUS_EMPTY);
-   fifo_status.almost_full  = (int)((rd_data && MASK_FIFO_STATUS_AFULL) >> BIT_POS_FIFO_STATUS_AFULL);
-   fifo_status.full         = (int)((rd_data && MASK_FIFO_STATUS_FULL) >> BIT_POS_FIFO_STATUS_FULL);
-   fifo_status.rd_error     = (int)((rd_data && MASK_FIFO_STATUS_RDERR) >> BIT_POS_FIFO_STATUS_RDERR);
-   fifo_status.wr_error     = (int)((rd_data && MASK_FIFO_STATUS_WRERR) >> BIT_POS_FIFO_STATUS_WRERR);
-
+   fifo_status.almost_empty = (int)((rd_data & MASK_FIFO_STATUS_AEMPTY) >> BIT_POS_FIFO_STATUS_AEMPTY);
+   fifo_status.empty        = (int)((rd_data & MASK_FIFO_STATUS_EMPTY) >> BIT_POS_FIFO_STATUS_EMPTY);
+   fifo_status.almost_full  = (int)((rd_data & MASK_FIFO_STATUS_AFULL) >> BIT_POS_FIFO_STATUS_AFULL);
+   fifo_status.full         = (int)((rd_data & MASK_FIFO_STATUS_FULL) >> BIT_POS_FIFO_STATUS_FULL);
+   fifo_status.rd_error     = (int)((rd_data & MASK_FIFO_STATUS_RDERR) >> BIT_POS_FIFO_STATUS_RDERR);
+   fifo_status.wr_error     = (int)((rd_data & MASK_FIFO_STATUS_WRERR) >> BIT_POS_FIFO_STATUS_WRERR);
 
    return fifo_status;
 }
@@ -244,7 +246,8 @@ int video_core_dcmi_interface::is_fifo_ok(void){
                 0 otherwise;
     */
    
-   return (fifo_status_p.wr_error||fifo_status_p.rd_error);
+   return !(fifo_status_p.wr_error||fifo_status_p.rd_error);
+   
 }
 
 
@@ -254,7 +257,9 @@ uint16_t video_core_dcmi_interface::get_fifo_rd_count(void){
     @param  : none
     @retval : 16-bit read count;
     */
-   return (uint16_t)((REG_READ(base_addr, REG_FIFO_CNT_OFFSET) & 0x0000FFFF)>> START_BIT_POS_FIFO_RD_CNT);
+   uint32_t rd_data;
+   rd_data = REG_READ(base_addr, REG_FIFO_CNT_OFFSET);
+   return (uint16_t)((rd_data & 0x0000FFFF)>> START_BIT_POS_FIFO_RD_CNT);
 }
 
 uint16_t video_core_dcmi_interface::get_fifo_wr_count(void){
@@ -263,7 +268,9 @@ uint16_t video_core_dcmi_interface::get_fifo_wr_count(void){
     @param  : none
     @retval : 16-bit write count;
     */
-   return (uint16_t)((REG_READ(base_addr, REG_FIFO_CNT_OFFSET) & 0xFFFF0000)>> START_BIT_POS_FIFO_WR_CNT);
+   uint32_t rd_data;
+   rd_data = REG_READ(base_addr, REG_FIFO_CNT_OFFSET);
+   return (uint16_t)((rd_data & 0xFFFF0000)>> START_BIT_POS_FIFO_WR_CNT);
 
 }
 
@@ -287,7 +294,6 @@ void video_core_dcmi_interface::cont_grab(void){
     @brief  : set up the decoder to continuously grab the dcmi device frame;
     @param  : none;
     @retval : none;
-
     */
    enable_decoder();
 }
