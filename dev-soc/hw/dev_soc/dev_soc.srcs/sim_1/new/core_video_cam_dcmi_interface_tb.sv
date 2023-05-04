@@ -167,6 +167,59 @@ program core_video_cam_dcmi_interface_tb
     read <= 1'b1;
     addr <= REG_FIFO_CNT_OFFSET;
     
+    // disable sink ready; so fifo will not be read;
+    // start the decoder;
+    // once the decoder is finished;
+    // then only enable the fifo read;
+    // see if it matches the expectation;
+    // expectation;
+    // expect the fifo stats read count != write count;
+    // expect that the stream out data will be on hold;
+    // until the sink is ready;
+    @(posedge clk_sys);    
+    sink_ready <= 1'b0;
+    
+    // start the decoder;
+    @(posedge clk_sys);    
+    write <= 1'b1;
+    read <= 1'b0;
+    addr <= REG_CTRL_OFFSET;
+    wr_data <= 2'b01;
+    
+    // disable the decoder after it has started;
+    // otherwise it will keep going;
+    // wait for the decoder to finish;
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_DECODER_STATUS_OFFSET;
+    wait(rd_data[0] == 1'b1);
+
+    // start the decoder;
+    @(posedge clk_sys);    
+    write <= 1'b1;
+    read <= 1'b0;
+    addr <= REG_CTRL_OFFSET;
+    wr_data <= 2'b00;   
+        
+    // wait for the decoder to finish;
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_DECODER_STATUS_OFFSET;
+    wait(rd_data[1] == 1'b1);
+    
+    // check for fifo stats;
+    // expect write count != read count;
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_FIFO_CNT_OFFSET;
+    
+    
+    
+    
+    
     
     #(100);
     $display("test ends");
