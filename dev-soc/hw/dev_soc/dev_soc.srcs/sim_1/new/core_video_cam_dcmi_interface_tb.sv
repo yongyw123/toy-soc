@@ -266,6 +266,16 @@ program core_video_cam_dcmi_interface_tb
     // expect the macro fifo eventually resets successfully;
     wait(rd_data[0] == 1'b1);
    
+   
+   // test if the decoder is idle;
+   // expect it to be;
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_DECODER_STATUS_OFFSET;
+    wait(rd_data[2] == 1'b1);
+
+   
     #(100);
     $display("test ends");
     $stop;
