@@ -567,21 +567,13 @@ Register Definition:
     bit[0] start the decoder;
             0 to disable the decoder;
             1 to enable the decoder;
-            *SW may need to apply a pulse: HIGH then LOW otherwise 
-            the decoder will run forever;
-            
     bit[1] synchronously clear decoder frame counter;
             1 yes;
             0 no;
-            *SW needs to apply a pulse: HIGH then LOW otherwise 
-            this clearing will forever in effect;
-            
     bit[2] reset the internal fifo in case if the fifo has unresolved errors;
             1 to reset;
             0 otherwise;
-            *SW needs to apply a pulse: HIGH then LOW otherwise it will
-            be forever in reset-state;
-             
+            
 2. register 1: status register;
     bit[0] detect the start of a frame
         1 yes; 
@@ -591,6 +583,9 @@ Register Definition:
         1 yes;
         0 otherwise;
         *this will clear by itself;
+    bit[2]: is the decoder idle?
+        1 yes;
+        0 otherwise;
         
 3. register 2: frame counter read register;
         bit[31:0] to store the number of frame detected;
