@@ -137,6 +137,36 @@ program core_video_cam_dcmi_interface_tb
     read <= 1'b1;
     addr <= REG_FRAME_OFFSET;
     
+    // allow the decoder  run over more than say 4 frames;
+    @(posedge clk_sys);    
+    write <= 1'b1;
+    read <= 1'b0;
+    addr <= REG_CTRL_OFFSET;
+    wr_data <= 2'b01;
+    
+    // check the frame counter;
+    // disable the decoder once the target is reached;
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_FRAME_OFFSET;
+    
+    wait(rd_data == 3);
+    // target has been reached; disable the decoder;
+    @(posedge clk_sys);    
+    write <= 1'b1;
+    read <= 1'b0;
+    addr <= REG_CTRL_OFFSET;
+    wr_data <= 2'b00;
+    
+    // read the fifo stats;
+    // expect it to be four times more in terms of the read and write counts;
+    // and read == write count;
+    @(posedge clk_sys);    
+    write <= 1'b0;
+    read <= 1'b1;
+    addr <= REG_FIFO_CNT_OFFSET;
+    
     
     #(100);
     $display("test ends");
