@@ -102,7 +102,7 @@ module video_sys
     logic DCMI_PCLK;
     logic DCMI_HREF;
     logic DCMI_VSYNC;
-    logic [LCD_DISPLAY_DATA_WIDTH-1:0] DCMI_DIN;
+    logic [LCD_DISPLAY_DATA_WIDTH-1:0] DCMI_PIXEL_DATA;
     // for downstream;
     logic [LCD_DISPLAY_DATA_WIDTH-1:0] DCMI_stream_out_data;
     logic DCMI_sink_ready;     // signal from the sink to this interface;
@@ -170,30 +170,32 @@ module video_sys
     ------------------------------------------------*/
     fifo_core_video_lcd_display 
     #(
-    .DATA_WIDTH(LCD_DISPLAY_DATA_WIDTH),
-    .ADDR_WIDTH(FIFO_LCD_ADDR_WIDTH)  
+        .DATA_WIDTH(LCD_DISPLAY_DATA_WIDTH),
+        .ADDR_WIDTH(FIFO_LCD_ADDR_WIDTH)  
     )
     fifo_lcd_unit
     (
-    .clk(clk_sys),
-    .reset(reset),
-    
-    // from the pixel source end;
-    .src_data(pixel_src_data),     
-    .src_valid(pixel_src_valid),
-    .src_ready(pixel_src_ready),
-    
-    // for the sink end: LCD display;
-    .sink_data(lcd_stream_in_pixel_data),
-    .sink_valid(lcd_stream_valid_flag),
-    .sink_ready(lcd_stream_ready_flag)
+        .clk(clk_sys),
+        .reset(reset),
+        
+        // from the pixel source end;
+        .src_data(pixel_src_data),     
+        .src_valid(pixel_src_valid),
+        .src_ready(pixel_src_ready),
+        
+        // for the sink end: LCD display;
+        .sink_data(lcd_stream_in_pixel_data),
+        .sink_valid(lcd_stream_valid_flag),
+        .sink_ready(lcd_stream_ready_flag)
     );
     
     /* ------------------------------------------------
     * lcd display interface (ILI9341); 
     ------------------------------------------------*/
     core_video_lcd_display
-    #(.PARALLEL_DATA_BITS(LCD_DISPLAY_DATA_WIDTH))
+    #(
+        .PARALLEL_DATA_BITS(LCD_DISPLAY_DATA_WIDTH)
+    )
     lcd_display_unit
     (
         // general;
@@ -336,7 +338,7 @@ module video_sys
         .DCMI_PCLK(DCMI_PCLK),
         .DCMI_HREF(DCMI_HREF),
         .DCMI_VSYNC(DCMI_VSYNC),
-        .DCMI_DIN(DCMI_DIN),
+        .DCMI_DIN(DCMI_PIXEL_DATA),
         
         // for downstream signals;
         .stream_out_data(DCMI_stream_out_data),
@@ -348,7 +350,7 @@ module video_sys
         .debug_FIFO_rst_ready(),
         .debug_decoder_complete_tick(),
         .debug_decoder_start_tick(),
-        .debug_detect_vsync_edge
+        .debug_detect_vsync_edge()
     );
     
     /*---------------------------------------
@@ -356,7 +358,37 @@ module video_sys
     * this is a temporary replacement
     * for the actual camera OV7670;
     ----------------------------------------*/
+    dcmi_emulator
+    #(
+        .DATA_BITS(8), // camera could only transmit 8-bit in parallel at at time;
     
+        // dcmi sync;
+        .PCLK_MOD(4),               // 100/4 = 25 MHz;
+        .VSYNC_LOW(10),             //vlow;
+        .HREF_LOW(5),               // hlow; 
+        .BUFFER_START_PERIOD(7),    // between vsync assertion and href assertion;
+        .BUFFER_END_PERIOD(5),	    // between the frame end and the frame start;
+        .HREF_TOTAL(LCD_WIDTH),           // total href assertion to generate;
+        .PIXEL_BYTE_TOTAL(640)      // 320 pixels per href with bp = 16-bit; 
+    )
+    dcmi_emulator_unit
+    (
+        .clk_sys(clk_sys),      // 100 MHz;
+        .reset_sys(reset),      // async;
+        
+        // user command;
+        .start(1),      // free running;
+        
+        // output; sycnhronization signals + dummy pixel data byte;
+        .pclk(DCMI_PCLK),   // fixed at 25 MHz (cannot emulate 24MHz using 100MHz clock);
+        .vsync(DCMI_VSYNC), 
+        .href(DCMI_HREF),
+        .dout(DCMI_PIXEL_DATA),
+
+        //[not used] status;
+        .frame_start_tick(),
+        .frame_complete_tick()
+    );
     
     
     /* -------------------------------------------------------------------
