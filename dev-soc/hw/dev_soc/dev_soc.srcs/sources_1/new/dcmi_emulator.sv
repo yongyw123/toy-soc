@@ -207,7 +207,12 @@ module dcmi_emulator
             
             ST_HREF_ACTIVE: begin
                 href = 1'b1;
-                dout = (DATA_BITS'($random));
+                
+                //dout = (DATA_BITS'($random)); // this is not supported in synthesis;
+                
+                // make it a strip using href count;
+                dout = DATA_BITS'(href_cnt_reg);
+                
                 // within an active HREF, there should be a fixed (targeted) number of bytes sent;                
                 if(pixel_byte_reg == (PIXEL_BYTE_TOTAL-1)) begin
                     state_next      = ST_HREF_REST;
