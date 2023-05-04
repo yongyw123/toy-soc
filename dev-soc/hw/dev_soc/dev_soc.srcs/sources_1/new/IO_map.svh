@@ -571,6 +571,8 @@ Register Definition:
             1 yes;
             0 no;
     bit[2] reset the internal fifo in case if the fifo has unresolved errors;
+            1 to reset;
+            0 otherwise;
              
 2. register 1: status register;
     bit[0] detect the start of a frame
