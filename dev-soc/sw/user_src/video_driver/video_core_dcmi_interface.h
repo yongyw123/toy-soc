@@ -8,6 +8,7 @@ Device Interface Protocol:  DCMI synchronization signals
 ---------------------------------------------*/
 #include "io_map.h"
 #include "io_reg_util.h"
+#include "user_util.h"
 
 // c and cpp linkage;
 // reference: https://igl.ethz.ch/teaching/tau/resources/cprog.htm
@@ -190,6 +191,10 @@ class video_core_dcmi_interface{
 
     // masking and fields;
     enum{
+        // control;
+        MASK_CTRL_DEC_START = BIT_MASK(BIT_POS_DEC_START),
+        
+        
         // decoder status;
         MASK_DEC_STATUS_START   = BIT_MASK(BIT_POS_DECODER_STATUS_START),
         MASK_DEC_STATUS_END     = BIT_MASK(BIT_POS_DECODER_STATUS_END),
@@ -207,29 +212,45 @@ class video_core_dcmi_interface{
 
     };
 
+    // constants/code;
+    enum{
+        SYS_READY = 1,        
+        ENABLE_DEC = 1,
+        DISABLE_DEC = 0
+    };
+
     public:
         video_core_dcmi_interface(uint32_t core_base_addr);
         ~video_core_dcmi_interface();
         
         // to wait for the macro fifo to steady before using this dcmi interface system;
         int is_sys_ready(void); 
-
+        
+        // decoder specific;
+        void set_decoder(int to_enable);
+        // wrapper for the above;
         void enable_decoder(void);
         void disable_decoder(void);
-        void clear_decoder_counter(void);
+
+        // other command;s
+        void clear_decoder_counter(void);   // resetting the decoder frame counter;
+        void reset_fifo(void); // manual resetting the internal fifo if all goes wrong;
 
         /* decoder status */
         int detect_frame_start(void);   // detect the start of a frame;
         int detect_frame_end(void); // detect the completion of a frame;
 
         /* check the macro fifo status; */
-        fifo_status_t read_fifo_status(void);
+        fifo_status_t get_fifo_status(void);
 
         // wrapper for the above;    
         // almost full, almost empty not constructed;
         int is_fifo_full(void);     // fully full?;
         int is_fifo_empty(void);    // fully empty?
         int is_fifo_ok(void);       // any errors reported?
+
+        
+        
 
         /* check fifo counters */
         uint16_t get_fifo_rd_count(void);
@@ -240,8 +261,12 @@ class video_core_dcmi_interface{
         // this video core base address in the user-address space;
         uint32_t base_addr;
         
-        // state of the decoder: running or disabled?
-        int decoder_state_p;  // +1 if running; 0 otherwise;
+        // readiness state; if fifo is not ready; the entire system
+        // will break down;
+        int system_ready_p;
+
+        // state of the control register;
+        int ctrl_state_p;  
 
         // state of the fifo:  any errors, etc?
         fifo_status_t fifo_status_p;
