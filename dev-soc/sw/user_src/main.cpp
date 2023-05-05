@@ -15,7 +15,15 @@ int main(){
     /* signal declarations */
     fifo_status_t dcmi_fifo_status;
     int dcmi_sys_ready_status;
-
+    
+    /*---------------------------------
+    * Camera OV7670 init;
+    ---------------------------------*/
+    debug_str("start initializing camera ov7670; \r\n");
+    ov7670_init(OV7670_OUTPUT_FORMAT_RGB565);
+    ov7670_set_test_pattern(OV7670_TEST_PATTERN_COLOUR_BAR_FADING);
+    debug_str("done initializing camera ov7670; \r\n\r\n");
+    
     /*---------------------------------
     * LCD init via the processor    
     ---------------------------------*/
