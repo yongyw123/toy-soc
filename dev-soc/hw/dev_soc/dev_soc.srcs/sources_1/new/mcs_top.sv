@@ -14,6 +14,8 @@
 //      2. bridge between ublaze mcs io bus and the user-space bus;
 //      3. mmio controller; interface between ublaze processor and io cores;
 //      4. already-constructed io cores;
+//      5. video controller; interface between the ublaze processor and the video cores;
+//      6. already-constructed video cores;
 // 
 // Dependencies: 
 // 
@@ -110,6 +112,9 @@ module mcs_top
         input logic [7:0] CAM_OV7670_DATA_JB    // 8-bit pixel data;
     );    
     
+    /*-------------------------------------------------------------
+    * signal declarations;
+    -------------------------------------------------------------*/
     // general;
     logic reset_sys;    // to invert the input reset;
     logic reset_clk;    // reset mmcm clock;
@@ -146,14 +151,15 @@ module mcs_top
     // locked=HIGH means clock has stabilized;
     assign reset_sys = ~CPU_RESETN || ~mmcm_clk_locked;    
     assign reset_clk = ~CPU_RESETN;
-    /* -------------------
-    instantiation;
-    0. clock unit   : ip-generated MMCM (mixed mode clock manager);
-    1. cpu_unit     : ip-generated microblaze mcs
-    2. bridge unit  : bridge between microblaze io bus and user bus;
-    3. mmio_unit    : mmio system (where all the io cores reside);
-    4. video_unit   : video system; 
-    -----------------*/
+    
+    /* -------------------------------------------------------------------
+    * instantiation;
+    * 0. clock unit   : ip-generated MMCM (mixed mode clock manager);
+    * 1. cpu_unit     : ip-generated microblaze mcs
+    * 2. bridge unit  : bridge between microblaze io bus and user bus;
+    * 3. mmio_unit    : mmio system (where all the io cores reside);
+    * 4. video_unit   : video system; 
+    -------------------------------------------------------------------*/
     
     // ip-generated clock management circuit;
     clk_wiz_0 clock_unit
@@ -163,7 +169,7 @@ module mcs_top
     
     // Status and control signals
     .reset(reset_clk),          // input reset
-    //.reset(0),      // allow free running? bad idea?
+    //.reset(0),                // allow free running? bad idea?
     .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
    
    // Clock in ports
@@ -309,7 +315,13 @@ module mcs_top
         .lcd_drive_rdx(LCD_RDX_JD04),     // to drive the lcd for read op;
         
         // this is shared between the host and the lcd;
-        .lcd_dinout(LCD_DATA_JC)
+        .lcd_dinout(LCD_DATA_JC),
+        
+        /* camera ov7670 sync signals and data */
+        .CAM_OV7670_PCLK_JA07(CAM_OV7670_PCLK_JA07),    // driven by the camera at 24 MHz;
+        .CAM_OV7670_VSYNC_JA08(CAM_OV7670_VSYNC_JA08),  // vertical synchronization;
+        .CAM_OV7670_HREF_JA09(CAM_OV7670_HREF_JA09),    // horizontal synchronization;
+        .CAM_OV7670_DATA_JB(CAM_OV7670_DATA_JB)         // 8-bit pixel data;
     );
     
     
