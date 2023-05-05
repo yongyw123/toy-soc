@@ -62,13 +62,23 @@ module video_sys
         output logic lcd_drive_dcx,     // data or command; LOW for command;          
         
         // this is shared between the host and the lcd;
-        inout tri[LCD_DISPLAY_DATA_WIDTH-1:0] lcd_dinout 
+        inout tri[LCD_DISPLAY_DATA_WIDTH-1:0] lcd_dinout, 
+        
+        /* camera ov7670 sync signals and data */
+        input logic CAM_OV7670_PCLK_JA07,       // driven by the camera at 24 MHz;
+        input logic CAM_OV7670_VSYNC_JA08,      // vertical synchronization;
+        input logic CAM_OV7670_HREF_JA09,       // horizontal synchronization;
+        input logic [7:0] CAM_OV7670_DATA_JB    // 8-bit pixel data;
     );
     
     
-    /* ----- signal declarations ------*/
+    /***********************************************************
+    * signal declarations
+    ************************************************************/
     
-    /* interface between the lcd and the fifo buffer */
+    /*--------------------------------------------------------------
+    * interface between the lcd and the fifo buffer 
+    --------------------------------------------------------------*/
     logic [LCD_DISPLAY_DATA_WIDTH-1:0] lcd_stream_in_pixel_data;
     logic lcd_stream_valid_flag;
     logic lcd_stream_ready_flag;
@@ -76,7 +86,7 @@ module video_sys
     /* constants */  
     localparam VIDEO_CORE_NUM_TOTAL = `VIDEO_CORE_TOTAL_G; 
     localparam VIDEO_REG_BIT_TOTAL = `VIDEO_REG_ADDR_BIT_SIZE_G;    // 19 bit;
-    localparam REG_DATA_WIDTH = `REG_DATA_WIDTH_G;  // 32 bit;
+    localparam REG_DATA_WIDTH = `REG_DATA_WIDTH_G;                  // 32 bit;
   
     localparam LCD_WIDTH    = 240;
     localparam LCD_HEIGHT   = 320;
@@ -85,29 +95,39 @@ module video_sys
     localparam BPP_16B  = 16;   // 16-bit;   
     localparam BPP_8B   = 8;    // 8-bit;
     
-    /* signals between the LCD fifo and the core_video_src_mux unit */
-    logic pixel_src_valid;  // from the mux to the fifo;
-    logic pixel_src_ready;  // from the fifo to the mux;
-    logic [BPP_8B-1:0] pixel_src_data;   // actual data;
+    /*--------------------------------------------------------------
+    * signals between the LCD fifo and the core_video_src_mux unit 
+    --------------------------------------------------------------*/
+    logic pixel_src_valid;              // from the mux to the fifo;
+    logic pixel_src_ready;              // from the fifo to the mux;
+    logic [BPP_8B-1:0] pixel_src_data;  // actual data;
     
-    
-    /* signals for the core_video_test_pattern_gen */
-    logic [BPP_8B-1:0] pattern_pixel_data;   // actual data;
+    /*-----------------------------------------------
+    * signals for the core_video_test_pattern_gen 
+    -----------------------------------------------*/    
     logic pattern_valid;
     logic pattern_ready;
+    logic [BPP_8B-1:0] pattern_pixel_data;   // actual data;
     
-    
-    /* signals for core_video_cam_dcmi_interface */
+    /*-------------------------------------------------------------- 
+    * signals for core_video_cam_dcmi_interface 
+    --------------------------------------------------------------*/
     // synchronization signals;
     logic DCMI_PCLK;
-    logic DCMI_HREF;
     logic DCMI_VSYNC;
+    logic DCMI_HREF;  
     logic [LCD_DISPLAY_DATA_WIDTH-1:0] DCMI_PIXEL_DATA;
-    // for downstream;
-    logic [LCD_DISPLAY_DATA_WIDTH-1:0] DCMI_stream_out_data;
+    
+    // for downstream;    
     logic DCMI_sink_ready;     // signal from the sink to this interface;
     logic DCMI_sink_valid;     // signal from this interface to the sink;
+    logic [LCD_DISPLAY_DATA_WIDTH-1:0] DCMI_stream_out_data;    // 8-bit data;
     
+    // map the dcmi signals with external camera pins;
+    assign DCMI_PCLK        = CAM_OV7670_PCLK_JA07;
+    assign DCMI_VSYNC       = CAM_OV7670_VSYNC_JA08;
+    assign DCMI_HREF        = CAM_OV7670_HREF_JA09;
+    assign DCMI_PIXEL_DATA  = CAM_OV7670_DATA_JB;
     
     /* ----- broadcasting arrays; */
     // individual control signals for each core;
@@ -116,9 +136,9 @@ module video_sys
     logic [VIDEO_CORE_NUM_TOTAL-1:0] core_ctrl_rd_array; // read enable;
     
     // input, output, and register data for each core;
-    logic [VIDEO_REG_BIT_TOTAL-1:0] core_addr_reg_array[VIDEO_CORE_NUM_TOTAL-1:0]; // register of each core;
-    logic [REG_DATA_WIDTH-1:0] core_data_rd_array[VIDEO_CORE_NUM_TOTAL-1:0]; // read data from each core;
-    logic [REG_DATA_WIDTH-1:0] core_data_wr_array[VIDEO_CORE_NUM_TOTAL-1:0]; // write data from each core;
+    logic [VIDEO_REG_BIT_TOTAL-1:0] core_addr_reg_array[VIDEO_CORE_NUM_TOTAL-1:0];  // register of each core;
+    logic [REG_DATA_WIDTH-1:0]      core_data_rd_array[VIDEO_CORE_NUM_TOTAL-1:0];   // read data from each core;
+    logic [REG_DATA_WIDTH-1:0]      core_data_wr_array[VIDEO_CORE_NUM_TOTAL-1:0];   // write data from each core;
     
     /************************ instantiation *****************************/
     /*------------------------------------------------
@@ -225,8 +245,8 @@ module video_sys
     
     
     /* ------------------------------------------------
-    multiplexer for different HW pixel sources to drive
-    the LCD; (not from the cpu)
+    * multiplexer for different HW pixel sources to drive
+    * the LCD; (not from the cpu)
     ------------------------------------------------*/
     core_video_src_mux
     #(
@@ -272,7 +292,7 @@ module video_sys
     
     
     /*------------------------------------------------
-     pixel test pattern generator for the LCD display
+    * pixel test pattern generator for the LCD display
     ------------------------------------------------*/
     core_video_lcd_test_pattern_gen
     #(
@@ -354,6 +374,8 @@ module video_sys
     );
     
     /*---------------------------------------
+    * DISABLED;
+    * rep;aced by CAMERA OV7670;
     * HW emulator for DCMI signals
     * this is a temporary replacement
     * for the actual camera OV7670;
@@ -377,13 +399,13 @@ module video_sys
         .reset_sys(reset),      // async;
         
         // user command;
-        .start(1),      // free running;
+        .start(0),      
         
         // output; sycnhronization signals + dummy pixel data byte;
-        .pclk(DCMI_PCLK),   // fixed at 25 MHz (cannot emulate 24MHz using 100MHz clock);
-        .vsync(DCMI_VSYNC), 
-        .href(DCMI_HREF),
-        .dout(DCMI_PIXEL_DATA),
+        .pclk(),   // fixed at 25 MHz (cannot emulate 24MHz using 100MHz clock);
+        .vsync(), 
+        .href(),
+        .dout(),
 
         //[not used] status;
         .frame_start_tick(),
@@ -392,8 +414,8 @@ module video_sys
     
     
     /* -------------------------------------------------------------------
-    ground the the read data signals from the unconstructed video cores 
-    for vivao synthesis optimization to opt out these unused signals 
+    * ground the the read data signals from the unconstructed video cores 
+    * for vivao synthesis optimization to opt out these unused signals 
      -------------------------------------------------------------------*/
     generate
         genvar i;

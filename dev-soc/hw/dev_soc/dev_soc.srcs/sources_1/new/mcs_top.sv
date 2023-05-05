@@ -104,12 +104,11 @@ module mcs_top
         * CAMERA OV7670 Synchronization Signals
         * and Data;
         --------------------------------------------*/             
-        input logic CAM_OV7670_PCLK_JA07,
-        input logic CAM_OV7670_VSYNC_JA08,
-        input logic CAM_OV7670_HREF_JA09,
-        input logic [7:0] CAM_OV7670_DATA_JB   // 8-bit pixel data;
-    );
-    
+        input logic CAM_OV7670_PCLK_JA07,       // driven by the camera at 24 MHz;
+        input logic CAM_OV7670_VSYNC_JA08,      // vertical synchronization;
+        input logic CAM_OV7670_HREF_JA09,       // horizontal synchronization;
+        input logic [7:0] CAM_OV7670_DATA_JB    // 8-bit pixel data;
+    );    
     
     // general;
     logic reset_sys;    // to invert the input reset;
@@ -291,7 +290,7 @@ module mcs_top
     video_unit
     (
         // general;
-        .clk_sys(clk),    // 100 MHz;
+        .clk_sys(clk),      // 100 MHz;
         .reset(reset_sys),  // async;
         
         .video_cs(user_video_cs),        // chip select for mmio system;
