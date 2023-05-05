@@ -104,10 +104,6 @@ extern "C" {
 #define OV7670_SCALING_XSC_TEST_PATTERN_LOWER_MASK 	0b10000000	// test_pattern[0]
 #define OV7670_SCALING_YSC_TEST_PATTERN_UPPER_MASK 	0b10000000  // test_pattern[1]
 
-#define OV7670_TEST_PATTERN_NONE 				0	// no test pattern; actual capture;
-#define OV7670_TEST_PATTERN_SHIFTING 			1	// single pixel wide vertical RGB stripes;
-#define OV7670_TEST_PATTERN_COLOUR_BAR 			2	// 8-bar colour bar;
-#define OV7670_TEST_PATTERN_COLOUR_BAR_FADING 	3	// 8-bar colour bar with fading;
 
 //> auto windowing setting;
 #define OV7670_TSLB_AUTO_WINDOW_MASK 	    0b00000001	// to control auto output window after resolution changes;

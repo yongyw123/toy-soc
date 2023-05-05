@@ -54,7 +54,7 @@ int main(){
     
     // orientation;
     debug_str("setting orientation ... \r\n");
-    obj_lcd.set_orientation(0,0,0);
+    obj_lcd.set_orientation(0,1,1);
 
     // set pixel arrangement;
     obj_lcd.set_BGR_order(1);
