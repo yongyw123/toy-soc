@@ -21,7 +21,7 @@ int main(){
     ---------------------------------*/
     debug_str("start initializing camera ov7670; \r\n");
     ov7670_init(OV7670_OUTPUT_FORMAT_RGB565);
-    ov7670_set_test_pattern(OV7670_TEST_PATTERN_COLOUR_BAR_FADING);
+    ov7670_set_test_pattern(OV7670_TEST_PATTERN_COLOUR_BAR);
     debug_str("done initializing camera ov7670; \r\n\r\n");
     
     /*---------------------------------
