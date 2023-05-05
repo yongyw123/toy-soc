@@ -39,18 +39,24 @@ module mcs_top
         // **important; it is active low; need to invert;
         input logic CPU_RESETN,     
         
-        /* external mapping from boards; */
+        /*-------------------------------------------- 
+        * GPO and GPI;
+        --------------------------------------------*/
         input logic [15:0] SW,      // use all switches available on the board;
         output logic [15:0] LED,    // use all leds available on the board;
         
-        // uart;
-        // beware of the mix of tx and rx;
-        // note: uart flow ctrl is not implemented; so no cts/rts pins;
+        /*--------------------------------------------
+        * uart;
+        * beware of the mix of tx and rx;
+        * note: uart flow ctrl is not implemented; so no cts/rts pins;
+        --------------------------------------------*/
         input logic UART_TXD_IN,  // this connects to the system uart rx;
         output logic UART_RXD_OUT, // this connects to the system uart tx;
         
-        // spi; not used;
-        // uses PMOD jumper @ JC;
+        /* --------------------------------------------
+        * SPI; not used;
+        * uses PMOD jumper @ JC;
+        -------------------------------------------*/
         /*
         output logic SPI_SCLK_JC1,
         output logic SPI_MOSI_JC2,
@@ -58,23 +64,11 @@ module mcs_top
         output logic SPI_SS_JC4, // slave select; asset active low;
         output logic SPI_DC_JC7,  // is the current MOSI a data or command for the slave?
         */
-        /* camera ov7670 control 
-        1. use i2c protocol;
-        2. require a clock driver of 24 MHz (to drive the camera itself);
-        3. use a HW reset;
-        */
-        // i2c;
-        // uses PMOD jumper @ JA;
-        output tri I2C_SCL_JA01,    // spi clock; tri because we have a pull up resistor;
-        inout tri I2C_SDA_JA02,      // spi data; inout becos shared between master and slaves;
-        
-        // output clocks @ JA jumpers;
-        output CLKOUT_24M_JA03,
-        
-        /*
-        LCD ili9341
-        uses PMOD jumpers @ JC and JD
-        */   
+                
+        /*--------------------------------------------
+        * LCD ili9341
+        * uses PMOD jumpers @ JC and JD
+        --------------------------------------------*/   
         // control pins;
         output logic LCD_CSX_JD01,     // chip select;
         output logic LCD_DCX_JD02,     // data or command; LOW for command;          
@@ -84,13 +78,36 @@ module mcs_top
         // data bus; shared between the host and the lcd;
         inout tri[7:0] LCD_DATA_JC,
         
-        /* hw reset pins
-        // software controlled;
-        // configure a pmod jumper as gpio;
-        */
+        /*-------------------------------------------- 
+        * hw reset pins
+        * software controlled;
+        * configure a pmod jumper as gpio;
+        --------------------------------------------*/
         inout tri GPIO_CAM_OV7670_RESETN_JA04,  // for camera ov7670;      
-        inout tri GPIO_LCD_ILI9341_RSTN_JD07   // for lcd ili9341;
+        inout tri GPIO_LCD_ILI9341_RSTN_JD07,   // for lcd ili9341;        
         
+        /*-------------------------------------------- 
+        * CAMERA OV7670 Control 
+        * 1. use i2c protocol;
+        * 2. require a clock driver of 24 MHz (to drive the camera itself);
+        * 3. use a HW reset;
+        --------------------------------------------*/
+        // i2c;
+        // uses PMOD jumper @ JA;
+        output tri I2C_SCL_JA01,    // spi clock; tri because we have a pull up resistor;
+        inout tri I2C_SDA_JA02,      // spi data; inout becos shared between master and slaves;
+        
+        // output clocks @ JA jumpers;
+        output CLKOUT_24M_JA03, // the camera requires an input clock to operate;
+        
+        /* ------------------------------------------
+        * CAMERA OV7670 Synchronization Signals
+        * and Data;
+        --------------------------------------------*/             
+        input logic CAM_OV7670_PCLK_JA07,
+        input logic CAM_OV7670_VSYNC_JA08,
+        input logic CAM_OV7670_HREF_JA09,
+        input logic [7:0] CAM_OV7670_DATA_JB   // 8-bit pixel data;
     );
     
     
