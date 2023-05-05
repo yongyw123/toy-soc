@@ -65,10 +65,10 @@ module video_sys
         inout tri[LCD_DISPLAY_DATA_WIDTH-1:0] lcd_dinout, 
         
         /* camera ov7670 sync signals and data */
-        input logic CAM_OV7670_PCLK_JA07,       // driven by the camera at 24 MHz;
-        input logic CAM_OV7670_VSYNC_JA08,      // vertical synchronization;
-        input logic CAM_OV7670_HREF_JA09,       // horizontal synchronization;
-        input logic [7:0] CAM_OV7670_DATA_JB    // 8-bit pixel data;
+        input logic dcmi_pclk,       // driven by the camera at 24 MHz;
+        input logic dcmi_vsync,      // vertical synchronization;
+        input logic dcmi_href,       // horizontal synchronization;
+        input logic [7:0] dcmi_pixel // 8-bit pixel data;
     );
     
     
@@ -112,22 +112,10 @@ module video_sys
     /*-------------------------------------------------------------- 
     * signals for core_video_cam_dcmi_interface 
     --------------------------------------------------------------*/
-    // synchronization signals;
-    logic DCMI_PCLK;
-    logic DCMI_VSYNC;
-    logic DCMI_HREF;  
-    logic [LCD_DISPLAY_DATA_WIDTH-1:0] DCMI_PIXEL_DATA;
-    
     // for downstream;    
     logic DCMI_sink_ready;     // signal from the sink to this interface;
     logic DCMI_sink_valid;     // signal from this interface to the sink;
     logic [LCD_DISPLAY_DATA_WIDTH-1:0] DCMI_stream_out_data;    // 8-bit data;
-    
-    // map the dcmi signals with external camera pins;
-    assign DCMI_PCLK        = CAM_OV7670_PCLK_JA07;
-    assign DCMI_VSYNC       = CAM_OV7670_VSYNC_JA08;
-    assign DCMI_HREF        = CAM_OV7670_HREF_JA09;
-    assign DCMI_PIXEL_DATA  = CAM_OV7670_DATA_JB;
     
     /* ----- broadcasting arrays; */
     // individual control signals for each core;
@@ -355,10 +343,11 @@ module video_sys
                 
         /* specific; */
         // specific external  signals;
-        .DCMI_PCLK(DCMI_PCLK),
-        .DCMI_HREF(DCMI_HREF),
-        .DCMI_VSYNC(DCMI_VSYNC),
-        .DCMI_DIN(DCMI_PIXEL_DATA),
+        // synchronization signals;
+        .DCMI_PCLK(dcmi_pclk),
+        .DCMI_HREF(dcmi_href),
+        .DCMI_VSYNC(dcmi_vsync),
+        .DCMI_DIN(dcmi_pixel),               
         
         // for downstream signals;
         .stream_out_data(DCMI_stream_out_data),

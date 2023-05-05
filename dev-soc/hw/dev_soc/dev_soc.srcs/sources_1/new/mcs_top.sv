@@ -85,7 +85,7 @@ module mcs_top
         * software controlled;
         * configure a pmod jumper as gpio;
         --------------------------------------------*/
-        inout tri GPIO_CAM_OV7670_RESETN_JA04,  // for camera ov7670;      
+        inout tri GPIO_CAM_OV7670_RESETN_JB09,  // for camera ov7670;      
         inout tri GPIO_LCD_ILI9341_RSTN_JD07,   // for lcd ili9341;        
         
         /*-------------------------------------------- 
@@ -95,21 +95,21 @@ module mcs_top
         * 3. use a HW reset;
         --------------------------------------------*/
         // i2c;
-        // uses PMOD jumper @ JA;
-        output tri I2C_SCL_JA01,    // spi clock; tri because we have a pull up resistor;
-        inout tri I2C_SDA_JA02,      // spi data; inout becos shared between master and slaves;
+        // uses PMOD jumper @ JB;
+        output tri I2C_SCL_JB07,    // spi clock; tri because we have a pull up resistor;
+        inout tri I2C_SDA_JB08,      // spi data; inout becos shared between master and slaves;
         
-        // output clocks @ JA jumpers;
-        output CLKOUT_24M_JA03, // the camera requires an input clock to operate;
+        // output clocks @ JB jumpers;
+        output CLKOUT_24M_JB02, // the camera requires an input clock to operate;
         
         /* ------------------------------------------
         * CAMERA OV7670 Synchronization Signals
-        * and Data;
+        * and Data;        
         --------------------------------------------*/             
-        input logic CAM_OV7670_PCLK_JA07,       // driven by the camera at 24 MHz;
-        input logic CAM_OV7670_VSYNC_JA08,      // vertical synchronization;
-        input logic CAM_OV7670_HREF_JA09,       // horizontal synchronization;
-        input logic [7:0] CAM_OV7670_DATA_JB    // 8-bit pixel data;
+        input logic CAM_OV7670_PCLK_JB10,       // driven by the camera at 24 MHz;
+        input logic CAM_OV7670_VSYNC_JB03,      // vertical synchronization;
+        input logic CAM_OV7670_HREF_JB04,       // horizontal synchronization;
+        input logic [7:0] CAM_OV7670_DATA_JA    // 8-bit pixel data;
     );    
     
     /*-------------------------------------------------------------
@@ -165,7 +165,7 @@ module mcs_top
     clk_wiz_0 clock_unit
    (
     // Clock out ports
-    .clkout_24M(CLKOUT_24M_JA03),     // output clkout_24M: for camera ov7670
+    .clkout_24M(CLKOUT_24M_JB02),     // output clkout_24M: for camera ov7670
     
     // Status and control signals
     .reset(reset_clk),          // input reset
@@ -275,14 +275,14 @@ module mcs_top
         i2c; 
         camera ov7670; 
         */        
-        .i2c_scl(I2C_SCL_JA01),
-        .i2c_sda(I2C_SDA_JA02),
+        .i2c_scl(I2C_SCL_JB07),
+        .i2c_sda(I2C_SDA_JB08),
         
         /* hw reset pins;
         * 1. camera : OV7670;
         * 2. LCD    : ILI9341;
         */
-        .gpio({GPIO_LCD_ILI9341_RSTN_JD07 ,GPIO_CAM_OV7670_RESETN_JA04})
+        .gpio({GPIO_LCD_ILI9341_RSTN_JD07 ,GPIO_CAM_OV7670_RESETN_JB09})
         
     );
     
@@ -318,10 +318,10 @@ module mcs_top
         .lcd_dinout(LCD_DATA_JC),
         
         /* camera ov7670 sync signals and data */
-        .CAM_OV7670_PCLK_JA07(CAM_OV7670_PCLK_JA07),    // driven by the camera at 24 MHz;
-        .CAM_OV7670_VSYNC_JA08(CAM_OV7670_VSYNC_JA08),  // vertical synchronization;
-        .CAM_OV7670_HREF_JA09(CAM_OV7670_HREF_JA09),    // horizontal synchronization;
-        .CAM_OV7670_DATA_JB(CAM_OV7670_DATA_JB)         // 8-bit pixel data;
+        .dcmi_pclk(CAM_OV7670_PCLK_JB10),    // driven by the camera at 24 MHz;
+        .dcmi_vsync(CAM_OV7670_VSYNC_JB03),  // vertical synchronization;
+        .dcmi_href(CAM_OV7670_HREF_JB04),    // horizontal synchronization;
+        .dcmi_pixel(CAM_OV7670_DATA_JA)         // 8-bit pixel data;
     );
     
     
