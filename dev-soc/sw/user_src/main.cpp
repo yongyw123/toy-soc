@@ -143,8 +143,12 @@ int main(){
     debug_str("\r\n");
     
     // dcmi snapshot;
-    debug_str("take a DCMI snapshot \r\n");
-    vid_dcmi.snapshot();
+    //debug_str("take a DCMI snapshot \r\n");
+    //vid_dcmi.snapshot();
+
+    /* "real-time" streaming */
+    // continuous grabbing the frames from the camera and display them;
+    vid_dcmi.cont_grab();
     
     debug_str("check done\r\n");
     while(1){        
