@@ -26,9 +26,13 @@ extern "C" {
 /*-------------------------------
 * constants 
 -------------------------------*/
-
 #define OV7670_OUTPUT_FORMAT_RGB565 0 // set the camera output to RGB565
 #define OV7670_OUTPUT_FORMAT_YUV422 1 // set the camera output to YUV422
+
+#define OV7670_TEST_PATTERN_NONE 				0	// no test pattern; actual capture;
+#define OV7670_TEST_PATTERN_SHIFTING 			1	// single pixel wide vertical RGB stripes;
+#define OV7670_TEST_PATTERN_COLOUR_BAR 			2	// 8-bar colour bar;
+#define OV7670_TEST_PATTERN_COLOUR_BAR_FADING 	3	// 8-bar colour bar with fading;
 
 #define MASK_TOGGLE_BIT_B0 0b00000001
 #define MASK_TOGGLE_BIT_B1 0b00000010

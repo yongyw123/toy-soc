@@ -20,6 +20,7 @@ Purpose: top level directives;
 #include "video_core_lcd_display.h"
 #include "video_core_src_mux.h"
 #include "video_core_test_pattern_gen.h"
+#include "video_core_dcmi_interface.h"
 
 // test driver;
 #include "test_util.h"
