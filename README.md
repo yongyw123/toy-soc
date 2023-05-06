@@ -14,17 +14,16 @@
 - [x] i2C interface to control Camera OV7670
 - [x] LCD Display Parallel Interface
 - [x] Pixel Test HW generation for LCD Display
-- [ ] Digital Camera Interface (DCMI)
-- [ ] Video Streaming System integrating the camera and the LCD.
-- [ ] Some basic DSP block?
-- [ ] HW accelerator for (undetermined) image algorithm?
+- [x] Digital Camera Interface (DCMI)
+- [x] Video Streaming System integrating the camera and the LCD.
+- [ ] Some basic DSP blocks for colour format conversion?
+- [ ] HW accelerator for (undetermined) image algorithm: DCT?
 
 ### Application
 
 - [ ] Test SW Function for each IO cores
-- [ ] IP generate FIFO dual clock
 - [x] IP generate Clock management circuit
-- [ ] IP generate SDRAM memory interface for Frame Buffers?
+- [ ] IP generate DDRAM memory interface for Frame Buffers?
 - [x] Camera OV7670 via i2C interface
 - [x] LCD ILI9341 Configuration Interface
 
