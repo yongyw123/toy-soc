@@ -111,7 +111,7 @@ video system:   1xxx_xxxx_xxxx_xxxx_vvvr_rrrr
 --------------------------------------------------*/
 
 /**************************************************************
-* S1_UART_DEBUG
+* S0_SYS_TIMER
 --------------------
 Timer Core uses three registers;
 
