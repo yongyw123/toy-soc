@@ -3,9 +3,7 @@
 
 /*
 *  Memory-mapped for MicroBlaze MCS;
-*  The instantiated MCS only has the CPU (processor) added;
-*  The rest of the IO module such as GPIO, UART, Timer, etc are constructed from the user;
-*  
+*
 * Assumption:
 * 32-bit address space;
 * byte addressable;
@@ -15,13 +13,6 @@
 * this address region shall host the to-be-constructed IO cores/modules;
 * IO bus address: 0xC0000000 - 0xFFFFFFFF; mapped to IO bus address output;
 *
-
-* MMIO Address Space;
-* 1. MMIO is intended for cores such as system timer, GPIO, UART etc.
-* 2. MMIO to host up to 64 cores; (2^{6})
-* 3. each core has 32 internal registers; (2^{5});
-*
-
 * Reference:
 * Title: MicroBlaze Micro Controller System v3.0/ LogiCORE IP Product Guide;
 * Document: PG116 July 15, 2021;
@@ -60,26 +51,20 @@
 
 8. video system:
     0. it has 8 video cores (2^3);
-    1. a pixel occupies 16-bit;
-    2. each core has 8 (2^3) internal registers for configuration purposes;
-    so, we have each core uses 16+3 = 19 bit space, summarized below;
-    1. 
-    1. it has 8 cores (2^3);
-    2. each core has 2^19 word;
+    1. each video core has 2^{5} = 32 registers;
+    2. each register is 32-bit wide;
     
 9. if there are other systems integrated in the future;
     more bits will be allocated for distinguishing purposes;
     
 summary of the word-addressable memory;        
 mmio system:    0xxx_xxxx_xxxx_xsss_sssr_rrrr
-video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
+video system:   1xxx_xxxx_xxxx_xxxx_vvvr_rrrr
 
 * x represents dont-care (to accommodate frame buffer?)
 * s represents mmio core;
 * r represents mmio or video core internal registers;
 * v represents video core;
-* a represents video space of each core; where this space is used for various purposes;
-*       such as to store i=the 16-bit pixel
 */
 
 `define BUS_MICROBLAZE_SIZE_G           32
