@@ -71,7 +71,13 @@ module uart_rx
     // serial to parallel shift out the rx data for output;
     logic [DATA_BIT-1:0] shift_out_reg, shift_out_next;
     
-    
+    /* updated: 08 May 2023
+    actually a synchronizer for Uart Rx data is not necessary;
+    since the UART rx data is only input to a purely
+    combinational circuit, not to a flip flop (register);
+    due to legacy; this synchronizer shall be kept as it is
+    since it will not change the function
+    */
     /* double FF synchronizer for the rx signal since this is asynchr 
     to reduce metastability prob; */
     logic rx_meta_reg;
