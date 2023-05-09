@@ -96,6 +96,7 @@ module core_video_lcd_test_pattern_gen
     
     // registers;
     logic enable_gen_reg, enable_gen_next; // switch to turn on/off the pattern generator;
+    logic [1:0] status_reg, status_next; // to store the generator frame status;
     
     /* interface for the test pattern generator */
     logic [SRC_BITS_PER_PIXEL-1:0] pattern_colour_bar_src;
@@ -110,12 +111,15 @@ module core_video_lcd_test_pattern_gen
     // ff;
    always_ff @(posedge clk, posedge reset)
         if(reset) begin
-            enable_gen_reg <= 1'b0;   // default; disabled;
+            enable_gen_reg  <= 1'b0;   // default; disabled;
+            status_reg      <= 2'b00;
         end
         
         else begin
-            if(wr_en)
+            if(wr_en) begin
                 enable_gen_reg <= enable_gen_next;
+            end
+            status_reg <= status_next;
         end
    
    // decode cpu instruction;
@@ -125,7 +129,9 @@ module core_video_lcd_test_pattern_gen
     assign enable_gen_next = wr_data[0];
     
     // read multiplexing;
-    assign rd_en = (read && cs);    
+    assign rd_en = (read && cs);
+    assign status_next = {frame_end, frame_start}; // next state for the status read;
+        
     always_comb begin
         // default;
         rd_data = 32'b0;
@@ -133,7 +139,8 @@ module core_video_lcd_test_pattern_gen
             // state;         
             2'b10 : rd_data = {31'b0, enable_gen_reg};    
             // status
-            2'b11 : rd_data = {30'b0, frame_end, frame_start};  
+            //2'b11 : rd_data = {30'b0, frame_end, frame_start};
+            2'b11 : rd_data = {30'b0, status_reg};  
             default: ; // nop
         endcase
     end
