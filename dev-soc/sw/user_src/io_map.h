@@ -501,14 +501,14 @@ Purpose:
 2. Note that this is asynchronous since this module is driven by OV7670 24MHz PCLK;
 
 Constituent Block:
-1. A dual-clock BRAM FIFO for the cross time domain;
+1. A dual-clock macro FIFO for the cross time domain;
       
 Assumptions:
 1. The synchronization signal settings are fixed; 
     thus; require the camera to be configured apriori;
     
 Issue + Constraint:
-1. The DUAL-CLOCK BRAM FIFO is a MACRO;
+1. The DUAL-CLOCK FIFO is a MACRO;
 2. there are conditions to meet before this FIFO could operate;
 3. Mainly, its RESET needs to satisfy the following:  
     Condition: A reset synchronizer circuit has been introduced to 7 series FPGAs. RST must be asserted
@@ -547,9 +547,9 @@ Register Map
 1. register 0 (offset 0): control register;
 2. register 1 (offset 1): status register;
 3. register 2 (offset 2): frame counter read register;
-4. register 3 (offset 3): BRAM FIFO status register;
-5. register 4 (offset 4): BRAM FIFO read and write counter;  
-6. register 5 (offset 5): BRAM FIFO (and system) readiness state
+4. register 3 (offset 3): FIFO status register;
+5. register 4 (offset 4): FIFO read and write counter;  
+6. register 5 (offset 5): FIFO (and system) readiness state
         
 Register Definition:
 1. register 0: control register;
@@ -582,7 +582,7 @@ Register Definition:
             - this will overflow and wrap around;
             - will clear to zero after a system reset;
 
-4. register 3: BRAM FIFO status register;
+4. register 3: FIFO status register;
         bit[0] - almost empty;
         bit[1] - almost full;
         bit[2] - empty;
@@ -590,11 +590,11 @@ Register Definition:
         bit[4] - read error;
         bit[5] - write error;
 
-5. register 4: BRAM FIFO read and write counter;
+5. register 4: FIFO read and write counter;
         bit[15:0]   - read count;
         bit[31:16]  - write count;      
        
-6. register 5: BRAM FIFO (and system) readiness state
+6. register 5: FIFO (and system) readiness state
         bit[0] 
             1 - system is ready to use;
             0 - otheriwse            

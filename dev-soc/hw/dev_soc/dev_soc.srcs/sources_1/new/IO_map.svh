@@ -590,7 +590,7 @@ Register Definition:
         bit[15:0]   - read count;
         bit[31:16]  - write count;      
        
-6. register 5: BRAM FIFO (and system) readiness state
+6. register 5: FIFO (and system) readiness state
         bit[0] 
             1 - system is ready to use;
             0 - otheriwse            
