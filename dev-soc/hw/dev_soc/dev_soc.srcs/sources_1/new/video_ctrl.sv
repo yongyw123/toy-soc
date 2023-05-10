@@ -78,8 +78,8 @@ module video_ctrl
     logic [VIDEO_REG_BIT_TOTAL-1:0] reg_addr;   // which register for a given core?
     
     // separate the video addr into its constituent component;
-    assign core_addr = video_addr[21:19];
-    assign reg_addr = video_addr[18:0];
+    assign core_addr = video_addr[7:5];
+    assign reg_addr = video_addr[4:0];
      
     // decoding;
     always_comb
@@ -97,10 +97,10 @@ module video_ctrl
     generate
         genvar i;
         for(i = 0; i < VIDEO_CORE_NUM_TOTAL; i++) begin
-            assign core_ctrl_rd_array[i] = video_rd;
-            assign core_ctrl_wr_array[i] = video_wr;
-            assign core_data_wr_array[i] = video_wr_data;
-            assign core_addr_reg_array[i] = reg_addr;        
+            assign core_ctrl_rd_array[i]    = video_rd;
+            assign core_ctrl_wr_array[i]    = video_wr;
+            assign core_data_wr_array[i]    = video_wr_data;
+            assign core_addr_reg_array[i]   = reg_addr;        
         end    
     endgenerate
     
