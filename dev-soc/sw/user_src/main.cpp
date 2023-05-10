@@ -96,19 +96,20 @@ int main(){
     // use the HW DCMI emulator as the pixel source
     debug_str("\r\n\r\n");
 	debug_str("selecting the HW DCMI emulator \r\n");
-    //vid_src_mux.select_camera();
-	vid_src_mux.select_test();
+    vid_src_mux.select_camera();
+	/*
+    //vid_src_mux.select_test();
 
     // enable the hw test pattern generator;
     vid_test_pattern.enable();
-
+    */
 
     /*-----------------------------------------------
     * DCMI decoder;
     * before starting any capture;
     * check the status and states;
     -----------------------------------------------*/
-    /*
+    
     debug_str("\r\n\r\n");
     // check the system boot up state;
 
@@ -152,15 +153,15 @@ int main(){
     //debug_str("take a DCMI snapshot \r\n");
     //vid_dcmi.snapshot();
 
-	*/
+
 
     /* "real-time" streaming */
-    /*
+    
     // continuous grabbing the frames from the camera and display them;
     vid_dcmi.cont_grab();
     
     debug_str("check done\r\n");
-    */
+    
     while(1){        
         ;
     }
