@@ -7,8 +7,12 @@
 #set_property -dict { PACKAGE_PIN E3    IOSTANDARD LVCMOS33 } [get_ports { CLK100MHZ }]; #IO_L12P_T1_MRCC_35 Sch=clk100mhz
 #create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports {CLK100MHZ}];
 
-set_property -dict { PACKAGE_PIN E3    IOSTANDARD LVCMOS33 } [get_ports { clk }]; #IO_L12P_T1_MRCC_35 Sch=clk100mhz
-create_clock -period 10.00 -waveform {0 5} [get_ports {clk}];
+#set_property -dict { PACKAGE_PIN E3    IOSTANDARD LVCMOS33 } [get_ports { clk }]; #IO_L12P_T1_MRCC_35 Sch=clk100mhz
+#create_clock -period 10.00 -waveform {0 5} [get_ports {clk}];
+
+set_property -dict { PACKAGE_PIN E3    IOSTANDARD LVCMOS33 } [get_ports { clk_in1 }]; #IO_L12P_T1_MRCC_35 Sch=clk100mhz
+#create_clock -period 10.00 -waveform {0 5} [get_ports {clk}];
+
 #create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports {clk}];
 #reference to remove clocking wizard errors: https://www.reddit.com/r/FPGA/comments/107ez0v/nexys_a7_and_vivados_clocking_wizard/
 

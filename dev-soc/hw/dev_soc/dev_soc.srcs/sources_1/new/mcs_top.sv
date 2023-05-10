@@ -35,7 +35,7 @@ module mcs_top
     //#(parameter MCS_BRIDGE_BASE_ADDR = `BUS_MICROBLAZE_IO_BASE_ADDR_G)    
     (
          // 100 MHz;
-        input logic clk,       
+        input logic clk_in1,       
         
         // async cpu (soft core) reset button; 
         // **important; it is active low; need to invert;
@@ -173,13 +173,13 @@ module mcs_top
     .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
    
    // Clock in ports
-    .clk_in1(clk) // input clk_in1: 100MHz;
+    .clk_in1(clk_in1) // input clk_in1: 100MHz;
    );      
-
+  
     // cpu
     microblaze_mcs_cpu cpu_unit(
       //.Clk(clkout_100M),                          // input wire Clk
-      .Clk(clk),                          // input wire Clk
+      .Clk(clk_in1),                          // input wire Clk
       .Reset(reset_sys),                      // input wire Reset
       .IO_addr_strobe(io_addr_strobe),    // output wire IO_addr_strobe
       .IO_address(io_address),            // output wire [31 : 0] IO_address
@@ -241,7 +241,7 @@ module mcs_top
     mmio_unit
     (
         //.clk(clkout_100M),
-        .clk(clk),
+        .clk(clk_in1),
         .reset(reset_sys),
         .mmio_addr(user_addr),
         .mmio_cs(user_mmio_cs),
@@ -296,7 +296,7 @@ module mcs_top
     video_unit
     (
         // general;
-        .clk_sys(clk),      // 100 MHz;
+        .clk_sys(clk_in1),      // 100 MHz;
         .reset(reset_sys),  // async;
         
         .video_cs(user_video_cs),        // chip select for mmio system;
