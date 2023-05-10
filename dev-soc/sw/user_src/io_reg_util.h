@@ -29,10 +29,10 @@ extern "C" {
 #define TOTAL_VIDEO_REG_NUM 32      // each video core has 2^{5} internal registers;
 
 // to distinguish between the mmio and video system under the same address space; 
-// the 25-indexed bit (the 26-th bit) of byte-addressable is used
-// equiv. 23-indexed bit of word-addressable
+// the 15-indexed bit (the 16-th bit) of byte-addressable is used
+// equiv. 13-indexed bit of word-addressable
 // HIGH for video; LOW otherwise    
-#define USER_VIDEO_BYTE_SELECT_BIT  0x02000000  // this corresponds to the 25-indexed bit of byte-addressable space;
+#define USER_VIDEO_BYTE_SELECT_BIT  0x800000  // this corresponds to the 15-indexed bit of byte-addressable space;
 
 /* ----------------------------------------------
 * MACROS

@@ -26,9 +26,9 @@
 * Note on Address Space
 *-------------------------------------------
 1. Microblaze MCS bus address is 32-bit-byte-addressable
-2. hwoever, user-space only uses 26-bit-byte-addressable;
-3. on word alignment, this is 24-bit-word-addressable;
-4. As of now, 26-bit-byte address space is intended
+2. hwoever, user-space only uses 24-bit-byte-addressable;
+3. on word alignment, this is 22-bit-word-addressable;
+4. As of now, 24-bit-byte address space is intended
     to host one general MMIO system and a video subsystem;
     
     where:
@@ -40,9 +40,9 @@
     
     video subystem is to stream a camera to display;
 
-5. 23-bit-word-addressable usable memory is allocated for user-systems;
+5. 21-bit-word-addressable usable memory is allocated for user-systems;
 
-6. to distinguish between the two systems, the 26th bit of the 26-bit-byte
+6. to distinguish between the two systems, the 23th bit of the 24-bit-byte
     addressable space is used as the select bit low for mmio; high for video;
     
 7. mmio system;
@@ -58,21 +58,25 @@
     more bits will be allocated for distinguishing purposes;
     
 summary of the word-addressable memory;        
-mmio system:    0xxx_xxxx_xxxx_xsss_sssr_rrrr
-video system:   1xxx_xxxx_xxxx_xxxx_vvvr_rrrr
+mmio system:    0x_xxxx_xxxx_xsss_sssr_rrrr
+video system:   1x_xxxx_xxxx_xxxx_vvvr_rrrr
 
-* x represents dont-care (to accommodate frame buffer?)
+* x represents dont-care;
 * s represents mmio core;
 * r represents mmio or video core internal registers;
 * v represents video core;
 */
 
 `define BUS_MICROBLAZE_SIZE_G           32
-//`define BUS_USER_SIZE_G                 21  // as above; (word aligned);
-//`define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // the 24-bit; as above, to distinguish two systems;
+`define BUS_USER_SIZE_G                 21  // as above; (word aligned);
+`define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // the 24-bit; as above, to distinguish two systems;
 
-`define BUS_USER_SIZE_G                 23  // as above; (word aligned);
-`define BUS_SYSTEM_SELECT_BIT_INDEX_G   25  // the 26-bit; as above, to distinguish two systems;
+//`define BUS_USER_SIZE_G                 23  // as above; (word aligned);
+//`define BUS_SYSTEM_SELECT_BIT_INDEX_G   25  // the 26-bit; as above, to distinguish two systems;
+
+//`define BUS_USER_SIZE_G                 19  // as above; (word aligned);
+//`define BUS_SYSTEM_SELECT_BIT_INDEX_G   21  // the 21-bit; as above, to distinguish two systems;
+
 
 // IO based address provided by microblaze MSC, as above;
 `define BUS_MICROBLAZE_IO_BASE_ADDR_G 32'hC0000000
@@ -305,13 +309,6 @@ video address space;
     0. it has 8 video cores (2^3);
     1. each video core has 2^{5} = 32 registers;
     2. each register is 32-bit wide;
-        
-summary of the word-addressable memory;        
-video system:   1xxx_xxxx_xxxx_xxxx_vvvr_rrrr
-
-* x represents dont-care (to accommodate frame buffer?)
-* r represents mmio or video core internal registers;
-* v represents video core;
 ----------------------------------------------------*/
 `define VIDEO_CORE_ADDR_BIT_SIZE_G   3 
 `define VIDEO_CORE_TOTAL_G           8  // 2**VIDEO_CORE_ADDR_SIZE_G;
