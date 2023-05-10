@@ -39,7 +39,7 @@ Important Idea (FSDM main states):
 1. Sampling (reading slave) and Shifting (writing to slave) are always
 conducted in the same clock period BUT on the different edge of the clock;
 depending on CPOL and CPHA;
-(Reference: https://onlinedocs.microchip.com/pr/GUID-835917AF-E521-4046-AD59-DCB458EB8466-en-US-1/index.html?GUID-E4682943-46B9-4A20-A62C-33E8FD3343A3)
+    (Reference: https://onlinedocs.microchip.com/pr/GUID-835917AF-E521-4046-AD59-DCB458EB8466-en-US-1/index.html?GUID-E4682943-46B9-4A20-A62C-33E8FD3343A3)
 
 2. By above, the FSMD has two main States:
     State A: is where the sampling occurs (happening on the first half of the SPI clock period);
