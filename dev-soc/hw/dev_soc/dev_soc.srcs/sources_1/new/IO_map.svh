@@ -301,24 +301,21 @@ Register IO access:
 
 /*----------------------------------------------------
 video address space;
-1. 2^3 = 8 video cores;
-2. each core has 19-bit address space;
-    where this 19-bit is used for internal register
-    and to store 16-bit pixel data;
-    
-summary:
-video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
+1. video system:
+    0. it has 8 video cores (2^3);
+    1. each video core has 2^{5} = 32 registers;
+    2. each register is 32-bit wide;
+        
+summary of the word-addressable memory;        
+video system:   1xxx_xxxx_xxxx_xxxx_vvvr_rrrr
 
 * x represents dont-care (to accommodate frame buffer?)
+* r represents mmio or video core internal registers;
 * v represents video core;
-* r represents video core internal registers;
-* a represents video space of each core; where this space is used for various purposes;
-*       such as to store i=the 16-bit pixel
 ----------------------------------------------------*/
-`define VIDEO_CORE_ADDR_SIZE_G       3 
-`define VIDEO_CORE_TOTAL_G           8 // 2**VIDEO_CORE_ADDR_SIZE_G;
-`define VIDEO_REG_ADDR_BIT_SIZE_G   19  // each video core has 19-bit address space allocated;
-
+`define VIDEO_CORE_ADDR_BIT_SIZE_G   3 
+`define VIDEO_CORE_TOTAL_G           8  // 2**VIDEO_CORE_ADDR_SIZE_G;
+`define VIDEO_REG_ADDR_BIT_SIZE_G    5  // each video core has 2^{5} = 32 registers
 
 /*----------------------------------------------------
 * video modules/cores shall be sloted in the video system;

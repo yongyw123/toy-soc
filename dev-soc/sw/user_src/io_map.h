@@ -320,10 +320,9 @@ summary:
 * r represents mmio or video core internal registers;
 * v represents video core;
 ----------------------------------------------------*/
-#define VIDEO_CORE_ADDR_SIZE_G       3 
-#define VIDEO_CORE_TOTAL_G           8 // 2**VIDEO_CORE_ADDR_SIZE_G;
-#define VIDEO_REG_ADDR_BIT_SIZE_G   19  // each video core has 19-bit address space allocated;
-
+#define VIDEO_CORE_ADDR_BIT_SIZE_G      3 
+#define VIDEO_CORE_TOTAL_G              8   // 2**VIDEO_CORE_ADDR_SIZE_G;
+#define VIDEO_REG_ADDR_BIT_SIZE_G       5  // each video core has 2^{32} registers;
 
 /*----------------------------------------------------
 * video modules/cores shall be sloted in the video system;
