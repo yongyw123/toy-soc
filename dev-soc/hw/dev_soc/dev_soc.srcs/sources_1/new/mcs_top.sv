@@ -119,6 +119,9 @@ module mcs_top
     logic reset_sys;    // to invert the input reset;
     logic reset_clk;    // reset mmcm clock;
     
+    // MMCM clock;
+    logic clkout_100M;  // 100MHz generated from the MMCM;
+    
     // mcs io bus signals; these are fixed;
     logic io_addr_strobe;   // output wire IO_addr_strobe
     logic [31:0] io_address;       // output wire [31 : 0] IO_address
@@ -166,6 +169,7 @@ module mcs_top
    (
     // Clock out ports
     .clkout_24M(CLKOUT_24M_JB02),     // output clkout_24M: for camera ov7670
+    .clkout_100M(clkout_100M),     // output clkout_100M
     
     // Status and control signals
     .reset(reset_clk),          // input reset
@@ -178,8 +182,7 @@ module mcs_top
   
     // cpu
     microblaze_mcs_cpu cpu_unit(
-      //.Clk(clkout_100M),                          // input wire Clk
-      .Clk(clk_in1),                          // input wire Clk
+      .Clk(clkout_100M),                          // input wire Clk
       .Reset(reset_sys),                      // input wire Reset
       .IO_addr_strobe(io_addr_strobe),    // output wire IO_addr_strobe
       .IO_address(io_address),            // output wire [31 : 0] IO_address
@@ -240,8 +243,7 @@ module mcs_top
     
     mmio_unit
     (
-        //.clk(clkout_100M),
-        .clk(clk_in1),
+        .clk(clkout_100M),
         .reset(reset_sys),
         .mmio_addr(user_addr),
         .mmio_cs(user_mmio_cs),
@@ -296,7 +298,7 @@ module mcs_top
     video_unit
     (
         // general;
-        .clk_sys(clk_in1),      // 100 MHz;
+        .clk_sys(clkout_100M),      // 100 MHz;
         .reset(reset_sys),  // async;
         
         .video_cs(user_video_cs),        // chip select for mmio system;

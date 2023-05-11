@@ -65,7 +65,7 @@ module core_timer/*
     
     // signal declaration;
     localparam TOTAL_COUNT = 64;            // counter bit length;
-    logic [TOTAL_COUNT - 1:0] count_curr;   // for counter;
+    logic [TOTAL_COUNT - 1:0] count_curr_reg;   // for counter;
     
     //logic [`G_CORE_ADDR_SIZE:0] test;
     
@@ -92,12 +92,12 @@ module core_timer/*
     /* counter; */
     always_ff @(posedge clk, posedge reset)
         if(reset)
-            count_curr <= 0;
+            count_curr_reg <= 0;
         else
             if(clear)
-                count_curr <= 0;
+                count_curr_reg <= 0;
             else if(go)
-                count_curr <= count_curr + 1;
+                count_curr_reg <= count_curr_reg + 1;
                 
     /* -----------  interface wrapper  -----------*/
     // register for go signal; this is explained above;
@@ -143,8 +143,8 @@ module core_timer/*
         // default;
         rd_data = 0;
         case(addr[1:0])
-            REG_CNTLOW_OFFSET:  rd_data = count_curr[31:0]; // lowerword count;
-            REG_CNTHIGH_OFFSET:  rd_data = {32'h0000, count_curr[63:32]};  // upperword count;
+            REG_CNTLOW_OFFSET:  rd_data = count_curr_reg[31:0]; // lowerword count;
+            REG_CNTHIGH_OFFSET:  rd_data = {32'h0000, count_curr_reg[63:32]};  // upperword count;
             default: ;  // do nothing;    
         endcase
    end

@@ -4,17 +4,32 @@
 ## - rename the used ports (in each line, after get_ports) according to the top level signal names in the project
 
 ## Clock signal
-#set_property -dict { PACKAGE_PIN E3    IOSTANDARD LVCMOS33 } [get_ports { CLK100MHZ }]; #IO_L12P_T1_MRCC_35 Sch=clk100mhz
-#create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports {CLK100MHZ}];
-
-#set_property -dict { PACKAGE_PIN E3    IOSTANDARD LVCMOS33 } [get_ports { clk }]; #IO_L12P_T1_MRCC_35 Sch=clk100mhz
-#create_clock -period 10.00 -waveform {0 5} [get_ports {clk}];
-
+#-----------------------------------------------------------------------------
+# SYSTEM CLOCK;
+# clk_in1 is already created in clock wizard XDC file;
+# this is to set the input port for this clk_in1 
 set_property -dict { PACKAGE_PIN E3    IOSTANDARD LVCMOS33 } [get_ports { clk_in1 }]; #IO_L12P_T1_MRCC_35 Sch=clk100mhz
-#create_clock -period 10.00 -waveform {0 5} [get_ports {clk}];
 
-#create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports {clk}];
-#reference to remove clocking wizard errors: https://www.reddit.com/r/FPGA/comments/107ez0v/nexys_a7_and_vivados_clocking_wizard/
+#-----------------------------------------------------------------------------
+# CAMERA EXTERNAL SYNCHRONIZATION CLOCK
+# note camera OV7670 PCLK @ 24MHz is non-differential;
+# thus, the camera OV7670 pclk must be driving clock-capable IO port, at the positive side of the clock of the IO port is MRCC; 
+set_property -dict { PACKAGE_PIN H16   IOSTANDARD LVCMOS33 } [get_ports { CAM_OV7670_PCLK_JB10 }]; #IO_L13P_T2_MRCC_15 Sch=jb[10]
+
+# indicate to the vivado that this port will be 24MHz (41.67 ns);
+# note that create_clock should not be interpreted as an action to create a clock;
+# this "create_clock" decribes a clock that must already exist in th eystem;
+# all constraints are there to provide mechanisms of describing the timing 
+# of the system external to the FPGA (as there is no internally generated clock in FPGA); 
+# reference: https://support.xilinx.com/s/question/0D52E00006hpkYiSAI/clocks-in-xdc?language=en_US
+create_clock -period 41.667 [get_ports {CAM_OV7670_PCLK_JB10}];
+
+#-----------------------------------------------------------------------------
+# HANDLING ASYNCHRONOUS CLOCKS;
+# there are two clocks that are asynchronous to each other;
+# the pclk @ 24MHz from the camera ov7670 is asynchronous to the system clock;
+# this clock pair cannot be safely timed; so set a clock group to indicate to vivado;
+set_clock_groups -name async_clk_in1_CAM_OV7670_PCLK_JB10 -asynchronous -group {get_clocks -include_generated_clocks clk_in1} -group {CAM_OV7670_PCLK_JB10}
 
 ##Switches
 set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { SW[0] }]; #IO_L24N_T3_RS0_15 Sch=sw[0]
@@ -128,9 +143,6 @@ set_property -dict { PACKAGE_PIN E16   IOSTANDARD LVCMOS33 } [get_ports { I2C_SC
 set_property -dict { PACKAGE_PIN F13   IOSTANDARD LVCMOS33 } [get_ports { I2C_SDA_JB08 }]; #IO_L5P_T0_AD9P_15 Sch=jb[8]
 set_property -dict { PACKAGE_PIN G13   IOSTANDARD LVCMOS33 } [get_ports { GPIO_CAM_OV7670_RESETN_JB09 }]; #IO_0_15 Sch=jb[9]
 
-# note camera OV7670 PCLK is non-differential;
-# thus, the camera OV7670 pclk must be driving clock-capable IO port, at the positive side of the clock of the IO port is MRCC; 
-set_property -dict { PACKAGE_PIN H16   IOSTANDARD LVCMOS33 } [get_ports { CAM_OV7670_PCLK_JB10 }]; #IO_L13P_T2_MRCC_15 Sch=jb[10]
 
 ##Pmod Header JC
 #set_property -dict { PACKAGE_PIN K1    IOSTANDARD LVCMOS33 } [get_ports { JC[1] }]; #IO_L23N_T3_35 Sch=jc[1]
