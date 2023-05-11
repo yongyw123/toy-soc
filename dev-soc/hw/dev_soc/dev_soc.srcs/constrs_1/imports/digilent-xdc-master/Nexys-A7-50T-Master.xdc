@@ -22,14 +22,31 @@ set_property -dict { PACKAGE_PIN H16   IOSTANDARD LVCMOS33 } [get_ports { CAM_OV
 # all constraints are there to provide mechanisms of describing the timing 
 # of the system external to the FPGA (as there is no internally generated clock in FPGA); 
 # reference: https://support.xilinx.com/s/question/0D52E00006hpkYiSAI/clocks-in-xdc?language=en_US
-create_clock -period 41.667 [get_ports {CAM_OV7670_PCLK_JB10}];
+create_clock -add -name camera_pclk -period 41.667 [get_ports {CAM_OV7670_PCLK_JB10}];
 
 #-----------------------------------------------------------------------------
 # HANDLING ASYNCHRONOUS CLOCKS;
 # there are two clocks that are asynchronous to each other;
 # the pclk @ 24MHz from the camera ov7670 is asynchronous to the system clock;
 # this clock pair cannot be safely timed; so set a clock group to indicate to vivado;
-set_clock_groups -name async_clk_in1_CAM_OV7670_PCLK_JB10 -asynchronous -group {get_clocks -include_generated_clocks clk_in1} -group {CAM_OV7670_PCLK_JB10}
+#set_clock_groups -asynchronous \
+#-group {get_clocks -include_generated_clocks clk_in1} \
+#-group {get_clocks {CAM_OV7670_PCLK_JB10}};
+
+#set_clock_groups -asynchronous \
+#-group {get_clocks -include_generated_clocks clk_in1} \
+#-group {camera_pclk};
+
+# generated clocks from MMCM that are asynchronous to the camera PCLK;
+# this is obtained from tcl command: "report_clocks" after implementation; 
+#clk_in1                10.000      {0.000 5.000}   P           {clk_in1}
+#clkfbout_clk_wiz_0     10.000      {0.000 5.000}   P,G,A       {clock_unit/inst/mmcm_adv_inst/CLKFBOUT}
+#clkout_100M_clk_wiz_0  10.000      {0.000 5.000}   P,G,A       {clock_unit/inst/mmcm_adv_inst/CLKOUT1}
+#clkout_24M_clk_wiz_0   41.667      {0.000 20.833}  P,G,A       {clock_unit/inst/mmcm_adv_inst/CLKOUT0}
+set_clock_groups -asynchronous \
+-group {clk_in1 clkfbout_clk_wiz_0 clkout_100M_clk_wiz_0 clkout_24M_clk_wiz_0} \
+-group {get_clocks {camera_pclk}};
+
 
 ##Switches
 set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { SW[0] }]; #IO_L24N_T3_RS0_15 Sch=sw[0]
