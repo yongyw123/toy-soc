@@ -115,12 +115,9 @@ module mcs_top
     /*-------------------------------------------------------------
     * signal declarations;
     -------------------------------------------------------------*/
-    // general;
-    logic reset_sys;    // to invert the input reset;
-    logic reset_clk;    // reset mmcm clock;
-    
     // MMCM clock;
     logic clkout_100M;  // 100MHz generated from the MMCM;
+    logic sys_clk;      // sys_clk = clkout_100M;
     
     // mcs io bus signals; these are fixed;
     logic io_addr_strobe;   // output wire IO_addr_strobe
@@ -146,14 +143,44 @@ module mcs_top
     logic [31:0] user_rd_data_video;
     
     // for ip-generated mmcm clock;
+    // note that this lock signal from MMCM is asynchronous;
     logic mmcm_clk_locked;   // whether the clock has stabilized or not?
     
+    
+    // registers for asynchronous reset signals;
+    logic reset_sys_raw;    // to invert the input reset;
+    logic reset_sys_reg;
+    logic reset_sys_sync;       
+   
     // conform the signals;
     /* ?? to do ??, need to debounce this reset button; */
     // inverted since cpu reset button is "active LOW";
     // locked=HIGH means clock has stabilized;
-    assign reset_sys = ~CPU_RESETN || ~mmcm_clk_locked;    
-    assign reset_clk = ~CPU_RESETN;
+    assign reset_sys_raw = ~CPU_RESETN || ~mmcm_clk_locked;   
+    assign reset_mmcm = ~CPU_RESETN;
+        
+    // use better name for the system clock;
+    assign sys_clk = clkout_100M;
+    
+    /* -------------------------------------------------------------------
+    * Synchronize the reset signals;
+    * currently; it is asynchronous
+    * implementation error encountered: LUT drives async reset alert
+    * implementation: use two registers (synchronizer) instead of one to
+    * filter out any glitch;
+    -------------------------------------------------------------------*/
+
+    // use the input clock, rather than from the MMCM;
+    // first stage;
+    always_ff @(posedge sys_clk) begin
+        // system reset;
+        reset_sys_reg   <= reset_sys_raw;
+    end
+    // second state register;
+    always_ff @(posedge sys_clk) begin
+        // system reset;
+        reset_sys_sync  <= reset_sys_reg;  
+    end
     
     /* -------------------------------------------------------------------
     * instantiation;
@@ -172,7 +199,7 @@ module mcs_top
     .clkout_100M(clkout_100M),     // output clkout_100M
     
     // Status and control signals
-    .reset(reset_clk),          // input reset
+    .reset(reset_mmcm),          // input reset
     //.reset(0),                // allow free running? bad idea?
     .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
    
@@ -182,8 +209,8 @@ module mcs_top
   
     // cpu
     microblaze_mcs_cpu cpu_unit(
-      .Clk(clkout_100M),                          // input wire Clk
-      .Reset(reset_sys),                      // input wire Reset
+      .Clk(sys_clk),                          // input wire Clk
+      .Reset(reset_sys_sync),                      // input wire Reset
       .IO_addr_strobe(io_addr_strobe),    // output wire IO_addr_strobe
       .IO_address(io_address),            // output wire [31 : 0] IO_address
       .IO_byte_enable(io_byte_enable),    // output wire [3 : 0] IO_byte_enable
@@ -243,8 +270,8 @@ module mcs_top
     
     mmio_unit
     (
-        .clk(clkout_100M),
-        .reset(reset_sys),
+        .clk(sys_clk),
+        .reset(reset_sys_sync),
         .mmio_addr(user_addr),
         .mmio_cs(user_mmio_cs),
         .mmio_wr(user_wr),
@@ -299,7 +326,7 @@ module mcs_top
     (
         // general;
         .clk_sys(clkout_100M),      // 100 MHz;
-        .reset(reset_sys),  // async;
+        .reset(reset_sys_sync),  // async;
         
         .video_cs(user_video_cs),        // chip select for mmio system;
         .video_wr(user_wr),             // write enable;

@@ -259,6 +259,11 @@ module core_video_cam_dcmi_interface
     assign debug_RST_FIFO = RST_FIFO;
     assign debug_FIFO_rst_ready = FIFO_rst_ready;
     
+    // to filter out the glitch of the fifo reset signal;
+    // use a register;
+    logic reset_fifo_raw;
+    logic reset_fifo_reg;
+    
     /* registers;
     some do not have register explicitly created here
     because it has been created within the 
@@ -371,7 +376,14 @@ module core_video_cam_dcmi_interface
      );
      
      
-     // reset system for FIFO;
+     
+     //***** reset system for FIFO;
+     // filter out the fifo reset signal glitch;
+     assign reset_fifo_raw = (reset_sys || decoder_cmd_fifo_rst); 
+     always_ff @(posedge clk_sys) begin
+        reset_fifo_reg <= reset_fifo_raw;
+     end   
+    
      FIFO_DUALCLOCK_MACRO_reset_system
      #(
         // counter to track how long FIFO reset signal has spent on HIGH/LOW;
@@ -384,7 +396,7 @@ module core_video_cam_dcmi_interface
      FIFO_reset_system_unit
      (
         .clk_sys(clk_sys),
-        .reset_sys((reset_sys || decoder_cmd_fifo_rst)),
+        .reset_sys(reset_fifo_reg),
         .slower_clk(pclk_main),
         .RST_FIFO(RST_FIFO),
         .FIFO_rst_ready(FIFO_rst_ready),
