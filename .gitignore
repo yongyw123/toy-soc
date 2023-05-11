@@ -9,6 +9,7 @@
 **/*.ip_user_files/
 **/*.gen/
 **/*.sim/
+**/*.runs/
 **/*.jou
 **/*.xpr
 **/vivado.log
