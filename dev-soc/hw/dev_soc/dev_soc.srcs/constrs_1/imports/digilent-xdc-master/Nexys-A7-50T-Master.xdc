@@ -47,6 +47,9 @@ set_clock_groups -asynchronous \
 -group {clk_in1 clkfbout_clk_wiz_0 clkout_100M_clk_wiz_0 clkout_24M_clk_wiz_0} \
 -group {get_clocks {camera_pclk}};
 
+#set_clock_groups -asynchronous \
+#-group {get_clocks -include_generated_clocks -of_objects [get_pins clock_unit/inst/mmcm_adv_inst/CLKIN1]} \
+#-group {get_clocks {camera_pclk}};
 
 ##Switches
 set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { SW[0] }]; #IO_L24N_T3_RS0_15 Sch=sw[0]
