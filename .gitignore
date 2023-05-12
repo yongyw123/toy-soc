@@ -9,7 +9,10 @@
 **/*.ip_user_files/
 **/*.gen/
 **/*.sim/
-**/*.runs/
+**/*exercise/
+**/*tutorial/
+**/*.dev_soc.run/*
+!**/*.dev_soc.run/*.rpt
 **/*.jou
 **/*.xpr
 **/vivado.log
