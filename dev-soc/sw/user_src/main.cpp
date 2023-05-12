@@ -96,8 +96,8 @@ int main(){
     vid_src_mux.select_camera();
 
     // enable the hw test pattern generator;
-    vid_test_pattern.enable();
-    vid_src_mux.select_test();
+    //vid_test_pattern.enable();
+    //vid_src_mux.select_test();
 
     /*-----------------------------------------------
     * DCMI decoder;
