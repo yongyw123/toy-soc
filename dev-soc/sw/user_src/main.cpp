@@ -87,22 +87,17 @@ int main(){
     
     /*-----------------------------------------------
     * Note:
-    * under the current setup, there is no actual DCMI device
-    * that is, the OV7670 camera;
-    * instead, we use a HW DCMI emulator to 
-    * simulate the real camera;
-    -----------------------------------------------*/
-    
-    // use the HW DCMI emulator as the pixel source
+    * select which pixel source to use for the display;
+    * the actual camera?
+    * or the HW test pattern generator;
+    -----------------------------------------------*/    
     debug_str("\r\n\r\n");
 	debug_str("selecting the HW DCMI emulator \r\n");
     vid_src_mux.select_camera();
-	/*
-    //vid_src_mux.select_test();
 
     // enable the hw test pattern generator;
     vid_test_pattern.enable();
-    */
+    vid_src_mux.select_test();
 
     /*-----------------------------------------------
     * DCMI decoder;
