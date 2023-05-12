@@ -54,20 +54,22 @@ extern "C" {
     addressable space is used as the select bit low for mmio; high for video;
     
 7. mmio system;
-    1. it has 64 cores (2^6);
-    2. each core has 32 registers of 32-bit wide; (2^5);
+    1. it has 32 cores (2^5);
+    2. each core has 16 (2^4);
+    3. each registers is 32-bit wide; 
 
 8. video system:
-    0. it has 8 video cores (2^3);
-    1. each video core has 2^{5} = 32 registers;
+    0. it has 16 video cores (2^4);
+    1. each video core has 2^{4} = 16 registers;
     2. each register is 32-bit wide;
     
 9. if there are other systems integrated in the future;
     more bits will be allocated for distinguishing purposes;
     
 summary of the word-addressable memory;        
-mmio system:    0x_xxxx_xxxx_xsss_sssr_rrrr
-video system:   1x_xxxx_xxxx_xxxx_vvvr_rrrr
+MMIO System	    :   0x_xxxx_xxxx_xxxs_ssss_rrrr
+Video System    :   1x_xxxx_xxxx_xxxx_vvvv_rrrr
+
 
 * x represents dont-care;
 * s represents mmio core;
@@ -95,18 +97,16 @@ video system:   1x_xxxx_xxxx_xxxx_vvvr_rrrr
 * mmio address space
 * this address space as above is to store
 * the IO cores;
-* 1. allocated to host 2^{6} = 64 cores;
-* 2. each core has 2^{5} = 32 internal registers 
+* 1. allocated to host 2^{5} = 32 cores;
+* 2. each core has 2^{4} = 16 internal registers 
 *   where each register is 32-bit wide;
 ----------------------------------------------------*/
-
-#define MIMO_ADDR_SIZE_G        6                   // mmio to accommodate 64 cores;
-//#define MIMO_CORE_TOTAL_G       2**MIMO_ADDR_SIZE_G // 64 cores;
-#define MIMO_CORE_TOTAL_G       64 // 64 cores;
+#define MIMO_ADDR_SIZE_G        5   // mmio to accommodate 32 cores;
+#define MIMO_CORE_TOTAL_G       32  // 2^{5} = 32 cores;
 
 // register info of each core; 
-#define REG_DATA_WIDTH_G    32  // MCS uses word (32-bit);
-#define REG_ADDR_SIZE_G     5   // each core has 2^{5} = 32 internal registers;
+#define REG_ADDR_SIZE_G     4       // each mimo core has 2^{4} = 16 internal registers;
+#define REG_DATA_WIDTH_G    32      // MCS uses word (32-bit);
 
 /*----------------------------------------------------
 * IO modules/cores shall be sloted in the IO memory map;
@@ -315,13 +315,14 @@ Register IO access:
 
 /*----------------------------------------------------
 video address space;
-0. it has 8 video cores (2^3);
-1. each video core has 2^{5} = 32 registers;
-2. each register is 32-bit wide;
+1. video system:
+    0. it has 16 video cores (2^4);
+    1. each video core has 2^{4} = 16 registers;
+    2. each register is 32-bit wide;
 ----------------------------------------------------*/
-#define VIDEO_CORE_ADDR_BIT_SIZE_G      3 
-#define VIDEO_CORE_TOTAL_G              8   // 2**VIDEO_CORE_ADDR_SIZE_G;
-#define VIDEO_REG_ADDR_BIT_SIZE_G       5  // each video core has 2^{32} registers;
+#define VIDEO_CORE_ADDR_BIT_SIZE_G   4
+#define VIDEO_CORE_TOTAL_G           16  // 2**VIDEO_CORE_ADDR_SIZE_G;
+#define VIDEO_REG_ADDR_BIT_SIZE_G    4  // each video core has 2^{4} = 16 registers
 
 /*----------------------------------------------------
 * video modules/cores shall be sloted in the video system;
