@@ -22,7 +22,7 @@
 **/dev_soc.runs/**/*.pb
 **/dev_soc.runs/**/*.js
 **/dev_soc.runs/**/*.sh
-**/dev_soc.runs/**/*.rpt
+**/dev_soc.runs/**/*.rpx
 **/dev_soc.runs/**/*.vdi
 **/dev_soc.runs/**/*.bmm
 **/dev_soc.runs/**/*.wdf
