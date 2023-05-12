@@ -11,9 +11,30 @@
 **/*.sim/
 **/*exercise/
 **/*tutorial/
-!**/*.dev_soc.run
-**/*.dev_soc.run/*
-!**/*.dev_soc.run/*.rpt
+# ignore everything else except the report file;
+# not sure if there is a better way to do this ...
+**/dev_soc.runs/**/*.end
+**/dev_soc.runs/**/*.begin
+**/dev_soc.runs/**/*.xml
+**/dev_soc.runs/**/*.log
+**/dev_soc.runs/**/*.dmp
+**/dev_soc.runs/**/*.txt
+**/dev_soc.runs/**/*.pb
+**/dev_soc.runs/**/*.js
+**/dev_soc.runs/**/*.sh
+**/dev_soc.runs/**/*.rpt
+**/dev_soc.runs/**/*.vdi
+**/dev_soc.runs/**/*.bmm
+**/dev_soc.runs/**/*.wdf
+**/dev_soc.runs/**/*.jou
+**/dev_soc.runs/**/*.dcp
+**/dev_soc.runs/**/*.tcl
+**/dev_soc.runs/**/*.mmi
+**/dev_soc.runs/**/*.bat
+**/dev_soc.runs/**/*.rst
+**/dev_soc.runs/**/*.vds
+**/dev_soc.runs/**/*.xdc
+**/dev_soc.runs/**/**_is_complete__
 **/*.jou
 **/*.xpr
 **/vivado.log
