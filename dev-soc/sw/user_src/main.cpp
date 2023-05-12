@@ -9,7 +9,7 @@ core_spi obj_spi(GET_MMIO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S5_SPI));
 // video system;
 video_core_src_mux vid_src_mux(GET_VIDEO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, V2_DISP_SRC_MUX));
 video_core_dcmi_interface vid_dcmi(GET_VIDEO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, V3_CAM_DCMI_IF));
-
+video_core_test_pattern_gen vid_test_pattern(GET_VIDEO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, V1_DISP_TEST_PATTERN));
 
 int main(){
     /* signal declarations */
@@ -87,22 +87,24 @@ int main(){
     
     /*-----------------------------------------------
     * Note:
-    * under the current setup, there is no actual DCMI device
-    * that is, the OV7670 camera;
-    * instead, we use a HW DCMI emulator to 
-    * simulate the real camera;
-    -----------------------------------------------*/
-    
-    // use the HW DCMI emulator as the pixel source
+    * select which pixel source to use for the display;
+    * the actual camera?
+    * or the HW test pattern generator;
+    -----------------------------------------------*/    
     debug_str("\r\n\r\n");
 	debug_str("selecting the HW DCMI emulator \r\n");
     vid_src_mux.select_camera();
+
+    // enable the hw test pattern generator;
+    //vid_test_pattern.enable();
+    //vid_src_mux.select_test();
 
     /*-----------------------------------------------
     * DCMI decoder;
     * before starting any capture;
     * check the status and states;
     -----------------------------------------------*/
+    
     debug_str("\r\n\r\n");
     // check the system boot up state;
 
@@ -146,11 +148,15 @@ int main(){
     //debug_str("take a DCMI snapshot \r\n");
     //vid_dcmi.snapshot();
 
+
+
     /* "real-time" streaming */
+    
     // continuous grabbing the frames from the camera and display them;
     vid_dcmi.cont_grab();
     
     debug_str("check done\r\n");
+    
     while(1){        
         ;
     }

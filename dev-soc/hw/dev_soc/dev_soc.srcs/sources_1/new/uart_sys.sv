@@ -30,11 +30,6 @@ FIFO;
 2. One for uart tx, one for uart rx;
 2. due to the mismatch in the speed of the two devices;
 
-Synchronizer;
-1. UART tx by nature is asynchronous
-2. UART Tx itself has a FF double synchronizer in it to reduce metastability;
-3. so not necessary to add here;
-
 Tx Construction:
 1. Data is buffered in the fifo before passed over to the UART Tx;
 2. As long as FIFO is not empty, it will trigger UART Tx request;

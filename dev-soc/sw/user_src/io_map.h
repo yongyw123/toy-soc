@@ -10,9 +10,7 @@ extern "C" {
 
 /*
 *  Memory-mapped for MicroBlaze MCS;
-*  The instantiated MCS only has the CPU (processor) added;
-*  The rest of the IO module such as GPIO, UART, Timer, etc are constructed from the user;
-*  
+*
 * Assumption:
 * 32-bit address space;
 * byte addressable;
@@ -22,13 +20,6 @@ extern "C" {
 * this address region shall host the to-be-constructed IO cores/modules;
 * IO bus address: 0xC0000000 - 0xFFFFFFFF; mapped to IO bus address output;
 *
-
-* MMIO Address Space;
-* 1. MMIO is intended for cores such as system timer, GPIO, UART etc.
-* 2. MMIO to host up to 64 cores; (2^{6})
-* 3. each core has 32 internal registers; (2^{5});
-*
-
 * Reference:
 * Title: MicroBlaze Micro Controller System v3.0/ LogiCORE IP Product Guide;
 * Document: PG116 July 15, 2021;
@@ -43,9 +34,9 @@ extern "C" {
 * Note on Address Space
 *-------------------------------------------
 1. Microblaze MCS bus address is 32-bit-byte-addressable
-2. hwoever, user-space only uses 26-bit-byte-addressable;
-3. on word alignment, this is 24-bit-word-addressable;
-4. As of now, 26-bit-byte address space is intended
+2. hwoever, user-space only uses 24-bit-byte-addressable;
+3. on word alignment, this is 22-bit-word-addressable;
+4. As of now, 24-bit-byte address space is intended
     to host one general MMIO system and a video subsystem;
     
     where:
@@ -57,64 +48,65 @@ extern "C" {
     
     video subystem is to stream a camera to display;
 
-5. 23-bit-word-addressable usable memory is allocated for user-systems;
+5. 21-bit-word-addressable usable memory is allocated for user-systems;
 
-6. to distinguish between the two systems, the 26th bit of the 26-bit-byte
+6. to distinguish between the two systems, the 23th bit of the 24-bit-byte
     addressable space is used as the select bit low for mmio; high for video;
     
 7. mmio system;
-    1. it has 64 cores (2^6);
-    2. each core has 32 registers of 32-bit wide; (2^5);
+    1. it has 32 cores (2^5);
+    2. each core has 16 (2^4);
+    3. each registers is 32-bit wide; 
 
 8. video system:
-    0. it has 8 video cores (2^3);
-    1. a pixel occupies 16-bit;
-    2. each core has 8 (2^3) internal registers for configuration purposes;
-    so, we have each core uses 16+3 = 19 bit space, summarized below;
-    1. 
-    1. it has 8 cores (2^3);
-    2. each core has 2^19 word;
+    0. it has 16 video cores (2^4);
+    1. each video core has 2^{4} = 16 registers;
+    2. each register is 32-bit wide;
     
 9. if there are other systems integrated in the future;
     more bits will be allocated for distinguishing purposes;
     
 summary of the word-addressable memory;        
-mmio system:    0xxx_xxxx_xxxx_xsss_sssr_rrrr
-video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
+MMIO System	    :   0x_xxxx_xxxx_xxxs_ssss_rrrr
+Video System    :   1x_xxxx_xxxx_xxxx_vvvv_rrrr
 
-* x represents dont-care (to accommodate frame buffer?)
+
+* x represents dont-care;
 * s represents mmio core;
 * r represents mmio or video core internal registers;
 * v represents video core;
-* a represents video space of each core; where this space is used for various purposes;
-*       such as to store i=the 16-bit pixel
 */
-#define BUS_MICROBLAZE_SIZE_G           32
-//#define BUS_USER_SIZE_G                 21  // as above; (word aligned);
-//#define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // the 24-bit; as above, to distinguish two systems;
 
-#define BUS_USER_SIZE_G                 23  // as above; (word aligned);
-#define BUS_SYSTEM_SELECT_BIT_INDEX_G   25  // the 24-bit; as above, to distinguish two systems;
+#define BUS_MICROBLAZE_SIZE_G           32
+#define BUS_USER_SIZE_G                 21  // as above; (word aligned);
+#define BUS_SYSTEM_SELECT_BIT_INDEX_G   23  // the 24-bit; as above, to distinguish two systems;
+
+//#define BUS_USER_SIZE_G                 23  // as above; (word aligned);
+//#define BUS_SYSTEM_SELECT_BIT_INDEX_G   25  // the 24-bit; as above, to distinguish two systems;
+
+
+//#define BUS_USER_SIZE_G                 13  // as above; (word aligned);
+//#define BUS_SYSTEM_SELECT_BIT_INDEX_G   15  // the 26-bit; as above, to distinguish two systems;
+
 
 // IO based address provided by microblaze MSC, as above;
 #define BUS_MICROBLAZE_IO_BASE_ADDR_G 0xC0000000
+
 
 /*---------------------------------------------------- 
 * mmio address space
 * this address space as above is to store
 * the IO cores;
-* 1. allocated to host 2^{6} = 64 cores;
-* 2. each core has 2^{5} = 32 internal registers 
+* 1. allocated to host 2^{5} = 32 cores;
+* 2. each core has 2^{4} = 16 internal registers 
 *   where each register is 32-bit wide;
 ----------------------------------------------------*/
-
-#define MIMO_ADDR_SIZE_G        6                   // mmio to accommodate 64 cores;
-//#define MIMO_CORE_TOTAL_G       2**MIMO_ADDR_SIZE_G // 64 cores;
-#define MIMO_CORE_TOTAL_G       64 // 64 cores;
+#define MIMO_ADDR_SIZE_G        5   // mmio to accommodate 32 cores;
+#define MIMO_CORE_TOTAL_G       32  // 2^{5} = 32 cores;
 
 // register info of each core; 
-#define REG_DATA_WIDTH_G    32  // MCS uses word (32-bit);
-#define REG_ADDR_SIZE_G     5   // each core has 2^{5} = 32 internal registers;
+#define REG_ADDR_SIZE_G     4       // each mimo core has 2^{4} = 16 internal registers;
+#define REG_DATA_WIDTH_G    32      // MCS uses word (32-bit);
 
 /*----------------------------------------------------
 * IO modules/cores shall be sloted in the IO memory map;
@@ -134,7 +126,7 @@ video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
 --------------------------------------------------*/
 
 /**************************************************************
-* S1_UART_DEBUG
+* S0_SYS_TIMER
 --------------------
 Timer Core uses three registers;
 
@@ -323,24 +315,14 @@ Register IO access:
 
 /*----------------------------------------------------
 video address space;
-1. 2^3 = 8 video cores;
-2. each core has 19-bit address space;
-    where this 19-bit is used for internal register
-    and to store 16-bit pixel data;
-    
-summary:
-video system:   1xvv_vrrr_aaaa_aaaa_aaaa_aaaa
-
-* x represents dont-care (to accommodate frame buffer?)
-* v represents video core;
-* r represents video core internal registers;
-* a represents video space of each core; where this space is used for various purposes;
-*       such as to store i=the 16-bit pixel
+1. video system:
+    0. it has 16 video cores (2^4);
+    1. each video core has 2^{4} = 16 registers;
+    2. each register is 32-bit wide;
 ----------------------------------------------------*/
-#define VIDEO_CORE_ADDR_SIZE_G       3 
-#define VIDEO_CORE_TOTAL_G           8 // 2**VIDEO_CORE_ADDR_SIZE_G;
-#define VIDEO_REG_ADDR_BIT_SIZE_G   19  // each video core has 19-bit address space allocated;
-
+#define VIDEO_CORE_ADDR_BIT_SIZE_G   4
+#define VIDEO_CORE_TOTAL_G           16  // 2**VIDEO_CORE_ADDR_SIZE_G;
+#define VIDEO_REG_ADDR_BIT_SIZE_G    4  // each video core has 2^{4} = 16 registers
 
 /*----------------------------------------------------
 * video modules/cores shall be sloted in the video system;
@@ -518,14 +500,14 @@ Purpose:
 2. Note that this is asynchronous since this module is driven by OV7670 24MHz PCLK;
 
 Constituent Block:
-1. A dual-clock BRAM FIFO for the cross time domain;
+1. A dual-clock macro FIFO for the cross time domain;
       
 Assumptions:
 1. The synchronization signal settings are fixed; 
     thus; require the camera to be configured apriori;
     
 Issue + Constraint:
-1. The DUAL-CLOCK BRAM FIFO is a MACRO;
+1. The DUAL-CLOCK FIFO is a MACRO;
 2. there are conditions to meet before this FIFO could operate;
 3. Mainly, its RESET needs to satisfy the following:  
     Condition: A reset synchronizer circuit has been introduced to 7 series FPGAs. RST must be asserted
@@ -564,9 +546,9 @@ Register Map
 1. register 0 (offset 0): control register;
 2. register 1 (offset 1): status register;
 3. register 2 (offset 2): frame counter read register;
-4. register 3 (offset 3): BRAM FIFO status register;
-5. register 4 (offset 4): BRAM FIFO read and write counter;  
-6. register 5 (offset 5): BRAM FIFO (and system) readiness state
+4. register 3 (offset 3): FIFO status register;
+5. register 4 (offset 4): FIFO read and write counter;  
+6. register 5 (offset 5): FIFO (and system) readiness state
         
 Register Definition:
 1. register 0: control register;
@@ -599,7 +581,7 @@ Register Definition:
             - this will overflow and wrap around;
             - will clear to zero after a system reset;
 
-4. register 3: BRAM FIFO status register;
+4. register 3: FIFO status register;
         bit[0] - almost empty;
         bit[1] - almost full;
         bit[2] - empty;
@@ -607,11 +589,11 @@ Register Definition:
         bit[4] - read error;
         bit[5] - write error;
 
-5. register 4: BRAM FIFO read and write counter;
+5. register 4: FIFO read and write counter;
         bit[15:0]   - read count;
         bit[31:16]  - write count;      
        
-6. register 5: BRAM FIFO (and system) readiness state
+6. register 5: FIFO (and system) readiness state
         bit[0] 
             1 - system is ready to use;
             0 - otheriwse            

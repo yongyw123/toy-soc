@@ -23,9 +23,12 @@
 
 - [ ] Test SW Function for each IO cores
 - [x] IP generate Clock management circuit
-- [ ] IP generate DDRAM memory interface for Frame Buffers?
+- [ ] IP generate DDR memory interface for Frame Buffers?
 - [x] Camera OV7670 via i2C interface
 - [x] LCD ILI9341 Configuration Interface
+
+## Optimization
+- [ ] speed vs area?
 
 ## Extra (Nice to have)
 
