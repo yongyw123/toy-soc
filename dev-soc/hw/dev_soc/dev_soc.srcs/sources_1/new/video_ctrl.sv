@@ -73,13 +73,16 @@ module video_ctrl
     localparam VIDEO_CORE_BIT_SIZE = $clog2(VIDEO_CORE_NUM_TOTAL);
     localparam VIDEO_REG_BIT_TOTAL = `VIDEO_REG_ADDR_BIT_SIZE_G;
     
+    localparam VIDEO_CORE_START_INDEX   = VIDEO_REG_BIT_TOTAL;
+    localparam VIDEO_CORE_END_INDEX     = VIDEO_CORE_BIT_SIZE + VIDEO_CORE_START_INDEX;
+    
     // signal;
     logic [VIDEO_CORE_BIT_SIZE-1:0] core_addr;  // to identify which video core?
     logic [VIDEO_REG_BIT_TOTAL-1:0] reg_addr;   // which register for a given core?
     
     // separate the video addr into its constituent component;
-    assign core_addr = video_addr[7:5];
-    assign reg_addr = video_addr[4:0];
+    assign core_addr = video_addr[VIDEO_CORE_END_INDEX : VIDEO_CORE_START_INDEX];
+    assign reg_addr = video_addr[(VIDEO_REG_BIT_TOTAL-1):0];
      
     // decoding;
     always_comb
