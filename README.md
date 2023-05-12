@@ -16,7 +16,8 @@
 - [x] Pixel Test HW generation for LCD Display
 - [x] Digital Camera Interface (DCMI)
 - [x] Video Streaming System integrating the camera and the LCD.
-- [ ] Some basic DSP blocks for colour format conversion?
+- [ ] Colour format conversion
+- [ ] Configure IP-generated memory interface with the external SDRAM
 - [ ] HW accelerator for (undetermined) image algorithm: DCT?
 
 ### Application
