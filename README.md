@@ -17,8 +17,9 @@
 - [x] Digital Camera Interface (DCMI)
 - [x] Video Streaming System integrating the camera and the LCD.
 - [ ] Colour format conversion
-- [ ] Configure IP-generated memory interface with the external SDRAM
-- [ ] HW accelerator for (undetermined) image algorithm: DCT?
+- [ ] Configure IP-generated memory interface (MIG) with the external SDRAM
+- [ ] Add a user logic for MIG
+- [ ] Implement a known motion detection algorithm.
 
 ### Application
 
