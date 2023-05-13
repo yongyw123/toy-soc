@@ -18,7 +18,7 @@
 - [x] Video Streaming System integrating the camera and the LCD.
 - [ ] Colour format conversion
 - [ ] Configure IP-generated memory interface (MIG) with the external SDRAM
-- [ ] Add a user logic for MIG
+- [ ] Add a SDRAM interface user logic for the MIG
 - [ ] Implement a known motion detection algorithm.
 
 ### Application
