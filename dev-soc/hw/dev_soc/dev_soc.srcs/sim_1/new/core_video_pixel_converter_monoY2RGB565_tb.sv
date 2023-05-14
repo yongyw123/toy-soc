@@ -51,6 +51,7 @@ module core_video_pixel_converter_monoY2RGB565_tb
     
     initial begin
     $display("test starts");
+    /*------- test 01: converter disabled */
     @(posedge clk_sys);
     cs <= 1'b1;
     read <= 1'b1;   // dont care;
@@ -60,7 +61,6 @@ module core_video_pixel_converter_monoY2RGB565_tb
     up_wr <= 1'b0;
     addr <= 0;
     
-    /*------- test one: converter disabled */
     // fill up the upstream buffer;
     @(posedge clk_sys);
     for(int i = 1; i < 9; i++) begin
@@ -84,7 +84,7 @@ module core_video_pixel_converter_monoY2RGB565_tb
     @(posedge clk_sys);
     down_rd <= 1'b0;
     
-    /*------- test one: converter enabled */
+    /*------- test 02: converter enabled */
     @(posedge clk_sys); 
     read <= 1'b1;   // dont care;  
     wr_data <= 1;// converter disabled;    
@@ -126,8 +126,37 @@ module core_video_pixel_converter_monoY2RGB565_tb
     @(posedge clk_sys);
     down_rd <= 1'b0;
     
+    /*------- test 03: disable converter again */
+    @(posedge clk_sys);
+    wr_data <= 0;// converter disabled;
+    down_rd <= 1'b0;    // downstream disabled;
+    up_wr <= 1'b0;
+    addr <= 0;
     
-    #(150);
+    // fill up the upstream buffer;
+    @(posedge clk_sys);
+    for(int i = 1; i < 9; i++) begin
+        @(posedge clk_sys);
+        up_wr <= 1'b1;
+        up_wr_data <= $random;    
+    end
+    @(posedge clk_sys);
+    up_wr <= 1'b0;    
+    
+    // downstream fifo is halved the size of the upstream fifo;
+    // expect it to be full;
+    wait(down_full == 1'b1);
+    #(50);     
+    @(posedge clk_sys);
+    down_rd <= 1'b1;
+        
+    // disable the downstream read once the downstream fifo is empty;
+    @(posedge clk_sys);    
+    wait(down_empty == 1'b1);    
+    @(posedge clk_sys);
+    down_rd <= 1'b0;
+          
+    #(50);
     $display("test ends");
     $stop;
     end
