@@ -319,11 +319,11 @@ video address space;
 /*----------------------------------------------------
 * video modules/cores shall be sloted in the video system;
 ----------------------------------------------------*/  
-`define V0_DISP_LCD             0   // lcd ILI9341 display via mcu 8080 seris protocol;
-`define V1_DISP_TEST_PATTERN    1   // test pattern generator for the lcd;
-`define V2_DISP_SRC_MUX         2   // direct which pixel source to the LCD: test pattern generator or from the camera?
-`define V3_CAM_DCMI_IF          3   // camera dcmi interface (with a dual-clock fifo embedded);
-`define V4_PIXEL_COLOUR_CONVERT 4   // transform Y of YUV422 to RGB565;
+`define V0_DISP_LCD                 0   // lcd ILI9341 display via mcu 8080 seris protocol;
+`define V1_DISP_TEST_PATTERN        1   // test pattern generator for the lcd;
+`define V2_DISP_SRC_MUX             2   // direct which pixel source to the LCD: test pattern generator or from the camera?
+`define V3_CAM_DCMI_IF              3   // camera dcmi interface (with a dual-clock fifo embedded);
+`define V4_PIXEL_COLOUR_CONVERTER   4   // transform Y of YUV422 to RGB565;
 
 /**************************************************************
 * V0_DISP_LCD
@@ -625,7 +625,7 @@ Register IO access:
 `define V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_WR_ERROR 5 
 
 /******************************************************************
-V4_PIXEL_COLOUR_CONVERT
+V4_PIXEL_COLOUR_CONVERTER
 --------------------------
 Purpose: if the camera output is in YUV422, then a conversion is needed
 because LCD only accepts RGB565 format;
