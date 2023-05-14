@@ -362,6 +362,31 @@ module video_sys
         .debug_detect_vsync_edge()
     );
     
+    
+    core_video_pixel_converter_monoY2RGB565
+    #(
+        // pixel width;
+        .BITS_PER_PIXEL_16B(16),    
+        .BITS_PER_PIXEL_8B(8)
+    )
+    
+    video_pixel_converter_monoY2RGB565_unit
+    (
+       // general;
+        .clk_sys(clk_sys),
+        .reset_sys(reset),
+        
+        // IO interface
+        .cs(core_ctrl_cs_array[`V3_CAM_DCMI_IF]),
+        .write(core_ctrl_wr_array[`V3_CAM_DCMI_IF]),
+        .read(core_ctrl_rd_array[`V3_CAM_DCMI_IF]),
+        .addr(core_addr_reg_array[`V3_CAM_DCMI_IF]),
+        .wr_data(core_data_wr_array[`V3_CAM_DCMI_IF]),
+        .rd_data(core_data_rd_array[`V3_CAM_DCMI_IF]),
+     
+        
+    );
+    
     /*---------------------------------------
     * DISABLED;
     * rep;aced by CAMERA OV7670;
@@ -408,7 +433,7 @@ module video_sys
      -------------------------------------------------------------------*/
     generate
         genvar i;
-            for(i = 4; i < VIDEO_CORE_NUM_TOTAL; i++)
+            for(i = 5; i < VIDEO_CORE_NUM_TOTAL; i++)
             begin
                 // always HIGH ==> idle ==> not signals;
                 assign core_data_rd_array[i] = 32'hFFFF_FFFF;

@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 /******************************************************************
-V4_PIXEL_COLOUR_CONVERT
+V4_PIXEL_COLOUR_CONVERTER
 --------------------------
 Purpose: if the camera output is in YUV422, then a conversion is needed
 because LCD only accepts RGB565 format;
