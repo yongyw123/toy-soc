@@ -89,7 +89,7 @@ module pixel_Y2RGB565_pass_top_tb();
     FIFO 
     #(
         .DATA_WIDTH(8), 
-        .ADDR_WIDTH(4)
+        .ADDR_WIDTH(2)
     )
     fifo_downstream
     (
