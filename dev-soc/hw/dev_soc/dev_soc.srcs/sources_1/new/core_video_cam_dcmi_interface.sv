@@ -417,8 +417,8 @@ module core_video_cam_dcmi_interface
     // need tp ensure the fifo macro is reset successfully; otherwise, do not read it;
     assign FIFO_rd_en       = (FIFO_rst_ready && sink_ready && !FIFO_empty && !FIFO_rd_error);
     assign stream_out_data  = FIFO_dout;
-    //assign sink_valid       = (FIFO_rst_ready && !FIFO_empty);
-    assign sink_valid       = FIFO_rd_en;     
+    assign sink_valid       = (FIFO_rst_ready && !FIFO_empty);
+    //assign sink_valid       = FIFO_rd_en;     
     
     // dual clock bram fifo;
     /* fifo sinking the pixel decoded from the dcmi_decoder */
