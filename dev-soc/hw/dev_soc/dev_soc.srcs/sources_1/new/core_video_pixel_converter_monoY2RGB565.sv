@@ -157,7 +157,7 @@ module core_video_pixel_converter_monoY2RGB565
         // go through the converter;
         else begin
             sink_data = converter_rgb565_downstream;
-            sink_valid = sink_valid_pixel_converter;
+            sink_valid = sink_valid_pixel_converter && sink_ready;
             sink_ready_pixel_converter = sink_ready;        
         end
     end
