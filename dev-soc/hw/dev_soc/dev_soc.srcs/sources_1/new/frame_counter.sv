@@ -176,7 +176,7 @@ module frame_counter
    // unpacking for pixel sink
    always_comb begin
         // default;
-        pixel_sink = pixel_src[3:0]; 
+        pixel_sink = pixel_src[7:0]; 
         
         // unpack the MSB for the first byte to send;
         if(unpack_pointer_reg == 0) begin
