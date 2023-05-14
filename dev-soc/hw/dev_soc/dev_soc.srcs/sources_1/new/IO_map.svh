@@ -322,7 +322,8 @@ video address space;
 `define V0_DISP_LCD             0   // lcd ILI9341 display via mcu 8080 seris protocol;
 `define V1_DISP_TEST_PATTERN    1   // test pattern generator for the lcd;
 `define V2_DISP_SRC_MUX         2   // direct which pixel source to the LCD: test pattern generator or from the camera?
-`define V3_CAM_DCMI_IF          3    // camera dcmi interface (with a dual-clock fifo embedded);
+`define V3_CAM_DCMI_IF          3   // camera dcmi interface (with a dual-clock fifo embedded);
+`define V4_PIXEL_COLOUR_CONVERT 4   // transform Y of YUV422 to RGB565;
 
 /**************************************************************
 * V0_DISP_LCD
@@ -623,6 +624,36 @@ Register IO access:
 `define V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_RD_ERROR 4 
 `define V3_CAM_DCMI_IF_REG_FIFO_STATUS_BIT_POS_WR_ERROR 5 
 
+/******************************************************************
+V4_PIXEL_COLOUR_CONVERT
+--------------------------
+Purpose: if the camera output is in YUV422, then a conversion is needed
+because LCD only accepts RGB565 format;
+
+Construction:
+1. for convenience, only the Y of the YUV422 is converted; 
+2. hence, the LCD display will be grayscale;
+
+Assumption:
+1. the camera output YUV422 configuration is UYVY;
+2. the Y appears as every second byte;
+3. this could be configured on the camera OV7670 side;
+
+------------
+Register Map
+1. register 0 (offset 0): control register;
+        
+Register Definition:
+1. register 0: control register;
+        bit[0] bypass the colour converter
+        0: "disabled" to bypass the colour converter;
+        1: "enabled" to go through the colour converter;
+                    
+Register IO access:
+1. register 0: write and read;
+******************************************************************/
+`define V4_PIXEL_COLOUR_CONVERT_REG_CTRL 0
+`define V4_PIXEL_COLOUR_CONVERT_REG_CTRL_BIT_POS 0
 
 
 `endif //_IO_MAP_SVH
