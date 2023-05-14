@@ -41,10 +41,7 @@ module pixel_Y2RGB565_pass
         output logic sink_valid,
         output logic [7:0] rgb565_out        
     );
-    
-    // constants;
-    localparam MOD_THRESHOLD = 2'b10;   // when should the bit counter wrap around;
-    
+       
     // signal declaration;
     logic [1:0] cnt_in_reg, cnt_in_next;    
     logic [7:0] unpacked_reg, unpacked_next;
@@ -72,6 +69,7 @@ module pixel_Y2RGB565_pass
         // default;
         state_next = state_reg;
         unpacked_next = unpacked_reg;
+        cnt_in_next = cnt_in_reg;
         
         src_ready = 1'b0;
         sink_valid = 1'b0;
@@ -79,17 +77,31 @@ module pixel_Y2RGB565_pass
         rgb565_out = unpacked_reg;
         
         case(state_reg)
+            // the input pixel represents first byte of the 16-bit pixel from the camera;
+            // no Y component; ignored;
             ST_FIRST_IGNORE: begin
                 src_ready = 1'b1;
                 sink_valid = 1'b0;
-                if(cnt_in_reg == 2'b01) begin
+                // seoncd "byte" fron the camera;
+                if(cnt_in_reg == 2'b10) begin
                     state_next = ST_OUT_FIRST;
-                    unpacked_next = converted_rgb565_in[7:0];                    
+                    // start shifting for the output;
+                    unpacked_next = converted_rgb565_in[7:0];
+                    // reset;
+                    cnt_in_next = 0;                        
+                end
+                else begin
+                    // only increment when we manage to read a data from the source;
+                    if(src_valid && src_ready) 
+                        cnt_in_next = cnt_in_reg + 1;
                 end
             end
-            
+            /*
+                ST_OUT_FIRST, ST_OUT_SECOND;    
+                unpacked the 16-bit converted rgb565 from Y into two 8-bits;
+             */
+             
             ST_OUT_FIRST: begin
-                src_ready = 1'b0;
                 if(sink_ready) begin
                     sink_valid = 1'b1;                    
                     unpacked_next = converted_rgb565_in[15:8];
@@ -97,19 +109,15 @@ module pixel_Y2RGB565_pass
                 end
             end
             ST_OUT_SECOND: begin
-                src_ready = 1'b0;
                 if(sink_ready) begin
-                    sink_valid  = 1'b0;                    
+                    sink_valid  = 1'b1;                    
                     state_next = ST_FIRST_IGNORE;
                 end                
             end
             
             default: ; // nop        
         endcase
-    end
-    
-    // next state for the pixel input counter;    
-    assign cnt_in_next = (cnt_in_reg == MOD_THRESHOLD) ? 0 : cnt_in_reg + 1;
+    end  
         
     
 endmodule
