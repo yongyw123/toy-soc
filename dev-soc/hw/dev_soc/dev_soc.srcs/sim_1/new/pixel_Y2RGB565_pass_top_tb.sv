@@ -48,7 +48,7 @@ module pixel_Y2RGB565_pass_top_tb();
     logic [15:0] up_wr_data;
     logic [15:0] up_rd_data;
     
-    assign up_rd = src_ready;
+    assign up_rd = !up_empty && src_ready;
     assign src_valid = !up_empty;
     assign converted_rgb565_in = up_rd_data;
     

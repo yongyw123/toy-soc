@@ -54,7 +54,7 @@ module pixel_Y2RGB565_pass_tb
     @(posedge clk_sys);
     up_wr <= 1'b0;
 
-    #(100);
+    #(200);
     
     $display("test ends");
     $stop;
