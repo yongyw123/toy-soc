@@ -103,7 +103,8 @@ module pixel_Y2RGB565_pass
              
             ST_OUT_FIRST: begin
                 if(sink_ready) begin
-                    sink_valid = 1'b1;                    
+                    sink_valid = 1'b1;    
+                    // shift next;
                     unpacked_next = converted_rgb565_in[15:8];
                     state_next = ST_OUT_SECOND;
                 end
