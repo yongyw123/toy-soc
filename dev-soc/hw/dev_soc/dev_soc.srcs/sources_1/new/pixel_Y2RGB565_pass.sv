@@ -77,7 +77,7 @@ module pixel_Y2RGB565_pass
         sink_valid = 1'b0;
         
         //rgb565_out = unpacked_reg;
-        
+        rgb565_out = pixel_in_reg[7:0];
         case(state_reg)
             // the input pixel represents first byte of the 16-bit pixel from the camera;
             // no Y component; ignored;
