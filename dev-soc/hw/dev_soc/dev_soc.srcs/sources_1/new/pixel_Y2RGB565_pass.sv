@@ -82,7 +82,7 @@ module pixel_Y2RGB565_pass
             // the input pixel represents first byte of the 16-bit pixel from the camera;
             // no Y component; ignored;
             ST_FIRST_IGNORE: begin
-                src_ready = 1'b1;
+                src_ready = (1'b1 && sink_ready);
                 sink_valid = 1'b0;
                 // seoncd "byte" fron the camera;
                 if(cnt_in_reg == 2'b10) begin
