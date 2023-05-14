@@ -30,7 +30,12 @@ module pixel_mono_YUV422_to_RGB565_tb(
         for(int i = 0; i  < 10; i++) begin
             pixel_in = 8'($random);
         #(10);
-        end        
+        end   
+        #(10);
+        pixel_in = 8'h81;
+        #(10);     
+        pixel_in = 8'h63;
+        #(10);     
         $display("---- test end -----");    
     $stop;
     end
