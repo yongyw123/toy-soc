@@ -47,6 +47,10 @@ Register Definition:
 Register IO access:
 1. register 0: write and read;
 ******************************************************************/
+`ifndef CORE_VIDEO_PIXEL_CONVERTER_MONOY2RGB565_SV
+`define CORE_VIDEO_PIXEL_CONVERTER_MONOY2RGB565_SV
+
+`include "IO_map.svh"
 
 
 module core_video_pixel_converter_monoY2RGB565
@@ -66,7 +70,7 @@ module core_video_pixel_converter_monoY2RGB565
         input logic cs,    
         input logic write,              
         input logic read,               
-        input logic [`VIDEO_REG_ADDR_BIT_SIZE_G-1:0] addr,  //  19-bit;         
+        input logic [`VIDEO_REG_ADDR_BIT_SIZE_G-1:0] addr,           
         input logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    
         output logic [`REG_DATA_WIDTH_G-1:0]  rd_data,
         
@@ -181,3 +185,5 @@ module core_video_pixel_converter_monoY2RGB565
     assign rd_data = {31'b0, ctrl_reg};
     
 endmodule
+
+`endif // CORE_VIDEO_PIXEL_CONVERTER_MONOY2RGB565_SV
