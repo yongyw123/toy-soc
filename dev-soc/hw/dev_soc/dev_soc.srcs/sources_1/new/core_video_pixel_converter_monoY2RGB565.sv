@@ -88,6 +88,12 @@ module core_video_pixel_converter_monoY2RGB565
     // constants;
     localparam ENABLE_CONVERTER = 1'b1;
     localparam DISABLE_CONVERTER = 1'b0;
+    localparam REG_CTRL = 1'b0;
+    
+    
+    // enabler;
+    logic wr_en;
+    logic rd_en;
     
     /*----------- declaration */   
     // interface between the pixel converter and the selector;
@@ -112,9 +118,15 @@ module core_video_pixel_converter_monoY2RGB565
             ctrl_reg <= 1'b0;   // colour converter disabled by default;
         end
         else begin
-            ctrl_reg <= wr_data[0];
+            if(wr_en)
+                ctrl_reg <= wr_data[0];
         end    
     end
+    
+    // decoding; 
+    // this is not necessary since there is only one register; but oh well;
+    assign wr_en = (addr[0] == REG_CTRL) && write && cs;
+    assign rd_en = (addr[0] == REG_CTRL) && read && cs;
     
     /* ----------------------------
     * upstream multiplexer
@@ -162,6 +174,7 @@ module core_video_pixel_converter_monoY2RGB565
     
     // pixel selector;
     pixel_Y2RGB565_pass
+    selector_pass_unit
     (
         // general;
         .clk_sys(clk),    // 100Mhz;
@@ -182,7 +195,7 @@ module core_video_pixel_converter_monoY2RGB565
        
 
     // read out;    
-    assign rd_data = {31'b0, ctrl_reg};
+    assign rd_data = (rd_en) ? {31'b0, ctrl_reg} : 32'b0;
     
 endmodule
 
