@@ -380,8 +380,8 @@ module video_sys
     video_pixel_converter_monoY2RGB565_unit
     (
        // general;
-        .clk_sys(clk_sys),
-        .reset_sys(reset),
+        .clk(clk_sys),
+        .reset(reset),
         
         // IO interface
         .cs(core_ctrl_cs_array[`V4_PIXEL_COLOUR_CONVERTER]),
