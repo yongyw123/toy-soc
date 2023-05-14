@@ -20,7 +20,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-
 module pixel_Y2RGB565_pass_top_tb();
     // general;
     localparam T = 10;  // system clock period: 10ns;
@@ -108,10 +107,10 @@ module pixel_Y2RGB565_pass_top_tb();
     );
     
     // uut;
-    core_video_pixel_converter_monoY2RGB565(.*);
+    pixel_Y2RGB565_pass uut(.*);
     
     // tb;
-    core_video_pixel_converter_monoY2RGB565_tb tb(.*);
+    pixel_Y2RGB565_pass_tb tb(.*);
 
     /* simulate system clk */
      always
@@ -135,5 +134,6 @@ module pixel_Y2RGB565_pass_top_tb();
     //initial begin
          
     
-
+             
+    //end
 endmodule

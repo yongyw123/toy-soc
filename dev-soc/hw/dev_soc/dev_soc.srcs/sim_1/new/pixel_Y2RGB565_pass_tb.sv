@@ -32,7 +32,8 @@ module pixel_Y2RGB565_pass_tb
         
         // simulate the downstream sink (fifo);
         output logic down_rd,
-        input logic down_empty
+        input logic down_empty,
+        input logic down_full
         
     );
     
@@ -53,8 +54,23 @@ module pixel_Y2RGB565_pass_tb
     // disable write;
     @(posedge clk_sys);
     up_wr <= 1'b0;
-
-    #(200);
+    
+    // downstream fifo is halved the size of the upstream fifo;
+    // expect it to be full since rd is disabled;
+    // once full; enable the full;
+    wait(down_full == 1'b1);
+    #(30);
+    @(posedge clk_sys);
+    down_rd <= 1'b1;
+    
+    
+    wait(down_full == 1'b0);
+    @(posedge clk_sys);
+    down_rd <= 1'b0;
+    
+    
+    
+    #(100);
     
     $display("test ends");
     $stop;
