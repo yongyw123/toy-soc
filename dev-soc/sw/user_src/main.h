@@ -21,6 +21,7 @@ Purpose: top level directives;
 #include "video_core_src_mux.h"
 #include "video_core_test_pattern_gen.h"
 #include "video_core_dcmi_interface.h"
+#include "video_core_pixel_converter_monoY2RGB565.h"
 
 // test driver;
 #include "test_util.h"
