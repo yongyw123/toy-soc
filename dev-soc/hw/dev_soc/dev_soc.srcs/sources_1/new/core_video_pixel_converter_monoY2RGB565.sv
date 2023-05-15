@@ -85,12 +85,42 @@ module core_video_pixel_converter_monoY2RGB565
         output logic [BITS_PER_PIXEL_8B - 1:0] sink_data
     );
     
-    
+   /*
    assign src_ready = sink_ready;
    assign sink_data = src_data;
    assign sink_valid = src_valid;
-   assign rd_data = 0;
+   */
    
+   logic [15:0] converted_rgb565;
+   
+   pixel_mono_YUV422_to_RGB565  
+   converter_unit
+    (
+        .pixel_in(src_data),
+        .rgb565_out(converted_rgb565)    
+    );
+    
+    pixel_Y2RGB565_pass
+    pixel_Y2RGB565_pass_unit
+    (
+        // general;
+        .clk_sys(clk),    // 100Mhz;
+        .reset(reset),      // async;
+        
+        // interface with the upper stream;
+        .src_valid(src_valid),
+        .src_ready(src_ready),
+        
+        // interface with the upper conversion block;
+        .converted_rgb565_in(converted_rgb565),
+        
+        // interface with the down stream;
+        .sink_ready(sink_ready),
+        .sink_valid(sink_valid),
+        .rgb565_out(sink_data)        
+    );
+   
+   assign rd_data = 0;
    
 endmodule
 
