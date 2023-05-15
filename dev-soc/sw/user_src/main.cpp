@@ -62,7 +62,8 @@ int main(){
     obj_lcd.set_orientation(0,1,1);
 
     // set pixel arrangement;
-    obj_lcd.set_BGR_order(1);
+    //obj_lcd.set_BGR_order(1);
+    obj_lcd.set_BGR_order(0);
 
     // turn it on;
 	obj_lcd.disp_on();
