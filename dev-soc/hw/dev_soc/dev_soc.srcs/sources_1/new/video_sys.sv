@@ -128,6 +128,13 @@ module video_sys
     logic [REG_DATA_WIDTH-1:0]      core_data_rd_array[VIDEO_CORE_NUM_TOTAL-1:0];   // read data from each core;
     logic [REG_DATA_WIDTH-1:0]      core_data_wr_array[VIDEO_CORE_NUM_TOTAL-1:0];   // write data from each core;
     
+    /*-------------------------------------------------------------- 
+    * signals for core_video_src_mux 
+    --------------------------------------------------------------*/
+    logic [BPP_8B-1:0] video_src_mux_camera_rgb_data;
+    logic video_src_mux_camera_ready;
+    logic video_src_mux_camera_valid;
+    
     /************************ instantiation *****************************/
     /*------------------------------------------------
     * video controller; 
@@ -272,10 +279,11 @@ module video_sys
         .pattern_ready(pattern_ready), // from lcd fifo to the test pattern generator;
         .pattern_valid(pattern_valid),  // from the test pattern gen to the lcd fifo;
         
-        // from the camera or a HW emulator;
-        .camera_rgb(DCMI_stream_out_data),   // pixel source;
-        .camera_ready(DCMI_sink_ready), // from lcd fifo to the camera;
-        .camera_valid(DCMI_sink_valid)   // from the camera to the lcd fifo;                       
+        // from the upstream (camera) through some intermediate processing element(s);
+        .camera_rgb(video_src_mux_camera_rgb_data),   // pixel source;
+        .camera_ready(video_src_mux_camera_ready),     // from lcd fifo to the upstream;
+        .camera_valid(video_src_mux_camera_valid)      // from the upstream to the fifo;; 
+                          
     );
     
     
@@ -362,6 +370,39 @@ module video_sys
         .debug_detect_vsync_edge()
     );
     
+    
+    core_video_pixel_converter_monoY2RGB565
+    #(
+        // pixel width;
+        .BITS_PER_PIXEL_16B(16),    
+        .BITS_PER_PIXEL_8B(8)
+    ) 
+    video_pixel_converter_monoY2RGB565_unit
+    (
+       // general;
+        .clk(clk_sys),
+        .reset(reset),
+        
+        // IO interface
+        .cs(core_ctrl_cs_array[`V4_PIXEL_COLOUR_CONVERTER]),
+        .write(core_ctrl_wr_array[`V4_PIXEL_COLOUR_CONVERTER]),
+        .read(core_ctrl_rd_array[`V4_PIXEL_COLOUR_CONVERTER]),
+        .addr(core_addr_reg_array[`V4_PIXEL_COLOUR_CONVERTER]),
+        .wr_data(core_data_wr_array[`V4_PIXEL_COLOUR_CONVERTER]),
+        .rd_data(core_data_rd_array[`V4_PIXEL_COLOUR_CONVERTER]),
+        
+        /* ------------ specific */
+        // interface with the upstream;
+        .src_valid(DCMI_sink_valid),
+        .src_ready(DCMI_sink_ready),
+        .src_data(DCMI_stream_out_data),
+        
+        // interface with the downstream;
+        .sink_ready(video_src_mux_camera_ready),
+        .sink_valid(video_src_mux_camera_valid),
+        .sink_data(video_src_mux_camera_rgb_data)
+    );
+    
     /*---------------------------------------
     * DISABLED;
     * rep;aced by CAMERA OV7670;
@@ -408,7 +449,7 @@ module video_sys
      -------------------------------------------------------------------*/
     generate
         genvar i;
-            for(i = 4; i < VIDEO_CORE_NUM_TOTAL; i++)
+            for(i = 5; i < VIDEO_CORE_NUM_TOTAL; i++)
             begin
                 // always HIGH ==> idle ==> not signals;
                 assign core_data_rd_array[i] = 32'hFFFF_FFFF;
