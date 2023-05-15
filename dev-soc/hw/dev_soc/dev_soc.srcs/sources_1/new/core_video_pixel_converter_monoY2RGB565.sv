@@ -131,6 +131,7 @@ module core_video_pixel_converter_monoY2RGB565
     /* ----------------------------
     * upstream multiplexer
     -----------------------------*/
+    /*
     always_comb begin
         // bypass the converter; 
         if(ctrl_reg == DISABLE_CONVERTER) begin
@@ -143,10 +144,11 @@ module core_video_pixel_converter_monoY2RGB565
             src_ready = src_ready_pixel_selector;
         end
     end
-    
+    */
     /* ----------------------------
     * downstream multiplexer
     -----------------------------*/
+    /*
     always_comb begin
         // bypass the converter;
         if(ctrl_reg == DISABLE_CONVERTER) begin
@@ -157,12 +159,44 @@ module core_video_pixel_converter_monoY2RGB565
         // go through the converter;
         else begin
             sink_data = converter_rgb565_downstream;
-            //sink_valid = sink_valid_pixel_converter && sink_ready;
-            sink_valid = sink_valid_pixel_converter;
+            sink_valid = sink_valid_pixel_converter && sink_ready;
+            //sink_valid = sink_valid_pixel_converter;
             sink_ready_pixel_converter = sink_ready;        
         end
     end
+    */
     
+   assign src_ready = sink_ready;
+   assign sink_data = src_data;
+   assign sink_valid = src_valid;
+   
+    /*
+    always_comb begin
+        // bypass the converter; 
+        case(ctrl_reg)
+            DISABLE_CONVERTER: begin
+                src_valid_pixel_selector = 1'b0;    
+                src_ready = sink_ready;
+                sink_data = src_data;
+                
+                sink_valid = src_valid;   
+                sink_ready_pixel_converter = 1'b0;
+            end
+            // go through the converter;
+            ENABLE_CONVERTER: begin
+                src_valid_pixel_selector = src_valid;
+                src_ready = src_ready_pixel_selector;
+                
+                sink_data = converter_rgb565_downstream;
+                //sink_valid = sink_valid_pixel_converter && sink_ready;
+                sink_valid = sink_valid_pixel_converter;
+                sink_ready_pixel_converter = sink_ready;
+            end
+            
+            default: ;
+        endcase
+    end
+    */
     /* ------------ instantiation */
     
     // converter
