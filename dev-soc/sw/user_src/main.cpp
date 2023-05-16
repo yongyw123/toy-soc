@@ -21,8 +21,8 @@ int main(){
     * Camera OV7670 init;
     ---------------------------------*/
     debug_str("start initializing camera ov7670; \r\n");
-    ov7670_init(OV7670_OUTPUT_FORMAT_RGB565);
-    //ov7670_init(OV7670_OUTPUT_FORMAT_YUV422);
+    //ov7670_init(OV7670_OUTPUT_FORMAT_RGB565);
+    ov7670_init(OV7670_OUTPUT_FORMAT_YUV422);
 
     ov7670_set_test_pattern(OV7670_TEST_PATTERN_NONE);
     //ov7670_set_test_pattern(OV7670_TEST_PATTERN_COLOUR_BAR);
@@ -95,8 +95,8 @@ int main(){
     /*-------------------------------------------------
     * Set up Pixel Converter (Grayscale)
     -------------------------------------------------*/
-    //vid_grayscale.enable_converter();
-    vid_grayscale.disable_converter();
+    vid_grayscale.enable_converter();
+    //vid_grayscale.disable_converter();
 
     /*-----------------------------------------------
     * Note:
