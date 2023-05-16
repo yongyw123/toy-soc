@@ -68,7 +68,7 @@ module pixel_mono_YUV422_to_RGB565
     // swap upper 8 byte with the lower 8 byte for endianness;
     // lcd and camera output are big endian;
     // soc is little endian;
-    //assign rgb565_out = {placeholder[7:0], placeholder[15:8]};   
-    assign rgb565_out = placeholder; 
+    assign rgb565_out = {placeholder[7:0], placeholder[15:8]};   
+    //assign rgb565_out = placeholder; 
         
 endmodule

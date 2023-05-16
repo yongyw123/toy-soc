@@ -444,9 +444,24 @@ void ov7670_set_output_format(uint8_t output_format){
 		//ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x00);
 		//ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x00); // this sets YUYV;
 		
+		//----
+		
 		// combo 02
+		//ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x04);
+		//ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x01); // this sets YUYV;
+
+		//ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x00);
+		//ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x00); // this sets YUYV;
+		
+		//ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x00);
+		//ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x01); // this sets YUYV;
+
+		//ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x04);
+		//ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x00); // this sets YUYV;
+
 		ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x04);
 		ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x01); // this sets YUYV;
+
 
 		// BGR false or true; same results ...;
 
