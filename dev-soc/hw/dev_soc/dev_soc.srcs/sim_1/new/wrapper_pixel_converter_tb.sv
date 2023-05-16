@@ -33,7 +33,10 @@ module wrapper_pixel_converter_tb
         
         // read downstream fifo test stimulus;
         output logic down_rd,
-        input logic down_empty        
+        input logic down_empty,
+        
+        // debugging status;
+        input logic debug_pass_src_valid        
     );
     
     initial begin
@@ -52,6 +55,7 @@ module wrapper_pixel_converter_tb
     @(posedge clk_sys);    
     up_wr <= 1'b0;
     
+    /*
     // eventually there is something to read downstream;
     // but there is lag between writing and reading;
     // so need to read multiple times;    
@@ -63,6 +67,16 @@ module wrapper_pixel_converter_tb
         wait(down_empty == 1'b1);        
         down_rd <= 1'b0;
     end
+    */
+    
+    wait(debug_pass_src_valid == 1'b0);
+    @(posedge clk_sys);
+    down_rd <= 1'b1;
+    
+    wait(down_empty == 1'b1);
+    @(posedge clk_sys);
+    down_rd <= 1'b0;
+        
     #(50);
     $display("test ends");
     $stop;

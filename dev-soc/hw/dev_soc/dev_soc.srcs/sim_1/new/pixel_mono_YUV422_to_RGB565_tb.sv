@@ -36,6 +36,31 @@ module pixel_mono_YUV422_to_RGB565_tb(
         #(10);     
         pixel_in = 8'h63;
         #(10);     
+        
+        pixel_in = 8'h24;
+        #(10);     
+        
+        pixel_in = 8'h81;
+        #(10);     
+        
+        pixel_in = 8'h09;
+        #(10);     
+        
+        pixel_in = 8'h63;
+        #(10);     
+        
+        pixel_in = 8'h0d;
+        #(10);     
+        
+        pixel_in = 8'h8d;
+        #(10);     
+        
+        pixel_in = 8'h65;
+        #(10);     
+        
+        pixel_in = 8'h12;
+        #(10);     
+        
         $display("---- test end -----");    
     $stop;
     end

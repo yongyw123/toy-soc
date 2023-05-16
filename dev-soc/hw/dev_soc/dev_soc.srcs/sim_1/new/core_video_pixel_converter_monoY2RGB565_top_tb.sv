@@ -165,12 +165,13 @@ module core_video_pixel_converter_monoY2RGB565_top_tb();
     /* monitoring system */
     initial begin
         
+        /*
        $monitor("time: %t, uut.converted_rgb565: %16B, up_rd_data: %8B",
        $time,
        uut.converted_rgb565,
        up_rd_data
        );
-       
+       */
     end    
     
 endmodule

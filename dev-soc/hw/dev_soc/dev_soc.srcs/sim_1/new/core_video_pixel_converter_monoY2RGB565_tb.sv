@@ -69,7 +69,7 @@ module core_video_pixel_converter_monoY2RGB565_tb
     @(posedge clk_sys);
     up_wr <= 1'b0;   
     
-    #(1000);
+    #(100);
     $display("test ends");
     $stop;
     end
