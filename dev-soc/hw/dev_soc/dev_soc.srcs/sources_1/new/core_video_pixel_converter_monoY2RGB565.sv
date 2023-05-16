@@ -52,7 +52,6 @@ Register IO access:
 
 `include "IO_map.svh"
 
-
 module core_video_pixel_converter_monoY2RGB565
     #(parameter 
                 
@@ -83,32 +82,103 @@ module core_video_pixel_converter_monoY2RGB565
         input logic sink_ready,
         output logic sink_valid,
         output logic [BITS_PER_PIXEL_8B - 1:0] sink_data
-        
-        // debug signals;
+            
     );
     
-   /*
-   assign src_ready = sink_ready;
-   assign sink_data = src_data;
-   assign sink_valid = src_valid;
-   */
-   
+    // constants;
+    localparam DISABLE_CONVERTER = 1'b0;
+    localparam ENABLE_CONVERTER = 1'b1;
+    localparam REG_CTRL_OFFSET = 1'b0;
+    localparam BIT_8B = 8;
+    
+    /* signal declarations */
+    // arguments for the converter;
+    // interface with the upstream;
+    logic converter_src_valid;
+    logic converter_src_ready;
+    logic [BIT_8B-1:0] converter_src_data;
+       
+    // interface with the downstream;
+    logic converter_sink_ready;
+    logic converter_sink_valid;
+    logic [BIT_8B-1:0] converter_sink_data; 
+                
+    // enabler signals;
+    logic wr_en;
+    logic rd_en;
+    
+    // registers;
+    logic ctrl_reg, ctrl_next;
+    
+    // ff;
+    always_ff @(posedge clk, posedge reset) begin
+        if(reset) begin
+            ctrl_reg <= DISABLE_CONVERTER;
+        end
+        else begin
+            if(wr_en) begin 
+                ctrl_reg <= ctrl_next;
+            end
+        end
+    end    
+    
+    // cpu instruction decoding;
+    // note that the address decoding is not necessary since there is only one register;
+    assign wr_en = (addr[0] == REG_CTRL_OFFSET) && cs && write;
+    assign rd_en = (addr[0] == REG_CTRL_OFFSET) && cs && read;
+    
+    // next state;
+    assign ctrl_next = wr_data[0];
+    
+    // cpu reading;
+    assign rd_data = {31'b0, ctrl_reg};
+     
+    // fsm for multiplezing;
+    always_comb begin
+        case(ctrl_reg) 
+            // go through the converter;
+            ENABLE_CONVERTER: begin
+                // interface with the upstream;
+                src_ready = converter_src_ready;
+                converter_src_data = src_data;
+                converter_src_valid = src_valid;
+                
+                // interface with the downstream;
+                converter_sink_ready = sink_ready;
+                sink_valid = converter_sink_valid;
+                sink_data = converter_sink_data;
+            end
+        
+            // bypass the converter
+            default: begin
+                src_ready = sink_ready;
+                sink_data = src_data;
+                sink_valid = src_valid;
+                
+                // disable the converter;
+                converter_src_valid = 1'b0;
+                converter_sink_ready = 1'b0;
+            end
+        endcase
+    end
+    
+   // instantiation;
    wrapper_pixel_converter
    pixel_converter_unit
    (    
         // general;
         .clk(clk), // system clock;
         .reset(reset),  // async reset;
-        
+
         // interface with the upstream;
-        .src_valid(src_valid),
-        .src_ready(src_ready),
-        .src_data(src_data),
+        .src_valid(converter_src_valid),
+        .src_ready(converter_src_ready),
+        .src_data(converter_src_data),
         
         // interface with the downstream;
-        .sink_ready(sink_ready),
-        .sink_valid(sink_valid),
-        .sink_data(sink_data),
+        .sink_ready(converter_sink_ready),
+        .sink_valid(converter_sink_valid),
+        .sink_data(converter_sink_data),
 
         // debugging;
         .debug_pass_src_valid(),
@@ -119,9 +189,6 @@ module core_video_pixel_converter_monoY2RGB565
         .debug_down_wr(),
         .debug_down_src_data()  
    );
-   
-   // cpu reading;
-   assign rd_data = 0;
    
 endmodule
 
