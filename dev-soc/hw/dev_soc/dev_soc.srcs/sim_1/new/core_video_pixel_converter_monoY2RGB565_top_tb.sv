@@ -143,6 +143,7 @@ module core_video_pixel_converter_monoY2RGB565_top_tb();
          
     // tb;
     core_video_pixel_converter_monoY2RGB565_tb tb(.*);
+    
     /* simulate system clk */
      always
         begin 
@@ -171,8 +172,6 @@ module core_video_pixel_converter_monoY2RGB565_top_tb();
        );
        
     end    
-
-                 
     
 endmodule
 
