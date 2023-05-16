@@ -87,10 +87,38 @@ module core_video_pixel_converter_monoY2RGB565
         // debug signals;
     );
     
-   
+   /*
    assign src_ready = sink_ready;
    assign sink_data = src_data;
    assign sink_valid = src_valid;
+   */
+   
+   wrapper_pixel_converter
+   pixel_converter_unit
+   (    
+        // general;
+        .clk(clk), // system clock;
+        .reset(reset),  // async reset;
+        
+        // interface with the upstream;
+        .src_valid(src_valid),
+        .src_ready(src_ready),
+        .src_data(src_data),
+        
+        // interface with the downstream;
+        .sink_ready(sink_ready),
+        .sink_valid(sink_valid),
+        .sink_data(sink_data),
+
+        // debugging;
+        .debug_pass_src_valid(),
+        .debug_pass_src_ready(),
+        .debug_pass_in_data(),
+        
+        .debug_pass_sink_ready(),
+        .debug_down_wr(),
+        .debug_down_src_data()  
+   );
    
    // cpu reading;
    assign rd_data = 0;

@@ -416,11 +416,40 @@ void ov7670_set_output_format(uint8_t output_format){
 		// this is because the camera is big endian;
 		// hence Y will only be output in every second byte;
 		// this is to cater with the HW implementation;
-		ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x00);
-		ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x00); // this sets YUYV;
 		
+		/* with BGR true */
+		// combo 01
+		//ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x00);
+		//ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x00); // this sets YUYV;
+		
+		// combo 02
+		//ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x04);
+		//ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x01); // this sets YUYV;
+
+		// combo 03
+		//ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x00);
+		//ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x01); // this sets YUYV;
+
+		// combo 02 and 03 produce the same result;
+
+
+		// combo 04
 		//ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x04);
 		//ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x00); // this sets YUYV;
+
+		// combo 04 and 01 produce the same result;
+
+		/* with BGR false */
+		// combo 01
+		//ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x00);
+		//ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x00); // this sets YUYV;
+		
+		// combo 02
+		ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x04);
+		ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x01); // this sets YUYV;
+
+		// BGR false or true; same results ...;
+
 	}
 
 	//> common setting for both formats;

@@ -80,7 +80,10 @@ module wrapper_pixel_converter
    logic up_wr;
    
    assign up_src_data = converted_rgb565;       // through the converter;
+   
+   // important;
    assign up_wr = src_valid && !up_flag_full;   // when the upstream has valid data;
+   
    assign src_ready = !up_flag_full;            // signal from this fifo to the upstream;
    
    // read interface of the upstream fifo;
@@ -127,7 +130,7 @@ module wrapper_pixel_converter
    logic [BIT_8B-1:0] down_sink_data;
    
    // module interface;
-   assign down_rd = sink_ready && !down_flag_empty;
+   assign down_rd = sink_ready && !down_flag_empty; // important;
    assign sink_valid = !down_flag_empty;
    assign sink_data = down_sink_data; 
 
