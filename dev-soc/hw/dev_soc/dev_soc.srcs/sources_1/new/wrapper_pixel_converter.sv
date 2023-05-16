@@ -162,7 +162,8 @@ module wrapper_pixel_converter
    
     // not all bytes have the Y component;
     // need to filter them out;
-    pixel_Y2RGB565_pass
+    //pixel_Y2RGB565_pass
+    pixel_Y2RGB565_pass_v2
     pixel_Y2RGB565_pass_unit
     (
         // general;
