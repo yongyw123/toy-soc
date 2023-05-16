@@ -24,8 +24,8 @@ int main(){
     //ov7670_init(OV7670_OUTPUT_FORMAT_RGB565);
     ov7670_init(OV7670_OUTPUT_FORMAT_YUV422);
 
-    ov7670_set_test_pattern(OV7670_TEST_PATTERN_NONE);
-    //ov7670_set_test_pattern(OV7670_TEST_PATTERN_COLOUR_BAR);
+    //ov7670_set_test_pattern(OV7670_TEST_PATTERN_NONE);
+    ov7670_set_test_pattern(OV7670_TEST_PATTERN_COLOUR_BAR);
     //ov7670_set_test_pattern(OV7670_TEST_PATTERN_COLOUR_BAR_FADING);
 
     debug_str("done initializing camera ov7670; \r\n\r\n");
