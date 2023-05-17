@@ -10,6 +10,7 @@ core_spi obj_spi(GET_MMIO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, S5_SPI));
 video_core_src_mux vid_src_mux(GET_VIDEO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, V2_DISP_SRC_MUX));
 video_core_dcmi_interface vid_dcmi(GET_VIDEO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, V3_CAM_DCMI_IF));
 video_core_test_pattern_gen vid_test_pattern(GET_VIDEO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, V1_DISP_TEST_PATTERN));
+video_core_pixel_converter_monoY2RGB565 vid_grayscale(GET_VIDEO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, V4_PIXEL_COLOUR_CONVERTER));
 
 int main(){
     /* signal declarations */
@@ -20,8 +21,13 @@ int main(){
     * Camera OV7670 init;
     ---------------------------------*/
     debug_str("start initializing camera ov7670; \r\n");
-    ov7670_init(OV7670_OUTPUT_FORMAT_RGB565);
-    ov7670_set_test_pattern(OV7670_TEST_PATTERN_NONE);
+    //ov7670_init(OV7670_OUTPUT_FORMAT_RGB565);
+    ov7670_init(OV7670_OUTPUT_FORMAT_YUV422);
+
+    //ov7670_set_test_pattern(OV7670_TEST_PATTERN_NONE);
+    //ov7670_set_test_pattern(OV7670_TEST_PATTERN_COLOUR_BAR);
+    ov7670_set_test_pattern(OV7670_TEST_PATTERN_COLOUR_BAR_FADING);
+
     debug_str("done initializing camera ov7670; \r\n\r\n");
     
     /*---------------------------------
@@ -58,6 +64,7 @@ int main(){
 
     // set pixel arrangement;
     obj_lcd.set_BGR_order(1);
+    //obj_lcd.set_BGR_order(0);
 
     // turn it on;
 	obj_lcd.disp_on();
@@ -84,7 +91,13 @@ int main(){
 	// hand over the control to the hw pixel generation cores;
 	obj_lcd_controller.set_video_stream();
 
-    
+
+    /*-------------------------------------------------
+    * Set up Pixel Converter (Grayscale)
+    -------------------------------------------------*/
+    vid_grayscale.enable_converter();
+    //vid_grayscale.disable_converter();
+
     /*-----------------------------------------------
     * Note:
     * select which pixel source to use for the display;

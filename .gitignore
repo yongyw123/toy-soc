@@ -11,8 +11,10 @@
 **/*.sim/
 **/*exercise/
 **/*tutorial/
+
 # ignore everything else except the report file;
 # not sure if there is a better way to do this ...
+**/dev_soc.runs/
 **/dev_soc.runs/**/*.end
 **/dev_soc.runs/**/*.begin
 **/dev_soc.runs/**/*.xml

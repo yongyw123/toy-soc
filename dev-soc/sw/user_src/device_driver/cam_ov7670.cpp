@@ -412,10 +412,13 @@ void ov7670_set_output_format(uint8_t output_format){
 		ov7670_update_reg(OV7670_REG_COM15, USER_OV7670_COM15_RGB565_OPTION_MASK, USER_OV7670_COM15_RGB565_OPTION_DISABLE);
 		ov7670_update_reg(OV7670_REG_COM7, USER_OV7670_COM7_OUTPUT_FORMAT_MASK, USER_OV7670_COM7_OUTPUT_FORMAT_YUV_ENABLE);
 
-		// ensure Y of YUV is always the second byte; eg: UYVY or VYUY;
-		// this is because the application assumes the above;
+		// ensure Y of YUV is always the LSB byte; eg: YUYV or YVYU;
+		// this is because the camera is big endian;
+		// hence Y will only be output in every second byte;
+		// this is to cater with the HW implementation;
 		ov7670_update_reg(OV7670_REG_TSLB, MASK_TOGGLE_BIT_B3, 0x04);
-		ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x00); // this sets UYVY;
+		ov7670_update_reg(OV7670_REG_COM13, MASK_TOGGLE_BIT_B0, 0x00); // this sets YUYV;
+
 	}
 
 	//> common setting for both formats;
