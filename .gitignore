@@ -14,6 +14,7 @@
 
 # ignore everything else except the report file;
 # not sure if there is a better way to do this ...
+**/*.runs/
 **/dev_soc.runs/
 **/dev_soc.runs/**/*.end
 **/dev_soc.runs/**/*.begin
