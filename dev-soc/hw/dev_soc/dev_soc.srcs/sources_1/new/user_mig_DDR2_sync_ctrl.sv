@@ -19,7 +19,16 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+
 /*----------------------------------------
+Purpose:
+1. This is a synchronous interface (wrapper) of the Xilinx Ip-generated
+    Memory Interface Generator (MIG) for DDR2.
+
+2. This is necessary because MIG itself has its own clock at 150MHz which
+    is asynchronous to the system clock at 100MHz;
+       
+-----------------------------
 CONSTRUCTION + BACKGROUND
 -------------
 MIG Setup:
