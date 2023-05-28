@@ -196,12 +196,12 @@ module mcs_top
     clk_wiz_0 clock_unit
    (
     // Clock out ports
-    .clkout_24M(CLKOUT_24M_JB02),     // output clkout_24M: for camera ov7670
+    .clkout_24M(CLKOUT_24M_JB02),     // output clkout_24M
     .clkout_100M(clkout_100M),     // output clkout_100M
-    
+    .clkout_200M(),     // output clkout_200M
+    .clkout_250M(),     // output clkout_250M
+   
     // Status and control signals
-    .reset(reset_mmcm),          // input reset
-    //.reset(0),                // allow free running? bad idea?
     .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
    
    // Clock in ports
