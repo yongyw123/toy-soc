@@ -146,12 +146,20 @@ module mcs_top
     // note that this lock signal from MMCM is asynchronous;
     logic mmcm_clk_locked;   // whether the clock has stabilized or not?
     
-    
+    /*-------------------------------------------
+    * System Reset Signals
+    -------------------------------------------*/
     // registers for asynchronous reset signals;
     logic reset_sys_raw;    // to invert the input reset;
     logic reset_sys_reg;
     logic reset_sys_sync;       
    
+    // to stretch the synchronized signal over some N system clock cycles;
+    localparam RST_SYS_CYCLE_NUM = 1024;
+    logic [11:0] cnt_rst_sys_reg, cnt_rst_sys_next; // width should at least hold the parameter above;
+    logic reset_sys_stretch;
+    logic reset_sys_stretch_reg; // to filter for glitch;
+    
     // conform the signals;
     /* ?? to do ??, need to debounce this reset button; */
     // inverted since cpu reset button is "active LOW";
@@ -164,24 +172,48 @@ module mcs_top
     assign sys_clk = clkout_100M;
     
     /* -------------------------------------------------------------------
-    * Synchronize the reset signals;
+    * Synchronize the reset signals via double FF;
     * currently; it is asynchronous
     * implementation error encountered: LUT drives async reset alert
-    * implementation: use two registers (synchronizer) instead of one to
-    * filter out any glitch;
     -------------------------------------------------------------------*/
 
-    // use the input clock, rather than from the MMCM;
-    // first stage;
+    // use the input clock, rather than from the MMCM?    
     always_ff @(posedge sys_clk) begin
         // system reset;
         reset_sys_reg   <= reset_sys_raw;
+        reset_sys_sync  <= reset_sys_reg;
     end
-    // second state register;
+    
+    /*--------------------------------------------------
+    * To stretch the synchronized reset_sys_sync over N system clock periods;
+    * where the system clock is the 100MHz clock generated from MMCM;
+    --------------------------------------------------*/
     always_ff @(posedge sys_clk) begin
-        // system reset;
-        reset_sys_sync  <= reset_sys_reg;  
+        // note that this reset signal has been synchronized;
+        if(reset_sys_sync) begin
+            cnt_rst_sys_reg <= 0;
+        end 
+        else begin
+            cnt_rst_sys_reg <= cnt_rst_sys_next;
+        end    
     end
+    
+    // next state logic;
+    // stop the count if the threshold has been met;
+    assign cnt_rst_sys_next = (cnt_rst_sys_reg == RST_SYS_CYCLE_NUM) ? cnt_rst_sys_reg : cnt_rst_sys_reg + 1;    
+    assign reset_sys_stretch = (cnt_rst_sys_reg != RST_SYS_CYCLE_NUM);
+    
+    // filter the rst_sys_stretch to avoid glitch since it comes from a combinational block;
+    always_ff @(posedge sys_clk) begin
+        // note that this reset signal has been synchronized;
+        if(reset_sys_sync) begin
+            reset_sys_stretch_reg <= 0;
+        end 
+        else begin
+            reset_sys_stretch_reg <= reset_sys_stretch;
+        end    
+    end
+    
     
     /* -------------------------------------------------------------------
     * instantiation;
