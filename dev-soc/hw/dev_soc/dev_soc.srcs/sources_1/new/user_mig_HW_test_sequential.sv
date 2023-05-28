@@ -348,9 +348,9 @@ module user_mig_HW_test_sequential
     clk_wiz_0 mmcm_unit
        (
         // Clock out ports
-        .clk_200M(clkout_200M),     // output clk_200M
-        .clk_250M(),     // output clk_250M
-        .clk_100M(clkout_100M),     // output clk_100M
+        .clkout_200M(clkout_200M),      // output clkout_200M
+        .clkout_250M(),                 // output clkout_250M
+        .clkout_100M(clkout_100M),      // output clkout_100M
         // Status and control signals        
         .locked(locked),       // output locked
        // Clock in ports
@@ -358,7 +358,7 @@ module user_mig_HW_test_sequential
     );      // input clk_in1
             
   
-    user_mem_ctrl uut
+    user_mig_DDR2_sync_ctrl uut
     (
         //  from the user system
         // general, 
