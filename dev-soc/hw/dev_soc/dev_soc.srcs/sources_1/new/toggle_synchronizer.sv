@@ -27,6 +27,16 @@ Intended Application:
 (Destination) Slow Clock Rate: 100MHz;
 (Source) Fast Clock Rate: 150MHz;
 
+//////////////////////////////////////////////////////////////////////////
+Caution:
+there exists two strict conditions so that the synchronized signalis correct;
+    
+conditions:
+1. Pulse is only one fast-clock-cycle wide.
+2. There should be only one fast-clock-pulse in at least three slow-clock cycles.
+
+//////////////////////////////////////////////////////////////////////////
+
 Construction:
 This is commonly used; google it;
 that said, it consists three stages;
@@ -34,6 +44,8 @@ that said, it consists three stages;
 2. stage 02: double FF synchronizer with respect to the slow clock domain;
 3. stage 03: falling/rising edge detector;
 -----------------------------------*/
+
+
 
 module toggle_synchronizer
     (
@@ -45,10 +57,10 @@ module toggle_synchronizer
         // dest;
         input logic clk_dest,
         input logic rst_dest,
-        output logic out_sync,
+        output logic out_sync
         
         // debugging;
-        output logic debug_src_next
+        //output logic debug_src_next
     );
     
     /*
@@ -100,7 +112,7 @@ module toggle_synchronizer
     assign src_next = (in_async) ? ~(src_reg) : src_reg;
     
     // debugging;
-    assign debug_src_next = src_next;
+    //assign debug_src_next = src_next;
     
     /*----------------------------------
     * Stage 02:
