@@ -45,7 +45,10 @@ module toggle_synchronizer
         // dest;
         input logic clk_dest,
         input logic rst_dest,
-        output logic out_sync
+        output logic out_sync,
+        
+        // debugging;
+        output logic debug_src_next
     );
     
     /*
@@ -95,6 +98,9 @@ module toggle_synchronizer
     end
     // next state (toggling circuit)
     assign src_next = (in_async) ? ~(src_reg) : src_reg;
+    
+    // debugging;
+    assign debug_src_next = src_next;
     
     /*----------------------------------
     * Stage 02:
