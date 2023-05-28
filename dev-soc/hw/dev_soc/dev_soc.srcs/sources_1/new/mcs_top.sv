@@ -214,7 +214,6 @@ module mcs_top
         end    
     end
     
-    
     /* -------------------------------------------------------------------
     * instantiation;
     * 0. clock unit   : ip-generated MMCM (mixed mode clock manager);
@@ -243,7 +242,7 @@ module mcs_top
     // cpu
     microblaze_mcs_cpu cpu_unit(
       .Clk(sys_clk),                          // input wire Clk
-      .Reset(reset_sys_sync),                      // input wire Reset
+      .Reset(reset_sys_stretch_reg),                      // input wire Reset
       .IO_addr_strobe(io_addr_strobe),    // output wire IO_addr_strobe
       .IO_address(io_address),            // output wire [31 : 0] IO_address
       .IO_byte_enable(io_byte_enable),    // output wire [3 : 0] IO_byte_enable
@@ -304,7 +303,7 @@ module mcs_top
     mmio_unit
     (
         .clk(sys_clk),
-        .reset(reset_sys_sync),
+        .reset(reset_sys_stretch_reg),
         .mmio_addr(user_addr),
         .mmio_cs(user_mmio_cs),
         .mmio_wr(user_wr),
@@ -359,7 +358,7 @@ module mcs_top
     (
         // general;
         .clk_sys(clkout_100M),      // 100 MHz;
-        .reset(reset_sys_sync),  // async;
+        .reset(reset_sys_stretch_reg),  // async;
         
         .video_cs(user_video_cs),        // chip select for mmio system;
         .video_wr(user_wr),             // write enable;
