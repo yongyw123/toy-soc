@@ -135,6 +135,11 @@ module core_video_pixel_converter_monoY2RGB565
      
     // fsm for multiplezing;
     always_comb begin
+        
+        // default;
+        converter_src_data = 1; // dummy;
+        
+        
         case(ctrl_reg) 
             // go through the converter;
             ENABLE_CONVERTER: begin
