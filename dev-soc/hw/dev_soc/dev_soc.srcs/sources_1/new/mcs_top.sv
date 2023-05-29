@@ -427,7 +427,6 @@ module mcs_top
         .dcmi_pixel(CAM_OV7670_DATA_JA)         // 8-bit pixel data;
     );
     
-    
     /*----------------------------
     * ?? TEMPORARY ??
     * to experiment with the HW DDR2;
@@ -487,6 +486,9 @@ module mcs_top
         .debug_mig_reset_n()    // reset signal for MIG:
           
     );
+    
+    
+    
     
 endmodule
 
