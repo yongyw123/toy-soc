@@ -109,7 +109,29 @@ module mcs_top
         input logic CAM_OV7670_PCLK_JB10,       // driven by the camera at 24 MHz;
         input logic CAM_OV7670_VSYNC_JB03,      // vertical synchronization;
         input logic CAM_OV7670_HREF_JB04,       // horizontal synchronization;
-        input logic [7:0] CAM_OV7670_DATA_JA    // 8-bit pixel data;
+        input logic [7:0] CAM_OV7670_DATA_JA,    // 8-bit pixel data;
+        
+        /* ------------------------------------------
+        * DDR2 SDRAM;        
+        --------------------------------------------*/
+        // ddr2 sdram memory interface (defined by the imported ucf file);
+        output logic [12:0] ddr2_addr,   // address; 
+        output logic [2:0]  ddr2_ba,    
+        output logic ddr2_cas_n,  // output                                       ddr2_cas_n
+        output logic [0:0] ddr2_ck_n,  // output [0:0]                        ddr2_ck_n
+        output logic [0:0] ddr2_ck_p,  // output [0:0]                        ddr2_ck_p
+        output logic [0:0] ddr2_cke,  // output [0:0]                       ddr2_cke
+        output logic ddr2_ras_n,  // output                                       ddr2_ras_n
+        output logic ddr2_we_n,  // output                                       ddr2_we_n
+        inout tri [15:0] ddr2_dq,  // inout [15:0]                         ddr2_dq
+        inout tri [1:0] ddr2_dqs_n,  // inout [1:0]                        ddr2_dqs_n
+        inout tri [1:0] ddr2_dqs_p,  // inout [1:0]                        ddr2_dqs_p      
+        output logic [0:0] ddr2_cs_n,  // output [0:0]           ddr2_cs_n
+        output logic [1:0] ddr2_dm,  // output [1:0]                        ddr2_dm
+        output logic [0:0] ddr2_odt // output [0:0]                       ddr2_odt
+        
+        
+        
     );    
     
     /*-------------------------------------------------------------
@@ -117,7 +139,12 @@ module mcs_top
     -------------------------------------------------------------*/
     // MMCM clock;
     logic clkout_100M;  // 100MHz generated from the MMCM;
+    logic clkout_200M;  // 200MHz generated from the MMCM;    
     logic sys_clk;      // sys_clk = clkout_100M;
+    
+    // for ip-generated mmcm clock;
+    // note that this lock signal from MMCM is asynchronous;
+    logic mmcm_clk_locked;   // whether the clock has stabilized or not?
     
     // mcs io bus signals; these are fixed;
     logic io_addr_strobe;   // output wire IO_addr_strobe
@@ -141,10 +168,6 @@ module mcs_top
     // for multiplexing the read data from mmio or video system;
     logic [31:0] user_rd_data_mmio;
     logic [31:0] user_rd_data_video;
-    
-    // for ip-generated mmcm clock;
-    // note that this lock signal from MMCM is asynchronous;
-    logic mmcm_clk_locked;   // whether the clock has stabilized or not?
     
     /*-------------------------------------------
     * System Reset Signals
@@ -246,7 +269,7 @@ module mcs_top
     // Clock out ports
     .clkout_24M(CLKOUT_24M_JB02),     // output clkout_24M
     .clkout_100M(clkout_100M),     // output clkout_100M
-    .clkout_200M(),     // output clkout_200M
+    .clkout_200M(clkout_200M),     // output clkout_200M
     .clkout_250M(),     // output clkout_250M
    
     // Status and control signals
@@ -329,7 +352,9 @@ module mcs_top
         //.mmio_rd_data(user_rd_data),
         .mmio_rd_data(user_rd_data_mmio),
         .sw(SW),
-        .led(LED),
+        
+        // not used; 
+        .led(),
         
         // uart signals; 
         .uart_tx(UART_RXD_OUT), 
@@ -374,7 +399,7 @@ module mcs_top
     video_unit
     (
         // general;
-        .clk_sys(clkout_100M),      // 100 MHz;
+        .clk_sys(sys_clk),      // 100 MHz;
         .reset(reset_sys_stretch_reg),  // async;
         
         .video_cs(user_video_cs),        // chip select for mmio system;
@@ -402,6 +427,66 @@ module mcs_top
         .dcmi_pixel(CAM_OV7670_DATA_JA)         // 8-bit pixel data;
     );
     
+    
+    /*----------------------------
+    * ?? TEMPORARY ??
+    * to experiment with the HW DDR2;
+    *-----------------------------*/
+    core_video_mig_interface
+    #(
+        /*------------------------------------------
+        * parameter for the HW testing cicruit;
+        ------------------------------------------*/
+        // counter/timer;
+        // N seconds led pause time; with 100MHz; 200MHz threshold is required;        
+        .TIMER_THRESHOLD(50_000_000),  // 0.5 second;
+        
+        // traffic generator to issue the addr;
+        // here we just simply use incremental basis;
+        .INDEX_THRESHOLD(32) // wrap around; 2^{5};
+    )
+    core_video_mig_interface_unit
+    (
+    
+        // general;        
+        .clk_sys(sys_clk),    // 100MHz system;
+        .clk_mem(clkout_200M),    // 200MHz for MIG;       
+        .reset_sys(reset_sys_stretch_reg),  // system reset;        
+        
+        /* ----------------------------
+        * external pin;
+        * 1. LED;
+        * 2. DDR2 SDRAM
+        ------------------------------*/
+        // LEDs;
+        .LED(LED),
+        
+        // LED also display the MMCM locked status;
+        .MMCM_locked(mmcm_clk_locked),
+                
+        // ddr2 sdram memory interface (defined by the imported ucf file);
+        .ddr2_addr(ddr2_addr),   // address; 
+        .ddr2_ba(ddr2_ba),    
+        .ddr2_cas_n(ddr2_cas_n),  // output                                       ddr2_cas_n
+        .ddr2_ck_n(ddr2_ck_n),  // output [0:0]                        ddr2_ck_n
+        .ddr2_ck_p(ddr2_ck_p),  // output [0:0]                        ddr2_ck_p
+        .ddr2_cke(ddr2_cke),  // output [0:0]                       ddr2_cke
+        .ddr2_ras_n(ddr2_ras_n),  // output                                       ddr2_ras_n
+        .ddr2_we_n(ddr2_we_n),  // output                                       ddr2_we_n
+        .ddr2_dq(ddr2_dq),  // inout [15:0]                         ddr2_dq
+        .ddr2_dqs_n(ddr2_dqs_n),  // inout [1:0]                        ddr2_dqs_n
+        .ddr2_dqs_p(ddr2_dqs_p),  // inout [1:0]                        ddr2_dqs_p      
+        .ddr2_cs_n(ddr2_cs_n),  // output [0:0]           ddr2_cs_n
+        .ddr2_dm(ddr2_dm),  // output [1:0]                        ddr2_dm
+        .ddr2_odt(ddr2_odt), // output [0:0]                       ddr2_odt
+
+        /*--------------------------
+        * debugging interface
+        --------------------------*/    
+        // not used;
+        .debug_mig_reset_n()    // reset signal for MIG:
+          
+    );
     
 endmodule
 
