@@ -52,14 +52,20 @@ create_clock -add -name camera_pclk -period 41.667 [get_ports {CAM_OV7670_PCLK_J
 #-group {get_clocks {camera_pclk}};
 
 #--------------------------------------------------------------------
-# group 01: all MMCM clock generated based on the 100MHz input clock;
+# group 01: only the 100MHz generated from MMCM; leave the rest untouched;
 # group 02: camera Pixel Clock @ 24MHz;
 # group 03: MIG DDR2 UI Clock @ 150MHz;
 #--------------------------------------------------------------------
 set_clock_groups -asynchronous \
--group [get_clocks clk_in1 -include_generated_clocks] \ 
+-group [get_clocks -of_objects [clock_unit/inst/mmcm_adv_inst/CLKOUT1]] \ 
 -group {get_clocks {camera_pclk}} \
 -group [get_clocks -include_generated_clocks -of [get_pins core_video_mig_interface_unit/user_mig_DDR2_sync_ctrl_unit/mig_unit/u_mig_7series_0_mig/u_ddr2_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]];
+
+
+#set_clock_groups -asynchronous \
+#-group [get_clocks clk_in1 -include_generated_clocks] \ 
+#-group {get_clocks {camera_pclk}} \
+#-group [get_clocks -include_generated_clocks -of [get_pins core_video_mig_interface_unit/user_mig_DDR2_sync_ctrl_unit/mig_unit/u_mig_7series_0_mig/u_ddr2_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]];
 
 
 #set_clock_groups -asynchronous \
