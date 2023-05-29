@@ -51,11 +51,15 @@ module user_mig_HW_test_sequential
     (
         // general;        
         input logic clk_sys_100M,   // user system;
-        input logic clk_mem_200M,   // MIG;
+        input logic clk_mem_200M,   // MIG;        
         input logic MMCM_locked,  // mmcm locked status; 
                  
-        input logic reset_sys,  // user system reset signal;       
-      
+        // user system reset signal; active HIGH     
+        input logic reset_sys,         
+        
+        // mig has its own dedicated reset signal; active HIGH
+        input logic reset_mig,  
+        
         // LEDs;
         output logic [15:0] LED,
                 
@@ -73,13 +77,12 @@ module user_mig_HW_test_sequential
         inout tri [1:0] ddr2_dqs_p,  // inout [1:0]                        ddr2_dqs_p      
         output logic [0:0] ddr2_cs_n,  // output [0:0]           ddr2_cs_n
         output logic [1:0] ddr2_dm,  // output [1:0]                        ddr2_dm
-        output logic [0:0] ddr2_odt, // output [0:0]                       ddr2_odt
+        output logic [0:0] ddr2_odt // output [0:0]                       ddr2_odt
         
         /*-----------------------------------
         * debugging interface
         * to remove for synthesis;
-        *-----------------------------------*/      
-        output logic debug_rst_mig_stretch_reg     
+        *-----------------------------------*/                   
         /*
         output logic debug_wr_strobe,
         output logic debug_rd_strobe,
@@ -97,39 +100,7 @@ module user_mig_HW_test_sequential
         */           
     );
         
-    /*
-    NOTE on ASYNC_REG;
-    1. This is reported in the route design;
-    2. Encountered Error: "TIMING-10#1 Warning
-        Missing property on synchronizer  
-        One or more logic synchronizer has been detected between 2 clock domains 
-        but the synchronizer does not have the property ASYNC_REG defined on one 
-        or both registers.
-        It is recommended to run report_cdc for a complete and detailed CDC coverage
-    "
-    3. See Xilinx UG901 (https://docs.xilinx.com/r/en-US/ug901-vivado-synthesis/ASYNC_REG)
-    The ASYNC_REG is an attribute that affects many processes in the Vivado tools flow. 
-    The purpose of this attribute is to inform the tool that a register is capable of receiving 
-    asynchronous data in the D input pin relative to the source clock, 
-    or that the register is a synchronizing register within a synchronization chain.
-    */    
             
-    
-    /*-------------------------------------------------------
-    * MIG reset;
-    * synchronize the MIG reset with respect to its own clock;
-    * MIG clock: ?? TBA ??
-    -------------------------------------------------------*/   
-    logic rst_mig_async;    // assigned to rst_sys_sync;
-    (* ASYNC_REG = "TRUE" *) logic rst_mig_01_reg, rst_mig_02_reg;  // synchronizer    
-    logic rst_mig_sync;     // synchronizer;
-    
-    // to stretch the synchronized rst mig signal over some N MIG clock cycles;
-    localparam  RST_MIG_CYCLE_NUM = 4096;
-    logic [12:0] cnt_rst_mig_reg, cnt_rst_mig_next; // width should at least hold the parameter above;
-    logic rst_mig_stretch;
-    logic rst_mig_stretch_reg; // to filter for glicth
-                
     /*-------------------------------------------------------
     * ddr2 MIG
     -------------------------------------------------------*/
@@ -198,8 +169,7 @@ module user_mig_HW_test_sequential
     /*-----------------------------------
     * debugging interface
     * to remove for synthesis;
-    *-----------------------------------*/    
-    assign debug_rst_mig_stretch_reg = rst_mig_stretch_reg;
+    *-----------------------------------*/        
     /*
     assign debug_wr_strobe = user_wr_strobe;    
     assign debug_rd_strobe = user_rd_strobe; 
@@ -212,55 +182,7 @@ module user_mig_HW_test_sequential
     assign debug_locked = locked;
     assign debug_MIG_user_transaction_complete = MIG_user_transaction_complete;
     */
-     
-    /* -------------------------------------------------------------------
-    * Synchronize the MIG reset signals;
-    * currently; it is asynchronous with respect to the system clock;
-    * this should not be necessary since;
-    * MIG will internally synchronize the asynchronous reset;
-    * however, this does not work on the real HW testing;
-    * MIG does not come out of a CPU reset;
-    * so trying to do something different here;
-    -------------------------------------------------------------------*/    
-    // use the synchronized system rst as the input;
-    assign rst_mig_async = reset_sys;
-    always_ff @(posedge clk_mem_200M) begin    
-        rst_mig_01_reg <= rst_mig_async;
-        rst_mig_02_reg <= rst_mig_01_reg;        
-    end
-    assign rst_mig_sync = rst_mig_02_reg;
-    
-    /*--------------------------------------------------
-    * To stretch the synchronized mig reset sys over N memory clock periods;
-    * where the memory clock is 200MHz driving the MIG;
-    --------------------------------------------------*/
-       
-    always_ff @(posedge clk_mem_200M) begin    
-        // note that this reset signal has been synchronized;
-        if(rst_mig_sync) begin
-            cnt_rst_mig_reg <= 0;
-        end 
-        else begin
-            cnt_rst_mig_reg <= cnt_rst_mig_next;
-        end    
-    end
-    
-    // next state logic;
-    // stop the count if the threshold has been met;
-    assign cnt_rst_mig_next = (cnt_rst_mig_reg == RST_MIG_CYCLE_NUM) ? cnt_rst_mig_reg : cnt_rst_mig_reg + 1;    
-    assign rst_mig_stretch = (cnt_rst_mig_reg != RST_MIG_CYCLE_NUM);
-    
-    // filter the mig rst_sys_stretch to avoid glitch since it comes from a combinational block;
-    always_ff @(posedge clk_mem_200M) begin
-        // note that this reset signal has been synchronized;
-        if(rst_mig_sync) begin
-            rst_mig_stretch_reg <= 0;
-        end 
-        else begin
-            rst_mig_stretch_reg <= rst_mig_stretch;
-        end    
-    end
-    
+         
     /*--------------------------------------
     * instantiation 
     --------------------------------------*/
@@ -277,7 +199,7 @@ module user_mig_HW_test_sequential
         .clk_mem(clk_mem_200M),        // 200MHz to drive MIG memory clock,
         //.rst_mem_n(~rst_sys_stretch_reg),      // active low to reset the mig interface,
                 
-        .rst_mem_n(~rst_mig_stretch_reg),      // active low to reset the mig interface,
+        .rst_mem_n(~reset_mig),      // active low to reset the mig interface,
         //.rst_mem_n(),      // active low to reset the mig interface,
         
         //interface between the user system and the memory controller,
