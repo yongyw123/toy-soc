@@ -149,6 +149,23 @@ module mcs_top
     /*-------------------------------------------
     * System Reset Signals
     -------------------------------------------*/
+    /*
+    NOTE on ASYNC_REG;
+    1. This is reported in the route design;
+    2. Encountered Error: "TIMING-10#1 Warning
+        Missing property on synchronizer  
+        One or more logic synchronizer has been detected between 2 clock domains 
+        but the synchronizer does not have the property ASYNC_REG defined on one 
+        or both registers.
+        It is recommended to run report_cdc for a complete and detailed CDC coverage
+    "
+    3. See Xilinx UG901 (https://docs.xilinx.com/r/en-US/ug901-vivado-synthesis/ASYNC_REG)
+    The ASYNC_REG is an attribute that affects many processes in the Vivado tools flow. 
+    The purpose of this attribute is to inform the tool that a register is capable of receiving 
+    asynchronous data in the D input pin relative to the source clock, 
+    or that the register is a synchronizing register within a synchronization chain.
+    */    
+  
     // registers for asynchronous reset signals;
     logic reset_sys_raw;    // to invert the input reset;
     (* ASYNC_REG = "TRUE" *) logic reset_sys_reg;       // ff synchronizer;
