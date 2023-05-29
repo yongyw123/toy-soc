@@ -21,7 +21,20 @@
 
 
 module core_video_mig_interface
-(
+    #(parameter
+        
+        /*------------------------------------------
+        * parameter for the HW testing cicruit;
+        ------------------------------------------*/
+        // counter/timer;
+        // N seconds led pause time; with 100MHz; 200MHz threshold is required;        
+        TIMER_THRESHOLD = 50_000_000,  // 0.5 second;
+        
+        // traffic generator to issue the addr;
+        // here we just simply use incremental basis;
+        INDEX_THRESHOLD = 32 // wrap around; 2^{5};
+    )
+    (
         // general;        
         input logic clk_sys,    // 100MHz system;
         input logic clk_mem,    // 200MHz for MIG;       
@@ -52,7 +65,14 @@ module core_video_mig_interface
         inout tri [1:0] ddr2_dqs_p,  // inout [1:0]                        ddr2_dqs_p      
         output logic [0:0] ddr2_cs_n,  // output [0:0]           ddr2_cs_n
         output logic [1:0] ddr2_dm,  // output [1:0]                        ddr2_dm
-        output logic [0:0] ddr2_odt // output [0:0]                       ddr2_odt
+        output logic [0:0] ddr2_odt, // output [0:0]                       ddr2_odt
+        
+        
+        /*--------------------------
+        * debugging interface
+        --------------------------*/    
+        
+        output logic debug_mig_reset_n    // reset signal for MIG:
         
     );
     
@@ -138,7 +158,11 @@ module core_video_mig_interface
     // active low for mig;
     assign rst_mem_n = ~rst_mig_stretch_reg;
     
-    
+    /*-----------------
+    * debugging;
+    --------------------*/
+    assign debug_mig_reset_n = rst_mem_n;
+     
     ////////////////////////////////////////////////////////////////
     // INSTANTIATION
     ////////////////////////////////////////////////////////////////
@@ -218,7 +242,13 @@ module core_video_mig_interface
     );
 
     // HW testing circuit;
-    user_mig_HW_test_sequential user_mig_HW_test_sequential_unit
+    user_mig_HW_test_sequential     
+    #(
+        .TIMER_THRESHOLD(TIMER_THRESHOLD),
+        .INDEX_THRESHOLD(INDEX_THRESHOLD)
+    )
+    
+    user_mig_HW_test_sequential_unit
     (
         // general;        
         .clk_sys_100M(clk_sys),   // user system;        

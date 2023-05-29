@@ -58,6 +58,9 @@ module core_video_mig_interface_top_tb();
     tri [1:0] ddr2_dm; //   [1:0]                        ddr2_dm
     logic [0:0] ddr2_odt;  //   [0:0]                       ddr2_odt
         
+    // debugging;
+    logic debug_mig_reset_n;
+     
     // mapping;
     assign clk_sys = clkout_100M;
     assign clk_mem = clkout_200M;
@@ -131,7 +134,15 @@ module core_video_mig_interface_top_tb();
     );      // input clk_in1
 
     // uut;
-    core_video_mig_interface uut (.*);
+    core_video_mig_interface 
+    #(
+        // 100 ns second pause time for simulation 
+        .TIMER_THRESHOLD(10),
+    
+        // the range of address is resticted to integer 10 for simulation;   
+        .INDEX_THRESHOLD(10)
+    )
+    uut (.*);
     
     // test stimulus;
     core_video_mig_interface_tb tb (.*);
