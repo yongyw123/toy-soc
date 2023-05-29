@@ -50,73 +50,38 @@ module user_mig_HW_test_sequential
     )     
     (
         // general;        
-        input logic clk_sys_100M,   // user system;
-        input logic clk_mem_200M,   // MIG;        
+        input logic clk_sys_100M,   // user system;        
+                
+        // LEDs;
+        output logic [15:0] LED,        
+        
+        // for LED display;        
         input logic MMCM_locked,  // mmcm locked status; 
                  
         // user system reset signal; active HIGH     
-        input logic reset_sys,         
-        
-        // mig has its own dedicated reset signal; active HIGH
-        input logic reset_mig,  
-        
-        // LEDs;
-        output logic [15:0] LED,
+        input logic reset_sys,                         
                 
-        // ddr2 sdram memory interface (defined by the imported ucf file);
-        output logic [12:0] ddr2_addr,   // address; 
-        output logic [2:0]  ddr2_ba,    
-        output logic ddr2_cas_n,  // output                                       ddr2_cas_n
-        output logic [0:0] ddr2_ck_n,  // output [0:0]                        ddr2_ck_n
-        output logic [0:0] ddr2_ck_p,  // output [0:0]                        ddr2_ck_p
-        output logic [0:0] ddr2_cke,  // output [0:0]                       ddr2_cke
-        output logic ddr2_ras_n,  // output                                       ddr2_ras_n
-        output logic ddr2_we_n,  // output                                       ddr2_we_n
-        inout tri [15:0] ddr2_dq,  // inout [15:0]                         ddr2_dq
-        inout tri [1:0] ddr2_dqs_n,  // inout [1:0]                        ddr2_dqs_n
-        inout tri [1:0] ddr2_dqs_p,  // inout [1:0]                        ddr2_dqs_p      
-        output logic [0:0] ddr2_cs_n,  // output [0:0]           ddr2_cs_n
-        output logic [1:0] ddr2_dm,  // output [1:0]                        ddr2_dm
-        output logic [0:0] ddr2_odt // output [0:0]                       ddr2_odt
+        /*-------------------------------------------------------
+        * to communicate with the MIG synchronous interface
+        -------------------------------------------------------*/
+        // user signals;
+        output logic user_wr_strobe,            // write request;
+        output logic user_rd_strobe,             // read request;
+        output logic [22:0] user_addr,           // address;
         
-        /*-----------------------------------
-        * debugging interface
-        * to remove for synthesis;
-        *-----------------------------------*/                   
-        /*
-        output logic debug_wr_strobe,
-        output logic debug_rd_strobe,
-        output logic debug_rst_sys,
-        output logic debug_clk_sys,
-        output logic debug_rst_sys_stretch,
-        output logic debug_ui_clk_sync_rst,
-        output logic debug_init_calib_complete,
-        output logic debug_rst_mig_stretch_reg,
-        output logic debug_ui_clk,
-        output logic debug_rst_sys_raw,
-        output logic debug_locked,
-        output logic debug_MIG_user_transaction_complete,
-        output logic debug_transaction_complete_async
-        */           
+        // data;
+        output logic [127:0] user_wr_data,       
+        input logic [127:0] user_rd_data,  
+        
+        // status
+        input logic MIG_user_init_complete,        // MIG done calibarating and initializing the DDR2;
+        input logic MIG_user_ready,                // this implies init_complete and also other status; see UG586; app_rdy;
+        input logic MIG_user_transaction_complete, // read/write transaction complete?
+        
+        // debugging port;
+        input logic [3:0] debug_ctrl_FSM // FSM of user_mig_DDR2_sync_ctrl module;
+                   
     );
-        
-            
-    /*-------------------------------------------------------
-    * ddr2 MIG
-    -------------------------------------------------------*/
-    // user signals for the uut;
-    logic user_wr_strobe;             // write request;
-    logic user_rd_strobe;             // read request;
-    logic [22:0] user_addr;           // address;
-    
-    // data;
-    logic [127:0] user_wr_data;       
-    logic [127:0] user_rd_data;   
-    
-    // status
-    logic MIG_user_init_complete;        // MIG done calibarating and initializing the DDR2;
-    logic MIG_user_ready;                // this implies init_complete and also other status; see UG586; app_rdy;
-    logic MIG_user_transaction_complete; // read/write transaction complete?
             
     /*--------------------------------------
     * application test signals 
@@ -144,7 +109,6 @@ module user_mig_HW_test_sequential
     // to debug whether the FSM stuck at some point ...
     // enumerate the FSM from 1 to 8;
     logic [3:0] debug_FSM_reg;
-    logic [3:0] debug_ctrl_FSM; // FSM of user_mem_ctrl module;
     
     // register to filter the glitch when writing the write data;
     // there is a register within the uut for read data; so not necessary;    
@@ -154,113 +118,15 @@ module user_mig_HW_test_sequential
     logic [22:0] user_addr_reg, user_addr_next;
         
     // counter/timer;
-    // 2 seconds led pause time; with 100MHz; 200MHz threshold is required;
-    //localparam TIMER_THRESHOLD = 200_000_000;
-    //localparam TIMER_THRESHOLD = 100_000_000; // one second;
-    //localparam TIMER_THRESHOLD = 10;
+    // N seconds led pause time; with 100MHz; 200MHz threshold is required;
     logic [27:0] timer_reg, timer_next;
     
     // traffic generator to issue the addr;
     // here we just simply use incremental basis;
-    //localparam INDEX_THRESHOLD = 65536; // wrap around; 2^{16};
-    //localparam INDEX_THRESHOLD = 2; // wrap around; 2^{16};
     logic [16:0] index_reg, index_next;
-         
-    /*-----------------------------------
-    * debugging interface
-    * to remove for synthesis;
-    *-----------------------------------*/        
-    /*
-    assign debug_wr_strobe = user_wr_strobe;    
-    assign debug_rd_strobe = user_rd_strobe; 
-    assign debug_rst_sys = rst_sys_sync;
-    assign debug_clk_sys = clk_sys;
-    //assign debug_rst_sys_stretch = rst_sys_stretch;
-    assign debug_rst_sys_stretch = rst_sys_stretch_reg;
-    assign debug_rst_mig_stretch_reg = rst_mig_stretch_reg;
-    assign debug_rst_sys_raw = rst_sys_raw;
-    assign debug_locked = locked;
-    assign debug_MIG_user_transaction_complete = MIG_user_transaction_complete;
-    */
-         
-    /*--------------------------------------
-    * instantiation 
-    --------------------------------------*/
-   
-    user_mig_DDR2_sync_ctrl uut
-    (
-        //  from the user system
-        // general, 
-        .clk_sys(clk_sys_100M),    // 100MHz,        
-        .rst_sys(reset_sys),
-        
-        //  MIG interface 
-        // memory system,
-        .clk_mem(clk_mem_200M),        // 200MHz to drive MIG memory clock,
-        //.rst_mem_n(~rst_sys_stretch_reg),      // active low to reset the mig interface,
-                
-        .rst_mem_n(~reset_mig),      // active low to reset the mig interface,
-        //.rst_mem_n(),      // active low to reset the mig interface,
-        
-        //interface between the user system and the memory controller,
-        .user_wr_strobe(user_wr_strobe),             // write request,
-        .user_rd_strobe(user_rd_strobe),             // read request,
-        .user_addr(user_addr),           // address,
-        
-        // data,
-        .user_wr_data(user_wr_data),   
-        .user_rd_data(user_rd_data),         
-        
-        // status
-        .MIG_user_init_complete(MIG_user_init_complete),        // MIG done calibarating and initializing the DDR2,
-        .MIG_user_ready(MIG_user_ready),                // this implies init_complete and also other status, see UG586, app_rdy,
-        .MIG_user_transaction_complete(MIG_user_transaction_complete), // read/write transaction complete?
-        
-        
-        // ddr2 sdram memory interface (defined by the imported ucf file),
-        .ddr2_addr(ddr2_addr),   // address, 
-        .ddr2_ba(ddr2_ba),    
-        .ddr2_cas_n(ddr2_cas_n),  // output                                       ddr2_cas_n
-        .ddr2_ck_n(ddr2_ck_n),  // output [0:0]                        ddr2_ck_n
-        .ddr2_ck_p(ddr2_ck_p),  // output [0:0]                        ddr2_ck_p
-        .ddr2_cke(ddr2_cke),  // output [0:0]                       ddr2_cke
-        .ddr2_ras_n(ddr2_ras_n),  // output                                       ddr2_ras_n
-        .ddr2_we_n(ddr2_we_n),  // output                                       ddr2_we_n
-        .ddr2_dq(ddr2_dq),  // inout [15:0]                         ddr2_dq
-        .ddr2_dqs_n(ddr2_dqs_n),  // inout [1:0]                        ddr2_dqs_n
-        .ddr2_dqs_p(ddr2_dqs_p),  // inout [1:0]                        ddr2_dqs_p
-        
-        // not used;
-        .init_calib_complete(),  // output                                       init_calib_complete
-        
-        .ddr2_cs_n(ddr2_cs_n),  // output [0:0]           ddr2_cs_n
-        .ddr2_dm(ddr2_dm),  // output [1:0]                        ddr2_dm
-        .ddr2_odt(ddr2_odt),  // output [0:0]                       ddr2_odt
-       
-        //  debugging interface (not used)            
-        .debug_app_rd_data_valid(),
-        .debug_app_rd_data_end(),
-        .debug_ui_clk(debug_ui_clk),
-        .debug_ui_clk_sync_rst(debug_ui_clk_sync_rst),
-        .debug_app_rdy(),
-        .debug_app_wdf_rdy(),
-        .debug_app_en(),
-        .debug_app_wdf_data(),
-        .debug_app_wdf_end(),
-        .debug_app_wdf_wren(),
-        .debug_init_calib_complete(debug_init_calib_complete),
-        .debug_transaction_complete_async(debug_transaction_complete_async),
-        .debug_app_cmd(),
-        .debug_app_rd_data(),        
-        .debug_user_wr_strobe_sync(),
-        .debug_user_rd_strobe_sync(),
-        .debug_FSM(debug_ctrl_FSM)
-    );
-    
     
     ////////////////////////////////////////////////////////////////////////////////////
-    
-    
+        
     // ff;
     always_ff @(posedge clk_sys_100M, posedge reset_sys) begin        
         if(reset_sys) begin        
@@ -407,8 +273,6 @@ module user_mig_HW_test_sequential
                 user_rd_strobe = 1'b1;
                 state_next = ST_READ_WAIT;            
             end
-            
-            
             
             ST_READ_WAIT: begin  
                 // debugging;
