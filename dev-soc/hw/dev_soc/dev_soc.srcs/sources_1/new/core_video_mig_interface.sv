@@ -25,9 +25,7 @@ module core_video_mig_interface
         // general;        
         input logic clk_sys,    // 100MHz system;
         input logic clk_mem,    // 200MHz for MIG;       
-        
         input logic reset_sys,  // system reset;        
-      
         
         /* ----------------------------
         * external pin;
@@ -66,7 +64,7 @@ module core_video_mig_interface
     // signals for module: user_mig_DDR2_sync_ctrl 
     ------------------------------------------------*/       
     logic rst_mem_n;
-    logic MMCM_locked;
+    //logic MMCM_locked;    // this is already declared as an output port;
     logic user_wr_strobe;
     logic user_rd_strobe;
     logic [22:0] user_addr;
@@ -137,7 +135,8 @@ module core_video_mig_interface
             rst_mig_stretch_reg <= rst_mig_stretch;
         end    
     end
-    assign rst_mem_n = rst_mig_stretch_reg;
+    // active low for mig;
+    assign rst_mem_n = ~rst_mig_stretch_reg;
     
     
     ////////////////////////////////////////////////////////////////
