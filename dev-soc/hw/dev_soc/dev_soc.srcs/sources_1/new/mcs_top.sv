@@ -151,8 +151,8 @@ module mcs_top
     -------------------------------------------*/
     // registers for asynchronous reset signals;
     logic reset_sys_raw;    // to invert the input reset;
-    logic reset_sys_reg;
-    logic reset_sys_sync;       
+    (* ASYNC_REG = "TRUE" *) logic reset_sys_reg;       // ff synchronizer;
+    (* ASYNC_REG = "TRUE" *) logic reset_sys_sync;      // ff synchronizer;
    
     // to stretch the synchronized signal over some N system clock cycles;
     localparam RST_SYS_CYCLE_NUM = 1024;
