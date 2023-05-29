@@ -52,14 +52,15 @@ module user_mig_HW_test_sequential
         // general;        
         input logic clk_sys_100M,   // user system;        
                 
+        // user system reset signal; active HIGH     
+        input logic reset_sys,                                 
+            
         // LEDs;
         output logic [15:0] LED,        
         
         // for LED display;        
         input logic MMCM_locked,  // mmcm locked status; 
                  
-        // user system reset signal; active HIGH     
-        input logic reset_sys,                         
                 
         /*-------------------------------------------------------
         * to communicate with the MIG synchronous interface
