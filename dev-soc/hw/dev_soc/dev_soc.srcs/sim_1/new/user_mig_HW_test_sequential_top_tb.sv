@@ -63,6 +63,7 @@ module user_mig_HW_test_sequential_top_tb();
     logic MIG_user_ready;
     logic MIG_user_transaction_complete;
     logic [3:0] debug_ctrl_FSM;
+    
      
     // uut signal mapping;
     assign clk_sys_100M = clkout_100M;
@@ -127,6 +128,8 @@ module user_mig_HW_test_sequential_top_tb();
     assign clk_mem = clkout_200M;
     assign rst_mem_n = ~rst_mig_stretch_reg;
     
+    // for the uut;
+    assign debug_ctrl_FSM = debug_FSM;
     
     /*---------------------------------------------------
     // monitoring;
