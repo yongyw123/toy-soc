@@ -155,9 +155,18 @@ module core_video_mig_interface
             rst_mig_stretch_reg <= rst_mig_stretch;
         end    
     end
-    // active low for mig;
-    assign rst_mem_n = ~rst_mig_stretch_reg;
     
+    // filter for glitch;
+    always_ff @(posedge clk_mem) begin
+        // note that this reset signal has been synchronized;
+        if(rst_mig_sync) begin
+            rst_mem_n <= 1'b1;  // active low;
+        end 
+        else begin
+            rst_mem_n <= ~rst_mig_stretch_reg;
+        end    
+    end
+             
     /*-----------------
     * debugging;
     --------------------*/
