@@ -28,61 +28,92 @@ module core_video_mig_interface_tb(
         input logic clk_sys,
         input logic [15:0] LED,
         output logic reset_sys,
-        input logic  locked // mmcm locked status;               
+        input logic  locked, // mmcm locked status;
+        
+        // mig status;
+        input logic core_MIG_init_complete,   // MIG DDR2 initialization complete;
+        input logic core_MIG_ready,           // MIG DDR2 ready to accept any request;
+        input logic core_MIG_transaction_complete, // a pulse indicating the read/write request has been serviced;
+        input logic core_MIG_ctrl_status_idle,    // MIG synchronous interface controller idle status;
+
+        // bus interface;
+        output logic cs,    
+        output logic write,              
+        output logic read,               
+        output logic [`VIDEO_REG_ADDR_BIT_SIZE_G-1:0] addr,           
+        output logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    
+        input logic [`REG_DATA_WIDTH_G-1:0]  rd_data,
+        
+        // motion detection core interface;
+        output logic core_motion_wrstrobe,
+        output logic core_motion_rdstrobe,
+        output logic [22:0] core_motion_addr,
+        output logic [127:0] core_motion_wrdata,
+        input logic [127:0] core_motion_rddata        
+             
     );
+    
     
     localparam LED_END_RANGE = 4;
         
+    // address;
+    localparam MIG_INTERFACE_REG_SEL       = `V5_MIG_INTERFACE_REG_SEL;
+    localparam MIG_INTERFACE_REG_STATUS    = `V5_MIG_INTERFACE_REG_STATUS;
+    localparam MIG_INTERFACE_REG_ADDR      = `V5_MIG_INTERFACE_REG_ADDR;
+    localparam MIG_INTERFACE_REG_CTRL      = `V5_MIG_INTERFACE_REG_CTRL;
+    
+    localparam MIG_INTERFACE_REG_WRDATA_01 = `V5_MIG_INTERFACE_REG_WRDATA_01;
+    localparam MIG_INTERFACE_REG_WRDATA_02 = `V5_MIG_INTERFACE_REG_WRDATA_02;
+    localparam MIG_INTERFACE_REG_WRDATA_03 = `V5_MIG_INTERFACE_REG_WRDATA_03;
+    localparam MIG_INTERFACE_REG_WRDATA_04 = `V5_MIG_INTERFACE_REG_WRDATA_04;
+    
+    localparam MIG_INTERFACE_REG_RDDATA_01 = `V5_MIG_INTERFACE_REG_RDDATA_01;
+    localparam MIG_INTERFACE_REG_RDDATA_02 = `V5_MIG_INTERFACE_REG_RDDATA_02;
+    localparam MIG_INTERFACE_REG_RDDATA_03 = `V5_MIG_INTERFACE_REG_RDDATA_03;
+    localparam MIG_INTERFACE_REG_RDDATA_04 = `V5_MIG_INTERFACE_REG_RDDATA_04;
+    
     initial begin
+        /* initial value; */
+        @(posedge clk_sys);
+        cs <= 0;
+        write <= 0;
+        read <= 0;
+        addr <= 0;
+        wr_data <= 0;
+        
         /* initial reset pulse */
         reset_sys = 1'b1;
         #(100);
         reset_sys = 1'b0;
         #(100);
-
         
         wait(locked == 1'b1);
         #(1000);
         
-        // reset to start over;
+        // reset halfway to start over;
         reset_sys = 1'b1;
         #(100);
         reset_sys = 1'b0;
-        #(100);        
+        #(100);  
         
-        #(500);
-        
-        // wait for the LED to increase;
-        // and wraps around twice to conclude the simulation;    
-        wait(LED[LED_END_RANGE:0] == 1);
-        
-        // first round is done;
-        wait(LED[LED_END_RANGE:0] == 0);
-        wait(LED[LED_END_RANGE:0] == 1);
-        
-        // second round is done;
-        wait(LED[LED_END_RANGE:0] == 0);
-                
-        // reset yp start over;
-        reset_sys = 1'b1;
-        #(100);
-        reset_sys = 1'b0;
-        #(100);
-        
-        // wait for the LED to increase;
-        // and wraps around twice to conclude the simulation;    
-        wait(LED[LED_END_RANGE:0] == 1);
-        
-        // first round is done;
-        wait(LED[LED_END_RANGE:0] == 0);
-        wait(LED[LED_END_RANGE:0] == 1);
-        
-        // second round is done;
-        wait(LED[LED_END_RANGE:0] == 0);
-        
+        /* test 01: */
         @(posedge clk_sys);
-                
-        $stop; 
+        read <= 1;
+        addr <= MIG_INTERFACE_REG_STATUS;
+        // wait for init complete;
+        wait(rd_data[0] == 1);  
+        @(posedge clk_sys);
+        
+        #(1000);
+        // other status must either hold true/high after init is completed;
+        // until something changes;
+        assert(rd_data[2] == 0);    // transaction complete must be low since there is no request;
+        assert(rd_data[3] == 1);    // controller must be idle;
+        
+           
+        
+        
+         
     end
 endmodule
 

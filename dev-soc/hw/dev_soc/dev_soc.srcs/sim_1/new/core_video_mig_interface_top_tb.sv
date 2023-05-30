@@ -44,8 +44,29 @@ module core_video_mig_interface_top_tb();
     logic clk_mem;          // 200MHz for MIG;
     logic reset_sys;        // user system reset;
     
+    // bus interface;
+    logic cs;    
+    logic write;              
+    logic read;               
+    logic [`VIDEO_REG_ADDR_BIT_SIZE_G-1:0] addr;           
+    logic [`REG_DATA_WIDTH_G-1:0]  wr_data;    
+    logic [`REG_DATA_WIDTH_G-1:0]  rd_data;
+    
+    // (multiplexed) placeholder for motion detection video core;
+    logic core_motion_wrstrobe;
+    logic core_motion_rdstrobe;
+    logic [22:0] core_motion_addr;
+    logic [127:0] core_motion_wrdata;
+    logic [127:0] core_motion_rddata;
+    
+    // MIG DDR2 status 
+    logic core_MIG_init_complete;   // MIG DDR2 initialization complete
+    logic core_MIG_ready;           // MIG DDR2 ready to accept any request
+    logic core_MIG_transaction_complete; // a pulse indicating the read/write request has been serviced
+    logic core_MIG_ctrl_status_idle;    // MIG synchronous interface controller idle status
     
     
+    // external signals;
     logic [15:0] LED;
     logic MMCM_locked;
     
