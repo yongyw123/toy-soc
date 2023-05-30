@@ -172,7 +172,7 @@ module core_video_mig_interface_top_tb();
         .TIMER_THRESHOLD(10),
     
         // the range of address is resticted to integer 10 for simulation;   
-        .INDEX_THRESHOLD(10)
+        .INDEX_THRESHOLD(32)
     )
     uut (.*);
     

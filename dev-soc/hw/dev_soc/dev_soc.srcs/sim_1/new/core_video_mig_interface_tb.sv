@@ -251,6 +251,54 @@ module core_video_mig_interface_tb(
             end                
         
         #(100);
+        
+        /* test 04: change to hw test */
+        @(posedge clk_sys);
+        write <= 1'b1;
+        read <= 1'b0;
+        addr <= MIG_INTERFACE_REG_SEL;
+        wr_data <= MIG_INTERFACE_REG_SEL_TEST;
+                
+        // current setup allows the led binary representation up to integer 32;
+        // allow the led to be free running until when it hits 9;
+        @(posedge clk_sys);
+        wait(LED[LED_END_RANGE:0] == 9);
+        
+        @(posedge clk_sys);
+        write <= 1'b1;
+        read <= 1'b0;
+        addr <= MIG_INTERFACE_REG_SEL;
+        wr_data <= MIG_INTERFACE_REG_SEL_NONE;
+        
+        // observe that the led stops counting;
+        #(500);
+        
+        // "re-enable" the test; expect the led to display from when it is stopped previously;
+        // this is by construction since there is no built-in stop/start button for the hw test;
+        @(posedge clk_sys);
+        write <= 1'b1;
+        read <= 1'b0;
+        addr <= MIG_INTERFACE_REG_SEL;
+        wr_data <= MIG_INTERFACE_REG_SEL_TEST;
+        
+        @(posedge clk_sys);
+        assert(LED[LED_END_RANGE:0] != 1) $display("Ok, LED resumes from where it stops");
+            else begin
+                $error("LED resets, this is not expected, stop the simulation at once");
+                $stop;
+            end
+            
+        // allow the led to run until 21 then stops it;
+        wait(LED[LED_END_RANGE:0] == 21);
+        
+        @(posedge clk_sys);
+        write <= 1'b1;
+        read <= 1'b0;
+        addr <= MIG_INTERFACE_REG_SEL;
+        wr_data <= MIG_INTERFACE_REG_SEL_NONE;
+        
+        #(100);
+        
         $stop;
          
     end
