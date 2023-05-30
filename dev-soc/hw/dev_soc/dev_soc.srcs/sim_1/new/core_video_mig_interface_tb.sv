@@ -55,6 +55,7 @@ module core_video_mig_interface_tb(
     
     
     localparam LED_END_RANGE = 4;
+    localparam RANDOM_128BIT_WRDATA = {128{$random}};
         
     // address;
     localparam MIG_INTERFACE_REG_SEL       = `V5_MIG_INTERFACE_REG_SEL;
@@ -299,6 +300,57 @@ module core_video_mig_interface_tb(
         
         #(100);
         
+        
+        /* test 05: change source to video core: motion detection */
+        // recall that in motion detection core; we deal with 128-bit transaction directly;
+        // this is unlike cpu as cpu is limited by the 32-bit register width;
+        @(posedge clk_sys);
+        write <= 1'b1;
+        read <= 1'b0;
+        addr <= MIG_INTERFACE_REG_SEL;
+        wr_data <= MIG_INTERFACE_REG_SEL_MOTION;
+        core_motion_rdstrobe <= 0;
+        core_motion_wrstrobe <= 0;
+        
+        // prepare the addr and the write data before submitting;
+        @(posedge clk_sys);
+        core_motion_addr <= 7;
+        core_motion_wrdata <= RANDOM_128BIT_WRDATA;
+        // submit the write request;
+        core_motion_wrstrobe <= 1;
+        
+        // disable after a write; otherwise, it will continue to write;
+        @(posedge clk_sys);
+        core_motion_wrstrobe <= 0;
+        
+        // wait for transaction to complete;
+        @(posedge clk_sys);
+        wait(core_MIG_transaction_complete == 1);
+        
+        // read from the previous write;
+        @(posedge clk_sys);
+        core_motion_addr <= 7;
+        // submit the write request;
+        core_motion_rdstrobe <= 1;        
+        
+        // disable after a read; otherwise, it will continue to read;
+        @(posedge clk_sys);
+        core_motion_rdstrobe <= 0;
+                
+        // wait for the transaction to complete;
+        @(posedge clk_sys);
+        wait(core_MIG_transaction_complete == 1);
+        
+        // data is valid to read;
+        @(posedge clk_sys);
+        assert(core_motion_rddata == RANDOM_128BIT_WRDATA) $display("core motion: read data matches: %127b", RANDOM_128BIT_WRDATA);
+            else begin
+                $error("core motion: read data does not match with the written data, stop the simulation at once");
+                $stop;
+            end
+        
+        #(100);
+                
         $stop;
          
     end
