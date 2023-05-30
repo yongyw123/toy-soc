@@ -72,14 +72,21 @@ module core_video_mig_interface_tb(
     localparam MIG_INTERFACE_REG_RDDATA_03 = `V5_MIG_INTERFACE_REG_RDDATA_03;
     localparam MIG_INTERFACE_REG_RDDATA_04 = `V5_MIG_INTERFACE_REG_RDDATA_04;
     
+    localparam MIG_INTERFACE_REG_SEL_NONE    = 3'b000;  // none;
+    localparam MIG_INTERFACE_REG_SEL_CPU     = 3'b001;  // cpu;
+    localparam MIG_INTERFACE_REG_SEL_MOTION  = 3'b010;  // motion detection video cores;
+    localparam MIG_INTERFACE_REG_SEL_TEST    = 3'b100;  // hw testing circuit;
+    
     initial begin
-        /* initial value; */
+        /* initial value; 
+        set to cpu source
+        */
         @(posedge clk_sys);
-        cs <= 0;
-        write <= 0;
+        cs <= 1;
+        write <= 1;
         read <= 0;
-        addr <= 0;
-        wr_data <= 0;
+        addr <= MIG_INTERFACE_REG_SEL;
+        wr_data <= MIG_INTERFACE_REG_SEL_CPU;
         
         /* initial reset pulse */
         reset_sys = 1'b1;
@@ -96,7 +103,7 @@ module core_video_mig_interface_tb(
         reset_sys = 1'b0;
         #(100);  
         
-        /* test 01: */
+        /* test 01: read the status via cpu*/
         @(posedge clk_sys);
         read <= 1;
         addr <= MIG_INTERFACE_REG_STATUS;
@@ -105,14 +112,19 @@ module core_video_mig_interface_tb(
         @(posedge clk_sys);
         
         #(1000);
+        
         // other status must either hold true/high after init is completed;
         // until something changes;
-        assert(rd_data[2] == 0);    // transaction complete must be low since there is no request;
-        assert(rd_data[3] == 1);    // controller must be idle;
         
-           
+        // transaction complete must be low since there is no request;
+        assert(rd_data[2] == 0) $display("ok");
+            else $error("transaction complete status is not low;");
+         // controller must be idle;
+        assert(rd_data[3] == 1) $display("ok");
+            else $error("controller is not idle");   
         
-        
+        #(100);
+        $stop;
          
     end
 endmodule

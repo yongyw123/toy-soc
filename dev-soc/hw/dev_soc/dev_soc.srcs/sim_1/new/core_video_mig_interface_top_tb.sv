@@ -88,6 +88,7 @@ module core_video_mig_interface_top_tb();
         
     // debugging;
     logic debug_mig_reset_n;
+    logic debug_MIG_init_complete_status;
      
     // mapping;
     assign clk_sys = clkout_100M;
