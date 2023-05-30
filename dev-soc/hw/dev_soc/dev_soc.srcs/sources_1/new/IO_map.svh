@@ -725,11 +725,7 @@ Register Definition:
 
 5. Register 4 (Offset 4): Read Control Register:
         bit[0]: submit the read request; (Need to clear once submitting for a single write operation);
-        bit[1]: shift in the first batch of the read data[31:0];
-        bit[2]: shift in the second batch of the read data[63:32];
-        bit[3]: shift in the third batch of the read data[95:64];
-        bit[4]: shift in the forth batch of the read data[127:96];
-        
+                
 6. Register 5-8: to store the 128-bit read data as noted in the construction;
 
 Register IO:
