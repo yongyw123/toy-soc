@@ -55,7 +55,23 @@ module core_video_mig_interface
         input logic [`VIDEO_REG_ADDR_BIT_SIZE_G-1:0] addr,           
         input logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    
         output logic [`REG_DATA_WIDTH_G-1:0]  rd_data,
+                
+        /* --------------------------------------------------------------------------
+        * (Multiplexed) Input Interface with this video core: motion detection 
+        ---------------------------------------------------------------------------*/
+        input logic core_motion_wrstrobe,
+        input logic core_motion_rdstrobe,
+        input logic [22:0] core_motion_addr,
+        input logic [127:0] core_motion_wrdata,
+        output logic [127:0] core_motion_rddata,
         
+        /* --------------------------------------------------------------------------
+        * MIG DDR2 status; 
+        ---------------------------------------------------------------------------*/
+         output logic core_MIG_init_complete,   // MIG DDR2 initialization complete;
+         output logic core_MIG_ready,           // MIG DDR2 ready to accept any request;
+         output logic core_MIG_transaction_complete, // a pulse indicating the read/write request has been serviced;
+         output logic core_MIG_ctrl_status_idle,    // MIG synchronous interface controller idle status;
                 
         /* ----------------------------
         * external pin;
@@ -211,8 +227,7 @@ module core_video_mig_interface
     logic [127:0] core_hw_test_wr_data;
     logic [127:0] core_hw_test_rd_data;
     logic [15:0] core_hw_test_LED;
-    
-        
+                
     /////////////////////////////////////////////////////////////////////////////////
     /* -------------------------------------------------------------------
     * Synchronize the MIG reset signals;
@@ -525,6 +540,13 @@ module core_video_mig_interface
         // bus interface;
         rd_data = 0;
         
+        // motion detection core;
+        core_motion_rddata = 0;         
+        core_MIG_init_complete = 0;
+        core_MIG_ready = 0;
+        core_MIG_transaction_complete = 0;
+        core_MIG_ctrl_status_idle = 0;
+        
         ////////// start the machinery; /////////////
         /*
         localparam MIG_INTERFACE_REG_SEL_NONE    = 3'b000;  // none;
@@ -584,6 +606,24 @@ module core_video_mig_interface
                 end
             end
             
+            MIG_INTERFACE_REG_SEL_MOTION: begin
+                // control;
+                user_wr_strobe = core_motion_wrstrobe;
+                user_rd_strobe = core_motion_rdstrobe;
+                user_addr = core_motion_addr;
+                
+                // data;
+                user_wr_data = core_motion_wrdata;                
+                core_motion_rddata = rd_data;
+                
+                // status;
+                core_MIG_init_complete = MIG_user_init_complete;  // MIG DDR2 initialization complete;
+                core_MIG_ready = MIG_user_ready;          // MIG DDR2 ready to accept any request;
+                core_MIG_transaction_complete = MIG_user_transaction_complete;// a pulse indicating the read/write request has been serviced;
+                core_MIG_ctrl_status_idle = MIG_ctrl_status_idle;   // MIG synchronous interface controller idle status;
+                      
+            end
+            
             MIG_INTERFACE_REG_SEL_TEST: begin                
                 core_hw_test_enable_ready_next = MIG_user_ready && 1'b1;
                 user_wr_strobe = core_hw_test_wr_strobe;
@@ -593,8 +633,6 @@ module core_video_mig_interface
                 core_hw_test_rd_data = user_rd_data;
                 LED = core_hw_test_LED;
             end
-            
-        
             
             // MIG_INTERFACE_REG_SEL_NONE
             default:     ;                
