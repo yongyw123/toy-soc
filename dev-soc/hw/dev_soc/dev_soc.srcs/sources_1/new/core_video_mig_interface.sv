@@ -190,7 +190,8 @@ module core_video_mig_interface
         /*--------------------------
         * debugging interface
         --------------------------*/            
-        output logic debug_mig_reset_n    // reset signal for MIG:
+        output logic debug_mig_reset_n,    // reset signal for MIG:
+        output logic debug_MIG_init_complete_status
         
     );
     
@@ -378,6 +379,7 @@ module core_video_mig_interface
     * debugging;
     --------------------*/
     assign debug_mig_reset_n = rst_mem_n;
+    assign debug_MIG_init_complete_status = MIG_user_init_complete;
      
     ////////////////////////////////////////////////////////////////
     // INSTANTIATION
