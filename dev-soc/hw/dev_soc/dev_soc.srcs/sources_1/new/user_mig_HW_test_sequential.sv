@@ -79,6 +79,10 @@ module user_mig_HW_test_sequential
         input logic MIG_user_ready,                // this implies init_complete and also other status; see UG586; app_rdy;
         input logic MIG_user_transaction_complete, // read/write transaction complete?
         
+        // MIG controller FSM is in idle state (not busy) (implies user_transaction_complete);
+        ///// IMPORTANT: there is a three system (100MHz) clock delay after write/read strobe is asserted;
+        input logic MIG_ctrl_status_idle,          
+        
         // debugging port;
         input logic [3:0] debug_ctrl_FSM // FSM of user_mig_DDR2_sync_ctrl module;
                    

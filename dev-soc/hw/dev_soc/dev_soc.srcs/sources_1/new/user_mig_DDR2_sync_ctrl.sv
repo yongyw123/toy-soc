@@ -139,6 +139,10 @@ module user_mig_DDR2_sync_ctrl
         output logic MIG_user_ready,                // this implies init_complete and also other status; see UG586; app_rdy;
         output logic MIG_user_transaction_complete, // read/write transaction complete?
         
+        // MIG controller FSM is in idle state (not busy) (implies user_transaction_complete);
+        ///// IMPORTANT: there is a three system (100MHz) clock delay after write/read strobe is asserted;
+        output logic MIG_ctrl_status_idle,          
+        
         /* -----------------------------------------------------
         *  MIG interface 
         ------------------------------------------------------*/
@@ -236,8 +240,10 @@ module user_mig_DDR2_sync_ctrl
     logic user_rd_strobe_sync;          // input; user to request read operation;
     logic init_calib_complete_async;    // output;
     logic app_rdy_async;
-    logic transaction_complete_async;   // output; 
+    logic transaction_complete_async;   // output;
     
+    logic ctrl_status_idle_async; 
+    logic ctrl_status_idle;                    // controller in idle state (implies transaction complete as well);
     
     // registers to filter glitches;    
     logic [63:0] app_rd_data_fbatch_reg, app_rd_data_fbatch_next;   // first batch;
@@ -284,9 +290,10 @@ module user_mig_DDR2_sync_ctrl
     // 3. transaction complete status;
     assign init_calib_complete_async = init_calib_complete;
     assign app_rdy_async = app_rdy;
+    assign ctrl_status_idle_async = ctrl_status_idle;
 
     FF_synchronizer_fast_to_slow
-    #(.WIDTH(2))
+    #(.WIDTH(3))
     FF_synchronizer_fast_to_slow_status_unit
     (
         // destination; slow domain;
@@ -318,10 +325,10 @@ module user_mig_DDR2_sync_ctrl
         .rst_dest(ui_clk_sync_rst),    // see the note above;  
         
         // source; from fast domain
-        .in_async({init_calib_complete_async, app_rdy_async}),
+        .in_async({init_calib_complete_async, app_rdy_async, ctrl_status_idle_async}),
         
         // to slow domain
-        .out_sync({MIG_user_init_complete, MIG_user_ready})
+        .out_sync({MIG_user_init_complete, MIG_user_ready, MIG_ctrl_status_idle})
     );
         
     // transaction_complete is a short pulse with respect to the UI clock;
@@ -457,6 +464,7 @@ module user_mig_DDR2_sync_ctrl
         // default;
         state_next = state_reg;
         transaction_complete_async = 1'b0;
+        ctrl_status_idle = 1'b0;   
         
         app_cmd         = MIG_CMD_READ;        
         app_en          = 1'b0;
@@ -506,6 +514,7 @@ module user_mig_DDR2_sync_ctrl
             ST_IDLE: begin
                 // debugging;
                 debug_FSM = 2;
+                ctrl_status_idle = 1'b1;
                 
                 // only if memory says so;
                 /* see UG586; app rdy is NOT asserted if:

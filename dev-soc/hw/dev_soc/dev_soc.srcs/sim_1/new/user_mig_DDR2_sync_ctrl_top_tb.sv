@@ -46,6 +46,7 @@ module user_mig_DDR2_sync_ctrl_top_tb();
     logic MIG_user_init_complete;        // MIG done calibarating and initializing the DDR2;
     logic MIG_user_ready;                // this implies init_complete and also other status; see UG586; app_rdy;
     logic MIG_user_transaction_complete; // read/write transaction complete?
+    logic MIG_ctrl_status_idle;          // MIG controller FSM is in idle state (not busy) (implies user_transaction_complete);
     
     // ddr2 MIG general signals 
     logic clk_mem;    // MIG memory clock;

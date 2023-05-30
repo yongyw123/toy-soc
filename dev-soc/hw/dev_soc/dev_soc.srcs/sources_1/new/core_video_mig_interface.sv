@@ -93,6 +93,10 @@ module core_video_mig_interface
     logic MIG_user_init_complete;
     logic MIG_user_ready;
     logic MIG_user_transaction_complete;
+    // MIG controller FSM is in idle state (not busy) (implies user_transaction_complete);
+    ///// IMPORTANT: there is a three system (100MHz) clock delay after write/read strobe is asserted;
+    logic MIG_ctrl_status_idle;      
+    
     logic [3:0] debug_ctrl_FSM;
     
     /*-------------------------------------------------------
@@ -202,6 +206,9 @@ module core_video_mig_interface
         .MIG_user_init_complete(MIG_user_init_complete),        // MIG done calibarating and initializing the DDR2,
         .MIG_user_ready(MIG_user_ready),                // this implies init_complete and also other status, see UG586, app_rdy,
         .MIG_user_transaction_complete(MIG_user_transaction_complete), // read/write transaction complete?
+        // MIG controller FSM is in idle state (not busy) (implies user_transaction_complete);
+        ///// IMPORTANT: there is a three system (100MHz) clock delay after write/read strobe is asserted;
+        .MIG_ctrl_status_idle(MIG_ctrl_status_idle),     
         
         /* -----------------------------------------------------
         * External Pin: MIG interface with the actual DDR2  
