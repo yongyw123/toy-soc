@@ -741,15 +741,15 @@ Register IO:
 6. Register (5-8): read only;
  
 *****************************************************************/
-`define V5_MIG_INTERFACE_REG_SEL        0
-`define V5_MIG_INTERFACE_REG_STATUS     1
-`define V5_MIG_INTERFACE_REG_ADDR       2
-`define V5_MIG_INTERFACE_REG_WR_CTRL    3
-`define V5_MIG_INTERFACE_REG_RD_CTRL    4
-`define V5_MIG_INTERFACE_REG_RDDATA_01  5
-`define V5_MIG_INTERFACE_REG_RDDATA_02  6
-`define V5_MIG_INTERFACE_REG_RDDATA_03  7
-`define V5_MIG_INTERFACE_REG_RDDATA_04  8
+`define V5_MIG_INTERFACE_REG_SEL        0   // 4'b0000;
+`define V5_MIG_INTERFACE_REG_STATUS     1   // 4'b0001;
+`define V5_MIG_INTERFACE_REG_ADDR       2   // 4'b0010;
+`define V5_MIG_INTERFACE_REG_WR_CTRL    3   // 4'b0011;
+`define V5_MIG_INTERFACE_REG_RD_CTRL    4   // 4'b0100;
+`define V5_MIG_INTERFACE_REG_RDDATA_01  5   // 4'b0101;
+`define V5_MIG_INTERFACE_REG_RDDATA_02  6   // 4'b0110;
+`define V5_MIG_INTERFACE_REG_RDDATA_03  7   // 4'b0111;
+`define V5_MIG_INTERFACE_REG_RDDATA_04  8   // 4'b1000;
 
 // register 0: multiplexing;
 `define V5_MIG_INTERFACE_REG_SEL_NONE     3'b000  // none;
