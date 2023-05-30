@@ -95,22 +95,32 @@ module core_video_mig_interface
     // CONSTANTS
     ///////////////////////////////////////
     // address;
-    localparam MIG_INTERFACE_REG_SEL       = 4'b0000;
-    localparam MIG_INTERFACE_REG_STATUS    = 4'b0001;
-    localparam MIG_INTERFACE_REG_ADDR      = 4'b0010;
-    localparam MIG_INTERFACE_REG_WR_CTRL   = 4'b0011;
-    localparam MIG_INTERFACE_REG_RD_CTRL   = 4'b0100;
-    localparam MIG_INTERFACE_REG_RDDATA_01 = 4'b0101;
-    localparam MIG_INTERFACE_REG_RDDATA_02 = 4'b0110;
-    localparam MIG_INTERFACE_REG_RDDATA_03 = 4'b0111;
-    localparam MIG_INTERFACE_REG_RDDATA_04 = 4'b1000;    
+    localparam MIG_INTERFACE_REG_SEL       = `V5_MIG_INTERFACE_REG_SEL;
+    localparam MIG_INTERFACE_REG_STATUS    = `V5_MIG_INTERFACE_REG_STATUS;
+    localparam MIG_INTERFACE_REG_ADDR      = `V5_MIG_INTERFACE_REG_ADDR;
+    localparam MIG_INTERFACE_REG_CTRL      = `V5_MIG_INTERFACE_REG_CTRL;
+    
+    localparam MIG_INTERFACE_REG_WRDATA_01 = `V5_MIG_INTERFACE_REG_WRDATA_01;
+    localparam MIG_INTERFACE_REG_WRDATA_02 = `V5_MIG_INTERFACE_REG_WRDATA_02;
+    localparam MIG_INTERFACE_REG_WRDATA_03 = `V5_MIG_INTERFACE_REG_WRDATA_03;
+    localparam MIG_INTERFACE_REG_WRDATA_04 = `V5_MIG_INTERFACE_REG_WRDATA_04;
+    
+    localparam MIG_INTERFACE_REG_RDDATA_01 = `V5_MIG_INTERFACE_REG_RDDATA_01;
+    localparam MIG_INTERFACE_REG_RDDATA_02 = `V5_MIG_INTERFACE_REG_RDDATA_02;
+    localparam MIG_INTERFACE_REG_RDDATA_03 = `V5_MIG_INTERFACE_REG_RDDATA_03;
+    localparam MIG_INTERFACE_REG_RDDATA_04 = `V5_MIG_INTERFACE_REG_RDDATA_04;
     
     // multiplexing;
     localparam MIG_INTERFACE_REG_SEL_NONE    = 3'b000;  // none;
     localparam MIG_INTERFACE_REG_SEL_CPU     = 3'b001;  // cpu;
     localparam MIG_INTERFACE_REG_SEL_MOTION  = 3'b010;  // motion detection video cores;
     localparam MIG_INTERFACE_REG_SEL_TEST    = 3'b100;  // hw testing circuit;
-
+    
+    
+    //bit position;
+    localparam MIG_INTERFACE_REG_CTRL_BIT_POS_WRSTROBE = 0;
+    localparam MIG_INTERFACE_REG_CTRL_BIT_POS_RDSTROBE = 1;
+    
     ///////////////////////////////////////
     // SIGNAL DECLARATION
     ///////////////////////////////////////
@@ -123,18 +133,36 @@ module core_video_mig_interface
     logic rd_en;
     
     // register enabler signals;
-    logic wr_mux_reg_en;
-    logic rd_mux_reg_en;
-    logic rd_status_reg_en;
-    logic rd_addr_reg_en;
-    logic rd_ddr2_rddata_01_reg_en;
-    logic rd_ddr2_rddata_02_reg_en;
-    logic rd_ddr2_rddata_03_reg_en;
-    logic rd_ddr2_rddata_04_reg_en;
+    logic wr_en_reg_mux;
+    logic wr_en_reg_addr;
+    logic wr_en_reg_ctrl;
+    
+    // mig ddr2 write is 128-bit; so need to shift in the four 32-bit cpu registers; 
+    logic wr_en_reg_cpu_ddr2_wrdata_01;
+    logic wr_en_reg_cpu_ddr2_wrdata_02;
+    logic wr_en_reg_cpu_ddr2_wrdata_03;
+    logic wr_en_reg_cpu_ddr2_wrdata_04;
+    
+    // register to hold wr_data from the cpu for ddr2 writing operation;
+    // ddr2 wr is 128-bit data; but cu register is 32-bit; need four cpu registers;
+    logic [31:0] cpu_ddr2_wrdata_01_reg;
+    logic [31:0] cpu_ddr2_wrdata_02_reg;
+    logic [31:0] cpu_ddr2_wrdata_03_reg;
+    logic [31:0] cpu_ddr2_wrdata_04_reg;
+   
+    // for read multiplexing
+    logic rd_en_reg_mux;
+    logic rd_en_reg_status;
+    logic rd_en_reg_addr;
+    logic rd_en_reg_ddr2_rddata_01;
+    logic rd_en_reg_ddr2_rddata_02;
+    logic rd_en_reg_ddr2_rddata_03;
+    logic rd_en_reg_ddr2_rddata_04;
         
-    // cpu register;
+    ////// cpu register;
     logic [2:0] mux_reg, mux_next;    // multiplexing;
-    logic [22:0] cpu_addr_reg, cpu_addr_next;
+    logic [22:0] cpu_addr_reg;
+    logic [31:0] cpu_ctrl_reg;
     logic [31:0] cpu_rddata_01_reg;
     logic [31:0] cpu_rddata_02_reg;
     logic [31:0] cpu_rddata_03_reg;
@@ -389,20 +417,35 @@ module core_video_mig_interface
         if(reset_sys) begin
             mux_reg <= MIG_INTERFACE_REG_SEL_NONE;
             core_hw_test_enable_ready_reg <= 1'b0;
-            
+                            
             cpu_addr_reg <= 0;        
             cpu_rddata_01_reg <= 0;
             cpu_rddata_02_reg <= 0;
             cpu_rddata_03_reg <= 0;
             cpu_rddata_04_reg <= 0;
-                
+
+            cpu_ddr2_wrdata_01_reg <= 0;
+            cpu_ddr2_wrdata_02_reg <= 0;
+            cpu_ddr2_wrdata_03_reg <= 0;
+            cpu_ddr2_wrdata_04_reg <= 0;                           
         end
+        
         else begin
-            if(wr_mux_reg_en) begin
+            // selecting which core/source to interface with the ddr2;
+            if(wr_en_reg_mux) begin
                 mux_reg <= mux_next;
-                core_hw_test_enable_ready_reg <= core_hw_test_enable_ready_next;
-                cpu_addr_reg <= cpu_addr_next;
+                core_hw_test_enable_ready_reg <= core_hw_test_enable_ready_next;                
             end;
+            
+            // ddr2 address specified by the cpu;
+            if(wr_en_reg_addr) begin
+                cpu_addr_reg <= wr_data[22:0];
+            end
+            
+            // control register;
+            if(wr_en_reg_ctrl) begin
+                cpu_ctrl_reg <= wr_data;
+            end
             
             // keep on reading after init is complete;
             // should be fine since the read data validity is ...
@@ -413,6 +456,23 @@ module core_video_mig_interface
                 cpu_rddata_03_reg <= user_rd_data[95:64];
                 cpu_rddata_04_reg <= user_rd_data[127:96];
             end
+            
+            // ddr2 write data;
+            if(wr_en_reg_cpu_ddr2_wrdata_01) begin
+                cpu_ddr2_wrdata_01_reg <= wr_data;
+            end
+            
+            if(wr_en_reg_cpu_ddr2_wrdata_02) begin
+                cpu_ddr2_wrdata_02_reg <= wr_data;
+            end
+            
+            if(wr_en_reg_cpu_ddr2_wrdata_03) begin
+                cpu_ddr2_wrdata_03_reg <= wr_data;
+            end
+            
+            if(wr_en_reg_cpu_ddr2_wrdata_04) begin
+                cpu_ddr2_wrdata_04_reg <= wr_data;
+            end
         end
     end  
     
@@ -421,19 +481,31 @@ module core_video_mig_interface
     assign rd_en = cs && read;
     
     // register 0; selector;    
-    assign wr_mux_reg_en = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_SEL);
+    assign wr_en_reg_mux = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_SEL);
     assign mux_next = wr_data[2:0];
     
     // register 1: status;
-    assign rd_mux_reg_en = rd_en && (addr[3:0] == MIG_INTERFACE_REG_SEL);
-    assign rd_status_reg_en = rd_en && (addr[3:0] == MIG_INTERFACE_REG_STATUS);
-    assign rd_addr_reg_en = rd_en && (addr[3:0] == MIG_INTERFACE_REG_ADDR);
+    assign rd_en_reg_mux = rd_en && (addr[3:0] == MIG_INTERFACE_REG_SEL);
+    assign rd_en_reg_status = rd_en && (addr[3:0] == MIG_INTERFACE_REG_STATUS);
     
-    // registers 5 - 8; ddr2 data 128-bit into four 32-bit cpu registers;
-    assign rd_ddr2_rddata_01_reg_en = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_01);
-    assign rd_ddr2_rddata_02_reg_en = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_02);
-    assign rd_ddr2_rddata_03_reg_en = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_03);
-    assign rd_ddr2_rddata_04_reg_en = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_04);     
+    // register 2: addr;
+    assign rd_en_reg_addr = rd_en && (addr[3:0] == MIG_INTERFACE_REG_ADDR);
+    assign wr_en_reg_addr = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_ADDR);
+    
+    // register 3: control register;
+    assign wr_en_reg_ctrl = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_CTRL);
+    
+    // registers to push the cpu 32-bit data to the ddr2 128-bit write data;
+    assign wr_en_reg_cpu_ddr2_wrdata_01 = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_WRDATA_01);
+    assign wr_en_reg_cpu_ddr2_wrdata_02 = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_WRDATA_02);
+    assign wr_en_reg_cpu_ddr2_wrdata_03 = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_WRDATA_03);
+    assign wr_en_reg_cpu_ddr2_wrdata_04 = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_WRDATA_04);
+    
+    // registers for ddr2 data 128-bit into four 32-bit cpu registers;
+    assign rd_en_reg_ddr2_rddata_01 = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_01);
+    assign rd_en_reg_ddr2_rddata_02 = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_02);
+    assign rd_en_reg_ddr2_rddata_03 = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_03);
+    assign rd_en_reg_ddr2_rddata_04 = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_04);     
     
    // multiplexing;
    always_comb begin
@@ -450,9 +522,6 @@ module core_video_mig_interface
         core_hw_test_enable_ready_next = 1'b0;
         core_hw_test_rd_data = 0;
         
-        // cpu;
-        cpu_addr_next = 0;
-        
         // bus interface;
         rd_data = 0;
         
@@ -465,16 +534,29 @@ module core_video_mig_interface
         */
         case(mux_reg)
             MIG_INTERFACE_REG_SEL_CPU: begin
+                /*-----------------------------------------
+                // signal assignment to the ddr2 mig interface;
+                ------------------------------------------*/
+                user_addr = cpu_addr_reg;
+                user_wr_data = {cpu_ddr2_wrdata_04_reg, cpu_ddr2_wrdata_03_reg, cpu_ddr2_wrdata_02_reg, cpu_ddr2_wrdata_01_reg};
+                user_wr_strobe = cpu_ctrl_reg[MIG_INTERFACE_REG_CTRL_BIT_POS_WRSTROBE];
+                user_rd_strobe = cpu_ctrl_reg[MIG_INTERFACE_REG_CTRL_BIT_POS_RDSTROBE];
+                
+                /*-----------------------------------------
                 // read multiplexing for the cpu;
-                if(rd_mux_reg_en) begin
+                ------------------------------------------*/
+                /// read the current state of the multiplexer;
+                if(rd_en_reg_mux) begin
                     rd_data = {29'b0, mux_reg};
                 end
+                
                 // status of the mig ddr2;
-                else if(rd_status_reg_en) begin
+                else if(rd_en_reg_status) begin
                     rd_data = {28'b0, MIG_ctrl_status_idle, MIG_user_transaction_complete, MIG_user_ready, MIG_user_init_complete};                
                 end
+                
                 // current address pointer;
-                else if(rd_addr_reg_en) begin
+                else if(rd_en_reg_addr) begin
                     rd_data = {9'b0, cpu_addr_reg};
                 end
                 
@@ -482,22 +564,22 @@ module core_video_mig_interface
                 // 128-bit is "divided" into four 32-bit cpu registers;
                 
                 // first batch;
-                else if(rd_ddr2_rddata_01_reg_en) begin
+                else if(rd_en_reg_ddr2_rddata_01) begin
                     rd_data = cpu_rddata_01_reg;                                    
                 end
                 
                 // second batch;
-                else if(rd_ddr2_rddata_02_reg_en) begin
+                else if(rd_en_reg_ddr2_rddata_02) begin
                     rd_data = cpu_rddata_02_reg;                                    
                 end
                 
                 // third batch;
-                else if(rd_ddr2_rddata_03_reg_en) begin
+                else if(rd_en_reg_ddr2_rddata_03) begin
                     rd_data = cpu_rddata_03_reg;                                    
                 end
                 
                 // last batch;
-                else if(rd_ddr2_rddata_04_reg_en) begin
+                else if(rd_en_reg_ddr2_rddata_04) begin
                     rd_data = cpu_rddata_04_reg;                                    
                 end
             end
