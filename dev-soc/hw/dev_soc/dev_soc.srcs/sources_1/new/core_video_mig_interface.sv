@@ -191,7 +191,9 @@ module core_video_mig_interface
         * debugging interface
         --------------------------*/            
         output logic debug_mig_reset_n,    // reset signal for MIG:
-        output logic debug_MIG_init_complete_status
+        output logic debug_MIG_init_complete_status,
+        output logic debug_MIG_transaction_complete_status,
+        output logic debug_MIG_ctrl_status_idle
         
     );
     
@@ -380,6 +382,8 @@ module core_video_mig_interface
     --------------------*/
     assign debug_mig_reset_n = rst_mem_n;
     assign debug_MIG_init_complete_status = MIG_user_init_complete;
+    assign debug_MIG_transaction_complete_status = MIG_user_transaction_complete;
+    assign debug_MIG_ctrl_status_idle = MIG_ctrl_status_idle; 
      
     ////////////////////////////////////////////////////////////////
     // INSTANTIATION
