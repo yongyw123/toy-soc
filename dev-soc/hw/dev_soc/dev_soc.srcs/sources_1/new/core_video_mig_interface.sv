@@ -707,7 +707,7 @@ module core_video_mig_interface
                 
                 // data;
                 user_wr_data = core_motion_wrdata;                
-                core_motion_rddata = rd_data;
+                core_motion_rddata = user_rd_data;
                 
                 // status;
                 core_MIG_init_complete = MIG_user_init_complete;  // MIG DDR2 initialization complete;
