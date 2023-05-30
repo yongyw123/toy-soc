@@ -19,6 +19,10 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+`ifndef CORE_VIDEO_MIG_INTERFACE_SV
+`define CORE_VIDEO_MIG_INTERFACE_SV
+
+`include "IO_map.svh"
 
 module core_video_mig_interface
     #(parameter
@@ -40,6 +44,19 @@ module core_video_mig_interface
         input logic clk_mem,    // 200MHz for MIG;       
         input logic reset_sys,  // system reset;        
         
+        /* --------------------------------------------------------------------------
+        BUS INTERFACE
+        //> given interface with video controller (which interfaces with the bus);
+        // note that not all interfacce will be used;
+        ---------------------------------------------------------------------------*/
+        input logic cs,    
+        input logic write,              
+        input logic read,               
+        input logic [`VIDEO_REG_ADDR_BIT_SIZE_G-1:0] addr,           
+        input logic [`REG_DATA_WIDTH_G-1:0]  wr_data,    
+        output logic [`REG_DATA_WIDTH_G-1:0]  rd_data,
+        
+                
         /* ----------------------------
         * external pin;
         * 1. LED;
@@ -65,21 +82,53 @@ module core_video_mig_interface
         inout tri [1:0] ddr2_dqs_p,  // inout [1:0]                        ddr2_dqs_p      
         output logic [0:0] ddr2_cs_n,  // output [0:0]           ddr2_cs_n
         output logic [1:0] ddr2_dm,  // output [1:0]                        ddr2_dm
-        output logic [0:0] ddr2_odt, // output [0:0]                       ddr2_odt
-        
+        output logic [0:0] ddr2_odt, // output [0:0]                       ddr2_odt        
         
         /*--------------------------
         * debugging interface
-        --------------------------*/    
-        
+        --------------------------*/            
         output logic debug_mig_reset_n    // reset signal for MIG:
         
     );
     
     ///////////////////////////////////////
+    // CONSTANTS
+    ///////////////////////////////////////
+    // address;
+    localparam MIG_INTERFACE_REG_SEL       = 4'b0000;
+    localparam MIG_INTERFACE_REG_STATUS    = 4'b0001;
+    localparam MIG_INTERFACE_REG_ADDR      = 4'b0010;
+    localparam MIG_INTERFACE_REG_WR_CTRL   = 4'b0011;
+    localparam MIG_INTERFACE_REG_RD_CTRL   = 4'b0100;
+    localparam MIG_INTERFACE_REG_RDDATA_01 = 4'b0101;
+    localparam MIG_INTERFACE_REG_RDDATA_02 = 4'b0110;
+    localparam MIG_INTERFACE_REG_RDDATA_03 = 4'b0111;
+    localparam MIG_INTERFACE_REG_RDDATA_04 = 4'b1000;    
+    
+    // multiplexing;
+    localparam MIG_INTERFACE_REG_SEL_NONE    = 3'b000;  // none;
+    localparam MIG_INTERFACE_REG_SEL_CPU     = 3'b001;  // cpu;
+    localparam MIG_INTERFACE_REG_SEL_MOTION  = 3'b010;  // motion detection video cores;
+    localparam MIG_INTERFACE_REG_SEL_TEST    = 3'b100;  // hw testing circuit;
+
+    ///////////////////////////////////////
     // SIGNAL DECLARATION
     ///////////////////////////////////////
     
+    /*------------------------------------------------
+    // bus interface 
+    ------------------------------------------------*/       
+    // general enabler signals;
+    logic wr_en;
+    logic rd_en;
+    
+    // register enabler signals;
+    logic wr_mux_reg_en;
+    
+    
+    // register;
+    logic [2:0] mux_reg, mux_next;    // multiplexing;
+        
     /*------------------------------------------------
     // signals for module: user_mig_DDR2_sync_ctrl 
     ------------------------------------------------*/       
@@ -112,6 +161,19 @@ module core_video_mig_interface
     logic rst_mig_stretch;
     logic rst_mig_stretch_reg; // to filter for glicth
     
+    
+    /*-------------------------------------------------------
+    * signals for HW test;
+    -------------------------------------------------------*/   
+    logic core_hw_test_enable_ready_reg, core_hw_test_enable_ready_next; 
+    logic core_hw_test_wr_strobe;   // write request from the hw core test;
+    logic core_hw_test_rd_strobe;   // read request from the hw core test;
+    logic [22:0] core_hw_test_addr; // address;
+    logic [127:0] core_hw_test_wr_data;
+    logic [127:0] core_hw_test_rd_data;
+    logic [15:0] core_hw_test_LED;
+    
+        
     /////////////////////////////////////////////////////////////////////////////////
     /* -------------------------------------------------------------------
     * Synchronize the MIG reset signals;
@@ -273,7 +335,7 @@ module core_video_mig_interface
         .reset_sys(reset_sys),                                 
         
         // LEDs;
-        .LED(LED),        
+        .LED(core_hw_test_LED),        
         
         // for LED display;        
         .MMCM_locked(MMCM_locked),  // mmcm locked status; 
@@ -282,17 +344,21 @@ module core_video_mig_interface
         * to communicate with the MIG synchronous interface
         -------------------------------------------------------*/
         // user signals;
-        .user_wr_strobe(user_wr_strobe),            // write request;
-        .user_rd_strobe(user_rd_strobe),             // read request;
-        .user_addr(user_addr),           // address;
+        .user_wr_strobe(core_hw_test_wr_strobe),            // write request;
+        .user_rd_strobe(core_hw_test_rd_strobe),             // read request;
+        .user_addr(core_hw_test_addr),           // address;
         
         // data;
-        .user_wr_data(user_wr_data),       
-        .user_rd_data(user_rd_data),  
+        .user_wr_data(core_hw_test_wr_data),       
+        .user_rd_data(core_hw_test_rd_data),  
         
         // status
         .MIG_user_init_complete(MIG_user_init_complete),        // MIG done calibarating and initializing the DDR2;
-        .MIG_user_ready(MIG_user_ready),                // this implies init_complete and also other status; see UG586; app_rdy;
+        //.MIG_user_ready(MIG_user_ready),                // this implies init_complete and also other status; see UG586; app_rdy;
+        
+        // only ready if enabled by the user;
+        // core_hw_test_enable_reg == MIG_user_ready && user_choice; 
+        .MIG_user_ready(core_hw_test_enable_ready_reg),
         .MIG_user_transaction_complete(MIG_user_transaction_complete), // read/write transaction complete?
         //.MIG_ctrl_status_idle(MIG_ctrl_status_idle),
         
@@ -302,7 +368,80 @@ module core_video_mig_interface
     
     
     
+    ////////////////////////////////////////////////////////////////
+    /// BUS INTERFACING    
+    ////////////////////////////////////////////////////////////////       
+    // ff;
+    //logic core_hw_test_enable_reg, core_hw_test_enable_next;
     
+    always_ff @(posedge clk_sys, posedge reset_sys) begin
+        if(reset_sys) begin
+            mux_reg <= MIG_INTERFACE_REG_SEL_NONE;
+            core_hw_test_enable_ready_reg <= 1'b0;            
+        end
+        else begin
+            if(wr_mux_reg_en) begin
+                mux_reg <= mux_next;
+                core_hw_test_enable_ready_reg <= core_hw_test_enable_ready_next;
+            end;
+            
+        end
+    end  
     
+    // addres decoding;
+    assign wr_en = cs && write;
+    assign rd_en = cs && read;
+    
+    // register 0; selector;    
+    assign wr_mux_reg_en = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_SEL);
+    assign mux_next = wr_data[2:0];
+    
+   // multiplexing;
+   always_comb begin
+   
+        ////////// default; ////////////
+        // common;
+        user_wr_data = 0;
+        user_addr = 0;
+        user_wr_strobe = 0;
+        user_rd_strobe = 0;
+        LED = 0;
+        
+        // hw test core;
+        core_hw_test_enable_ready_next = 1'b0;
+        core_hw_test_rd_data = 0;
+        
+        
+        ////////// start the machinery; /////////////
+        /*
+        localparam MIG_INTERFACE_REG_SEL_NONE    = 3'b000;  // none;
+        localparam MIG_INTERFACE_REG_SEL_CPU     = 3'b001;  // cpu;
+        localparam MIG_INTERFACE_REG_SEL_MOTION  = 3'b010;  // motion detection video cores;
+        localparam MIG_INTERFACE_REG_SEL_TEST    = 3'b100;  // hw testing circuit;
+        */
+        case(mux_reg)
+            
+            MIG_INTERFACE_REG_SEL_MOTION: begin                
+                core_hw_test_enable_ready_next = MIG_user_ready && 1'b1;
+                user_wr_strobe = core_hw_test_wr_strobe;
+                user_rd_strobe = core_hw_test_rd_strobe;
+                user_addr = core_hw_test_addr;
+                user_wr_data = core_hw_test_wr_data;
+                core_hw_test_rd_data = user_rd_data;
+                LED = core_hw_test_LED;
+            end
+            
+        
+            
+            // MIG_INTERFACE_REG_SEL_NONE
+            default:     ;                
+        endcase
+   
+   end 
+   
+     
     
 endmodule
+
+
+`endif //CORE_VIDEO_MIG_INTERFACE_SV
