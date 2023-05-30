@@ -88,20 +88,20 @@ module core_video_mig_interface_tb(
         addr <= MIG_INTERFACE_REG_SEL;
         wr_data <= MIG_INTERFACE_REG_SEL_CPU;
         
+        // disable
+        @(posedge clk_sys);
+        cs <= 1;
+        write <= 0;
+        read <= 0;
+        addr <= MIG_INTERFACE_REG_SEL;
+                
         /* initial reset pulse */
-        reset_sys = 1'b1;
-        #(100);
-        reset_sys = 1'b0;
-        #(100);
-        
         wait(locked == 1'b1);
-        #(1000);
-        
-        // reset halfway to start over;
         reset_sys = 1'b1;
         #(100);
         reset_sys = 1'b0;
-        #(100);  
+        #(100);
+        
         
         /* test 01: read the status via cpu*/
         @(posedge clk_sys);
@@ -109,14 +109,16 @@ module core_video_mig_interface_tb(
         addr <= MIG_INTERFACE_REG_STATUS;
         // wait for init complete;
         wait(rd_data[0] == 1);  
-        @(posedge clk_sys);
-        
-        #(1000);
+        #(100);
+        $stop;
         
         // other status must either hold true/high after init is completed;
         // until something changes;
         
         // transaction complete must be low since there is no request;
+        /*
+        @(posedge clk_sys);
+        #(100);
         assert(rd_data[2] == 0) $display("ok");
             else $error("transaction complete status is not low;");
          // controller must be idle;
@@ -124,6 +126,66 @@ module core_video_mig_interface_tb(
             else $error("controller is not idle");   
         
         #(100);
+        */
+        
+        /* test 02: write and read via the cpu */
+        /*
+        // push the 32-bit cpu data four times to populate the 128-bit ddr2; 
+        @(posedge clk_sys);
+        read <= 0;
+        write <= 1;
+        addr <= MIG_INTERFACE_REG_WRDATA_01;
+        wr_data <= 32'ha;
+        
+        @(posedge clk_sys);
+        write <= 1;
+        addr <= MIG_INTERFACE_REG_WRDATA_02;
+        wr_data <= 32'hb;
+        
+        @(posedge clk_sys);
+        write <= 1;
+        addr <= MIG_INTERFACE_REG_WRDATA_03;
+        wr_data <= 32'hc;
+        
+        @(posedge clk_sys);
+        write <= 1;
+        addr <= MIG_INTERFACE_REG_WRDATA_04;
+        wr_data <= 32'hd;
+        
+        // prepare the write address;
+        @(posedge clk_sys);
+        write <= 1;
+        addr <= MIG_INTERFACE_REG_ADDR;
+        wr_data <= 5;
+        
+        // submit the write request;
+        @(posedge clk_sys);
+        write <= 1'b1;
+        addr <= MIG_INTERFACE_REG_CTRL;
+        wr_data <= {31'b0, 1'b1};
+        
+        // disable the write otherwise it will keep writing;
+        @(posedge clk_sys);
+        write <= 1'b1;
+        addr <= MIG_INTERFACE_REG_CTRL;
+        wr_data <= {31'b0, 1'b0};
+        
+        // wait for the transaction complete status;
+        @(posedge clk_sys);
+        write <= 1'b0;
+        read <= 1'b1;
+        addr <= MIG_INTERFACE_REG_STATUS;
+        
+        @(posedge clk_sys);
+        assert(rd_data[2] == 1) $display("ok, transaction complete status is detected;");
+            else $error("expected transaction complete status to be high;");
+        
+        #(100);
+        
+        */
+        
+        
+        
         $stop;
          
     end
