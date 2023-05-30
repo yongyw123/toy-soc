@@ -193,7 +193,8 @@ module core_video_mig_interface
         output logic debug_mig_reset_n,    // reset signal for MIG:
         output logic debug_MIG_init_complete_status,
         output logic debug_MIG_transaction_complete_status,
-        output logic debug_MIG_ctrl_status_idle
+        output logic debug_MIG_ctrl_status_idle,
+        output logic [2:0] debug_mux_reg
         
     );
     
@@ -384,12 +385,14 @@ module core_video_mig_interface
     assign debug_MIG_init_complete_status = MIG_user_init_complete;
     assign debug_MIG_transaction_complete_status = MIG_user_transaction_complete;
     assign debug_MIG_ctrl_status_idle = MIG_ctrl_status_idle; 
-     
+    assign debug_mux_reg = mux_reg;
+    
     ////////////////////////////////////////////////////////////////
     // INSTANTIATION
     ////////////////////////////////////////////////////////////////
     
     // mig synchronous interface controller;
+    
     user_mig_DDR2_sync_ctrl user_mig_DDR2_sync_ctrl_unit
     (        
         // general, 
@@ -400,9 +403,7 @@ module core_video_mig_interface
         .clk_mem(clk_mem),        // 200MHz to drive MIG memory clock,
         .rst_mem_n(rst_mem_n),      // active low to reset the mig interface,
         
-        /* -----------------------------------------------------
-        *  interface between the user system and the memory controller,
-        ------------------------------------------------------*/
+        //  interface between the user system and the memory controller,
         .user_wr_strobe(user_wr_strobe),             // write request,
         .user_rd_strobe(user_rd_strobe),             // read request,
         .user_addr(user_addr),           // address,
@@ -419,9 +420,7 @@ module core_video_mig_interface
         ///// IMPORTANT: there is a three system (100MHz) clock delay after write/read strobe is asserted;
         .MIG_ctrl_status_idle(MIG_ctrl_status_idle),     
         
-        /* -----------------------------------------------------
-        * External Pin: MIG interface with the actual DDR2  
-        ------------------------------------------------------*/
+        ////// External Pin: MIG interface with the actual DDR2  
         
         // ddr2 sdram memory interface (defined by the imported ucf file),
         .ddr2_addr(ddr2_addr),   // address, 
@@ -442,9 +441,8 @@ module core_video_mig_interface
         // not used;
         .init_calib_complete(),  // output                                       init_calib_complete
         
-        /* -----------------------------------------------------
-        *  debugging interface 
-        ------------------------------------------------------*/
+        
+        /////  debugging interface 
         .debug_FSM(debug_ctrl_FSM),
         
         // not used;
@@ -465,7 +463,7 @@ module core_video_mig_interface
         .debug_user_wr_strobe_sync(),
         .debug_user_rd_strobe_sync()        
     );
-
+    
     // HW testing circuit;
     user_mig_HW_test_sequential     
     #(
