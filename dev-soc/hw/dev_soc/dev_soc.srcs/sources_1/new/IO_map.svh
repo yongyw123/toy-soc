@@ -755,7 +755,7 @@ Register IO:
 `define V5_MIG_INTERFACE_REG_RDDATA_01  4'b1000     // 8
 `define V5_MIG_INTERFACE_REG_RDDATA_02  4'b1001     // 9
 `define V5_MIG_INTERFACE_REG_RDDATA_03  4'b1010     // 10
-`define V5_MIG_INTERFACE_REG_RDDATA_04  4'b1011     // 1
+`define V5_MIG_INTERFACE_REG_RDDATA_04  4'b1011     // 11
 
 // register 0: multiplexing;
 `define V5_MIG_INTERFACE_REG_SEL_NONE     3'b000  // none;
