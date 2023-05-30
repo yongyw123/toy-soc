@@ -716,17 +716,16 @@ Register Definition:
 3. Register 2 (Offset 2): address common for read and write;
         bit[22:0] address;
 
-4. Register 3 (Offset 3): Write Control Register;
-        bit[0]: push first 32-bit batch of the write_data[31:0]; active HIGH;
-        bit[1]: push second 32-bit batch of the write_data[63:32]; active HIGH;
-        bit[2]: push third 32-bit batch of the write_data[95:64]; active HIGH;
-        bit[3]: push forth 32-bit batch of the write_data[127:96]; active HIGH;
-        bit[4]: submit the write request; (Need to clear once submitting for a single write operation);
-
-5. Register 4 (Offset 4): Read Control Register:
-        bit[0]: submit the read request; (Need to clear once submitting for a single write operation);
-                
-6. Register 5-8: to store the 128-bit read data as noted in the construction;
+4. Register 3 (Offset 3): Control Register;
+        bit[0]: submit the write request; (Need to clear once submitting for a single write operation);
+        bit[1]: submit the read request; (Need to clear once submitting for a single write operation);        
+      
+5. Register 4 (Offset 4): DDR2 Write Register - push the first 32-bit batch of the write_data[31:0]; active HIGH;
+6. Register 5 (Offset 5): DDR2 Write Register - push the second 32-bit batch of the write_data[63:32]; active HIGH;
+7. Register 6 (Offset 6): DDR2 Write Register - push the third 32-bit batch of the write_data[95:64]; active HIGH;
+8. Register 7 (Offset 7): DDR2 Write Register -  push the forth 32-bit batch of the write_data[127:96]; active HIGH;
+       
+9. Register 8-11: to store the 128-bit read data as noted in the construction;
 
 Register IO:
 1. Register 0: read and write;
@@ -734,18 +733,29 @@ Register IO:
 3. Register 2: read and write;
 4. Register 3: write only;
 5. Register 4: write only;
-6. Register (5-8): read only;
+6. Register 5: write only;
+7. Register 6: write only;
+8. Register 7: write only;
+9. Register 8: read only;
+10. Register 9: read only;
+11. Register 10: read only;
+12. Register 11: read only;
  
 *****************************************************************/
-`define V5_MIG_INTERFACE_REG_SEL        0   // 4'b0000;
-`define V5_MIG_INTERFACE_REG_STATUS     1   // 4'b0001;
-`define V5_MIG_INTERFACE_REG_ADDR       2   // 4'b0010;
-`define V5_MIG_INTERFACE_REG_WR_CTRL    3   // 4'b0011;
-`define V5_MIG_INTERFACE_REG_RD_CTRL    4   // 4'b0100;
-`define V5_MIG_INTERFACE_REG_RDDATA_01  5   // 4'b0101;
-`define V5_MIG_INTERFACE_REG_RDDATA_02  6   // 4'b0110;
-`define V5_MIG_INTERFACE_REG_RDDATA_03  7   // 4'b0111;
-`define V5_MIG_INTERFACE_REG_RDDATA_04  8   // 4'b1000;
+`define V5_MIG_INTERFACE_REG_SEL        4'b0000     // 0;
+`define V5_MIG_INTERFACE_REG_STATUS     4'b0001     // 1;
+`define V5_MIG_INTERFACE_REG_ADDR       4'b0010     // 2;
+`define V5_MIG_INTERFACE_REG_CTRL       4'b0011     // 3;
+
+`define V5_MIG_INTERFACE_REG_WRDATA_01  4'b0100     // 4
+`define V5_MIG_INTERFACE_REG_WRDATA_02  4'b0101     // 5
+`define V5_MIG_INTERFACE_REG_WRDATA_03  4'b0110     // 6;
+`define V5_MIG_INTERFACE_REG_WRDATA_04  4'b0111     // 7
+
+`define V5_MIG_INTERFACE_REG_RDDATA_01  4'b1000     // 8
+`define V5_MIG_INTERFACE_REG_RDDATA_02  4'b1001     // 9
+`define V5_MIG_INTERFACE_REG_RDDATA_03  4'b1010     // 10
+`define V5_MIG_INTERFACE_REG_RDDATA_04  4'b1011     // 1
 
 // register 0: multiplexing;
 `define V5_MIG_INTERFACE_REG_SEL_NONE     3'b000  // none;
