@@ -53,11 +53,16 @@ module core_video_mig_interface_tb(
              
     );
     
-    
+    ////////// for simulation;
     localparam LED_END_RANGE = 4;
-    localparam RANDOM_128BIT_WRDATA = {128{$random}};
+    //localparam RANDOM_128BIT_WRDATA = {128{$random}};
+    logic [127:0] RANDOM_128BIT_WRDATA = {127{$random}};     
         
-    // address;
+    localparam TEST_ARRAY_SIZE_CORE_MOTION = 1000;
+    //localparam TEST_ARRAY_SIZE_CORE_MOTION = 2;    
+    bit[TEST_ARRAY_SIZE_CORE_MOTION-1:0][127:0] TEST_ARRAY_CORE_MOTION;
+
+    //////////// register address;
     localparam MIG_INTERFACE_REG_SEL       = `V5_MIG_INTERFACE_REG_SEL;
     localparam MIG_INTERFACE_REG_STATUS    = `V5_MIG_INTERFACE_REG_STATUS;
     localparam MIG_INTERFACE_REG_ADDR      = `V5_MIG_INTERFACE_REG_ADDR;
@@ -301,9 +306,9 @@ module core_video_mig_interface_tb(
         #(100);
         
         
-        /* test 05: change source to video core: motion detection */
+        /* test 05: change source to video core: motion detection */        
         // recall that in motion detection core; we deal with 128-bit transaction directly;
-        // this is unlike cpu as cpu is limited by the 32-bit register width;
+        // this is unlike cpu as cpu is limited by the 32-bit register width;        
         @(posedge clk_sys);
         write <= 1'b1;
         read <= 1'b0;
@@ -350,7 +355,64 @@ module core_video_mig_interface_tb(
             end
         
         #(100);
-                
+              
+        /* test 06: burst write and read via video core: motion detection */
+		// prepare an array of random data to write;
+        for(int i = 0; i < TEST_ARRAY_SIZE_CORE_MOTION; i++) begin
+            TEST_ARRAY_CORE_MOTION[i] = {128{$random}};        
+        end
+        
+        // burst write;
+        for(int i = 0; i < TEST_ARRAY_SIZE_CORE_MOTION; i++) begin
+            // setup;
+            @(posedge clk_sys);
+            core_motion_wrstrobe <= 1'b0;                    
+            core_motion_addr <= i;
+            core_motion_wrdata = TEST_ARRAY_CORE_MOTION[i];        
+            
+            // submit the write request;
+            @(posedge clk_sys);
+            core_motion_wrstrobe <= 1'b1;                                            
+            @(posedge clk_sys);
+            core_motion_wrstrobe <= 1'b0; // disable write;
+                        
+            // wait for the transaction to complete
+            @(posedge clk_sys);
+            wait(core_MIG_transaction_complete == 1'b1);
+            @(posedge clk_sys);
+        
+        end
+        
+        // burst read;
+        for(int i = 0; i < TEST_ARRAY_SIZE_CORE_MOTION; i++) begin
+            // setup;
+            @(posedge clk_sys);
+            core_motion_rdstrobe <= 1'b0;                    
+            core_motion_addr <= i;            
+            
+            // submit the read request;
+            @(posedge clk_sys);
+            core_motion_rdstrobe <= 1'b1;                                            
+            @(posedge clk_sys);
+            core_motion_rdstrobe <= 1'b0; 
+                        
+            // wait for the transaction to complete
+            @(posedge clk_sys);
+            wait(core_MIG_transaction_complete == 1'b1);
+            
+            @(posedge clk_sys);            
+            // check if the read data matches with what it is written at a given address;
+             assert(core_motion_rddata == TEST_ARRAY_CORE_MOTION[i]) 
+             begin                
+                $display("Test index: %0d, Time; %t, Status: OK, read data matches with the written data at Address: %0d", i, $time, core_motion_addr);
+             end  
+             else begin 
+                    $error("Read Data does not match with the Written Data @ time: %t, Address: %0d", $time, core_motion_addr);
+                    $error("ERROR Encountered: terminate the simulation at once");                                                     
+                    $stop;  // stop the simulation immediately upon discovering a mismatch; as this should not happen unless intended;                     
+             end            
+         end
+          
         $stop;
          
     end
