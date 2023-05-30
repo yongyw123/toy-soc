@@ -78,6 +78,13 @@ module core_video_mig_interface_tb(
     localparam MIG_INTERFACE_REG_SEL_TEST    = 3'b100;  // hw testing circuit;
     
     initial begin
+        // initial reset;
+        wait(locked == 1'b1);
+        reset_sys = 1'b1;
+        #(100);
+        reset_sys = 1'b0;
+        #(100);
+        
         /* initial value; 
         set to cpu source
         */
@@ -95,12 +102,6 @@ module core_video_mig_interface_tb(
         read <= 0;
         addr <= MIG_INTERFACE_REG_SEL;
                 
-        /* initial reset pulse */
-        wait(locked == 1'b1);
-        reset_sys = 1'b1;
-        #(100);
-        reset_sys = 1'b0;
-        #(100);
         
         
         /* test 01: read the status via cpu*/
@@ -110,13 +111,12 @@ module core_video_mig_interface_tb(
         // wait for init complete;
         wait(rd_data[0] == 1);  
         #(100);
-        $stop;
+        
         
         // other status must either hold true/high after init is completed;
         // until something changes;
         
         // transaction complete must be low since there is no request;
-        /*
         @(posedge clk_sys);
         #(100);
         assert(rd_data[2] == 0) $display("ok");
@@ -126,10 +126,8 @@ module core_video_mig_interface_tb(
             else $error("controller is not idle");   
         
         #(100);
-        */
         
         /* test 02: write and read via the cpu */
-        /*
         // push the 32-bit cpu data four times to populate the 128-bit ddr2; 
         @(posedge clk_sys);
         read <= 0;
@@ -177,15 +175,82 @@ module core_video_mig_interface_tb(
         addr <= MIG_INTERFACE_REG_STATUS;
         
         @(posedge clk_sys);
-        assert(rd_data[2] == 1) $display("ok, transaction complete status is detected;");
-            else $error("expected transaction complete status to be high;");
-        
+        wait(rd_data[2] == 1);
         #(100);
         
-        */
+        /* test 03: read from the previous write (at the same address) */
         
+        // prepare the address;
+		// maintain as the write address;
+        @(posedge clk_sys);
+        write <= 1;
+        addr <= MIG_INTERFACE_REG_ADDR;
+        wr_data <= 5;
         
+		// submit the read request;		
+        @(posedge clk_sys);
+        write <= 1'b1;
+        addr <= MIG_INTERFACE_REG_CTRL;
+        wr_data <= {30'b0, 2'b10};
+		
+        // optional: disable the read; otherwise it will keep on reading;
+        @(posedge clk_sys);
+        write <= 1'b1;
+        addr <= MIG_INTERFACE_REG_CTRL;
+        wr_data <= {30'b0, 2'b00};
+		
+		// wait for the transaction to complete;
+		// wait for the transaction complete status;
+        @(posedge clk_sys);
+        write <= 1'b0;
+        read <= 1'b1;
+        addr <= MIG_INTERFACE_REG_STATUS;
         
+        @(posedge clk_sys);
+        wait(rd_data[2] == 1);
+            
+		// read the 128-bit DDR2 into four read data registers;
+        @(posedge clk_sys);
+        read <= 1'b1;
+		addr <= MIG_INTERFACE_REG_RDDATA_01;
+		@(posedge clk_sys);
+		assert(rd_data == 32'ha) $display("ok, rd_data: %32b", rd_data);
+			else begin            
+                $error("expected transaction complete status to be high; stop the simulation");
+                $stop;
+            end        
+        		
+		@(posedge clk_sys);
+        read <= 1'b1;
+		addr <= MIG_INTERFACE_REG_RDDATA_02;
+		@(posedge clk_sys);
+		assert(rd_data == 32'hb) $display("ok, rd_data: %32b", rd_data);
+			else begin            
+                $error("expected transaction complete status to be high; stop the simulation");
+                $stop;
+            end                
+		
+		@(posedge clk_sys);
+        read <= 1'b1;
+		addr <= MIG_INTERFACE_REG_RDDATA_03;
+		@(posedge clk_sys);
+		assert(rd_data == 32'hc) $display("ok, rd_data: %32b", rd_data);
+			else begin            
+                $error("expected transaction complete status to be high; stop the simulation");
+                $stop;
+            end                
+		
+		@(posedge clk_sys);
+        read <= 1'b1;
+		addr <= MIG_INTERFACE_REG_RDDATA_04;
+		@(posedge clk_sys);
+		assert(rd_data == 32'hd) $display("ok, rd_data: %32b", rd_data);
+			else begin            
+                $error("expected transaction complete status to be high; stop the simulation");
+                $stop;
+            end                
+        
+        #(100);
         $stop;
          
     end

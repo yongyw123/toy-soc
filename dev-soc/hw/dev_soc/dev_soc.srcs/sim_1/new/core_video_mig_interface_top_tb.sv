@@ -91,6 +91,7 @@ module core_video_mig_interface_top_tb();
     logic debug_MIG_init_complete_status;
     logic debug_MIG_transaction_complete_status;
     logic debug_MIG_ctrl_status_idle;
+    logic [2:0] debug_mux_reg;
     
     // mapping;
     assign clk_sys = clkout_100M;
@@ -130,7 +131,6 @@ module core_video_mig_interface_top_tb();
     https://support.xilinx.com/s/question/0D52E00006hpsNVSAY/mig-simulation-initcalibcomplete-stays-low?language=en_US
     
     */
-    
     ddr2_model ddr2_model_unit
     (
         .ck(ddr2_ck_p),
@@ -149,6 +149,7 @@ module core_video_mig_interface_top_tb();
         .rdqs_n(),
         .odt(ddr2_odt)
     );
+    
     
     // mmcm;
     clk_wiz_0 mmcm_unit
