@@ -19,6 +19,10 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+`ifndef CORE_VIDEO_MIG_INTERFACE_TB_SV
+`define CORE_VIDEO_MIG_INTERFACE_TB_SV
+
+`include "IO_map.svh"
 
 module core_video_mig_interface_tb(
         input logic clk_sys,
@@ -81,4 +85,6 @@ module core_video_mig_interface_tb(
         $stop; 
     end
 endmodule
+
+`endif //CORE_VIDEO_MIG_INTERFACE_TB_SV
 

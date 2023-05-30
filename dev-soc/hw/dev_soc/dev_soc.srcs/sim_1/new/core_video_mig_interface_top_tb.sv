@@ -19,6 +19,11 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+`ifndef CORE_VIDEO_MIG_INTERFACE_TOP_TB_SV
+`define CORE_VIDEO_MIG_INTERFACE_TOP_TB_SV
+
+`include "IO_map.svh"
+
 
 module core_video_mig_interface_top_tb();
 
@@ -38,6 +43,8 @@ module core_video_mig_interface_top_tb();
     logic clk_sys;          // 100MHz system clock;
     logic clk_mem;          // 200MHz for MIG;
     logic reset_sys;        // user system reset;
+    
+    
     
     logic [15:0] LED;
     logic MMCM_locked;
@@ -171,3 +178,4 @@ module core_video_mig_interface_top_tb();
 
 endmodule
 
+`endif //CORE_VIDEO_MIG_INTERFACE_TOP_TB_SV
