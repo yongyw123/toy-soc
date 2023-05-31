@@ -270,7 +270,7 @@ module core_video_mig_interface
     /*------------------------------------------------
     // signals for module: user_mig_DDR2_sync_ctrl 
     ------------------------------------------------*/       
-    logic rst_mem_n;
+    //logic rst_mem_n;
     //logic MMCM_locked;    // this is already declared as an output port;
     logic user_wr_strobe;
     logic user_rd_strobe;
