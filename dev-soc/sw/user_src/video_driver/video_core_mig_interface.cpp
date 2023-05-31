@@ -161,6 +161,7 @@ void video_core_mig_interface::set_addr(uint32_t addr){
     @param  : address;
     @retval : none;
     @note   : underlying DDR2 MIG address is 23 bit;    
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
 
    REG_WRITE(base_addr, REG_ADDR_OFFSET, addr);
@@ -172,6 +173,7 @@ void video_core_mig_interface::submit_write(void){
     @param  : none
     @retval : none
     @note   : user needs to ensure data and address line are already set up;        
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
 
    uint32_t wr_data = (uint32_t)REG_CTRL_MASK_WRSTROBE;   
@@ -188,6 +190,7 @@ void video_core_mig_interface::submit_read(void){
     @param  : none
     @retval : none
     @note   : user needs to ensure the address line is already set up;        
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
 
    uint32_t wr_data = (uint32_t)REG_CTRL_MASK_RDSTROBE;   
@@ -203,6 +206,7 @@ void video_core_mig_interface::push_wrdata_01(uint32_t wrdata){
     @brief  : to push a 32-bit data into the DDR2 128-bit wr_data[31:0];
     @param  : write data;
     @retval : none;    
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
    REG_WRITE(base_addr, REG_WRDATA_01_OFFSET, wrdata);
 }
@@ -212,6 +216,7 @@ void video_core_mig_interface::push_wrdata_02(uint32_t wrdata){
     @brief  : to push a 32-bit data into the DDR2 128-bit wr_data[63:32];
     @param  : write data;
     @retval : none;    
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
    REG_WRITE(base_addr, REG_WRDATA_02_OFFSET, wrdata);
 }
@@ -221,6 +226,7 @@ void video_core_mig_interface::push_wrdata_03(uint32_t wrdata){
     @brief  : to push a 32-bit data into the DDR2 128-bit wr_data[95:64];
     @param  : write data;
     @retval : none;    
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
    REG_WRITE(base_addr, REG_WRDATA_03_OFFSET, wrdata);
 }
@@ -231,6 +237,7 @@ void video_core_mig_interface::push_wrdata_04(uint32_t wrdata){
     @brief  : to push a 32-bit data into the DDR2 128-bit wr_data[127:96];
     @param  : write data;
     @retval : none;    
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
    REG_WRITE(base_addr, REG_WRDATA_04_OFFSET, wrdata);
 }
@@ -241,6 +248,7 @@ uint32_t video_core_mig_interface::get_rddata_01(void){
     @brief  : to read off the 32-bit of the DDR2 128-bit data at addr[31:0];
     @param  : none;
     @retval : 32-bit read data;
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
    REG_READ(base_addr, REG_RDDATA_01_OFFSET);
 }
@@ -250,6 +258,7 @@ uint32_t video_core_mig_interface::get_rddata_02(void){
     @brief  : to read off the 32-bit of the DDR2 128-bit data at addr[63:32];
     @param  : none;
     @retval : 32-bit read data;
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
    REG_READ(base_addr, REG_RDDATA_02_OFFSET);
 }
@@ -259,6 +268,7 @@ uint32_t video_core_mig_interface::get_rddata_03(void){
     @brief  : to read off the 32-bit of the DDR2 128-bit data at addr[95:64];
     @param  : none;
     @retval : 32-bit read data;
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
    REG_READ(base_addr, REG_RDDATA_03_OFFSET);
 }
@@ -268,6 +278,7 @@ uint32_t video_core_mig_interface::get_rddata_04(void){
     @brief  : to read off the 32-bit of the DDR2 128-bit data at addr[127:96];
     @param  : none;
     @retval : 32-bit read data;
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
    REG_READ(base_addr, REG_RDDATA_04_OFFSET);
 }
@@ -283,6 +294,7 @@ void video_core_mig_interface::write_ddr2(uint32_t addr, uint32_t wrbatch01, uin
            5. wrbatch04 : forms the DDR2 128-bit wr data[127:96];
     @retval : none
     @note   : This is a blocking method; waiting for the MIG to acknowledge.
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
     
     // one needs to setup the address and data before submitting the write request;
@@ -299,56 +311,34 @@ void video_core_mig_interface::write_ddr2(uint32_t addr, uint32_t wrbatch01, uin
     while(!is_transaction_complete()){};
 }
 
-void video_core_mig_interface::debug_rd_ddr2(uint32_t addr){
+void video_core_mig_interface::read_ddr2(uint32_t addr, uint32_t *read_buffer){
     /*
-    @brief  : to serial print out the data read from the DDR2;
-    @param  : address to read from;
+    @brief  : to get the data read from the DDR2;
+    @param  : 
+        1. address to read from;
+        2. pointer to an array to store the data read;
     @retval : none;
     @note   : this is a blocking method;
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
-
-   uint32_t rd_data;
-
+   
    // prepare the address;
    set_addr(addr);
-   debug_str("Reading at Address: ");
-   debug_hex(addr);
-   debug_str("\r\n");
-
+   
    // submit the read request;
    submit_read();
 
    // block until the MIG says the data is valid to read;
    while(!is_transaction_complete()){};
 
-   ////// data is valid to read;
-   // first batch;
-   rd_data = get_rddata_01();
-   debug_str("Read Data Batch 01: ");
-   debug_hex(rd_data);
-   debug_str("\r\n");
-   
-   // second batch;
-   rd_data = get_rddata_02();
-   debug_str("Read Data Batch 02: ");
-   debug_hex(rd_data);
-   debug_str("\r\n");
-
-    // third batch;
-   rd_data = get_rddata_03();
-   debug_str("Read Data Batch 03: ");
-   debug_hex(rd_data);
-   debug_str("\r\n");
-
-    // forth batch;
-   rd_data = get_rddata_04();
-   debug_str("Read Data Batch 04: ");
-   debug_hex(rd_data);
-   debug_str("\r\n");
-
-   debug_str("Done reading.\r\n");
+   // data is valid to ready;
+   // store it to the pointed array;
+   // there are four batches to read to make the entire 128-bit DDR2 transaction;
+    *(read_buffer + 0) = get_rddata_01();
+    *(read_buffer + 1) = get_rddata_02();
+    *(read_buffer + 2) = get_rddata_03();
+    *(read_buffer + 3) = get_rddata_04();   
 }
-
 
 void video_core_mig_interface::init_ddr2(uint32_t init_value, uint32_t start_addr, uint32_t range_addr){
     /*
@@ -357,22 +347,59 @@ void video_core_mig_interface::init_ddr2(uint32_t init_value, uint32_t start_add
         1. init_value   : the value to populate the DDR2;
         2. start_addr   : start address of the DDR2 to write to;
         3. range_addr   : the address range of the DDR2 to write to;
-    @retval : none
+    @retval : none    
     @note   : each address represents a 128-bit transaction;
+    @assumption : CPU is controlling the MIG interface (set it apriori);
     */
 
    uint32_t i;  // loop index;
    for(i = 0; i < range_addr; i++){
-        // prepare the address;
-        set_addr(start_addr + i);
+        write_ddr2((start_addr + i), init_value, init_value, init_value, init_value);
+   }        
+}
 
-        // set up the data;
-        push_wrdata_01(init_value);
-        push_wrdata_02(init_value);
-        push_wrdata_03(init_value);
-        push_wrdata_04(init_value);
-        
-        // submit the write request;
-        submit_write();
+void video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t start_addr, uint32_t range_addr){
+    /*
+    @brief  : sanity check of init_ddr2();    
+    @param  :
+        1. init_value   : the expected value written to the DDR2 to check against;
+        2. start_addr   : start address of the DDR2 to read from ;
+        3. range_addr   : the address range of the DDR2 to read from;
+    @retval : none;
+    @assumption : CPU is controlling the MIG interface (set it apriori);
+    */
+
+   uint32_t i; // loop index;
+   uint32_t read_buffer[4]; // buffer to store the entire "128-bit" DDR2 data;
+   uint32_t read_data;
+   uint32_t address;
+   int check_status = 0;
+   debug_str("Checking DDR2 initialization ... \r\n");
+   for(i = 0; i < range_addr; i++){
+        address = (start_addr + i);
+        read_ddr2(address, read_buffer);
+        // iterate each 32-bit read data and check against the expected val;
+        for(int j = 0; j < 4; j++){
+            read_data = read_buffer[i];
+            if(read_data != init_value){
+                debug_str("Address: ");
+                debug_hex(address);
+                debug_str("; Status: NOT OK; Actual Read Data: ");                                                
+                debug_hex(read_data);
+                debug_str("\r\n");
+            }
+            else{
+                debug_str("Address: ");
+                debug_hex(address);
+                debug_str("; Status: OK\r\n");
+                check_status++;
+            }
+        }
+   }
+   debug_str("Done checking DDR2 initialization ... \r\n");
+   if(check_status == (range_addr-1)){
+        debug_str("Result: OK\r\n");
+   }else{
+        debug_str("Result: NOT OK\r\n");
    }
 }
