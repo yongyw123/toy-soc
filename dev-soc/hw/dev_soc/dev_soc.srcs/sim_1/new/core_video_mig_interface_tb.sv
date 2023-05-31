@@ -61,6 +61,9 @@ module core_video_mig_interface_tb(
     //localparam TEST_ARRAY_SIZE_CORE_MOTION = 1000;
     localparam TEST_ARRAY_SIZE_CORE_MOTION = 2;    
     bit[TEST_ARRAY_SIZE_CORE_MOTION-1:0][127:0] TEST_ARRAY_CORE_MOTION;
+    
+    localparam TEST_ARRAY_SIZE_CORE_CPU = 2;    
+    bit[TEST_ARRAY_SIZE_CORE_CPU-1:0][127:0] TEST_ARRAY_CORE_CPU;
 
     //////////// register address;
     localparam MIG_INTERFACE_REG_SEL       = `V5_MIG_INTERFACE_REG_SEL;
@@ -220,9 +223,10 @@ module core_video_mig_interface_tb(
         read <= 1'b1;
 		addr <= MIG_INTERFACE_REG_RDDATA_01;
 		@(posedge clk_sys);
-		assert(rd_data == 32'ha) $display("ok, rd_data: %32b", rd_data);
+		assert(rd_data == 32'ha) $display("ok, rd_data: %10h", rd_data);
 			else begin            
-                $error("expected transaction complete status to be high; stop the simulation");
+                $error("Sequential CPU transfer test: read data does not match with the written data");
+                $error("stop the simulation at once");
                 $stop;
             end        
         		
@@ -230,9 +234,10 @@ module core_video_mig_interface_tb(
         read <= 1'b1;
 		addr <= MIG_INTERFACE_REG_RDDATA_02;
 		@(posedge clk_sys);
-		assert(rd_data == 32'hb) $display("ok, rd_data: %32b", rd_data);
+		assert(rd_data == 32'hb) $display("ok, rd_data: %10h", rd_data);
 			else begin            
-                $error("expected transaction complete status to be high; stop the simulation");
+                $error("Sequential CPU transfer test: read data does not match with the written data");
+                $error("stop the simulation at once");
                 $stop;
             end                
 		
@@ -240,9 +245,10 @@ module core_video_mig_interface_tb(
         read <= 1'b1;
 		addr <= MIG_INTERFACE_REG_RDDATA_03;
 		@(posedge clk_sys);
-		assert(rd_data == 32'hc) $display("ok, rd_data: %32b", rd_data);
+		assert(rd_data == 32'hc) $display("ok, rd_data: %10h", rd_data);
 			else begin            
-                $error("expected transaction complete status to be high; stop the simulation");
+                $error("Sequential CPU transfer test: read data does not match with the written data");
+                $error("stop the simulation at once");
                 $stop;
             end                
 		
@@ -250,9 +256,10 @@ module core_video_mig_interface_tb(
         read <= 1'b1;
 		addr <= MIG_INTERFACE_REG_RDDATA_04;
 		@(posedge clk_sys);
-		assert(rd_data == 32'hd) $display("ok, rd_data: %32b", rd_data);
+		assert(rd_data == 32'hd) $display("ok, rd_data: %10h", rd_data);
 			else begin            
-                $error("expected transaction complete status to be high; stop the simulation");
+                $error("Sequential CPU transfer test: read data does not match with the written data");
+                $error("stop the simulation at once");
                 $stop;
             end                
         
@@ -348,7 +355,7 @@ module core_video_mig_interface_tb(
         
         // data is valid to read;
         @(posedge clk_sys);
-        assert(core_motion_rddata == RANDOM_128BIT_WRDATA) $display("core motion: read data matches: %127b", RANDOM_128BIT_WRDATA);
+        assert(core_motion_rddata == RANDOM_128BIT_WRDATA) $display("core motion: read data matches: %10h", RANDOM_128BIT_WRDATA);
             else begin
                 $error("core motion: read data does not match with the written data, stop the simulation at once");
                 $stop;
@@ -359,7 +366,8 @@ module core_video_mig_interface_tb(
         /* test 06: burst write and read via video core: motion detection */
 		// prepare an array of random data to write;
         for(int i = 0; i < TEST_ARRAY_SIZE_CORE_MOTION; i++) begin
-            TEST_ARRAY_CORE_MOTION[i] = {128{$random}};        
+            //TEST_ARRAY_CORE_MOTION[i] = {128{$random}};
+            TEST_ARRAY_CORE_MOTION[i] = {{16{$random}}, {16{$random}}, {16{$random}}, {16{$random}}};        
         end
         
         // burst write;
@@ -423,7 +431,175 @@ module core_video_mig_interface_tb(
                     $stop;  // stop the simulation immediately upon discovering a mismatch; as this should not happen unless intended;                     
              end            
          end
-          
+         
+        /* test 07: burst write and read via the cpu */
+        /////// change the source to cpu;
+        @(posedge clk_sys);
+        cs <= 1;
+        write <= 1;
+        read <= 0;
+        addr <= MIG_INTERFACE_REG_SEL;
+        wr_data <= MIG_INTERFACE_REG_SEL_CPU;
+        
+        // disable write
+        @(posedge clk_sys);
+        cs <= 1;
+        write <= 0;
+        read <= 0;
+                
+        // prepare an array of random data to write;
+        for(int i = 0; i < TEST_ARRAY_SIZE_CORE_CPU; i++) begin  
+            //TEST_ARRAY_CORE_CPU[i] = {128{$random}};          
+            TEST_ARRAY_CORE_CPU[i] = {{16{$random}}, {16{$random}}, {16{$random}}, {16{$random}}};        
+        end
+        
+        ////// burst write;
+        for(int i = 0; i < TEST_ARRAY_SIZE_CORE_CPU; i++) begin
+            @(posedge clk_sys);
+            read <= 0;
+            write <= 1;
+            addr <= MIG_INTERFACE_REG_WRDATA_01;
+            wr_data <= TEST_ARRAY_CORE_CPU[i][31:0];
+        
+            @(posedge clk_sys);
+            write <= 1;
+            addr <= MIG_INTERFACE_REG_WRDATA_02;
+            wr_data <= TEST_ARRAY_CORE_CPU[i][63:32];
+        
+            @(posedge clk_sys);
+            write <= 1;
+            addr <= MIG_INTERFACE_REG_WRDATA_03;
+            wr_data <= TEST_ARRAY_CORE_CPU[i][95:64];
+        
+            @(posedge clk_sys);
+            write <= 1;
+            addr <= MIG_INTERFACE_REG_WRDATA_04;
+            wr_data <= TEST_ARRAY_CORE_CPU[i][127:96];
+        
+            // prepare the write address;
+            @(posedge clk_sys);
+            write <= 1;
+            addr <= MIG_INTERFACE_REG_ADDR;
+            wr_data <= i;	// address index-based
+        
+            // submit the write request;
+            @(posedge clk_sys);
+            write <= 1'b1;
+            addr <= MIG_INTERFACE_REG_CTRL;
+            wr_data <= {31'b0, 1'b1};
+        
+            // disable the write otherwise it will keep writing;
+            @(posedge clk_sys);
+            write <= 1'b1;
+            addr <= MIG_INTERFACE_REG_CTRL;
+            wr_data <= {31'b0, 1'b0};
+        
+            // wait for the transaction complete status;
+            @(posedge clk_sys);
+            write <= 1'b0;
+            read <= 1'b1;
+            addr <= MIG_INTERFACE_REG_STATUS;
+        
+            @(posedge clk_sys);
+            wait(rd_data[2] == 1);	
+        end
+        
+        
+        ///////////////////// burst read;
+        
+        for(int i = 0; i < TEST_ARRAY_SIZE_CORE_CPU; i++) begin
+            // prepare the address;
+            // maintain as the write address;
+            @(posedge clk_sys);
+            write <= 1;
+            addr <= MIG_INTERFACE_REG_ADDR;
+            wr_data <= i ; // index-based;
+        
+            // submit the read request;		
+            @(posedge clk_sys);
+            write <= 1'b1;
+            addr <= MIG_INTERFACE_REG_CTRL;
+            wr_data <= {30'b0, 2'b10};
+        
+            // optional: disable the read; otherwise it will keep on reading;
+            @(posedge clk_sys);
+            write <= 1'b1;
+            addr <= MIG_INTERFACE_REG_CTRL;
+            wr_data <= {30'b0, 2'b00};
+        
+            // wait for the transaction to complete;
+            // wait for the transaction complete status;
+            @(posedge clk_sys);
+            write <= 1'b0;
+            read <= 1'b1;
+            addr <= MIG_INTERFACE_REG_STATUS;
+        
+            @(posedge clk_sys);
+            wait(rd_data[2] == 1);
+        
+            ///////// read the 128-bit DDR2 into four read data registers;
+        
+            // first batch
+            @(posedge clk_sys);
+            read <= 1'b1;
+            addr <= MIG_INTERFACE_REG_RDDATA_01;
+            @(posedge clk_sys);
+            assert(rd_data == TEST_ARRAY_CORE_CPU[i][31:0]) 
+            begin
+                $display("Burst CPU Core - Test index: %0d, Batch: 1; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][31:0], core_motion_addr);
+            end
+            else begin            
+                $display("Burst CPU Core - Test index: %0d, Batch: 1; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][31:0], core_motion_addr);
+                $error("Burst Motion Core - ERROR Encountered: terminate the simulation at once");                                                     
+                $stop;  // stop the simulation immediately upon discovering a mismatch; as this should not happen unless intended;
+            end        
+        
+            // second batch
+            @(posedge clk_sys);
+            read <= 1'b1;
+            addr <= MIG_INTERFACE_REG_RDDATA_02;
+            @(posedge clk_sys);
+            assert(rd_data == TEST_ARRAY_CORE_CPU[i][63:32]) 
+            begin
+                $display("Burst CPU Core - Test index: %0d, Batch: 2; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][63:32], core_motion_addr);
+            end
+            else begin            
+                $display("Burst CPU Core - Test index: %0d, Batch: 2; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][63:32], core_motion_addr);
+                $error("Burst Motion Core - ERROR Encountered: terminate the simulation at once");                                                     
+                $stop;  // stop the simulation immediately upon discovering a mismatch; as this should not happen unless intended;
+            end        
+        
+            // third batch
+            @(posedge clk_sys);
+            read <= 1'b1;
+            addr <= MIG_INTERFACE_REG_RDDATA_03;
+            @(posedge clk_sys);
+            assert(rd_data == TEST_ARRAY_CORE_CPU[i][95:64]) 
+            begin
+                $display("Burst CPU Core - Test index: %0d, Batch: 3; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][95:64], core_motion_addr);
+            end
+            else begin            
+                $display("Burst CPU Core - Test index: %0d, Batch: 3; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][95:64], core_motion_addr);
+                $error("Burst Motion Core - ERROR Encountered: terminate the simulation at once");                                                     
+                $stop;  // stop the simulation immediately upon discovering a mismatch; as this should not happen unless intended;
+            end        
+        
+            // forth batch
+            @(posedge clk_sys);
+            read <= 1'b1;
+            addr <= MIG_INTERFACE_REG_RDDATA_04;
+            @(posedge clk_sys);
+            assert(rd_data == TEST_ARRAY_CORE_CPU[i][127:96]) 
+            begin
+                $display("Burst CPU Core - Test index: %0d, Batch: 4; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][127:96], core_motion_addr);
+            end
+            else begin            
+                $display("Burst CPU Core - Test index: %0d, Batch: 4; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][127:96], core_motion_addr);
+                $error("Burst Motion Core - ERROR Encountered: terminate the simulation at once");                                                     
+                $stop;  // stop the simulation immediately upon discovering a mismatch; as this should not happen unless intended;
+            end        
+        end
+
         $stop;
          
     end
