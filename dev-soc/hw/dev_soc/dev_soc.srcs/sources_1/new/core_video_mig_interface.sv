@@ -539,12 +539,13 @@ module core_video_mig_interface
         end
         
         else begin
+            // no conditionals needed;
+            // to disable/enable the hw testing; 
+            core_hw_test_enable_ready_reg <= core_hw_test_enable_ready_next;
+            
             // selecting which core/source to interface with the ddr2;
             if(wr_en_reg_mux) begin
-                mux_reg <= mux_next;
-                
-                // to disable/enable the hw testing; 
-                core_hw_test_enable_ready_reg <= core_hw_test_enable_ready_next;                
+                mux_reg <= mux_next;                                                
             end;
             
             // ddr2 address specified by the cpu;
