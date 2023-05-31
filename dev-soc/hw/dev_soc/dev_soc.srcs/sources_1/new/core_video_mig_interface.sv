@@ -270,7 +270,7 @@ module core_video_mig_interface
     /*------------------------------------------------
     // signals for module: user_mig_DDR2_sync_ctrl 
     ------------------------------------------------*/       
-    //logic rst_mem_n;
+    logic rst_mem_n;
     //logic MMCM_locked;    // this is already declared as an output port;
     logic user_wr_strobe;
     logic user_rd_strobe;
@@ -358,8 +358,7 @@ module core_video_mig_interface
             rst_mig_stretch_reg <= rst_mig_stretch;
         end    
     end
-    
-    /*
+        
     // filter for glitch;
     always_ff @(posedge clk_mem) begin
         // note that this reset signal has been synchronized;
@@ -370,7 +369,7 @@ module core_video_mig_interface
             rst_mem_n <= ~rst_mig_stretch_reg;
         end    
     end
-    */       
+           
     /*-----------------
     * debugging;
     --------------------*/
