@@ -173,8 +173,12 @@ void video_core_mig_interface::submit_write(void){
     @param  : none
     @retval : none
     @note   : user needs to ensure data and address line are already set up;        
+    @note   : this is a blocking method;
     @assumption : CPU is controlling the MIG interface (set it apriori);
     */
+
+   // block until  the mig is ready to accept a new request;
+   while(!is_mig_app_ready()){};   
 
    uint32_t wr_data = (uint32_t)REG_CTRL_MASK_WRSTROBE;   
    REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
@@ -197,8 +201,12 @@ void video_core_mig_interface::submit_read(void){
     @param  : none
     @retval : none
     @note   : user needs to ensure the address line is already set up;        
+    @note   : this is a blocking method;
     @assumption : CPU is controlling the MIG interface (set it apriori);
     */
+
+   // block until  the mig is ready to accept a new request;
+   while(!is_mig_app_ready()){};
 
    uint32_t wr_data = (uint32_t)REG_CTRL_MASK_RDSTROBE;   
    REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
