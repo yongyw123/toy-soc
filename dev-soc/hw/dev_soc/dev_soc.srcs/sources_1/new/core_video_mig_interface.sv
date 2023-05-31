@@ -268,6 +268,7 @@ module core_video_mig_interface
         
     ////// cpu register;
     logic [2:0] mux_reg, mux_next;    // multiplexing;
+    logic [3:0] status_reg, status_next;    // aggregating status from various parts;
     logic [22:0] cpu_addr_reg;
     logic [31:0] cpu_ctrl_reg;
     logic [31:0] cpu_rddata_01_reg;
@@ -524,6 +525,7 @@ module core_video_mig_interface
     always_ff @(posedge clk_sys, posedge reset_sys) begin
         if(reset_sys) begin
             mux_reg <= MIG_INTERFACE_REG_SEL_NONE;
+            status_reg <= 0;
             core_hw_test_enable_ready_reg <= 1'b0;
                             
             cpu_addr_reg <= 0;        
@@ -539,9 +541,10 @@ module core_video_mig_interface
         end
         
         else begin
-            // no conditionals needed;
+            //////// no conditionals needed;
             // to disable/enable the hw testing; 
             core_hw_test_enable_ready_reg <= core_hw_test_enable_ready_next;
+            status_reg <= status_next;
             
             // selecting which core/source to interface with the ddr2;
             if(wr_en_reg_mux) begin
@@ -594,11 +597,11 @@ module core_video_mig_interface
     // register 0; selector;    
     assign wr_en_reg_mux = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_SEL);
     assign mux_next = wr_data[2:0];
-    
-    // register 1: status;
     assign rd_en_reg_mux = rd_en && (addr[3:0] == MIG_INTERFACE_REG_SEL);
-    assign rd_en_reg_status = rd_en && (addr[3:0] == MIG_INTERFACE_REG_STATUS);
     
+    // register 1: status;    
+    assign rd_en_reg_status = rd_en && (addr[3:0] == MIG_INTERFACE_REG_STATUS);
+    assign status_next = {MIG_ctrl_status_idle, MIG_user_transaction_complete, MIG_user_ready, MIG_user_init_complete};
     // register 2: addr;
     assign rd_en_reg_addr = rd_en && (addr[3:0] == MIG_INTERFACE_REG_ADDR);
     assign wr_en_reg_addr = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_ADDR);
@@ -642,7 +645,7 @@ module core_video_mig_interface
         core_hw_test_rd_data = 0;
         
         // bus interface;
-        rd_data = 0;
+        rd_data = {32{1'b0}};
         
         // motion detection core;
         core_motion_rddata = 0;         
@@ -678,7 +681,8 @@ module core_video_mig_interface
                 
                 // status of the mig ddr2;
                 else if(rd_en_reg_status) begin
-                    rd_data = {28'b0, MIG_ctrl_status_idle, MIG_user_transaction_complete, MIG_user_ready, MIG_user_init_complete};                
+                    //rd_data = {28'b0, MIG_ctrl_status_idle, MIG_user_transaction_complete, MIG_user_ready, MIG_user_init_complete};
+                    rd_data = {28'b0, status_reg};                
                 end
                 
                 // current address pointer;
