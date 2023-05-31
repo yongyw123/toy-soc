@@ -365,37 +365,48 @@ module core_video_mig_interface_tb(
         // burst write;
         for(int i = 0; i < TEST_ARRAY_SIZE_CORE_MOTION; i++) begin
             // setup;
-            @(posedge clk_sys);
-            core_motion_wrstrobe <= 1'b0;                    
+            @(posedge clk_sys);                                
             core_motion_addr <= i;
             core_motion_wrdata = TEST_ARRAY_CORE_MOTION[i];        
+            core_motion_wrstrobe <= 1'b1; // submit the write request;
             
+            @(posedge clk_sys);
+            // disable otherwise it will keep going;
+            core_motion_wrstrobe <= 1'b0; // disable write;
+            
+            /*
             // submit the write request;
             @(posedge clk_sys);
             core_motion_wrstrobe <= 1'b1;                                            
             @(posedge clk_sys);
             core_motion_wrstrobe <= 1'b0; // disable write;
-                        
+            */          
             // wait for the transaction to complete
             @(posedge clk_sys);
             wait(core_MIG_transaction_complete == 1'b1);
-            @(posedge clk_sys);
-        
+            
+            //@(posedge clk_sys);        
         end
         
         // burst read;
         for(int i = 0; i < TEST_ARRAY_SIZE_CORE_MOTION; i++) begin
             // setup;
             @(posedge clk_sys);
-            core_motion_rdstrobe <= 1'b0;                    
-            core_motion_addr <= i;            
+            core_motion_addr <= i;                        
+            core_motion_rdstrobe <= 1'b1; // submit the read request;                                            
             
+            @(posedge clk_sys);
+            // disable otherwise it will keep going;
+            core_motion_rdstrobe <= 1'b0; 
+            
+            /*
             // submit the read request;
             @(posedge clk_sys);
             core_motion_rdstrobe <= 1'b1;                                            
             @(posedge clk_sys);
             core_motion_rdstrobe <= 1'b0; 
-                        
+            */          
+            
             // wait for the transaction to complete
             @(posedge clk_sys);
             wait(core_MIG_transaction_complete == 1'b1);
