@@ -256,16 +256,7 @@ module core_video_mig_interface
     logic [31:0] cpu_ddr2_wrdata_02_reg;
     logic [31:0] cpu_ddr2_wrdata_03_reg;
     logic [31:0] cpu_ddr2_wrdata_04_reg;
-   
-    // for read multiplexing
-    logic rd_en_reg_mux;
-    logic rd_en_reg_status;
-    logic rd_en_reg_addr;
-    logic rd_en_reg_ddr2_rddata_01;
-    logic rd_en_reg_ddr2_rddata_02;
-    logic rd_en_reg_ddr2_rddata_03;
-    logic rd_en_reg_ddr2_rddata_04;
-        
+           
     ////// cpu register;
     logic [2:0] mux_reg, mux_next;    // multiplexing;
     logic [3:0] status_reg, status_next;    // aggregating status from various parts;
@@ -597,13 +588,11 @@ module core_video_mig_interface
     // register 0; selector;    
     assign wr_en_reg_mux = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_SEL);
     assign mux_next = wr_data[2:0];
-    assign rd_en_reg_mux = rd_en && (addr[3:0] == MIG_INTERFACE_REG_SEL);
-    
-    // register 1: status;    
-    assign rd_en_reg_status = rd_en && (addr[3:0] == MIG_INTERFACE_REG_STATUS);
+        
+    // register 1: status;        
     assign status_next = {MIG_ctrl_status_idle, MIG_user_transaction_complete, MIG_user_ready, MIG_user_init_complete};
-    // register 2: addr;
-    assign rd_en_reg_addr = rd_en && (addr[3:0] == MIG_INTERFACE_REG_ADDR);
+    
+    // register 2: addr;   
     assign wr_en_reg_addr = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_ADDR);
     
     // register 3: control register;
@@ -614,16 +603,9 @@ module core_video_mig_interface
     assign wr_en_reg_cpu_ddr2_wrdata_02 = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_WRDATA_02);
     assign wr_en_reg_cpu_ddr2_wrdata_03 = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_WRDATA_03);
     assign wr_en_reg_cpu_ddr2_wrdata_04 = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_WRDATA_04);
-    
-    // registers for ddr2 data 128-bit into four 32-bit cpu registers;
-    assign rd_en_reg_ddr2_rddata_01 = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_01);
-    assign rd_en_reg_ddr2_rddata_02 = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_02);
-    assign rd_en_reg_ddr2_rddata_03 = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_03);
-    assign rd_en_reg_ddr2_rddata_04 = rd_en && (addr[3:0] == MIG_INTERFACE_REG_RDDATA_04);     
-    
-   // multiplexing;
-   always_comb begin
-   
+        
+   // write decoding;
+   always_comb begin   
         ////////// default; ////////////
         // common for mig ddr2 sync interface (controller);
         user_wr_data = 0;
@@ -643,10 +625,7 @@ module core_video_mig_interface
         // hw test core;
         core_hw_test_enable_ready_next = 1'b0;
         core_hw_test_rd_data = 0;
-        
-        // bus interface;
-        rd_data = {32{1'b0}};
-        
+                
         // motion detection core;
         core_motion_rddata = 0;         
         core_MIG_init_complete = 0;
@@ -662,56 +641,12 @@ module core_video_mig_interface
         localparam MIG_INTERFACE_REG_SEL_TEST    = 3'b100;  // hw testing circuit;
         */
         case(mux_reg)
-            MIG_INTERFACE_REG_SEL_CPU: begin
-                /*-----------------------------------------
-                // signal assignment to the ddr2 mig interface;
-                ------------------------------------------*/
+            MIG_INTERFACE_REG_SEL_CPU: begin                
+                // signal assignment to the ddr2 mig interface;               
                 user_addr = cpu_addr_reg;
                 user_wr_data = {cpu_ddr2_wrdata_04_reg, cpu_ddr2_wrdata_03_reg, cpu_ddr2_wrdata_02_reg, cpu_ddr2_wrdata_01_reg};
                 user_wr_strobe = cpu_ctrl_reg[MIG_INTERFACE_REG_CTRL_BIT_POS_WRSTROBE];
-                user_rd_strobe = cpu_ctrl_reg[MIG_INTERFACE_REG_CTRL_BIT_POS_RDSTROBE];
-                
-                /*-----------------------------------------
-                // read multiplexing for the cpu;
-                ------------------------------------------*/
-                /// read the current state of the multiplexer;
-                if(rd_en_reg_mux) begin
-                    rd_data = {29'b0, mux_reg};
-                end
-                
-                // status of the mig ddr2;
-                else if(rd_en_reg_status) begin
-                    //rd_data = {28'b0, MIG_ctrl_status_idle, MIG_user_transaction_complete, MIG_user_ready, MIG_user_init_complete};
-                    rd_data = {28'b0, status_reg};                
-                end
-                
-                // current address pointer;
-                else if(rd_en_reg_addr) begin
-                    rd_data = {9'b0, cpu_addr_reg};
-                end
-                
-                // the reset of the 128-bit data read from the mig ddr2;
-                // 128-bit is "divided" into four 32-bit cpu registers;
-                
-                // first batch;
-                else if(rd_en_reg_ddr2_rddata_01) begin
-                    rd_data = cpu_rddata_01_reg;                                    
-                end
-                
-                // second batch;
-                else if(rd_en_reg_ddr2_rddata_02) begin
-                    rd_data = cpu_rddata_02_reg;                                    
-                end
-                
-                // third batch;
-                else if(rd_en_reg_ddr2_rddata_03) begin
-                    rd_data = cpu_rddata_03_reg;                                    
-                end
-                
-                // last batch;
-                else if(rd_en_reg_ddr2_rddata_04) begin
-                    rd_data = cpu_rddata_04_reg;                                    
-                end
+                user_rd_strobe = cpu_ctrl_reg[MIG_INTERFACE_REG_CTRL_BIT_POS_RDSTROBE];                                
             end
             
             MIG_INTERFACE_REG_SEL_MOTION: begin
@@ -728,8 +663,7 @@ module core_video_mig_interface
                 core_MIG_init_complete = MIG_user_init_complete;  // MIG DDR2 initialization complete;
                 core_MIG_ready = MIG_user_ready;          // MIG DDR2 ready to accept any request;
                 core_MIG_transaction_complete = MIG_user_transaction_complete;// a pulse indicating the read/write request has been serviced;
-                core_MIG_ctrl_status_idle = MIG_ctrl_status_idle;   // MIG synchronous interface controller idle status;
-                      
+                core_MIG_ctrl_status_idle = MIG_ctrl_status_idle;   // MIG synchronous interface controller idle status;                      
             end
             
             MIG_INTERFACE_REG_SEL_TEST: begin                
@@ -748,8 +682,31 @@ module core_video_mig_interface
    
    end 
    
-     
-    
+   // read multiplexing for the cpu;
+   always_comb begin
+        // default;
+        rd_data = 32'b0;
+        case({rd_en, addr[3:0]})
+            // mux register;
+            {1'b1, MIG_INTERFACE_REG_SEL}   : rd_data = {29'b0, mux_reg};
+            
+            // status register
+            {1'b1, MIG_INTERFACE_REG_STATUS}: rd_data = {28'b0, status_reg};
+            
+            // address register;
+            {1'b1, MIG_INTERFACE_REG_ADDR}  : rd_data = {9'b0, cpu_addr_reg};
+            
+            ////////// to shift in (unpack) the 128-bit ddr2 data into four 32-bit batches;
+            // first batch;
+            {1'b1, MIG_INTERFACE_REG_RDDATA_01}: rd_data = cpu_rddata_01_reg;
+            {1'b1, MIG_INTERFACE_REG_RDDATA_02}: rd_data = cpu_rddata_02_reg;
+            {1'b1, MIG_INTERFACE_REG_RDDATA_03}: rd_data = cpu_rddata_03_reg;
+            {1'b1, MIG_INTERFACE_REG_RDDATA_04}: rd_data = cpu_rddata_04_reg;
+            
+            default: ; // nop;
+        endcase 
+   end          
+       
 endmodule
 
 
