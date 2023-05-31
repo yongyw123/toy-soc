@@ -59,7 +59,7 @@ create_clock -add -name camera_pclk -period 41.667 [get_ports {CAM_OV7670_PCLK_J
 set_clock_groups -asynchronous \
 -group [get_clocks -of_objects [get_pins clock_unit/inst/mmcm_adv_inst/CLKOUT1]] \ 
 -group {get_clocks {camera_pclk}} \
--group [get_clocks -include_generated_clocks -of [get_pins core_video_mig_interface_unit/user_mig_DDR2_sync_ctrl_unit/mig_unit/u_mig_7series_0_mig/u_ddr2_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]];
+-group [get_clocks -include_generated_clocks -of [get_pins video_unit/video_core_mig_interface_unit/user_mig_DDR2_sync_ctrl_unit/mig_unit/u_mig_7series_0_mig/u_ddr2_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]];
 
 
 #set_clock_groups -asynchronous \
