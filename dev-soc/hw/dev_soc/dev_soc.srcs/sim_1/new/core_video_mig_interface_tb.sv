@@ -367,7 +367,8 @@ module core_video_mig_interface_tb(
 		// prepare an array of random data to write;
         for(int i = 0; i < TEST_ARRAY_SIZE_CORE_MOTION; i++) begin
             //TEST_ARRAY_CORE_MOTION[i] = {128{$random}};
-            TEST_ARRAY_CORE_MOTION[i] = {{16{$random}}, {16{$random}}, {16{$random}}, {16{$random}}};        
+             // urandom generates 32-bit pseudorandom number each time it is called;
+            TEST_ARRAY_CORE_MOTION[i] = { $urandom(11),  $urandom(22),  $urandom(33),  $urandom(44)};                    
         end
         
         // burst write;
@@ -450,7 +451,8 @@ module core_video_mig_interface_tb(
         // prepare an array of random data to write;
         for(int i = 0; i < TEST_ARRAY_SIZE_CORE_CPU; i++) begin  
             //TEST_ARRAY_CORE_CPU[i] = {128{$random}};          
-            TEST_ARRAY_CORE_CPU[i] = {{16{$random}}, {16{$random}}, {16{$random}}, {16{$random}}};        
+            // urandom generates 32-bit pseudorandom number each time it is called;
+            TEST_ARRAY_CORE_CPU[i] = { $urandom(1),  $urandom(2),  $urandom(3),  $urandom(4)};        
         end
         
         ////// burst write;
@@ -546,10 +548,10 @@ module core_video_mig_interface_tb(
             @(posedge clk_sys);
             assert(rd_data == TEST_ARRAY_CORE_CPU[i][31:0]) 
             begin
-                $display("Burst CPU Core - Test index: %0d, Batch: 1; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][31:0], core_motion_addr);
+                $display("Burst CPU Core - Test index: %0d, Batch: 1; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][31:0], i);
             end
             else begin            
-                $display("Burst CPU Core - Test index: %0d, Batch: 1; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][31:0], core_motion_addr);
+                $display("Burst CPU Core - Test index: %0d, Batch: 1; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][31:0], i);
                 $error("Burst Motion Core - ERROR Encountered: terminate the simulation at once");                                                     
                 $stop;  // stop the simulation immediately upon discovering a mismatch; as this should not happen unless intended;
             end        
@@ -561,10 +563,10 @@ module core_video_mig_interface_tb(
             @(posedge clk_sys);
             assert(rd_data == TEST_ARRAY_CORE_CPU[i][63:32]) 
             begin
-                $display("Burst CPU Core - Test index: %0d, Batch: 2; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][63:32], core_motion_addr);
+                $display("Burst CPU Core - Test index: %0d, Batch: 2; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][63:32], i);
             end
             else begin            
-                $display("Burst CPU Core - Test index: %0d, Batch: 2; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][63:32], core_motion_addr);
+                $display("Burst CPU Core - Test index: %0d, Batch: 2; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][63:32], i);
                 $error("Burst Motion Core - ERROR Encountered: terminate the simulation at once");                                                     
                 $stop;  // stop the simulation immediately upon discovering a mismatch; as this should not happen unless intended;
             end        
@@ -576,10 +578,10 @@ module core_video_mig_interface_tb(
             @(posedge clk_sys);
             assert(rd_data == TEST_ARRAY_CORE_CPU[i][95:64]) 
             begin
-                $display("Burst CPU Core - Test index: %0d, Batch: 3; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][95:64], core_motion_addr);
+                $display("Burst CPU Core - Test index: %0d, Batch: 3; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][95:64], i);
             end
             else begin            
-                $display("Burst CPU Core - Test index: %0d, Batch: 3; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][95:64], core_motion_addr);
+                $display("Burst CPU Core - Test index: %0d, Batch: 3; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][95:64], i);
                 $error("Burst Motion Core - ERROR Encountered: terminate the simulation at once");                                                     
                 $stop;  // stop the simulation immediately upon discovering a mismatch; as this should not happen unless intended;
             end        
@@ -591,10 +593,10 @@ module core_video_mig_interface_tb(
             @(posedge clk_sys);
             assert(rd_data == TEST_ARRAY_CORE_CPU[i][127:96]) 
             begin
-                $display("Burst CPU Core - Test index: %0d, Batch: 4; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][127:96], core_motion_addr);
+                $display("Burst CPU Core - Test index: %0d, Batch: 4; Time; %t, Status: OK, read data: %10h matches with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][127:96], i);
             end
             else begin            
-                $display("Burst CPU Core - Test index: %0d, Batch: 4; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][127:96], core_motion_addr);
+                $display("Burst CPU Core - Test index: %0d, Batch: 4; Time; %t, Status: FAILED, read data: %10h DOES NOT match with the written data: %10h at Address: %0d", i, $time, rd_data, TEST_ARRAY_CORE_CPU[i][127:96], i);
                 $error("Burst Motion Core - ERROR Encountered: terminate the simulation at once");                                                     
                 $stop;  // stop the simulation immediately upon discovering a mismatch; as this should not happen unless intended;
             end        
