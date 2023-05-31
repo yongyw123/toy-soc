@@ -18,12 +18,23 @@ int main(){
     uint32_t start_addr = 0;                        // starting address of DDR2 to test;
     uint32_t range_addr = 100;                      // how many DDR2 address to cover?
     uint32_t init_value = (uint32_t)0xFFFFFFFF;     // common value to populate the DDR2;
-    
+    uint32_t read_status;
+
+    debug_str("Video Core DDR2 MIG Test\r\n");
+    vid_mig.set_core_test();
+
+    /*
     // set the ddr2 to interface with the cpu;
     vid_mig.set_core_cpu();
-    
+
+    read_status = vid_mig.get_status();
+    debug_str("status register: ");
+    debug_hex(read_status);
+    debug_str("\r\n");
+    */
+    /*
     // block until the mig signals calibration complete;
-    while(~vid_mig.is_mig_init_complete()){};
+    while(!vid_mig.is_mig_init_complete()){};
     
     // initialize the DDR2 to a common value;
     debug_str("Setting initial value to DDR2 ...\r\n");
@@ -33,7 +44,7 @@ int main(){
     // check the initialization;
     debug_str("Checking if the value initialization is correct.\r\n");
     vid_mig.check_init_ddr2(init_value, start_addr, range_addr);
-
+    */
     while(1){        
         ;
     }
