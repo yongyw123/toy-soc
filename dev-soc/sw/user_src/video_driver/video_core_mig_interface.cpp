@@ -180,11 +180,11 @@ void video_core_mig_interface::submit_write(void){
    REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
 
    /*-------------------------------------------------------------
-   * LIMITATION;
+   * ??? LIMITATION ???
    * need to ensure the wrstrobe is two system clock periods wide;
    * this is due to the HW synchronization issue;
    --------------------------------------------------------------*/
-   REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
+    //REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
 
    // need to disable after one clock cycle; otherwise; it will keep 
    // on writing;
@@ -204,12 +204,12 @@ void video_core_mig_interface::submit_read(void){
    REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
 
     /*-------------------------------------------------------------
-   * LIMITATION;
-   * need to ensure the wrstrobe is two system clock periods wide;
+   * ??? LIMITATION ???
+   * need to ensure the rdstrobe is two system clock periods wide;
    * this is due to the HW synchronization issue;
    --------------------------------------------------------------*/
-   REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
-   
+   //REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
+
    // need to disable after one clock cycle; otherwise; it will keep 
    // on reading;
    REG_WRITE(base_addr, REG_CTRL_OFFSET, (uint32_t) 0x00);
