@@ -209,9 +209,7 @@ class video_core_mig_interface{
         /* set the address, common for read and write */
         void set_addr(uint32_t addr);
 
-        /* set control */
-        void submit_request(int wr_or_rd);    // submit write/read request;
-        // wrapper for the above;
+        /* set control */        
         void submit_write(void);
         void submit_read(void);
 
