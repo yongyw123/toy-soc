@@ -367,6 +367,7 @@ module core_video_mig_interface
         end    
     end
     
+    /*
     // filter for glitch;
     always_ff @(posedge clk_mem) begin
         // note that this reset signal has been synchronized;
@@ -377,7 +378,7 @@ module core_video_mig_interface
             rst_mem_n <= ~rst_mig_stretch_reg;
         end    
     end
-             
+    */       
     /*-----------------
     * debugging;
     --------------------*/
@@ -401,7 +402,8 @@ module core_video_mig_interface
         
         // memory system,
         .clk_mem(clk_mem),        // 200MHz to drive MIG memory clock,
-        .rst_mem_n(rst_mem_n),      // active low to reset the mig interface,
+        //.rst_mem_n(rst_mem_n),      // active low to reset the mig interface,
+        .rst_mem_n(~rst_mig_stretch_reg),      // active low to reset the mig interface,
         
         //  interface between the user system and the memory controller,
         .user_wr_strobe(user_wr_strobe),             // write request,
@@ -624,7 +626,15 @@ module core_video_mig_interface
         user_addr = 0;
         user_wr_strobe = 0;
         user_rd_strobe = 0;
-        LED = 0;
+        
+        ///// display the state of the mig/ddr2 for debugging convenience;
+        // led[15] - mmcm locked status;
+        // led[14] - mig user init/calib completion flag;
+        // led[13] - mig app ready signal;
+        // led[12] - mig user controller transaction complete;
+        // led[11] - mig user controller idle state;
+        LED = {MMCM_locked, MIG_user_init_complete, MIG_user_ready, MIG_user_transaction_complete, MIG_ctrl_status_idle, 11'b0};
+        //LED = 16'b0;
         
         // hw test core;
         core_hw_test_enable_ready_next = 1'b0;
@@ -723,7 +733,7 @@ module core_video_mig_interface
                 user_rd_strobe = core_hw_test_rd_strobe;
                 user_addr = core_hw_test_addr;
                 user_wr_data = core_hw_test_wr_data;
-                core_hw_test_rd_data = user_rd_data;
+                core_hw_test_rd_data = user_rd_data;                
                 LED = core_hw_test_LED;
             end
             
