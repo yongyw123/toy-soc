@@ -199,7 +199,7 @@ class video_core_mig_interface{
         void set_core_motion(void); // with the motion detection core;
 
         /* check mig status */
-        int get_status(void);
+        uint32_t get_status(void);
         // wrapper for the above;
         int is_mig_init_complete(void);
         int is_mig_app_ready(void);
@@ -233,10 +233,10 @@ class video_core_mig_interface{
         but cpu register is only 32-bit wide;
         so need four cpu registers to hold one transaction ...    
         */
-        uint32_t shift_rddata_01(void);   // first batch;
-        uint32_t shift_rddata_02(void);   // second batch;
-        uint32_t shift_rddata_03(void);   // third batch;
-        uint32_t shift_rddata_04(void);   // forth batch;
+        uint32_t get_rddata_01(void);   // first batch;
+        uint32_t get_rddata_02(void);   // second batch;
+        uint32_t get_rddata_03(void);   // third batch;
+        uint32_t get_rddata_04(void);   // forth batch;
 
         /* utility;
         the purpose of using cpu to communicate with the ddr2 
