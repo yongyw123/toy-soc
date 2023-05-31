@@ -193,7 +193,7 @@ class video_core_mig_interface{
         /* select which core to interface with the DDR2 via MIG; */
         void set_source(int source);
         /// wrappers for the above;        
-        void set_none(void);
+        void set_core_none(void);
         void set_core_cpu(void);    // communicate via cpu;
         void set_core_test(void);   // hw test;
         void set_core_motion(void); // with the motion detection core;

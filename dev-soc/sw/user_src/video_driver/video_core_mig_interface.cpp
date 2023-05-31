@@ -56,7 +56,7 @@ void video_core_mig_interface::set_source(int source){
     curr_source = source;
 }
 
-void video_core_mig_interface::set_none(void){
+void video_core_mig_interface::set_core_none(void){
     /*
     @brief  : to set the DDR2 to interface with nothing;
     @param  : none;
