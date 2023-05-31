@@ -24,7 +24,7 @@ int main(){
     
     // block until the mig signals calibration complete;
     while(~vid_mig.is_mig_init_complete()){};
-
+    
     // initialize the DDR2 to a common value;
     debug_str("Setting initial value to DDR2 ...\r\n");
     vid_mig.init_ddr2(init_value, start_addr, range_addr);

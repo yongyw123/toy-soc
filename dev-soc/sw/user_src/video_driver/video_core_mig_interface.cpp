@@ -272,7 +272,7 @@ uint32_t video_core_mig_interface::get_rddata_01(void){
     @retval : 32-bit read data;
     @assumption : CPU is controlling the MIG interface (set it apriori);
     */
-   REG_READ(base_addr, REG_RDDATA_01_OFFSET);
+   return REG_READ(base_addr, REG_RDDATA_01_OFFSET);
 }
 
 uint32_t video_core_mig_interface::get_rddata_02(void){
@@ -282,7 +282,7 @@ uint32_t video_core_mig_interface::get_rddata_02(void){
     @retval : 32-bit read data;
     @assumption : CPU is controlling the MIG interface (set it apriori);
     */
-   REG_READ(base_addr, REG_RDDATA_02_OFFSET);
+   return REG_READ(base_addr, REG_RDDATA_02_OFFSET);
 }
 
 uint32_t video_core_mig_interface::get_rddata_03(void){
@@ -292,7 +292,7 @@ uint32_t video_core_mig_interface::get_rddata_03(void){
     @retval : 32-bit read data;
     @assumption : CPU is controlling the MIG interface (set it apriori);
     */
-   REG_READ(base_addr, REG_RDDATA_03_OFFSET);
+   return REG_READ(base_addr, REG_RDDATA_03_OFFSET);
 }
 
 uint32_t video_core_mig_interface::get_rddata_04(void){
@@ -302,7 +302,7 @@ uint32_t video_core_mig_interface::get_rddata_04(void){
     @retval : 32-bit read data;
     @assumption : CPU is controlling the MIG interface (set it apriori);
     */
-   REG_READ(base_addr, REG_RDDATA_04_OFFSET);
+   return REG_READ(base_addr, REG_RDDATA_04_OFFSET);
 }
 
 void video_core_mig_interface::write_ddr2(uint32_t addr, uint32_t wrbatch01, uint32_t wrbatch02, uint32_t wrbatch03, uint32_t wrbatch04){
@@ -395,7 +395,7 @@ void video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t sta
    uint32_t read_buffer[4]; // buffer to store the entire "128-bit" DDR2 data;
    uint32_t read_data;
    uint32_t address;
-   int check_status = 0;
+   uint32_t check_status = 0;
    debug_str("Checking DDR2 initialization ... \r\n");
    for(i = 0; i < range_addr; i++){
         address = (start_addr + i);
