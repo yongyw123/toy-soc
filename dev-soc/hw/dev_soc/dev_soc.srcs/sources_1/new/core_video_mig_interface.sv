@@ -517,9 +517,10 @@ module core_video_mig_interface
         if(reset_sys) begin
             mux_reg <= MIG_INTERFACE_REG_SEL_NONE;
             status_reg <= 0;
-            core_hw_test_enable_ready_reg <= 1'b0;
-                            
+            cpu_ctrl_reg <= 0;
+            core_hw_test_enable_ready_reg <= 1'b0;                            
             cpu_addr_reg <= 0;        
+            
             cpu_rddata_01_reg <= 0;
             cpu_rddata_02_reg <= 0;
             cpu_rddata_03_reg <= 0;
