@@ -424,45 +424,13 @@ module mcs_top
         .dcmi_pclk(CAM_OV7670_PCLK_JB10),    // driven by the camera at 24 MHz;
         .dcmi_vsync(CAM_OV7670_VSYNC_JB03),  // vertical synchronization;
         .dcmi_href(CAM_OV7670_HREF_JB04),    // horizontal synchronization;
-        .dcmi_pixel(CAM_OV7670_DATA_JA)         // 8-bit pixel data;
-    );
-    
-    /*----------------------------
-    * ?? TEMPORARY ??
-    * to experiment with the HW DDR2;
-    *-----------------------------*/
-    core_video_mig_interface
-    #(
-        /*------------------------------------------
-        * parameter for the HW testing cicruit;
-        ------------------------------------------*/
-        // counter/timer;
-        // N seconds led pause time; with 100MHz; 200MHz threshold is required;        
-        .TIMER_THRESHOLD(50_000_000),  // 0.5 second;
+        .dcmi_pixel(CAM_OV7670_DATA_JA),         // 8-bit pixel data;
         
-        // traffic generator to issue the addr;
-        // here we just simply use incremental basis;
-        .INDEX_THRESHOLD(32) // wrap around; 2^{5};
-    )
-    core_video_mig_interface_unit
-    (
-    
-        // general;        
-        .clk_sys(sys_clk),    // 100MHz system;
-        .clk_mem(clkout_200M),    // 200MHz for MIG;       
-        .reset_sys(reset_sys_stretch_reg),  // system reset;        
-        
-        /* ----------------------------
-        * external pin;
-        * 1. LED;
-        * 2. DDR2 SDRAM
-        ------------------------------*/
-        // LEDs;
+        /* MIG interface core; */
         .LED(LED),
+        .MMCM_locked(mmcm_clk_locked),    // MMCM locked status;
+        .clk_mem(clkout_200M),        // 200MHz to drive the MIG;
         
-        // LED also display the MMCM locked status;
-        .MMCM_locked(mmcm_clk_locked),
-                
         // ddr2 sdram memory interface (defined by the imported ucf file);
         .ddr2_addr(ddr2_addr),   // address; 
         .ddr2_ba(ddr2_ba),    
@@ -477,18 +445,9 @@ module mcs_top
         .ddr2_dqs_p(ddr2_dqs_p),  // inout [1:0]                        ddr2_dqs_p      
         .ddr2_cs_n(ddr2_cs_n),  // output [0:0]           ddr2_cs_n
         .ddr2_dm(ddr2_dm),  // output [1:0]                        ddr2_dm
-        .ddr2_odt(ddr2_odt), // output [0:0]                       ddr2_odt
-
-        /*--------------------------
-        * debugging interface
-        --------------------------*/    
-        // not used;
-        .debug_mig_reset_n()    // reset signal for MIG:
-          
+        .ddr2_odt(ddr2_odt) // output [0:0]                       ddr2_odt
     );
-    
-    
-    
+        
     
 endmodule
 
