@@ -271,3 +271,30 @@ uint32_t video_core_mig_interface::get_rddata_04(void){
     */
    REG_READ(base_addr, REG_RDDATA_04_OFFSET);
 }
+
+void video_core_mig_interface::write_ddr2(uint32_t addr, uint32_t wrbatch01, uint32_t wrbatch02, uint32_t wrbatch03, uint32_t wrbatch04){
+    /*
+    @brief  : to write to the DDR2;
+    @param  :
+           1. addr      : the address to write to;
+           2. wrbatch01 : forms the DDR2 128-bit wr data[31:0];
+           3. wrbatch02 : forms the DDR2 128-bit wr data[63:32];
+           4. wrbatch03 : forms the DDR2 128-bit wr data[95:64];
+           5. wrbatch04 : forms the DDR2 128-bit wr data[127:96];
+    @retval : none
+    @note   : This is a blocking method; waiting for the MIG to acknowledge.
+    */
+    
+    // one needs to setup the address and data before submitting the write request;
+    set_addr(addr);
+    push_wrdata_01(wrbatch01);
+    push_wrdata_02(wrbatch02);
+    push_wrdata_03(wrbatch03);
+    push_wrdata_04(wrbatch04);
+
+    // submit;
+    submit_write();
+
+    // block until the MIG has accepted and acknowledged the write request;
+    while(!is_transaction_complete()){};
+}
