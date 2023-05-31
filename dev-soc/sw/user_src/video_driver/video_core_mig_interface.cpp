@@ -298,3 +298,57 @@ void video_core_mig_interface::write_ddr2(uint32_t addr, uint32_t wrbatch01, uin
     // block until the MIG has accepted and acknowledged the write request;
     while(!is_transaction_complete()){};
 }
+
+void video_core_mig_interface::debug_rd_ddr2(uint32_t addr){
+    /*
+    @brief  : to serial print out the data read from the DDR2;
+    @param  : address to read from;
+    @retval : none;
+    @note   : this is a blocking method;
+    */
+
+   uint32_t rd_data;
+
+   // prepare the address;
+   set_addr(addr);
+
+   // submit the read request;
+   submit_read();
+
+   // block until the MIG says the data is valid to read;
+   while(!is_transaction_complete()){};
+
+   ////// data is valid to read;
+   // first batch;
+   rd_data = get_rddata_01();
+   debug_str("Read Data Batch 01: ");
+   debug_hex(rd_data);
+   debug_str("\r\n");
+   
+   // second batch;
+   rd_data = get_rddata_02();
+   debug_str("Read Data Batch 02: ");
+   debug_hex(rd_data);
+   debug_str("\r\n");
+
+    // third batch;
+   rd_data = get_rddata_03();
+   debug_str("Read Data Batch 03: ");
+   debug_hex(rd_data);
+   debug_str("\r\n");
+
+    // forth batch;
+   rd_data = get_rddata_04();
+   debug_str("Read Data Batch 04: ");
+   debug_hex(rd_data);
+   debug_str("\r\n");
+
+   debug_str("done reading \r\n");
+}
+
+
+void video_core_mig_interface::init_ddr2(uint32_t init_value, uint32_t start_addr, uint32_t range_addr){
+    
+
+
+}
