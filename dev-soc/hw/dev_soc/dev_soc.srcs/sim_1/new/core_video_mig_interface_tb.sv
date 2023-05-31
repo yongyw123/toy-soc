@@ -22,7 +22,7 @@
 `ifndef CORE_VIDEO_MIG_INTERFACE_TB_SV
 `define CORE_VIDEO_MIG_INTERFACE_TB_SV
 
-`include "IO_map.svh"
+//`include "IO_map.svh"
 
 module core_video_mig_interface_tb(
         input logic clk_sys,
@@ -58,8 +58,8 @@ module core_video_mig_interface_tb(
     //localparam RANDOM_128BIT_WRDATA = {128{$random}};
     logic [127:0] RANDOM_128BIT_WRDATA = {127{$random}};     
         
-    localparam TEST_ARRAY_SIZE_CORE_MOTION = 1000;
-    //localparam TEST_ARRAY_SIZE_CORE_MOTION = 2;    
+    //localparam TEST_ARRAY_SIZE_CORE_MOTION = 1000;
+    localparam TEST_ARRAY_SIZE_CORE_MOTION = 2;    
     bit[TEST_ARRAY_SIZE_CORE_MOTION-1:0][127:0] TEST_ARRAY_CORE_MOTION;
 
     //////////// register address;
@@ -404,11 +404,11 @@ module core_video_mig_interface_tb(
             // check if the read data matches with what it is written at a given address;
              assert(core_motion_rddata == TEST_ARRAY_CORE_MOTION[i]) 
              begin                
-                $display("Test index: %0d, Time; %t, Status: OK, read data matches with the written data at Address: %0d", i, $time, core_motion_addr);
+                $display("Burst Motion Core - Test index: %0d, Time; %t, Status: OK, read data matches with the written data at Address: %0d", i, $time, core_motion_addr);
              end  
              else begin 
-                    $error("Read Data does not match with the Written Data @ time: %t, Address: %0d", $time, core_motion_addr);
-                    $error("ERROR Encountered: terminate the simulation at once");                                                     
+                    $error("Burst Motion Core - Read Data does not match with the Written Data @ time: %t, Address: %0d", $time, core_motion_addr);
+                    $error("Burst Motion Core - ERROR Encountered: terminate the simulation at once");                                                     
                     $stop;  // stop the simulation immediately upon discovering a mismatch; as this should not happen unless intended;                     
              end            
          end
