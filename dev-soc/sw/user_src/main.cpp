@@ -21,8 +21,8 @@ int main(){
     uint32_t read_status;
 
     debug_str("Video Core DDR2 MIG Test\r\n");
-    vid_mig.set_core_none();
-    //vid_mig.set_core_test();
+    //vid_mig.set_core_none();
+    vid_mig.set_core_test();
 
     /*
     // set the ddr2 to interface with the cpu;
