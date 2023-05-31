@@ -311,6 +311,9 @@ void video_core_mig_interface::debug_rd_ddr2(uint32_t addr){
 
    // prepare the address;
    set_addr(addr);
+   debug_str("Reading at Address: ");
+   debug_hex(addr);
+   debug_str("\r\n");
 
    // submit the read request;
    submit_read();
@@ -343,12 +346,33 @@ void video_core_mig_interface::debug_rd_ddr2(uint32_t addr){
    debug_hex(rd_data);
    debug_str("\r\n");
 
-   debug_str("done reading \r\n");
+   debug_str("Done reading.\r\n");
 }
 
 
 void video_core_mig_interface::init_ddr2(uint32_t init_value, uint32_t start_addr, uint32_t range_addr){
-    
+    /*
+    @brief  : to initialize the DDR2 with common initial value;
+    @param  :
+        1. init_value   : the value to populate the DDR2;
+        2. start_addr   : start address of the DDR2 to write to;
+        3. range_addr   : the address range of the DDR2 to write to;
+    @retval : none
+    @note   : each address represents a 128-bit transaction;
+    */
 
+   uint32_t i;  // loop index;
+   for(i = 0; i < range_addr; i++){
+        // prepare the address;
+        set_addr(start_addr + i);
 
+        // set up the data;
+        push_wrdata_01(init_value);
+        push_wrdata_02(init_value);
+        push_wrdata_03(init_value);
+        push_wrdata_04(init_value);
+        
+        // submit the write request;
+        submit_write();
+   }
 }
