@@ -510,10 +510,10 @@ module video_sys
         .core_motion_rddata(),
     
         // MIG DDR2 status;        
-        .core_MIG_init_complete(0),   // MIG DDR2 initialization complete;
-        .core_MIG_ready(0),           // MIG DDR2 ready to accept any request;
-        .core_MIG_transaction_complete(0), // a pulse indicating the read/write request has been serviced;
-        .core_MIG_ctrl_status_idle(0),    // MIG synchronous interface controller idle status;
+        .core_MIG_init_complete(),   // MIG DDR2 initialization complete;
+        .core_MIG_ready(),           // MIG DDR2 ready to accept any request;
+        .core_MIG_transaction_complete(), // a pulse indicating the read/write request has been serviced;
+        .core_MIG_ctrl_status_idle(),    // MIG synchronous interface controller idle status;
                 
         /*-----------------------------
         * external pin;
