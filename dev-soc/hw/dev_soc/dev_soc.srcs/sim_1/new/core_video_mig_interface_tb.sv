@@ -59,10 +59,12 @@ module core_video_mig_interface_tb(
     logic [127:0] RANDOM_128BIT_WRDATA = {127{$random}};     
         
     //localparam TEST_ARRAY_SIZE_CORE_MOTION = 1000;
-    localparam TEST_ARRAY_SIZE_CORE_MOTION = 2;    
+    //localparam TEST_ARRAY_SIZE_CORE_MOTION = 2;
+    localparam TEST_ARRAY_SIZE_CORE_MOTION = 1000;    
     bit[TEST_ARRAY_SIZE_CORE_MOTION-1:0][127:0] TEST_ARRAY_CORE_MOTION;
     
-    localparam TEST_ARRAY_SIZE_CORE_CPU = 2;    
+    //localparam TEST_ARRAY_SIZE_CORE_CPU = 2;
+    localparam TEST_ARRAY_SIZE_CORE_CPU = 500;    
     bit[TEST_ARRAY_SIZE_CORE_CPU-1:0][127:0] TEST_ARRAY_CORE_CPU;
 
     //////////// register address;
@@ -368,7 +370,7 @@ module core_video_mig_interface_tb(
         for(int i = 0; i < TEST_ARRAY_SIZE_CORE_MOTION; i++) begin
             //TEST_ARRAY_CORE_MOTION[i] = {128{$random}};
              // urandom generates 32-bit pseudorandom number each time it is called;
-            TEST_ARRAY_CORE_MOTION[i] = { $urandom(11),  $urandom(22),  $urandom(33),  $urandom(44)};                    
+            TEST_ARRAY_CORE_MOTION[i] = {$urandom(1*i+2),  $urandom(2*i+2),  $urandom(3*i+2),  $urandom(4*i+2)};                    
         end
         
         // burst write;
@@ -433,7 +435,22 @@ module core_video_mig_interface_tb(
              end            
          end
          
-        /* test 07: burst write and read via the cpu */
+        /* test 07: switch to the hw test */
+        @(posedge clk_sys);
+        write <= 1'b1;
+        read <= 1'b0;
+        addr <= MIG_INTERFACE_REG_SEL;
+        wr_data <= MIG_INTERFACE_REG_SEL_TEST;
+        
+            
+        // allow it to wrap around twice after it hits 31;
+        wait(LED[LED_END_RANGE:0] == 0);
+        wait(LED[LED_END_RANGE:0] == 1);
+        wait(LED[LED_END_RANGE:0] == 0);
+        wait(LED[LED_END_RANGE:0] == 1);
+        wait(LED[LED_END_RANGE:0] == 0);
+                
+        /* test 08: burst write and read via the cpu */
         /////// change the source to cpu;
         @(posedge clk_sys);
         cs <= 1;
@@ -452,7 +469,7 @@ module core_video_mig_interface_tb(
         for(int i = 0; i < TEST_ARRAY_SIZE_CORE_CPU; i++) begin  
             //TEST_ARRAY_CORE_CPU[i] = {128{$random}};          
             // urandom generates 32-bit pseudorandom number each time it is called;
-            TEST_ARRAY_CORE_CPU[i] = { $urandom(1),  $urandom(2),  $urandom(3),  $urandom(4)};        
+            TEST_ARRAY_CORE_CPU[i] = {$urandom(1*i+1),  $urandom(2*i+1),  $urandom(3*i+1),  $urandom(4*i+1)};        
         end
         
         ////// burst write;
