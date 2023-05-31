@@ -18,25 +18,43 @@ int main(){
     uint32_t start_addr = 0;                        // starting address of DDR2 to test;
     uint32_t range_addr = 100;                      // how many DDR2 address to cover?
     uint32_t init_value = (uint32_t)0xFFFFFFFF;     // common value to populate the DDR2;
-    uint32_t read_status;
+    int read_status;
 
     debug_str("Video Core DDR2 MIG Test\r\n");
-    //vid_mig.set_core_none();
-    vid_mig.set_core_test();
+    
+    /////////////// test: selecting the interface core ;
 
-    /*
+    //vid_mig.set_core_none();
+    //vid_mig.set_core_test();    
     // set the ddr2 to interface with the cpu;
     vid_mig.set_core_cpu();
-
-    read_status = vid_mig.get_status();
-    debug_str("status register: ");
+    debug_str("Setting to cpu interface for MIG.\r\n");
+    
+    ///////////// test: reading the status register;
+    read_status = vid_mig.is_mig_init_complete();
+    debug_str("calibration status: ");
     debug_hex(read_status);
     debug_str("\r\n");
-    */
-    /*
+
+    read_status = vid_mig.is_mig_app_ready();
+    debug_str("app ready status: ");
+    debug_hex(read_status);
+    debug_str("\r\n");
+
+    read_status = vid_mig.is_transaction_complete();
+    debug_str("ctrl transaction status: ");
+    debug_hex(read_status);
+    debug_str("\r\n");
+
+    read_status = vid_mig.is_mig_ctrl_idle();
+    debug_str("ctrl idle status: ");
+    debug_hex(read_status);
+    debug_str("\r\n");
+
     // block until the mig signals calibration complete;
     while(!vid_mig.is_mig_init_complete()){};
-    
+    debug_str("MIG calibration is ok\r\n");
+
     // initialize the DDR2 to a common value;
     debug_str("Setting initial value to DDR2 ...\r\n");
     vid_mig.init_ddr2(init_value, start_addr, range_addr);
@@ -45,7 +63,8 @@ int main(){
     // check the initialization;
     debug_str("Checking if the value initialization is correct.\r\n");
     vid_mig.check_init_ddr2(init_value, start_addr, range_addr);
-    */
+    debug_str("Done testing ... \r\n");
+    
     while(1){        
         ;
     }

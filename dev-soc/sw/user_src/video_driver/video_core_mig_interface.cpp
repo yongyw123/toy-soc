@@ -111,7 +111,7 @@ int video_core_mig_interface::is_mig_init_complete(void){
 
    uint32_t rd;
    rd = get_status();
-   return (int)(rd & REG_STATUS_MIG_INIT_MASK);
+   return (int)((rd & REG_STATUS_MIG_INIT_MASK) >> REG_STATUS_BIT_POS_MIG_INIT);
 }
 
 int video_core_mig_interface::is_mig_app_ready(void){
@@ -123,7 +123,7 @@ int video_core_mig_interface::is_mig_app_ready(void){
 
    uint32_t rd;
    rd = get_status();
-   return (int)(rd & REG_STATUS_MIG_RDY_MASK);
+   return (int)((rd & REG_STATUS_MIG_RDY_MASK) >> REG_STATUS_BIT_POS_MIG_RDY);
 }
 
 int video_core_mig_interface::is_transaction_complete(void){
@@ -140,7 +140,7 @@ int video_core_mig_interface::is_transaction_complete(void){
     */
    uint32_t rd;
    rd = get_status();
-   return (int)(rd & REG_STATUS_OP_COMPLETE_MASK);
+   return (int)((rd & REG_STATUS_OP_COMPLETE_MASK) >> REG_STATUS_BIT_POS_OP_COMPLETE);
 }
 
 int video_core_mig_interface::is_mig_ctrl_idle(void){
@@ -152,7 +152,7 @@ int video_core_mig_interface::is_mig_ctrl_idle(void){
 
    uint32_t rd;
    rd = get_status();
-   return (int)(rd & REG_STATUS_CTRL_IDLE_MASK);
+   return (int)((rd & REG_STATUS_CTRL_IDLE_MASK) >> REG_STATUS_BIT_POS_CTRL_IDLE);
 }
 
 void video_core_mig_interface::set_addr(uint32_t addr){
@@ -188,7 +188,7 @@ void video_core_mig_interface::submit_write(void){
    * need to ensure the wrstrobe is two system clock periods wide;
    * this is due to the HW synchronization issue;
    --------------------------------------------------------------*/
-    //REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
+    REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
 
    // need to disable after one clock cycle; otherwise; it will keep 
    // on writing;
@@ -216,7 +216,7 @@ void video_core_mig_interface::submit_read(void){
    * need to ensure the rdstrobe is two system clock periods wide;
    * this is due to the HW synchronization issue;
    --------------------------------------------------------------*/
-   //REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
+   REG_WRITE(base_addr, REG_CTRL_OFFSET, wr_data);
 
    // need to disable after one clock cycle; otherwise; it will keep 
    // on reading;
