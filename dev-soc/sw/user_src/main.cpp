@@ -14,11 +14,27 @@ video_core_pixel_converter_monoY2RGB565 vid_grayscale(GET_VIDEO_CORE_ADDR(BUS_MI
 video_core_mig_interface vid_mig(GET_VIDEO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, V5_MIG_INTERFACE));
 
 int main(){
-    // signal declaration;
+    ////////// signal declaration;
+    /*
     uint32_t start_addr = 0;                        // starting address of DDR2 to test;
     uint32_t range_addr = 100;                      // how many DDR2 address to cover?
     uint32_t init_value = (uint32_t)0xFFFFFFFF;     // common value to populate the DDR2;
+    */
+    
+    // for reporting;
     int read_status;
+    int count; // count;
+
+    // for reading;
+    uint32_t read_buffer[4];
+
+    // some test data;
+    uint32_t test_address = (uint32_t)0x1F;        
+    uint32_t test_wrdata01 = (uint32_t)0x12ABCDEF;
+    uint32_t test_wrdata02 = (uint32_t)0x12345678;
+    uint32_t test_wrdata03 = (uint32_t)0xAFBFCFDF;
+    uint32_t test_wrdata04 = (uint32_t)0x10203040;
+    uint32_t test_wrarray[4] = {test_wrdata01, test_wrdata02, test_wrdata03, test_wrdata04};
 
     debug_str("Video Core DDR2 MIG Test\r\n");
     
@@ -55,6 +71,28 @@ int main(){
     while(!vid_mig.is_mig_init_complete()){};
     debug_str("MIG calibration is ok\r\n");
 
+    //////// test: simple write 
+    debug_str("Test: start simple writing\r\n");
+    vid_mig.write_ddr2((uint32_t)test_address, test_wrdata01, test_wrdata02, test_wrdata03, test_wrdata04);
+    debug_str("Test: done simple writing\r\n");
+
+    //////// test: simple read;
+    debug_str("Test: start simple reading\r\n");
+    vid_mig.read_ddr2(test_address, read_buffer);
+    count = 0;
+    for(int i = 0; i < 4; i++){
+        if(read_buffer[i] != test_wrarray[i]){
+            debug_str("test reading and writing FAILED; abort\r\n");
+            break;
+        }else{
+            count++;
+        }   
+    }
+    debug_str("Passed test count: ");
+    debug_dec(count);
+    debug_str("\r\n");
+
+    /*
     // initialize the DDR2 to a common value;
     debug_str("Setting initial value to DDR2 ...\r\n");
     vid_mig.init_ddr2(init_value, start_addr, range_addr);
@@ -64,7 +102,8 @@ int main(){
     debug_str("Checking if the value initialization is correct.\r\n");
     vid_mig.check_init_ddr2(init_value, start_addr, range_addr);
     debug_str("Done testing ... \r\n");
-    
+    */
+   
     while(1){        
         ;
     }
