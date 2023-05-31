@@ -206,7 +206,7 @@ module mcs_top
     // locked=HIGH means clock has stabilized;
     // need to hold reset asserted until both CPU and locked signals are OK;
     assign reset_sys_raw = ~CPU_RESETN || ~mmcm_clk_locked;      
-    assign reset_mmcm = ~CPU_RESETN;
+    
         
     // use better name for the system clock;
     assign sys_clk = clkout_100M;
