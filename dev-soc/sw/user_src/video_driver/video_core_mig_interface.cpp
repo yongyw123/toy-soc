@@ -465,5 +465,5 @@ int video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t star
    }
 
    // return binary status;
-   return (count_match == range_addr);
+   return (int)(count_match == range_addr);
 }

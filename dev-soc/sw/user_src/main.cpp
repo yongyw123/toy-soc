@@ -30,7 +30,8 @@ int main(){
 
     //// for sequential testing;
     uint32_t seq_j; // loop  
-    uint32_t seq_range = 50;
+    //uint32_t seq_range = 50;
+    uint32_t seq_range;
     
     //// for burst testing;
     uint32_t start_addr;    // starting address of DDR2 to test;
@@ -139,6 +140,9 @@ int main(){
     /// test: sequential write->read;
     /// use the address as the write data;
     ////////////////////////////////////////////////////////////////////
+    seq_j = 0;
+    seq_range = 1000;    
+    
     debug_str("///////////////////////////////////\r\n");
     debug_str("Test: sequential write->read\r\n");    
     count = 0;
@@ -146,12 +150,16 @@ int main(){
         // write; 
         vid_mig.write_ddr2((uint32_t)seq_j, seq_j, seq_j, seq_j, seq_j);
         vid_mig.read_ddr2((uint32_t)seq_j, read_buffer);
-                
+
+        check_OK = 0;        
         debug_str("Index: ");
         debug_dec(seq_j);
-        debug_str(" ; ");        
-        check_OK = 0;
+        debug_str(" ; ");
+        debug_str("Address: ");
+        debug_dec(seq_j);
+        debug_str(" ; ");                        
         debug_str("Unpacked read data: "); 
+
         // read in 32-bit batch data from a 128-bit DDR2 read transaction;
         for(int i = 0; i < 4; i++){                                                
             debug_hex(read_buffer[i]);
@@ -185,9 +193,10 @@ int main(){
 
     //////////////////////////////////////////////////////////////////////
 
+    /*
     debug_str("///////////////////////////////////\r\n");
     start_addr = 0;                        // starting address of DDR2 to test;
-    range_addr = 20;                      // how many DDR2 address to cover?
+    range_addr = 1000;                      // how many DDR2 address to cover?
     init_value = (uint32_t)0xFAFBFCF0;     // common value to populate the DDR2;
 
     debug_str("Test: Burst write using a common write value; followed by a burst read\r\n");
@@ -205,7 +214,7 @@ int main(){
     debug_str("Burst Read starts\r\n");
     vid_mig.check_init_ddr2(init_value, start_addr, range_addr);
     debug_str("Burst Read ends\r\n");    
-    
+    */    
 
     while(1){        
         ;
