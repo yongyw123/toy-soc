@@ -14,7 +14,10 @@ video_core_pixel_converter_monoY2RGB565 vid_grayscale(GET_VIDEO_CORE_ADDR(BUS_MI
 video_core_mig_interface vid_mig(GET_VIDEO_CORE_ADDR(BUS_MICROBLAZE_IO_BASE_ADDR_G, V5_MIG_INTERFACE));
 
 int main(){
-    ////////// signal declaration;
+    //////////////////////////////////////////
+    // signal declaration;
+    /////////////////////////////////////////
+
     // for reporting;
     int read_status;
     uint32_t read_reg;
@@ -25,7 +28,11 @@ int main(){
     // for reading;
     uint32_t read_buffer[4];
 
-    // for testing;
+    //// for sequential testing;
+    uint32_t seq_j; // loop  
+    uint32_t seq_range = 50;
+    
+    //// for burst testing;
     uint32_t start_addr = 0;                        // starting address of DDR2 to test;
     uint32_t range_addr = 20;                      // how many DDR2 address to cover?
     uint32_t init_value = (uint32_t)0xFAFBFCF0;     // common value to populate the DDR2;
@@ -135,31 +142,35 @@ int main(){
     debug_str("///////////////////////////////////\r\n");
     debug_str("Test: sequential write->read\r\n");    
     count = 0;
-    for(int j = 0; j < 10; j++){
-        // write;
-        vid_mig.write_ddr2((uint32_t)j, j, j, j, j);
-        vid_mig.read_ddr2((uint32_t)j, read_buffer);
-        count = 0;
+    for(seq_j = 0; seq_j < seq_range; seq_j++){
+        // write; 
+        vid_mig.write_ddr2((uint32_t)seq_j, seq_j, seq_j, seq_j, seq_j);
+        vid_mig.read_ddr2((uint32_t)seq_j, read_buffer);
+                
         debug_str("Index: ");
-        debug_dec(j);
-        debug_str("\r\n");
+        debug_dec(seq_j);
+        debug_str(" ; ");        
         check_OK = 0;
         debug_str("Unpacked read data: "); 
+        // read in 32-bit batch data from a 128-bit DDR2 read transaction;
         for(int i = 0; i < 4; i++){                                                
             debug_hex(read_buffer[i]);
             debug_str(" | ");
-            if(read_buffer[i] != j){
+            if(read_buffer[i] != seq_j){
                 debug_str("ERROR: Read does not match with write.\r\n");                    
             }else{
                 check_OK++;
             }   
         }
-        debug_str("\r\n");
+        
+        // all batches within 128-bit data match?
         if(check_OK == 4){
             count++;
+            debug_str(" ; Status: OK\r\n");
         }   
+        
     }
-    debug_str("Test: Sequentia write->read ends\r\n");
+    debug_str("Test: Sequential write->read ends\r\n");
     debug_str("Status: ");
     debug_dec(count);
     debug_str(" matched \r\n");
