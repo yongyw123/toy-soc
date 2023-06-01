@@ -717,7 +717,9 @@ Register Definition:
 2. Register 1 (Offset 1): Status Register
         bit[0]: MIG DDR2 initialization complete status; active high;
         bit[1]: MIG DDR2 app ready status (implies init complete status); active high;
-        bit[2]: transaction completion status, common for both read and write; ONLY LAST ONE CLOCK CYCLE;     
+        bit[2]: transaction completion status, 
+                common for both read and write; 
+                once asserted, it will remain as it is until new write/read strobe is requested;                
         bit[3]: MIG controller idle status; active high;
             
 3. Register 2 (Offset 2): address common for read and write;
@@ -748,8 +750,7 @@ Register IO:
 11. Register 10: read only;
 12. Register 11: read only;
  
-*****************************************************************/
-#define V5_MIG_INTERFACE_REG_SEL       0    // 4'b0000     // 0;
+*****************************************************************/#define V5_MIG_INTERFACE_REG_SEL       0    // 4'b0000     // 0;
 #define V5_MIG_INTERFACE_REG_STATUS    1    // 4'b0001     // 1;
 #define V5_MIG_INTERFACE_REG_ADDR      2    // 4'b0010     // 2;
 #define V5_MIG_INTERFACE_REG_CTRL      3    // 4'b0011     // 3;

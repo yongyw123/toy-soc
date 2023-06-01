@@ -105,7 +105,6 @@ int main(){
         debug_str("\r\n");
     }
     
-
     //////// test: simple write 
     debug_str("Test: start simple writing\r\n");
     vid_mig.write_ddr2((uint32_t)test_address, test_wrdata01, test_wrdata02, test_wrdata03, test_wrdata04);
