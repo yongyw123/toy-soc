@@ -352,8 +352,8 @@ void video_core_mig_interface::read_ddr2(uint32_t addr, uint32_t *read_buffer){
    // submit the read request;
    submit_read();
    
-   // debugging 
-   //delay_busy_ms(1000);
+   // debugging
+   delay_busy_ms(10);
 
    //debug_str("waiting for read transaction to complete.\r\n");
    // block until the MIG says the data is valid to read;
@@ -382,8 +382,14 @@ void video_core_mig_interface::init_ddr2(uint32_t init_value, uint32_t start_add
     */
 
    uint32_t i;  // loop index;
+   uint32_t address;
+   address = start_addr;
    for(i = 0; i < range_addr; i++){
-        write_ddr2((start_addr + i), init_value, init_value, init_value, init_value);
+        write_ddr2(address, init_value, init_value, init_value, init_value);
+        address++;
+        
+        // debugging
+        delay_busy_ms(10);
    }        
 }
 
@@ -401,35 +407,37 @@ void video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t sta
    uint32_t i; // loop index;
    uint32_t read_buffer[4]; // buffer to store the entire "128-bit" DDR2 data;
    uint32_t read_data;
-   uint32_t address;
+   uint32_t address = start_addr;
    uint32_t check_status = 0;
    uint32_t count_match = 0;
    debug_str("Checking DDR2 initialization ... \r\n");
    for(i = 0; i < range_addr; i++){
-        address = (start_addr + i);
-        read_ddr2(address, read_buffer);
         
+        read_ddr2(address, read_buffer);
+
         // iterate each 32-bit read data and check against the expected val;
         check_status = 0;
         for(int j = 0; j < 4; j++){
             read_data = read_buffer[i];
             if(read_data != init_value){
                 debug_str("Address: ");
-                debug_hex(address);
+                debug_dec(address);
                 debug_str("; Status: NOT OK; Actual Read Data: ");                                                
                 debug_hex(read_data);
                 debug_str("\r\n");
             }
             else{
                 debug_str("Address: ");
-                debug_hex(address);
+                debug_dec(address);
                 debug_str("; Status: OK\r\n");
                 check_status++;
             }
         }
-        if(check_status = 4){
+        if(check_status == 4){
             count_match++;
         }
+        address++;
+
    }
    debug_str("Done checking DDR2 initialization ... \r\n");
    if(count_match == (range_addr-1)){
