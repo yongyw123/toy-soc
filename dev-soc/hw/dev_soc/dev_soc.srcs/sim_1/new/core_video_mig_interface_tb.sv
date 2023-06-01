@@ -59,12 +59,12 @@ module core_video_mig_interface_tb(
     logic [127:0] RANDOM_128BIT_WRDATA = {127{$random}};     
         
     //localparam TEST_ARRAY_SIZE_CORE_MOTION = 1000;
-    localparam TEST_ARRAY_SIZE_CORE_MOTION = 2;
-    //localparam TEST_ARRAY_SIZE_CORE_MOTION = 1000;    
+    //localparam TEST_ARRAY_SIZE_CORE_MOTION = 2;
+    localparam TEST_ARRAY_SIZE_CORE_MOTION = 1000;    
     bit[TEST_ARRAY_SIZE_CORE_MOTION-1:0][127:0] TEST_ARRAY_CORE_MOTION;
     
-    localparam TEST_ARRAY_SIZE_CORE_CPU = 2;
-    //localparam TEST_ARRAY_SIZE_CORE_CPU = 500;    
+    //localparam TEST_ARRAY_SIZE_CORE_CPU = 2;
+    localparam TEST_ARRAY_SIZE_CORE_CPU = 500;    
     bit[TEST_ARRAY_SIZE_CORE_CPU-1:0][127:0] TEST_ARRAY_CORE_CPU;
 
     //////////// register address;
