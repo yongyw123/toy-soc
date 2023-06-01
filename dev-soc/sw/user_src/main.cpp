@@ -38,8 +38,15 @@ int main(){
     uint32_t test_wrdata04 = (uint32_t)0x10203040;
     uint32_t test_wrarray[4] = {test_wrdata01, test_wrdata02, test_wrdata03, test_wrdata04};
 
+    debug_str("Preparation: \r\n");
+    debug_str("Write Data Batch 01: "); debug_hex(test_wrdata01); debug_str("\r\n");
+    debug_str("Write Data Batch 02: "); debug_hex(test_wrdata02); debug_str("\r\n");
+    debug_str("Write Data Batch 03: "); debug_hex(test_wrdata03); debug_str("\r\n");
+    debug_str("Write Data Batch 04: "); debug_hex(test_wrdata04); debug_str("\r\n");
+
+
     debug_str("Video Core DDR2 MIG Test\r\n");
-    
+
     /////////////// test: selecting the interface core ;
 
     //vid_mig.set_core_none();
@@ -86,6 +93,7 @@ int main(){
 
     //////// test: simple read from just-initialized DDR2;
     // expect the read data to be gibberish;    
+    /*
     debug_str("Test: start simple reading from uninitialized (value) DDR2\r\n");
     vid_mig.read_ddr2(test_address, read_buffer);
     count = 0;
@@ -94,6 +102,7 @@ int main(){
         debug_hex(read_buffer[i]);
         debug_str("\r\n");
     }
+    */
 
     //////// test: simple write 
     debug_str("Test: start simple writing\r\n");
@@ -108,6 +117,11 @@ int main(){
     vid_mig.read_ddr2(test_address, read_buffer);
     count = 0;
     for(int i = 0; i < 4; i++){
+        debug_str("Read Data Batch "); 
+        debug_dec(i+1);
+        debug_str(" : ");
+        debug_hex(read_buffer[i]);
+        debug_str("\r\n");
         if(read_buffer[i] != test_wrarray[i]){
             debug_str("test reading and writing FAILED; abort\r\n");
             break;
