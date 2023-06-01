@@ -219,6 +219,17 @@ module core_video_mig_interface_tb(
         
         @(posedge clk_sys);
         wait(rd_data[2] == 1);
+        
+        /////////////////////////////////////
+        /// debugging
+        /*
+        @(posedge clk_sys);
+        wait(rd_data[2] == 0);
+        
+        @(posedge clk_sys);
+        wait(rd_data[2] == 1);
+        */
+        ///////////////////////////////////
             
 		// read the 128-bit DDR2 into four read data registers;
         @(posedge clk_sys);
@@ -231,7 +242,11 @@ module core_video_mig_interface_tb(
                 $error("stop the simulation at once");
                 $stop;
             end        
-        		
+       
+        //$stop;
+        
+        ////////////////////////////////
+        
 		@(posedge clk_sys);
         read <= 1'b1;
 		addr <= MIG_INTERFACE_REG_RDDATA_02;
