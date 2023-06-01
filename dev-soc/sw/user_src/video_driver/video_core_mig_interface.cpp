@@ -459,9 +459,9 @@ int video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t star
    debug_str("\r\n");    
 
    if(count_match == range_addr){
-        debug_str("Test Result: PASSED\r\n");
+        debug_str("Initialization Result: PASSED\r\n");
    }else{
-        debug_str("Test Result: FAILED\r\n");        
+        debug_str("Initialization Result: FAILED\r\n");        
    }
 
    // return binary status;
