@@ -95,7 +95,7 @@ int main(){
 
     //////// test: simple read from just-initialized DDR2;
     // expect the read data to be gibberish;    
-    /*
+    
     debug_str("Test: start simple reading from uninitialized (value) DDR2\r\n");
     vid_mig.read_ddr2(test_address, read_buffer);
     count = 0;
@@ -104,7 +104,7 @@ int main(){
         debug_hex(read_buffer[i]);
         debug_str("\r\n");
     }
-    */
+    
 
     //////// test: simple write 
     debug_str("Test: start simple writing\r\n");
