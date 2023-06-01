@@ -242,14 +242,15 @@ class video_core_mig_interface{
         /* utility;
         the purpose of using cpu to communicate with the ddr2 
         is to initialize the ddr2 for other applications;
-
-        also, for testing purposes;        
         */
         
         void write_ddr2(uint32_t addr, uint32_t wrbatch01, uint32_t wrbatch02, uint32_t wrbatch03, uint32_t wrbatch04);
         void read_ddr2(uint32_t addr, uint32_t *read_buffer);
         void init_ddr2(uint32_t init_value, uint32_t start_addr, uint32_t range_addr);
         int check_init_ddr2(uint32_t init_value, uint32_t start_addr, uint32_t range_addr); // sanity check for init_ddr2();
+
+        /* testing purpose*/
+        int sw_test_sequential(uint32_t number);
 
     private:
         // this video core base address in the user-address space;

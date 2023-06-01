@@ -467,3 +467,83 @@ int video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t star
    // return binary status;
    return (int)(count_match == range_addr);
 }
+
+int video_core_mig_interface::sw_test_sequential(uint32_t number){
+    /*
+    @Test Purpose: To sequential write followed by a read; 
+    @param          : number of address to cover
+    @retval         :
+        HIGH (1) if OK; LOW (0) otherwise
+
+    @Test Setup:
+    1. Use the index as the address and the write data;
+    2. Start Address: 0x00;
+    3. End Address: Start Address + number;
+    */
+
+    uint32_t seq_j;
+    uint32_t seq_range = number;
+    uint32_t count;
+    uint32_t read_buffer[4];
+    uint32_t check_OK;
+
+
+    debug_str("Test: sequential write->read\r\n"); 
+    debug_str("Number of Address to Cover: ");
+    debug_dec(number);
+    debug_str("\r\n");
+    debug_str("Start Address: 0x00\r\n");
+    debug_str("----- test starts --------\r\n");
+
+    count = 0;
+    for(seq_j = 0; seq_j < seq_range; seq_j++){
+        // write; 
+        write_ddr2((uint32_t)seq_j, seq_j, seq_j, seq_j, seq_j);
+        
+        //read immediately after the write;
+        read_ddr2((uint32_t)seq_j, read_buffer);
+
+        check_OK = 0;        
+        debug_str("Index: ");
+        debug_dec(seq_j);
+        debug_str(" ; ");
+        debug_str("Address: ");
+        debug_dec(seq_j);
+        debug_str(" ; ");                        
+        debug_str("Unpacked read data: "); 
+
+        // read in 32-bit batch data from a 128-bit DDR2 read transaction;
+        for(int i = 0; i < 4; i++){                                                
+            debug_hex(read_buffer[i]);
+            debug_str(" | ");
+            if(read_buffer[i] == seq_j){                
+                check_OK++;
+            }   
+        }
+        
+        // all batches within 128-bit data match?
+        if(check_OK == 4){
+            count++;
+            debug_str(" ; Status: OK\r\n");
+        }else{
+            debug_str(" ; Status: NOT OK\r\n");                                                                
+        }
+    }
+
+
+    debug_str("Test: Sequential write->read ends\r\n");
+    debug_str("Expected Matched Count: ");
+    debug_dec(seq_range);
+    debug_str("\r\n");
+    debug_str("Actual Matched Count: ");
+    debug_dec(count);
+    debug_str("\r\n");    
+    if(count == seq_range){
+        debug_str("Test Result: PASSED\r\n");
+    }else{
+        debug_str("Test Result: FAILED\r\n");
+    }
+
+    return (int)(count == seq_range);
+
+}
