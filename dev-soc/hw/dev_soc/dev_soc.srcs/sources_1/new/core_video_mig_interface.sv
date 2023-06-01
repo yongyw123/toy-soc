@@ -194,7 +194,9 @@ module core_video_mig_interface
         output logic debug_MIG_init_complete_status,
         output logic debug_MIG_transaction_complete_status,
         output logic debug_MIG_ctrl_status_idle,
-        output logic [2:0] debug_mux_reg
+        output logic [2:0] debug_mux_reg,
+        output logic debug_MIG_CPU_transaction_complete_status_reg,
+        output logic debug_MIG_CPU_transaction_complete_status_next
         
     );
     
@@ -260,6 +262,7 @@ module core_video_mig_interface
     ////// cpu register;
     logic [2:0] mux_reg, mux_next;    // multiplexing;
     logic [3:0] status_reg, status_next;    // aggregating status from various parts;
+    logic MIG_CPU_transaction_complete_status_reg, MIG_CPU_transaction_complete_status_next;    // to register the transaction completion flag;  
     logic [22:0] cpu_addr_reg;
     logic [31:0] cpu_ctrl_reg;
     logic [31:0] cpu_rddata_01_reg;
@@ -378,13 +381,14 @@ module core_video_mig_interface
     assign debug_MIG_transaction_complete_status = MIG_user_transaction_complete;
     assign debug_MIG_ctrl_status_idle = MIG_ctrl_status_idle; 
     assign debug_mux_reg = mux_reg;
+    assign debug_MIG_CPU_transaction_complete_status_reg = MIG_CPU_transaction_complete_status_reg;
+    assign debug_MIG_CPU_transaction_complete_status_next = MIG_CPU_transaction_complete_status_next;
     
     ////////////////////////////////////////////////////////////////
     // INSTANTIATION
     ////////////////////////////////////////////////////////////////
     
-    // mig synchronous interface controller;
-    
+    // mig synchronous interface controller;    
     user_mig_DDR2_sync_ctrl user_mig_DDR2_sync_ctrl_unit
     (        
         // general, 
@@ -509,9 +513,7 @@ module core_video_mig_interface
     ////////////////////////////////////////////////////////////////
     /// BUS INTERFACING    
     ////////////////////////////////////////////////////////////////       
-    // ff;
-    //logic core_hw_test_enable_reg, core_hw_test_enable_next;
-    
+    // ff;        
     always_ff @(posedge clk_sys, posedge reset_sys) begin
         if(reset_sys) begin
             mux_reg <= MIG_INTERFACE_REG_SEL_NONE;
@@ -519,6 +521,7 @@ module core_video_mig_interface
             cpu_ctrl_reg <= 0;
             core_hw_test_enable_ready_reg <= 1'b0;                            
             cpu_addr_reg <= 0;        
+            MIG_CPU_transaction_complete_status_reg <= 0;
             
             cpu_rddata_01_reg <= 0;
             cpu_rddata_02_reg <= 0;
@@ -536,6 +539,7 @@ module core_video_mig_interface
             // to disable/enable the hw testing; 
             core_hw_test_enable_ready_reg <= core_hw_test_enable_ready_next;
             status_reg <= status_next;
+            MIG_CPU_transaction_complete_status_reg <= MIG_CPU_transaction_complete_status_next;
             
             // selecting which core/source to interface with the ddr2;
             if(wr_en_reg_mux) begin
@@ -581,30 +585,61 @@ module core_video_mig_interface
         end
     end  
     
+    ////////////////////////////////////////////
     // addres decoding;
+    ///////////////////////////////////////////
     assign wr_en = cs && write;
     assign rd_en = cs && read;
     
-    // register 0; selector;    
+    ///////// register 0; selector;    
     assign wr_en_reg_mux = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_SEL);
     assign mux_next = wr_data[2:0];
         
-    // register 1: status;        
-    assign status_next = {MIG_ctrl_status_idle, MIG_user_transaction_complete, MIG_user_ready, MIG_user_init_complete};
+    ///////// register 1: status;        
+    //assign status_next = {MIG_ctrl_status_idle, MIG_user_transaction_complete, MIG_user_ready, MIG_user_init_complete};    
+    //assign status_next = {MIG_ctrl_status_idle, MIG_CPU_transaction_complete_status_reg, MIG_user_ready, MIG_user_init_complete};
     
-    // register 2: addr;   
+    // look ahead for transaction completion status;
+    assign status_next = {MIG_ctrl_status_idle, MIG_CPU_transaction_complete_status_next, MIG_user_ready, MIG_user_init_complete};
+    
+    ///////// register 2: addr;   
     assign wr_en_reg_addr = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_ADDR);
     
-    // register 3: control register;
+    ///////// register 3: control register;
     assign wr_en_reg_ctrl = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_CTRL);
     
-    // registers to push the cpu 32-bit data to the ddr2 128-bit write data;
+    ///////// registers to push the cpu 32-bit data to the ddr2 128-bit write data;
     assign wr_en_reg_cpu_ddr2_wrdata_01 = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_WRDATA_01);
     assign wr_en_reg_cpu_ddr2_wrdata_02 = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_WRDATA_02);
     assign wr_en_reg_cpu_ddr2_wrdata_03 = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_WRDATA_03);
     assign wr_en_reg_cpu_ddr2_wrdata_04 = (wr_en) && (addr[3:0] == MIG_INTERFACE_REG_WRDATA_04);
         
+   ////////////////////////////////////
+   // ISSUE: to address the transaction completion flag issue;
+   // issue: MIG_user_transaction_complete flag only lasts for one cpu cycle;
+   //           hence, mostly likely, it will be missed by the sw;
+   // note: this MIG_user_transaction_complete_flag has been synchronized with the 100MHz system clock;
+   // solution:
+   // 1. use a register to hold it and do not clear it until new write/read strobe is requested?
+   // 2. This is a wait-check-then-submit method for the SW;
+   ////////////////////////////////////
+   always_comb begin
+        if(MIG_user_transaction_complete && ~(user_wr_strobe||user_rd_strobe)) begin
+            MIG_CPU_transaction_complete_status_next = 1'b1;
+        end
+        // clear it since new request has been submitted;
+        else if(user_wr_strobe || user_rd_strobe) begin
+            MIG_CPU_transaction_complete_status_next = 1'b0;
+        end
+        // default: maintain as it is until told otherwise;        
+        else begin
+            MIG_CPU_transaction_complete_status_next = MIG_CPU_transaction_complete_status_reg;            
+        end
+   end
+   
+   /////////////////////////////////////
    // write decoding;
+   /////////////////////////////////////
    always_comb begin   
         ////////// default; ////////////
         // common for mig ddr2 sync interface (controller);
@@ -682,7 +717,9 @@ module core_video_mig_interface
    
    end 
    
+   ////////////////////////////////////////////
    // read multiplexing for the cpu;
+   ///////////////////////////////////////////
    always_comb begin
         // default;
         rd_data = 32'b0;
