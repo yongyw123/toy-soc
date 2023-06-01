@@ -249,7 +249,7 @@ class video_core_mig_interface{
         void write_ddr2(uint32_t addr, uint32_t wrbatch01, uint32_t wrbatch02, uint32_t wrbatch03, uint32_t wrbatch04);
         void read_ddr2(uint32_t addr, uint32_t *read_buffer);
         void init_ddr2(uint32_t init_value, uint32_t start_addr, uint32_t range_addr);
-        void check_init_ddr2(uint32_t init_value, uint32_t start_addr, uint32_t range_addr); // sanity check for init_ddr2();
+        int check_init_ddr2(uint32_t init_value, uint32_t start_addr, uint32_t range_addr); // sanity check for init_ddr2();
 
     private:
         // this video core base address in the user-address space;

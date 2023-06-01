@@ -319,6 +319,9 @@ void video_core_mig_interface::write_ddr2(uint32_t addr, uint32_t wrbatch01, uin
     @assumption : CPU is controlling the MIG interface (set it apriori);
     */
     
+    // block until the controller is ready;
+    //while(!is_mig_ctrl_idle()){};
+
     // one needs to setup the address and data before submitting the write request;
     set_addr(addr);
     push_wrdata_01(wrbatch01);
@@ -346,6 +349,9 @@ void video_core_mig_interface::read_ddr2(uint32_t addr, uint32_t *read_buffer){
     @assumption : CPU is controlling the MIG interface (set it apriori);
     */
    
+   // block until the controller is ready;
+   //while(!is_mig_ctrl_idle()){};
+
    // prepare the address;
    set_addr(addr);
    
@@ -393,14 +399,15 @@ void video_core_mig_interface::init_ddr2(uint32_t init_value, uint32_t start_add
    }        
 }
 
-void video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t start_addr, uint32_t range_addr){
+int video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t start_addr, uint32_t range_addr){
     /*
     @brief  : sanity check of init_ddr2();    
     @param  :
         1. init_value   : the expected value written to the DDR2 to check against;
         2. start_addr   : start address of the DDR2 to read from ;
         3. range_addr   : the address range of the DDR2 to read from;
-    @retval : none;
+    @retval : binary
+        HIGH (1) if the initialization check is OK; LOW (0) otherwise;
     @assumption : CPU is controlling the MIG interface (set it apriori);
     */
 
@@ -412,40 +419,51 @@ void video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t sta
    uint32_t count_match = 0;
    debug_str("Checking DDR2 initialization ... \r\n");
    for(i = 0; i < range_addr; i++){
-        
+        // read;        
         read_ddr2(address, read_buffer);
+        
+        // serial print formatting;
+        check_status = 0;
+        debug_str("Index: ");
+        debug_dec(i);
+        debug_str(" ; ");
+        debug_str("Address: ");
+        debug_dec(address);
+        debug_str(" ; ");                        
+        debug_str("Unpacked read data: "); 
 
         // iterate each 32-bit read data and check against the expected val;
-        check_status = 0;
         for(int j = 0; j < 4; j++){
-            read_data = read_buffer[i];
-            if(read_data != init_value){
-                debug_str("Address: ");
-                debug_dec(address);
-                debug_str("; Status: NOT OK; Actual Read Data: ");                                                
-                debug_hex(read_data);
-                debug_str("\r\n");
-            }
-            else{
-                debug_str("Address: ");
-                debug_dec(address);
-                debug_str("; Status: OK\r\n");
+            read_data = read_buffer[j];
+            debug_hex(read_data);
+            debug_str(" | ");
+            if(read_data == init_value){
                 check_status++;
             }
         }
         if(check_status == 4){
             count_match++;
+            debug_str(" ; Status: OK\r\n");
+        }else{
+            debug_str(" ; Status: NOT OK\r\n");                                                                
         }
         address++;
 
    }
-   debug_str("Done checking DDR2 initialization ... \r\n");
-   if(count_match == (range_addr-1)){
-        debug_str("Result: All matched. OK\r\n");
+   debug_str("Done checking DDR2 common initialization ... \r\n");
+   debug_str("Expected Matched Count: ");
+   debug_dec(range_addr);
+   debug_str("\r\n");
+   debug_str("Actual Matched Count: ");
+   debug_dec(count_match);
+   debug_str("\r\n");    
+
+   if(count_match == range_addr){
+        debug_str("Test Result: PASSED\r\n");
    }else{
-        debug_str("Result: NOT OK\r\n");
-        debug_str("Only "); 
-        debug_dec(count_match);
-        debug_str(" match\r\n");
+        debug_str("Test Result: FAILED\r\n");        
    }
+
+   // return binary status;
+   return (count_match == range_addr);
 }

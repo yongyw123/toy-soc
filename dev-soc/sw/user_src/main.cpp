@@ -22,7 +22,7 @@ int main(){
     int read_status;
     uint32_t read_reg;
 
-    int count; // count;
+    uint32_t count; // count;
     int check_OK;   
 
     // for reading;
@@ -33,9 +33,9 @@ int main(){
     uint32_t seq_range = 50;
     
     //// for burst testing;
-    uint32_t start_addr = 0;                        // starting address of DDR2 to test;
-    uint32_t range_addr = 20;                      // how many DDR2 address to cover?
-    uint32_t init_value = (uint32_t)0xFAFBFCF0;     // common value to populate the DDR2;
+    uint32_t start_addr;    // starting address of DDR2 to test;
+    uint32_t range_addr;    // how many DDR2 address to cover?
+    uint32_t init_value;    // common value to populate the DDR2;
 
     // some test data;
     uint32_t test_address = (uint32_t)0x1F;        
@@ -156,9 +156,7 @@ int main(){
         for(int i = 0; i < 4; i++){                                                
             debug_hex(read_buffer[i]);
             debug_str(" | ");
-            if(read_buffer[i] != seq_j){
-                debug_str("ERROR: Read does not match with write.\r\n");                    
-            }else{
+            if(read_buffer[i] == seq_j){                
                 check_OK++;
             }   
         }
@@ -167,22 +165,31 @@ int main(){
         if(check_OK == 4){
             count++;
             debug_str(" ; Status: OK\r\n");
-        }           
+        }else{
+            debug_str(" ; Status: NOT OK\r\n");                                                                
+        }
     }
     debug_str("Test: Sequential write->read ends\r\n");
-    debug_str("Stats: ");
+    debug_str("Expected Matched Count: ");
+    debug_dec(seq_range);
+    debug_str("\r\n");
+    debug_str("Actual Matched Count: ");
     debug_dec(count);
-    debug_str(" matched \r\n");
+    debug_str("\r\n");    
     if(count == seq_range){
-        debug_str("Status: PASSED\r\n");
+        debug_str("Test Result: PASSED\r\n");
     }else{
-        debug_str("Status: FAILED\r\n");
+        debug_str("Test Result: FAILED\r\n");
 
     }
 
     //////////////////////////////////////////////////////////////////////
 
     debug_str("///////////////////////////////////\r\n");
+    start_addr = 0;                        // starting address of DDR2 to test;
+    range_addr = 20;                      // how many DDR2 address to cover?
+    init_value = (uint32_t)0xFAFBFCF0;     // common value to populate the DDR2;
+
     debug_str("Test: Burst write using a common write value; followed by a burst read\r\n");
     debug_str("Setup: \r\n");
     debug_str("Start Address: "); debug_hex(start_addr); debug_str("\r\n");
