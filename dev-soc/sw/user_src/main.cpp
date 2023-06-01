@@ -140,6 +140,7 @@ int main(){
     /// test: sequential write->read;
     /// use the address as the write data;
     ////////////////////////////////////////////////////////////////////
+    /*
     seq_j = 0;
     seq_range = 1000;    
     
@@ -190,14 +191,14 @@ int main(){
         debug_str("Test Result: FAILED\r\n");
 
     }
-
+    */
     //////////////////////////////////////////////////////////////////////
 
-    /*
+    
     debug_str("///////////////////////////////////\r\n");
     start_addr = 0;                        // starting address of DDR2 to test;
     range_addr = 1000;                      // how many DDR2 address to cover?
-    init_value = (uint32_t)0xFAFBFCF0;     // common value to populate the DDR2;
+    init_value = (uint32_t)0xFA97AB01;     // common value to populate the DDR2;
 
     debug_str("Test: Burst write using a common write value; followed by a burst read\r\n");
     debug_str("Setup: \r\n");
@@ -214,7 +215,7 @@ int main(){
     debug_str("Burst Read starts\r\n");
     vid_mig.check_init_ddr2(init_value, start_addr, range_addr);
     debug_str("Burst Read ends\r\n");    
-    */    
+    
 
     while(1){        
         ;
