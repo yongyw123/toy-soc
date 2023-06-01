@@ -403,11 +403,14 @@ void video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t sta
    uint32_t read_data;
    uint32_t address;
    uint32_t check_status = 0;
+   uint32_t count_match = 0;
    debug_str("Checking DDR2 initialization ... \r\n");
    for(i = 0; i < range_addr; i++){
         address = (start_addr + i);
         read_ddr2(address, read_buffer);
+        
         // iterate each 32-bit read data and check against the expected val;
+        check_status = 0;
         for(int j = 0; j < 4; j++){
             read_data = read_buffer[i];
             if(read_data != init_value){
@@ -424,14 +427,17 @@ void video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t sta
                 check_status++;
             }
         }
+        if(check_status = 4){
+            count_match++;
+        }
    }
    debug_str("Done checking DDR2 initialization ... \r\n");
-   if(check_status == (range_addr-1)){
+   if(count_match == (range_addr-1)){
         debug_str("Result: All matched. OK\r\n");
    }else{
         debug_str("Result: NOT OK\r\n");
         debug_str("Only "); 
-        debug_dec(check_status);
+        debug_dec(count_match);
         debug_str(" match\r\n");
    }
 }
