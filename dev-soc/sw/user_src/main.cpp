@@ -48,14 +48,15 @@ int main(){
     /// test: selecting the interface core ;
     ////////////////////////////////////////////////////////
 
-    debug_str("Setting the MIG to interface with the HW Testing Circuit.\r\n");
-    debug_str("Expect the DDR2 to ignore any CPU write/read below\r\n");
+    //debug_str("Setting the MIG to interface with the HW Testing Circuit.\r\n");
+    //debug_str("Expect the DDR2 to ignore any CPU write/read below\r\n");
     //vid_mig.set_core_none();
-    vid_mig.set_core_test();    
+    //vid_mig.set_core_test();    
     
     // set the ddr2 to interface with the cpu;
-    //vid_mig.set_core_cpu();
-    //debug_str("Setting to cpu interface for MIG.\r\n");
+    debug_str("Setting to cpu interface for MIG.\r\n");
+    vid_mig.set_core_cpu();
+    
     
     ////////////////////////////////////////////////////////
     // test: reading the status register;
@@ -158,6 +159,7 @@ int main(){
     //////////////////////////////////////////////////////////////////////
     // test: burst write using a common value -> burst read;
     ////////////////////////////////////////////////////////////////////    
+    /*
     debug_str("///////////////////////////////////\r\n");
     start_addr = 0;                        // starting address of DDR2 to test;
     range_addr = 1000;                      // how many DDR2 address to cover?
@@ -178,7 +180,15 @@ int main(){
     debug_str("Burst Read starts\r\n");
     vid_mig.check_init_ddr2(init_value, start_addr, range_addr);
     debug_str("Burst Read ends\r\n");    
-    
+    */
+
+    //////////////////////////////////////////////////////////////////////////
+    // test: burst write using with address index as the data -> burst read;
+    /////////////////////////////////////////////////////////////////////////    
+    number_of_address = 3;
+    vid_mig.sw_test_burst(number_of_address);
+
+
 
     while(1){        
         ;

@@ -251,6 +251,7 @@ class video_core_mig_interface{
 
         /* testing purpose*/
         int sw_test_sequential(uint32_t number);
+        int sw_test_burst(uint32_t number);
 
     private:
         // this video core base address in the user-address space;
