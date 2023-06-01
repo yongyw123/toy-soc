@@ -549,7 +549,9 @@ module video_sys
         .debug_MIG_init_complete_status(),
         .debug_MIG_transaction_complete_status(),
         .debug_MIG_ctrl_status_idle(),
-        .debug_mux_reg()    
+        .debug_mux_reg(),
+        .debug_MIG_CPU_transaction_complete_status_reg(),
+        .debug_MIG_CPU_transaction_complete_status_next()   
     );
     
     
