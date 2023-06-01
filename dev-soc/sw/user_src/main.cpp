@@ -23,6 +23,8 @@ int main(){
     
     // for reporting;
     int read_status;
+    uint32_t read_reg;
+
     int count; // count;
 
     // for reading;
@@ -47,6 +49,21 @@ int main(){
     debug_str("Setting to cpu interface for MIG.\r\n");
     
     ///////////// test: reading the status register;
+    // block until the mig signals calibration complete;
+    while(!vid_mig.is_mig_init_complete()){};
+    debug_str("MIG calibration is ok\r\n");
+
+    // block until the mig signals its app is ready;
+    while(!vid_mig.is_mig_app_ready()){};
+    debug_str("MIG is ready\r\n");
+
+    // read the entire status register;
+    read_reg = vid_mig.get_status();
+    debug_str("status register: ");
+    debug_hex(read_reg);
+    debug_str("\r\n");
+
+    // print out the individual status
     read_status = vid_mig.is_mig_init_complete();
     debug_str("calibration status: ");
     debug_hex(read_status);
@@ -67,18 +84,24 @@ int main(){
     debug_hex(read_status);
     debug_str("\r\n");
 
-    // block until the mig signals calibration complete;
-    while(!vid_mig.is_mig_init_complete()){};
-    debug_str("MIG calibration is ok\r\n");
-
-    // block until the mig signals its app is ready;
-    while(!vid_mig.is_mig_app_ready()){};
-    debug_str("MIG is ready\r\n");
+    //////// test: simple read from just-initialized DDR2;
+    // expect the read data to be gibberish;    
+    debug_str("Test: start simple reading from uninitialized (value) DDR2\r\n");
+    vid_mig.read_ddr2(test_address, read_buffer);
+    count = 0;
+    for(int i = 0; i < 4; i++){
+        debug_str("Read Data Batch 01: ");
+        debug_hex(read_buffer[i]);
+        debug_str("\r\n");
+    }
 
     //////// test: simple write 
     debug_str("Test: start simple writing\r\n");
     vid_mig.write_ddr2((uint32_t)test_address, test_wrdata01, test_wrdata02, test_wrdata03, test_wrdata04);
     debug_str("Test: done simple writing\r\n");
+
+    /// debugging pause;
+    delay_busy_ms(1000);    
 
     //////// test: simple read;
     debug_str("Test: start simple reading\r\n");
