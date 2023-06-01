@@ -329,10 +329,10 @@ void video_core_mig_interface::write_ddr2(uint32_t addr, uint32_t wrbatch01, uin
     // submit;
     submit_write();
 
-    debug_str("waiting for transaction to complete.\r\n");
+    //debug_str("waiting for transaction to complete.\r\n");
     // block until the MIG has accepted and acknowledged the write request;
     while(!is_transaction_complete()){};
-    debug_str("write transaction is complete.\r\n");
+    //debug_str("write transaction is complete.\r\n");
 }
 
 void video_core_mig_interface::read_ddr2(uint32_t addr, uint32_t *read_buffer){
@@ -355,10 +355,10 @@ void video_core_mig_interface::read_ddr2(uint32_t addr, uint32_t *read_buffer){
    // debugging 
    //delay_busy_ms(1000);
 
-   debug_str("waiting for read transaction to complete.\r\n");
+   //debug_str("waiting for read transaction to complete.\r\n");
    // block until the MIG says the data is valid to read;
    while(!is_transaction_complete()){};
-   debug_str("read transaction is complete.\r\n");
+   //debug_str("read transaction is complete.\r\n");
 
    // data is valid to ready;
    // store it to the pointed array;
@@ -427,8 +427,11 @@ void video_core_mig_interface::check_init_ddr2(uint32_t init_value, uint32_t sta
    }
    debug_str("Done checking DDR2 initialization ... \r\n");
    if(check_status == (range_addr-1)){
-        debug_str("Result: OK\r\n");
+        debug_str("Result: All matched. OK\r\n");
    }else{
         debug_str("Result: NOT OK\r\n");
+        debug_str("Only "); 
+        debug_dec(check_status);
+        debug_str(" match\r\n");
    }
 }
