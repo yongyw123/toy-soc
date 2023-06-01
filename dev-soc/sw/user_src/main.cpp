@@ -39,10 +39,12 @@ int main(){
     uint32_t test_wrarray[4] = {test_wrdata01, test_wrdata02, test_wrdata03, test_wrdata04};
 
     debug_str("Preparation: \r\n");
-    debug_str("Write Data Batch 01: "); debug_hex(test_wrdata01); debug_str("\r\n");
-    debug_str("Write Data Batch 02: "); debug_hex(test_wrdata02); debug_str("\r\n");
-    debug_str("Write Data Batch 03: "); debug_hex(test_wrdata03); debug_str("\r\n");
-    debug_str("Write Data Batch 04: "); debug_hex(test_wrdata04); debug_str("\r\n");
+    debug_hex(0xABCD);
+    debug_str("\r\n");
+    debug_str("Write Data Batch 01: "); debug_hex((int)test_wrdata01); debug_str("\r\n");
+    debug_str("Write Data Batch 02: "); debug_hex((int)test_wrdata02); debug_str("\r\n");
+    debug_str("Write Data Batch 03: "); debug_hex((int)test_wrdata03); debug_str("\r\n");
+    debug_str("Write Data Batch 04: "); debug_hex((int)test_wrdata04); debug_str("\r\n");
 
 
     debug_str("Video Core DDR2 MIG Test\r\n");
