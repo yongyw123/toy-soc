@@ -353,7 +353,7 @@ void video_core_mig_interface::read_ddr2(uint32_t addr, uint32_t *read_buffer){
    submit_read();
    
    // debugging
-   delay_busy_ms(10);
+   //delay_busy_ms(10);
 
    //debug_str("waiting for read transaction to complete.\r\n");
    // block until the MIG says the data is valid to read;
@@ -389,7 +389,7 @@ void video_core_mig_interface::init_ddr2(uint32_t init_value, uint32_t start_add
         address++;
         
         // debugging
-        delay_busy_ms(10);
+        //delay_busy_ms(10);
    }        
 }
 

@@ -20,6 +20,7 @@ int main(){
     uint32_t read_reg;
 
     int count; // count;
+    int check_OK;   
 
     // for reading;
     uint32_t read_buffer[4];
@@ -126,6 +127,47 @@ int main(){
     debug_dec(count);
     debug_str("\r\n");
 
+
+    //////////////////////////////////////////////////////////////////////
+    /// test: sequential write->read;
+    /// use the address as the write data;
+    ////////////////////////////////////////////////////////////////////
+    debug_str("///////////////////////////////////\r\n");
+    debug_str("Test: sequential write->read\r\n");    
+    count = 0;
+    for(int j = 0; j < 10; j++){
+        // write;
+        vid_mig.write_ddr2((uint32_t)j, j, j, j, j);
+        vid_mig.read_ddr2((uint32_t)j, read_buffer);
+        count = 0;
+        debug_str("Index: ");
+        debug_dec(j);
+        debug_str("\r\n");
+        check_OK = 0;
+        debug_str("Unpacked read data: "); 
+        for(int i = 0; i < 4; i++){                                                
+            debug_hex(read_buffer[i]);
+            debug_str(" | ");
+            if(read_buffer[i] != j){
+                debug_str("ERROR: Read does not match with write.\r\n");                    
+            }else{
+                check_OK++;
+            }   
+        }
+        debug_str("\r\n");
+        if(check_OK == 4){
+            count++;
+        }   
+    }
+    debug_str("Test: Sequentia write->read ends\r\n");
+    debug_str("Status: ");
+    debug_dec(count);
+    debug_str(" matched \r\n");
+
+    /*
+
+    //////////////////////////////////////////////////////////////////////
+
     debug_str("///////////////////////////////////\r\n");
     debug_str("Test: Burst write using a common write value; followed by a burst read\r\n");
     debug_str("Setup: \r\n");
@@ -142,7 +184,8 @@ int main(){
     debug_str("Burst Read starts\r\n");
     vid_mig.check_init_ddr2(init_value, start_addr, range_addr);
     debug_str("Burst Read ends\r\n");    
-   
+    */
+
     while(1){        
         ;
     }
