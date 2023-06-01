@@ -21,19 +21,15 @@ int main(){
     // for reporting;
     int read_status;
     uint32_t read_reg;
-
-    uint32_t count; // count;
-    int check_OK;   
+    uint32_t count;
 
     // for reading;
     uint32_t read_buffer[4];
-
-    //// for sequential testing;
-    uint32_t seq_j; // loop  
-    //uint32_t seq_range = 50;
-    uint32_t seq_range;
     
-    //// for burst testing;
+    // for sequential testing;
+    uint32_t number_of_address;
+
+    // for burst testing;
     uint32_t start_addr;    // starting address of DDR2 to test;
     uint32_t range_addr;    // how many DDR2 address to cover?
     uint32_t init_value;    // common value to populate the DDR2;
@@ -48,7 +44,9 @@ int main(){
 
     debug_str("Video Core DDR2 MIG Test\r\n");
     debug_str("///////////////////////////////////\r\n");
-    /////////////// test: selecting the interface core ;
+    ////////////////////////////////////////////////////////
+    /// test: selecting the interface core ;
+    ////////////////////////////////////////////////////////
 
     //vid_mig.set_core_none();
     //vid_mig.set_core_test();    
@@ -56,8 +54,10 @@ int main(){
     vid_mig.set_core_cpu();
     debug_str("Setting to cpu interface for MIG.\r\n");
     
-    ///////////// test: reading the status register;
+    ////////////////////////////////////////////////////////
+    // test: reading the status register;
     // block until the mig signals calibration complete;
+    ////////////////////////////////////////////////////////
     debug_str("///////////////////////////////////\r\n");
     debug_str("test: reading the status register\r\n\r\n");
     while(!vid_mig.is_mig_init_complete()){};
@@ -94,8 +94,10 @@ int main(){
     debug_hex(read_status);
     debug_str("\r\n");
 
-    //////// test: simple read from just-initialized DDR2;
+    ////////////////////////////////////////////////////////
+    // test: simple read from just-initialized DDR2;
     // expect the read data to be gibberish;  
+    ////////////////////////////////////////////////////////
 
     debug_str("///////////////////////////////////\r\n");
     debug_str("Test: start simple reading from uninitialized (value) DDR2\r\n");
@@ -107,14 +109,18 @@ int main(){
         debug_hex(read_buffer[i]);
         debug_str("\r\n");
     }
-    
-    //////// test: simple write 
+
+    ////////////////////////////////////////////////////////
+    // test: simple write 
+    ////////////////////////////////////////////////////////
     debug_str("///////////////////////////////////\r\n");
     debug_str("Test: start simple writing\r\n");
     vid_mig.write_ddr2((uint32_t)test_address, test_wrdata01, test_wrdata02, test_wrdata03, test_wrdata04);
     debug_str("Test: done simple writing\r\n");
 
-    //////// test: simple read;
+    ////////////////////////////////////////////////////////
+    // test: simple read;
+    ////////////////////////////////////////////////////////
     debug_str("Test: start simple reading\r\n");
     vid_mig.read_ddr2(test_address, read_buffer);
     count = 0;
@@ -137,64 +143,18 @@ int main(){
 
 
     //////////////////////////////////////////////////////////////////////
-    /// test: sequential write->read;
-    /// use the address as the write data;
+    // test: sequential write->read;
+    // use the address as the write data;
+    ////////////////////////////////////////////////////////////////////
+    debug_str("///////////////////////////////////\r\n");
+    number_of_address = 1000;
+    vid_mig.sw_test_sequential(number_of_address);
+    
+    
+    //////////////////////////////////////////////////////////////////////
+    // test: burst write using a common value -> burst read;
     ////////////////////////////////////////////////////////////////////
     /*
-    seq_j = 0;
-    seq_range = 1000;    
-    
-    debug_str("///////////////////////////////////\r\n");
-    debug_str("Test: sequential write->read\r\n");    
-    count = 0;
-    for(seq_j = 0; seq_j < seq_range; seq_j++){
-        // write; 
-        vid_mig.write_ddr2((uint32_t)seq_j, seq_j, seq_j, seq_j, seq_j);
-        vid_mig.read_ddr2((uint32_t)seq_j, read_buffer);
-
-        check_OK = 0;        
-        debug_str("Index: ");
-        debug_dec(seq_j);
-        debug_str(" ; ");
-        debug_str("Address: ");
-        debug_dec(seq_j);
-        debug_str(" ; ");                        
-        debug_str("Unpacked read data: "); 
-
-        // read in 32-bit batch data from a 128-bit DDR2 read transaction;
-        for(int i = 0; i < 4; i++){                                                
-            debug_hex(read_buffer[i]);
-            debug_str(" | ");
-            if(read_buffer[i] == seq_j){                
-                check_OK++;
-            }   
-        }
-        
-        // all batches within 128-bit data match?
-        if(check_OK == 4){
-            count++;
-            debug_str(" ; Status: OK\r\n");
-        }else{
-            debug_str(" ; Status: NOT OK\r\n");                                                                
-        }
-    }
-    debug_str("Test: Sequential write->read ends\r\n");
-    debug_str("Expected Matched Count: ");
-    debug_dec(seq_range);
-    debug_str("\r\n");
-    debug_str("Actual Matched Count: ");
-    debug_dec(count);
-    debug_str("\r\n");    
-    if(count == seq_range){
-        debug_str("Test Result: PASSED\r\n");
-    }else{
-        debug_str("Test Result: FAILED\r\n");
-
-    }
-    */
-    //////////////////////////////////////////////////////////////////////
-
-    
     debug_str("///////////////////////////////////\r\n");
     start_addr = 0;                        // starting address of DDR2 to test;
     range_addr = 1000;                      // how many DDR2 address to cover?
@@ -215,7 +175,7 @@ int main(){
     debug_str("Burst Read starts\r\n");
     vid_mig.check_init_ddr2(init_value, start_addr, range_addr);
     debug_str("Burst Read ends\r\n");    
-    
+    */
 
     while(1){        
         ;
