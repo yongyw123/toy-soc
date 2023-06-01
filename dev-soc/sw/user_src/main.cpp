@@ -167,15 +167,18 @@ int main(){
         if(check_OK == 4){
             count++;
             debug_str(" ; Status: OK\r\n");
-        }   
-        
+        }           
     }
     debug_str("Test: Sequential write->read ends\r\n");
-    debug_str("Status: ");
+    debug_str("Stats: ");
     debug_dec(count);
     debug_str(" matched \r\n");
+    if(count == seq_range){
+        debug_str("Status: PASSED\r\n");
+    }else{
+        debug_str("Status: FAILED\r\n");
 
-    /*
+    }
 
     //////////////////////////////////////////////////////////////////////
 
@@ -195,7 +198,7 @@ int main(){
     debug_str("Burst Read starts\r\n");
     vid_mig.check_init_ddr2(init_value, start_addr, range_addr);
     debug_str("Burst Read ends\r\n");    
-    */
+    
 
     while(1){        
         ;
