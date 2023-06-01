@@ -48,11 +48,14 @@ int main(){
     /// test: selecting the interface core ;
     ////////////////////////////////////////////////////////
 
+    debug_str("Setting the MIG to interface with the HW Testing Circuit.\r\n");
+    debug_str("Expect the DDR2 to ignore any CPU write/read below\r\n");
     //vid_mig.set_core_none();
-    //vid_mig.set_core_test();    
+    vid_mig.set_core_test();    
+    
     // set the ddr2 to interface with the cpu;
-    vid_mig.set_core_cpu();
-    debug_str("Setting to cpu interface for MIG.\r\n");
+    //vid_mig.set_core_cpu();
+    //debug_str("Setting to cpu interface for MIG.\r\n");
     
     ////////////////////////////////////////////////////////
     // test: reading the status register;
