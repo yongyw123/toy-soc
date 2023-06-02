@@ -109,7 +109,29 @@ module mcs_top
         input logic CAM_OV7670_PCLK_JB10,       // driven by the camera at 24 MHz;
         input logic CAM_OV7670_VSYNC_JB03,      // vertical synchronization;
         input logic CAM_OV7670_HREF_JB04,       // horizontal synchronization;
-        input logic [7:0] CAM_OV7670_DATA_JA    // 8-bit pixel data;
+        input logic [7:0] CAM_OV7670_DATA_JA,    // 8-bit pixel data;
+        
+        /* ------------------------------------------
+        * DDR2 SDRAM;        
+        --------------------------------------------*/
+        // ddr2 sdram memory interface (defined by the imported ucf file);
+        output logic [12:0] ddr2_addr,   // address; 
+        output logic [2:0]  ddr2_ba,    
+        output logic ddr2_cas_n,  // output                                       ddr2_cas_n
+        output logic [0:0] ddr2_ck_n,  // output [0:0]                        ddr2_ck_n
+        output logic [0:0] ddr2_ck_p,  // output [0:0]                        ddr2_ck_p
+        output logic [0:0] ddr2_cke,  // output [0:0]                       ddr2_cke
+        output logic ddr2_ras_n,  // output                                       ddr2_ras_n
+        output logic ddr2_we_n,  // output                                       ddr2_we_n
+        inout tri [15:0] ddr2_dq,  // inout [15:0]                         ddr2_dq
+        inout tri [1:0] ddr2_dqs_n,  // inout [1:0]                        ddr2_dqs_n
+        inout tri [1:0] ddr2_dqs_p,  // inout [1:0]                        ddr2_dqs_p      
+        output logic [0:0] ddr2_cs_n,  // output [0:0]           ddr2_cs_n
+        output logic [1:0] ddr2_dm,  // output [1:0]                        ddr2_dm
+        output logic [0:0] ddr2_odt // output [0:0]                       ddr2_odt
+        
+        
+        
     );    
     
     /*-------------------------------------------------------------
@@ -117,7 +139,12 @@ module mcs_top
     -------------------------------------------------------------*/
     // MMCM clock;
     logic clkout_100M;  // 100MHz generated from the MMCM;
+    logic clkout_200M;  // 200MHz generated from the MMCM;    
     logic sys_clk;      // sys_clk = clkout_100M;
+    
+    // for ip-generated mmcm clock;
+    // note that this lock signal from MMCM is asynchronous;
+    logic mmcm_clk_locked;   // whether the clock has stabilized or not?
     
     // mcs io bus signals; these are fixed;
     logic io_addr_strobe;   // output wire IO_addr_strobe
@@ -142,44 +169,89 @@ module mcs_top
     logic [31:0] user_rd_data_mmio;
     logic [31:0] user_rd_data_video;
     
-    // for ip-generated mmcm clock;
-    // note that this lock signal from MMCM is asynchronous;
-    logic mmcm_clk_locked;   // whether the clock has stabilized or not?
-    
-    
+    /*-------------------------------------------
+    * System Reset Signals
+    -------------------------------------------*/
+    /*
+    NOTE on ASYNC_REG;
+    1. This is reported in the route design;
+    2. Encountered Error: "TIMING-10#1 Warning
+        Missing property on synchronizer  
+        One or more logic synchronizer has been detected between 2 clock domains 
+        but the synchronizer does not have the property ASYNC_REG defined on one 
+        or both registers.
+        It is recommended to run report_cdc for a complete and detailed CDC coverage
+    "
+    3. See Xilinx UG901 (https://docs.xilinx.com/r/en-US/ug901-vivado-synthesis/ASYNC_REG)
+    The ASYNC_REG is an attribute that affects many processes in the Vivado tools flow. 
+    The purpose of this attribute is to inform the tool that a register is capable of receiving 
+    asynchronous data in the D input pin relative to the source clock, 
+    or that the register is a synchronizing register within a synchronization chain.
+    */    
+  
     // registers for asynchronous reset signals;
     logic reset_sys_raw;    // to invert the input reset;
-    logic reset_sys_reg;
-    logic reset_sys_sync;       
+    (* ASYNC_REG = "TRUE" *) logic reset_sys_reg;       // ff synchronizer;
+    (* ASYNC_REG = "TRUE" *) logic reset_sys_sync;      // ff synchronizer;
    
+    // to stretch the synchronized signal over some N system clock cycles;
+    localparam RST_SYS_CYCLE_NUM = 1024;
+    logic [11:0] cnt_rst_sys_reg, cnt_rst_sys_next; // width should at least hold the parameter above;
+    logic reset_sys_stretch;
+    logic reset_sys_stretch_reg; // to filter for glitch;
+    
     // conform the signals;
     /* ?? to do ??, need to debounce this reset button; */
     // inverted since cpu reset button is "active LOW";
     // locked=HIGH means clock has stabilized;
-    assign reset_sys_raw = ~CPU_RESETN || ~mmcm_clk_locked;   
-    assign reset_mmcm = ~CPU_RESETN;
+    // need to hold reset asserted until both CPU and locked signals are OK;
+    assign reset_sys_raw = ~CPU_RESETN || ~mmcm_clk_locked;      
+    
         
     // use better name for the system clock;
     assign sys_clk = clkout_100M;
     
     /* -------------------------------------------------------------------
-    * Synchronize the reset signals;
+    * Synchronize the reset signals via double FF;
     * currently; it is asynchronous
     * implementation error encountered: LUT drives async reset alert
-    * implementation: use two registers (synchronizer) instead of one to
-    * filter out any glitch;
     -------------------------------------------------------------------*/
 
-    // use the input clock, rather than from the MMCM;
-    // first stage;
+    // use the input clock, rather than from the MMCM?    
     always_ff @(posedge sys_clk) begin
         // system reset;
         reset_sys_reg   <= reset_sys_raw;
+        reset_sys_sync  <= reset_sys_reg;
     end
-    // second state register;
+    
+    /*--------------------------------------------------
+    * To stretch the synchronized reset_sys_sync over N system clock periods;
+    * where the system clock is the 100MHz clock generated from MMCM;
+    --------------------------------------------------*/
     always_ff @(posedge sys_clk) begin
-        // system reset;
-        reset_sys_sync  <= reset_sys_reg;  
+        // note that this reset signal has been synchronized;
+        if(reset_sys_sync) begin
+            cnt_rst_sys_reg <= 0;
+        end 
+        else begin
+            cnt_rst_sys_reg <= cnt_rst_sys_next;
+        end    
+    end
+    
+    // next state logic;
+    // stop the count if the threshold has been met;
+    assign cnt_rst_sys_next = (cnt_rst_sys_reg == RST_SYS_CYCLE_NUM) ? cnt_rst_sys_reg : cnt_rst_sys_reg + 1;    
+    assign reset_sys_stretch = (cnt_rst_sys_reg != RST_SYS_CYCLE_NUM);
+    
+    // filter the rst_sys_stretch to avoid glitch since it comes from a combinational block;
+    always_ff @(posedge sys_clk) begin
+        // note that this reset signal has been synchronized;
+        if(reset_sys_sync) begin
+            reset_sys_stretch_reg <= 0;
+        end 
+        else begin
+            reset_sys_stretch_reg <= reset_sys_stretch;
+        end    
     end
     
     /* -------------------------------------------------------------------
@@ -195,12 +267,12 @@ module mcs_top
     clk_wiz_0 clock_unit
    (
     // Clock out ports
-    .clkout_24M(CLKOUT_24M_JB02),     // output clkout_24M: for camera ov7670
+    .clkout_24M(CLKOUT_24M_JB02),     // output clkout_24M
     .clkout_100M(clkout_100M),     // output clkout_100M
-    
+    .clkout_200M(clkout_200M),     // output clkout_200M
+    .clkout_250M(),     // output clkout_250M
+   
     // Status and control signals
-    .reset(reset_mmcm),          // input reset
-    //.reset(0),                // allow free running? bad idea?
     .locked(mmcm_clk_locked),   // output locked; locked (HIGH) means the clock has stablized; 
    
    // Clock in ports
@@ -210,7 +282,7 @@ module mcs_top
     // cpu
     microblaze_mcs_cpu cpu_unit(
       .Clk(sys_clk),                          // input wire Clk
-      .Reset(reset_sys_sync),                      // input wire Reset
+      .Reset(reset_sys_stretch_reg),                      // input wire Reset
       .IO_addr_strobe(io_addr_strobe),    // output wire IO_addr_strobe
       .IO_address(io_address),            // output wire [31 : 0] IO_address
       .IO_byte_enable(io_byte_enable),    // output wire [3 : 0] IO_byte_enable
@@ -271,7 +343,7 @@ module mcs_top
     mmio_unit
     (
         .clk(sys_clk),
-        .reset(reset_sys_sync),
+        .reset(reset_sys_stretch_reg),
         .mmio_addr(user_addr),
         .mmio_cs(user_mmio_cs),
         .mmio_wr(user_wr),
@@ -280,7 +352,9 @@ module mcs_top
         //.mmio_rd_data(user_rd_data),
         .mmio_rd_data(user_rd_data_mmio),
         .sw(SW),
-        .led(LED),
+        
+        // not used; 
+        .led(),
         
         // uart signals; 
         .uart_tx(UART_RXD_OUT), 
@@ -325,8 +399,8 @@ module mcs_top
     video_unit
     (
         // general;
-        .clk_sys(clkout_100M),      // 100 MHz;
-        .reset(reset_sys_sync),  // async;
+        .clk_sys(sys_clk),      // 100 MHz;
+        .reset(reset_sys_stretch_reg),  // async;
         
         .video_cs(user_video_cs),        // chip select for mmio system;
         .video_wr(user_wr),             // write enable;
@@ -350,9 +424,30 @@ module mcs_top
         .dcmi_pclk(CAM_OV7670_PCLK_JB10),    // driven by the camera at 24 MHz;
         .dcmi_vsync(CAM_OV7670_VSYNC_JB03),  // vertical synchronization;
         .dcmi_href(CAM_OV7670_HREF_JB04),    // horizontal synchronization;
-        .dcmi_pixel(CAM_OV7670_DATA_JA)         // 8-bit pixel data;
+        .dcmi_pixel(CAM_OV7670_DATA_JA),         // 8-bit pixel data;
+        
+        /* MIG interface core; */
+        .LED(LED),
+        .MMCM_locked(mmcm_clk_locked),    // MMCM locked status;
+        .clk_mem(clkout_200M),        // 200MHz to drive the MIG;
+        
+        // ddr2 sdram memory interface (defined by the imported ucf file);
+        .ddr2_addr(ddr2_addr),   // address; 
+        .ddr2_ba(ddr2_ba),    
+        .ddr2_cas_n(ddr2_cas_n),  // output                                       ddr2_cas_n
+        .ddr2_ck_n(ddr2_ck_n),  // output [0:0]                        ddr2_ck_n
+        .ddr2_ck_p(ddr2_ck_p),  // output [0:0]                        ddr2_ck_p
+        .ddr2_cke(ddr2_cke),  // output [0:0]                       ddr2_cke
+        .ddr2_ras_n(ddr2_ras_n),  // output                                       ddr2_ras_n
+        .ddr2_we_n(ddr2_we_n),  // output                                       ddr2_we_n
+        .ddr2_dq(ddr2_dq),  // inout [15:0]                         ddr2_dq
+        .ddr2_dqs_n(ddr2_dqs_n),  // inout [1:0]                        ddr2_dqs_n
+        .ddr2_dqs_p(ddr2_dqs_p),  // inout [1:0]                        ddr2_dqs_p      
+        .ddr2_cs_n(ddr2_cs_n),  // output [0:0]           ddr2_cs_n
+        .ddr2_dm(ddr2_dm),  // output [1:0]                        ddr2_dm
+        .ddr2_odt(ddr2_odt) // output [0:0]                       ddr2_odt
     );
-    
+        
     
 endmodule
 

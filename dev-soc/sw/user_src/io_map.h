@@ -332,6 +332,7 @@ video address space;
 #define V2_DISP_SRC_MUX             2   // direct which pixel source to the LCD: test pattern generator or from the camera?
 #define V3_CAM_DCMI_IF              3   // camera dcmi interface (with a dual-clock fifo embedded);
 #define V4_PIXEL_COLOUR_CONVERTER   4   // transform Y of YUV422 to RGB565;
+#define V5_MIG_INTERFACE            5   // DDR2 MIG synchronous interface;
 
 /**************************************************************
 * V0_DISP_LCD
@@ -663,9 +664,124 @@ Register IO access:
 #define V4_PIXEL_COLOUR_CONVERT_REG_CTRL 0
 #define V4_PIXEL_COLOUR_CONVERT_REG_CTRL_BIT_POS 0
 
+/*****************************************************************
+V5_MIG_INTERFACE
+-----------------
+Purpose: to select which source to interface with the DDR2 SDRAM via MIG;
+It is either interfacing with:
+1. CPU;
+2. other video core: motion detection?
+3. a HW testing circuit;
 
+Construction:
+1. DDR2 read/write transaction is 128-bit.
+2. So this complicates stuffs since ublaze register is 32-bit wide only;
+3. to facilitate the read/write operation, we use multiple registers;
 
+3.1 note that each address (bit) covers one 128-bit;
 
+4. For write:
+    1. we shall have multiple write control register bits:
+    2. before submitting write request, we need to shift in the ublaze 32-bit into 128-bit;
+    3. each bit is to push a 32-bit from ublaze to the 128-bit DDR2 register;
+    4. some bits to setup the write address;
+    5. one bit to submit the write request;
+
+5. For read;
+    1. similarly, we need multiple read control register bits;
+    2. after submitting the read request along with the read address, we check and wait for transaction complete status;
+    3. this completion status indicates the data on the bus is ready to be read;
+    4. it takes "4 times" to shift in the 128-bit into four registers of 32-bit each;
+      
+
+-----
+Register Map
+1. Register 0 (Offset 0): select register;
+2. Register 1 (Offset 1): status register;
+3. Register 2 (Offset 2): address, common for read and write;
+3. Register 3 (Offset 3): write control register;
+4. Register 4 (Offset 4): read control register;
+5. Register 5 (Offset 5): read data batch 01;
+6. Register 6 (Offset 6): read data batch 02;
+7. Register 7 (Offset 7): read data batch 03;
+8. Register 8 (Offset 8): read data batch 04;
+
+Register Definition:
+1. Register 0 (Offset 0): select register;
+    bit[2:0] for multiplexing
+        3'b000: NONE
+        3'b001: CPU
+        3'b010: Motion Detection Core
+        3'b100: HW Testing Circuit;
+        
+2. Register 1 (Offset 1): Status Register
+        bit[0]: MIG DDR2 initialization complete status; active high;
+        bit[1]: MIG DDR2 app ready status (implies init complete status); active high;
+        bit[2]: transaction completion status, 
+                common for both read and write; 
+                once asserted, it will remain as it is until new write/read strobe is requested;                
+        bit[3]: MIG controller idle status; active high;
+            
+3. Register 2 (Offset 2): address common for read and write;
+        bit[22:0] address;
+
+4. Register 3 (Offset 3): Control Register;
+        bit[0]: submit the write request; (Need to clear once submitting for a single write operation);
+        bit[1]: submit the read request; (Need to clear once submitting for a single write operation);        
+      
+5. Register 4 (Offset 4): DDR2 Write Register - push the first 32-bit batch of the write_data[31:0]; active HIGH;
+6. Register 5 (Offset 5): DDR2 Write Register - push the second 32-bit batch of the write_data[63:32]; active HIGH;
+7. Register 6 (Offset 6): DDR2 Write Register - push the third 32-bit batch of the write_data[95:64]; active HIGH;
+8. Register 7 (Offset 7): DDR2 Write Register -  push the forth 32-bit batch of the write_data[127:96]; active HIGH;
+       
+9. Register 8-11: to store the 128-bit read data as noted in the construction;
+
+Register IO:
+1. Register 0: read and write;
+2. Register 1: read only;
+3. Register 2: read and write;
+4. Register 3: write only;
+5. Register 4: write only;
+6. Register 5: write only;
+7. Register 6: write only;
+8. Register 7: write only;
+9. Register 8: read only;
+10. Register 9: read only;
+11. Register 10: read only;
+12. Register 11: read only;
+ 
+*****************************************************************/#define V5_MIG_INTERFACE_REG_SEL       0    // 4'b0000     // 0;
+#define V5_MIG_INTERFACE_REG_STATUS    1    // 4'b0001     // 1;
+#define V5_MIG_INTERFACE_REG_ADDR      2    // 4'b0010     // 2;
+#define V5_MIG_INTERFACE_REG_CTRL      3    // 4'b0011     // 3;
+
+#define V5_MIG_INTERFACE_REG_WRDATA_01  4   //4'b0100     // 4
+#define V5_MIG_INTERFACE_REG_WRDATA_02  5   //4'b0101     // 5
+#define V5_MIG_INTERFACE_REG_WRDATA_03  6   //4'b0110     // 6;
+#define V5_MIG_INTERFACE_REG_WRDATA_04  7   //4'b0111     // 7
+
+#define V5_MIG_INTERFACE_REG_RDDATA_01  8   //4'b1000     // 8
+#define V5_MIG_INTERFACE_REG_RDDATA_02  9   //4'b1001     // 9
+#define V5_MIG_INTERFACE_REG_RDDATA_03  10  //4'b1010     // 10
+#define V5_MIG_INTERFACE_REG_RDDATA_04  11  //4'b1011     // 11
+
+// register 0: multiplexing;
+#define V5_MIG_INTERFACE_REG_SEL_NONE     0 //3'b000  // none;
+#define V5_MIG_INTERFACE_REG_SEL_CPU      1 //3'b001  // cpu;
+#define V5_MIG_INTERFACE_REG_SEL_MOTION   2 //3'b010  // motion detection video cores;
+#define V5_MIG_INTERFACE_REG_SEL_TEST     4 //3'b100  // hw testing circuit;
+
+// register 1: status;
+#define V5_MIG_INTERFACE_REG_BIT_POS_STATUS_MIG_INIT    0
+#define V5_MIG_INTERFACE_REG_BIT_POS_STATUS_MIG_RDY     1
+#define V5_MIG_INTERFACE_REG_BIT_POS_STATUS_COMPLETE    2
+#define V5_MIG_INTERFACE_REG_BIT_POS_STATUS_CTRL_IDLE   3
+
+// register 3: control;
+#define V5_MIG_INTERFACE_REG_BIT_POS_WRSTROBE 0
+#define V5_MIG_INTERFACE_REG_BIT_POS_RDSTROBE 1
+
+ 
 
 #ifdef __cpluscplus
 } // extern "C";

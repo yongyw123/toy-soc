@@ -198,8 +198,11 @@ void core_uart::print(int number, int base){
    uint8_t temp_ch;     // to hold converted ascii;
    
 
-   uint8_t remainder;   // to determine the base; modulo;
-   uint8_t quotient;    // for base conversion;
+   //uint8_t remainder;   // to determine the base; modulo;
+   //uint8_t quotient;    // for base conversion;
+   
+   uint32_t remainder;   // to determine the base; modulo;
+   uint32_t quotient;    // for base conversion;
    
     // check;
     if(base != 2 && base != 8 && base != 16){

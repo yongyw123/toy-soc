@@ -39,7 +39,7 @@ module video_sys
     (
         // general;
         input logic clk_sys,    // 100 MHz;
-        input logic reset,  // async;
+        input logic reset,  // async;                
         
         /*
         // user bus interface;
@@ -68,7 +68,28 @@ module video_sys
         input logic dcmi_pclk,       // driven by the camera at 24 MHz;
         input logic dcmi_vsync,      // vertical synchronization;
         input logic dcmi_href,       // horizontal synchronization;
-        input logic [7:0] dcmi_pixel // 8-bit pixel data;
+        input logic [7:0] dcmi_pixel, // 8-bit pixel data;
+        
+        /* MIG interface core; */
+        output logic [15:0] LED,
+        input logic MMCM_locked,    // MMCM locked status;
+        input logic clk_mem,        // 200MHz to drive the MIG;
+        
+        // ddr2 sdram memory interface (defined by the imported ucf file);
+        output logic [12:0] ddr2_addr,   // address; 
+        output logic [2:0]  ddr2_ba,    
+        output logic ddr2_cas_n,  // output                                       ddr2_cas_n
+        output logic [0:0] ddr2_ck_n,  // output [0:0]                        ddr2_ck_n
+        output logic [0:0] ddr2_ck_p,  // output [0:0]                        ddr2_ck_p
+        output logic [0:0] ddr2_cke,  // output [0:0]                       ddr2_cke
+        output logic ddr2_ras_n,  // output                                       ddr2_ras_n
+        output logic ddr2_we_n,  // output                                       ddr2_we_n
+        inout tri [15:0] ddr2_dq,  // inout [15:0]                         ddr2_dq
+        inout tri [1:0] ddr2_dqs_n,  // inout [1:0]                        ddr2_dqs_n
+        inout tri [1:0] ddr2_dqs_p,  // inout [1:0]                        ddr2_dqs_p      
+        output logic [0:0] ddr2_cs_n,  // output [0:0]           ddr2_cs_n
+        output logic [1:0] ddr2_dm,  // output [1:0]                        ddr2_dm
+        output logic [0:0] ddr2_odt // output [0:0]                       ddr2_odt
     );
     
     
@@ -443,13 +464,104 @@ module video_sys
     );
     
     
+    /*--------------------------------------------
+    * MIG interface with the board's DDR2 SDRAM;
+    -------------------------------------------*/
+     core_video_mig_interface     
+     #(
+        /*------------------------------------------
+        * parameter for the HW testing cicruit;
+        ------------------------------------------*/
+        // counter/timer;
+        // N seconds led pause time; with 100MHz; 200MHz threshold is required;        
+        .TIMER_THRESHOLD(50_000_000),  // 0.5 second;
+        
+        // traffic generator to issue the addr;
+        // here we just simply use incremental basis;
+        .INDEX_THRESHOLD(32) // wrap around; 2^{5};
+    )
+    video_core_mig_interface_unit
+    (
+        // general;        
+        .clk_sys(clk_sys),    // 100MHz system;
+        .clk_mem(clk_mem),    // 200MHz for MIG;       
+        .reset_sys(reset),  // system reset;        
+    
+        /* --------------------------------------------------------------------------
+        BUS INTERFACE
+        //> given interface with video controller (which interfaces with the bus);
+        // note that not all interfacce will be used;
+        ---------------------------------------------------------------------------*/
+        .cs(core_ctrl_cs_array[`V5_MIG_INTERFACE]),
+        .write(core_ctrl_wr_array[`V5_MIG_INTERFACE]),
+        .read(core_ctrl_rd_array[`V5_MIG_INTERFACE]),
+        .addr(core_addr_reg_array[`V5_MIG_INTERFACE]),
+        .wr_data(core_data_wr_array[`V5_MIG_INTERFACE]),
+        .rd_data(core_data_rd_array[`V5_MIG_INTERFACE]),
+        
+        /* --------------------------------------------------------------------------
+        * (Multiplexed) Input Interface with this video core: motion detection 
+        ---------------------------------------------------------------------------*/
+        // placeholder; not yet constructed;
+        .core_motion_wrstrobe(),
+        .core_motion_rdstrobe(),
+        .core_motion_addr(),
+        .core_motion_wrdata(),
+        .core_motion_rddata(),
+    
+        // MIG DDR2 status;        
+        .core_MIG_init_complete(),   // MIG DDR2 initialization complete;
+        .core_MIG_ready(),           // MIG DDR2 ready to accept any request;
+        .core_MIG_transaction_complete(), // a pulse indicating the read/write request has been serviced;
+        .core_MIG_ctrl_status_idle(),    // MIG synchronous interface controller idle status;
+                
+        /*-----------------------------
+        * external pin;
+        * 1. LED;
+        * 2. DDR2 SDRAM
+        ------------------------------*/
+        // LEDs;
+        .LED(LED),
+    
+        // LED also display the MMCM locked status;
+        .MMCM_locked(MMCM_locked),
+                
+        // ddr2 sdram memory interface (defined by the imported ucf file);
+        .ddr2_addr(ddr2_addr),   // address; 
+        .ddr2_ba(ddr2_ba),    
+        .ddr2_cas_n(ddr2_cas_n),  // output                                       ddr2_cas_n
+        .ddr2_ck_n(ddr2_ck_n),  // output [0:0]                        ddr2_ck_n
+        .ddr2_ck_p(ddr2_ck_p),  // output [0:0]                        ddr2_ck_p
+        .ddr2_cke(ddr2_cke),  // output [0:0]                       ddr2_cke
+        .ddr2_ras_n(ddr2_ras_n),  // output                                       ddr2_ras_n
+        .ddr2_we_n(ddr2_we_n),  // output                                       ddr2_we_n
+        .ddr2_dq(ddr2_dq),  // inout [15:0]                         ddr2_dq
+        .ddr2_dqs_n(ddr2_dqs_n),  // inout [1:0]                        ddr2_dqs_n
+        .ddr2_dqs_p(ddr2_dqs_p),  // inout [1:0]                        ddr2_dqs_p      
+        .ddr2_cs_n(ddr2_cs_n),  // output [0:0]           ddr2_cs_n
+        .ddr2_dm(ddr2_dm),  // output [1:0]                        ddr2_dm
+        .ddr2_odt(ddr2_odt), // output [0:0]                       ddr2_odt        
+    
+        /*--------------------------
+        * debugging interface
+        --------------------------*/            
+        .debug_mig_reset_n(),    // reset signal for MIG:
+        .debug_MIG_init_complete_status(),
+        .debug_MIG_transaction_complete_status(),
+        .debug_MIG_ctrl_status_idle(),
+        .debug_mux_reg(),
+        .debug_MIG_CPU_transaction_complete_status_reg(),
+        .debug_MIG_CPU_transaction_complete_status_next()   
+    );
+    
+    
     /* -------------------------------------------------------------------
     * ground the the read data signals from the unconstructed video cores 
     * for vivao synthesis optimization to opt out these unused signals 
      -------------------------------------------------------------------*/
     generate
         genvar i;
-            for(i = 5; i < VIDEO_CORE_NUM_TOTAL; i++)
+            for(i = 6; i < VIDEO_CORE_NUM_TOTAL; i++)
             begin
                 // always HIGH ==> idle ==> not signals;
                 assign core_data_rd_array[i] = 32'hFFFF_FFFF;
