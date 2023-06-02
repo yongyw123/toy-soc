@@ -17,15 +17,15 @@
 - [x] Digital Camera Interface (DCMI)
 - [x] Video Streaming System integrating the camera and the LCD.
 - [x] Colour format conversion
-- [ ] Configure IP-generated memory interface (MIG) with the external SDRAM
-- [ ] Add a SDRAM interface user logic for the MIG
+- [x] Configure IP-generated memory interface (MIG) with the external SDRAM
+- [x] Add a SDRAM interface user logic for the MIG
 - [ ] Implement a known motion detection algorithm.
 
 ### Application
 
 - [ ] Test SW Function for each IO cores
 - [x] IP generate Clock management circuit
-- [ ] IP generate DDR memory interface for Frame Buffers?
+- [x] IP generate DDR memory interface for Frame Buffers?
 - [x] Camera OV7670 via i2C interface
 - [x] LCD ILI9341 Configuration Interface
 
