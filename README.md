@@ -20,6 +20,7 @@
 - [x] Configure IP-generated memory interface (MIG) with the external SDRAM
 - [x] Add a SDRAM interface user logic for the MIG
 - [ ] Implement a known motion detection algorithm.
+- [ ] Add a debouncer module for the HW CPU Reset Button.
 
 ### Application
 
