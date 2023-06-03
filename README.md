@@ -42,24 +42,24 @@ To gain a fundamental SoC design knowledge by kickstarting a prototype. The prim
 
 ## SoC Design Flow
 
-Given a specification, a partition is done between HW and SW. The HW design and SW design methodologies follow closely these tutorials: [1] Vivado Design Suite Tutorial and [2] Vitis Software Development Workflow, respectively. That said, the workflow is slightly modified due to different developing environments. The actual workflow  is shown in Figure ??.
+Given a specification, a partition is done between HW and SW. The HW design and SW design methodologies follow closely these tutorials: [1] Vivado Design Suite Tutorial and [2] Vitis Software Development Workflow, respectively. That said, the workflow is slightly modified due to different developing environments. The actual workflow  is shown in Figure 02.
 
-*Figure 0?: Design Flow*
-![Figure 0?](/docs/diagram/design_flow.png "Figure 0?: Design Flow")
+*Figure 02: Design Flow*
+![Figure 02](/docs/diagram/design_flow.png "Figure 02: Design Flow")
 
 ## System Overview
 
-MicroBlaze (MCS) address space is partitioned into two main systems: [1] Memory-mapped IO (MMIO) System and [2] Video System. This is shown in Figure ??. 
+MicroBlaze (MCS) address space is partitioned into two main systems: [1] Memory-mapped IO (MMIO) System and [2] Video System. This is shown in Figure 03.
 
-MMIO System consists the standard IO peripherals.
+MMIO System consists of the standard IO peripherals.
 
-Video System is considered as separate system. This is because unlike the MMIO system which is control-dominated, video system is data-dominated. The user (SW) only needs to configure the video cores once, then the data streaming wll take over. The video streaming from the camera to the LCD is automatic via the handshaking mechanism among the FIFO's. This is shown in Figure ??
+Video System is considered as separate system. This is because unlike the MMIO system which is control-dominated, video system is data-dominated. The user (SW) only needs to configure the video cores once, then the data streaming wll take over. The video streaming from the camera to the LCD is automatic via the handshaking mechanism among the FIFO's. This is shown in Figure 04.
 
-*Figure 0?: User Space Parition*
-![Figure 0?](/docs/diagram/user_space_partition.png "Figure ??: User space partition")
+*Figure 03: User Space Parition*
+![Figure 03](/docs/diagram/user_space_partition.png "Figure 03: User space partition")
 
-*Figure 0?: Video System*
-![Figure 0?](/docs/diagram/video_system.png "Figure ??: Video System")
+*Figure 04: Video System*
+![Figure 04](/docs/diagram/video_system.png "Figure 04: Video System")
 
 
 ## Target
