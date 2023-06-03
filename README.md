@@ -2,8 +2,7 @@
 
 This is a toy System on Chip (SoC) prototype with video streaming as the main application.
 
-**Documentation:**
-The documentation is linked here <?>. This documents the memory organization, register map, register definition, construction, test results etc. This README is excerpted from this documentation.
+**Documentation:** The documentation, titled "master_docs.docx" is linked here: <https://drive.google.com/drive/folders/1FAS5dOIlAdlUM4IH7u-qAvcwE-8EjuxC?usp=drive_link>. This documents the memory organization, register map, register definition, construction, test results etc. This README is excerpted from this documentation.
 
 | **Environment**           |                           |
 |--                         |--                         |
@@ -16,8 +15,8 @@ The documentation is linked here <?>. This documents the memory organization, re
 
 | **External Devices**  | **Description** |
 |--                     |-- |
-| LCD                   | Adafruit – 2.8” TFT LCD with Touchscreen Breakout Board with MicroSD Socket – ILI9341   |
-| Camera                | VGA OV7670 Camera Module i2C 640x480   |
+| LCD                   | Adafruit – 2.8” TFT LCD – ILI9341   |
+| Camera                | VGA OV7670 Camera Module - i2C 640x480   |
 | External Memory       | DDR2 SDRAM (Micron: MT47H64M16HR-25E). This is already embedded on the FPGA Development Board. |
 
 **Source File Navigation:**
@@ -76,8 +75,8 @@ Video System is considered separately. This is because unlike the MMIO system wh
 | **Milestone**     | **What's Included**   |   **Status**  | **Video Demo (Link)** |
 |--                 |--                     |--             |--         |
 | MMIO System       | Constructed the necessary communication IO such as i2C, SPI etc to configure/communicate with the external device.    | Completed | NA (See the Test Data Section)    |
-| Video System      | Manage to stream the camera OV7670 to the LCD ILI9341. Supported camera colour format: RGB565, YUV422.  |Completed | ??        |
-| Pixel Conversion | To convert the luminosity, Y of YUV422 to RGB565 format. | Completed | ??  |
+| Video System      | Manage to stream the camera OV7670 to the LCD ILI9341. Supported camera colour format: RGB565, YUV422.  |Completed | [Video Link](https://drive.google.com/file/d/1Ql_ATRLhIBi_aJ_FT88XsLlPmVaYCTlK/view?usp=drive_link)       |
+| Pixel Conversion | To convert the luminosity, Y of YUV422 to RGB565 format. | Completed | [Video Link](https://drive.google.com/file/d/1wXfFwY07H_3Q5xLHrdHuBh9xfQ7aIEZR/view?usp=drive_link)  |
 | DDR2 SDRAM Interface  | User synchronous interface with the MIG memory interface for the external memory: DDR2 SDRAM. | Completed | NA (See the Test Data Section).   |
 | Motion Detection HW Implementation  | TBA       | Not Started   | NA    |
 
@@ -104,9 +103,10 @@ Updated: June 03, 2023
 
 ## Test Data Navigation
 
-Table ?? links the location of the test data of the major system blocks. Validation is conducted after the SW driver has been developed for its HW Core. Test data includes report, measurement data using logic analyser and/or video recording of the observation. 
-All the test data are stored under this parent directory: test-data < ?? >
+Table 01 links the location of the test data of the major system blocks. Validation is conducted after the SW driver has been developed for its HW Core. Test data includes report, measurement data using logic analyser and/or video recording of the observation. 
+All the test data are stored under this parent directory: test-data <https://drive.google.com/drive/folders/1dAce-5lKH0lcdWMkTcalP11L70i5ODlV?usp=drive_link>
 
+*Table 01:*
 | **System Block Under Test**   | **Test Performed**    | **Test Data Relative Location (under the parent directory linked above)**     |
 |--                             |--                     |--                                                                             |
 | SPI Master Controller             | To test MOSI write data via logic analyser. | ./spi-core   |
@@ -122,16 +122,16 @@ All the test data are stored under this parent directory: test-data < ?? >
 
 ## Acknowledgement
 
-This project is born out of the attempts at the exercises for [4], [5], [6]. The verification technique  employed is from [4].
+This project is born out of the attempts at the exercises for [4], [5], [6]. 
 
 ## Reference
 
 1. Xilinx, "Vivado Design Suite Tutorial: Embedded Processor Hardware Design (UG940)", version 2019.1, June 27, 2019.
 2. Xilinx, "Vitis Unified Software Platform Documentation: Embedded Software Development (UG1400)", version 2023.1, May 05, 2016.
 3. Digilent, "Nexys A7 Reference Manual", website, accessed 27 May 2023, Link: <https://digilent.com/reference/programmable-logic/nexys-a7/reference-manual>
-4. Donald Thomas. (2016). Logic Design and Verification Using SystemVerilog (Revised). CreateSpace
-5. Joseph Yiu. (2019). System-on-Chip with Arm® Cortex®-M Processors: Reference Book. Arm Education Media
-6. Pong P. Chu. (2018). FPGA Prototyping by SystemVerilog Exampls: Xilinx MicroBlaze MCS SoC Edition. Wiley
+4. Donald Thomas, CreateSpace, “Logic Design and Verification Using SystemVerilog (Revised)”, 2016
+5. Joseph Yiu, Arm Education Media “System-on-Chip with Arm® Cortex®-M Processors: Reference Book”, 2019
+6. Pong P. Chu, Wiley, “FPGA Prototyping by SystemVerilog Examples: Xilinx MicroBlaze MCS SoC Edition”, 2018
 
 ---
 
@@ -156,6 +156,7 @@ This project is born out of the attempts at the exercises for [4], [5], [6]. The
 - [ ] Implement a known motion detection algorithm.
 - [ ] Add a debouncer module for the HW CPU Reset Button.
 - [ ] Optimization (performance, area)
+- [ ] Characterize the frame rate of the video streaming (inc. the motion detection).
 
 ### Application
 
@@ -167,4 +168,4 @@ This project is born out of the attempts at the exercises for [4], [5], [6]. The
 
 ## Extra (Nice to have)
 
-- [ ] Add interrupt system and incorporate into the IO cores. To consider using IP or user-defined.
+- [ ] Add interrupt system. To consider using IP or user-defined?
