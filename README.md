@@ -1,15 +1,25 @@
 # Toy SoC
 
-This is a toy SoC prototype with video streaming as the main application.
+This is a toy System on Chip (SoC) prototype with video streaming as the main application.
 
 **Documentation:**
 The documentation is linked here <?>. This documents the memory organization, register map, register definition, construction, test results etc. This README is excerpted from this documentation.
 
-**Environment**
-??
+| **Environment**           |                           |
+|--                         |--                         |
+| FPGA Development Board    | Digilent Nexys A7-50T     |
+| FPGA Part Number          | XC7A50T-1CSG3241          |
+| HW IDE                    | Vivado v2021.2            |
+| HW Language               | SystemVerilog             |
+| SW IDE                    | Vitis IDE v1.0.0.2021     |
+| SW Language               | C++/C                     |
 
-**Navigation**
-??
+**Source File Navigation:**
+
+1. HW: It follows Vivado Hierarchy (structure).
+    1. Source File : ./dev-soc/hw/dev_soc/dev_soc.srcs/sources_1
+    2. Simulation File : ./dev-soc/hw/dev_soc/dev_soc.srcs/sim_1
+2. SW: ./dev-soc/sw/user_src/
 
 ## Table of Contents
 
@@ -24,15 +34,17 @@ The documentation is linked here <?>. This documents the memory organization, re
 
 ## Objective
 
-To gain a fundamental SoC design knowledge by kickstarting a prototype. The primary goal is to build the necessary IO peripherals, mainly around the IP-generated CPU: MicroBlaze Micro Controller System (MCS) to enable a video streaming from a camera to an LCD display. This is shown in Figure ??. The secondary goal is to implement a HW motion detection algorithm on top on the video system. This is shown in Figure ??
+To gain a fundamental SoC design knowledge by kickstarting a prototype. The primary goal is to build the necessary IO peripherals, mainly around the IP-generated CPU: MicroBlaze Micro Controller System (MCS) to enable a video streaming from a camera to an LCD display. This is shown in Figure 01. The secondary goal is to implement a HW motion detection algorithm on top on the video system. This is shown in Figure ??
 
-?? insert diagram ??
+*Figure 01: System Block Diagram*
+![Figure 01](/docs/diagram/system_block_diagram.png "Figure 01: System Block Diagram")
 
 ## SoC Design Flow
 
-Given a specification, a partition is done between HW and SW. The HW design and SW design methodologies follow closely these tutorials: [0] Vivado Design Suite Tutorial and [1] Vitis Software Development Workflow, respectively. That said, the workflow is slightly modified due to different developing environments. The actual workflow  is shown in Figure ??.
+Given a specification, a partition is done between HW and SW. The HW design and SW design methodologies follow closely these tutorials: [1] Vivado Design Suite Tutorial and [2] Vitis Software Development Workflow, respectively. That said, the workflow is slightly modified due to different developing environments. The actual workflow  is shown in Figure ??.
 
-?? insert diagram ??
+*Figure 0?: Design Flow*
+![Figure 0?](/docs/diagram/design_flow_diagram.png "Figure 0?: Design Flow")
 
 ## Target
 
@@ -42,7 +54,15 @@ Given a specification, a partition is done between HW and SW. The HW design and 
 
 ## Project Status: Milestone + Demonstration
 
-Updated: June 03, 2023
+*Updated: June 03, 2023*
+
+| **Milestone**     | **What's Included**   |   **Status**  | **Video Demo (Link)** |
+|--                 |--                     |--             |--         |
+| MMIO System       | Constructed the necessary communication IO such as i2C, SPI etc to configure/communicate with the external device.    | Completed | NA (See the Test Data Section)    |
+| Video System      | Manage to stream the camera OV7670 to the LCD ILI9341. Supported camera colour format: RGB565, YUV422.  |Completed | ??        |
+| Pixel Conversion | To convert the luminosity, Y of YUV422 to RGB565 format. | Completed | ??  |
+| DDR2 SDRAM Interface  | User synchronous interface with the MIG memory interface for the external memory: DDR2 SDRAM. | Completed | NA (See the Test Data Section).   |
+| Motion Detection  | TBA       | Not Started   | NA    |
 
 ### Device Resource Utilization
 
@@ -61,9 +81,9 @@ Updated: June 03, 2023
 
 ### Design Timing Summary
 
-Updated: June 03, 2023
+*Updated: June 03, 2023*
 
-?? insert image ??
+![Figure 0?](/docs/diagram/timing_summary.png "Figure 0?: Design Timing Summary")
 
 
 ## External Devices
@@ -75,11 +95,16 @@ Updated: June 03, 2023
 | External Memory       | DDR2 SDRAM (Micron: MT47H64M16HR-25E) |
 ## Acknowledgement
 
-This project is born out of the attempts at the exercises for [??], [??], [??]. The verification technique  employed is from [?].
+This project is born out of the attempts at the exercises for [4], [5], [6]. The verification technique  employed is from [4].
 
 ## Reference
 
-??
+1. Xilinx, "Vivado Design Suite Tutorial: Embedded Processor Hardware Design (UG940)", version 2019.1, June 27, 2019.
+2. Xilinx, "Vitis Unified Software Platform Documentation: Embedded Software Development (UG1400)", version 2023.1, May 05, 2016.
+3. Digilent, "Nexys A7 Reference Manual", website, accessed 27 May 2023, Link: <https://digilent.com/reference/programmable-logic/nexys-a7/reference-manual>
+4. Donald Thomas. (2016). Logic Design and Verification Using SystemVerilog (Revised). CreateSpace
+5. Joseph Yiu. (2019). System-on-Chip with Arm® Cortex®-M Processors: Reference Book. Arm Education Media
+6. Pong P. Chu. (2018). FPGA Prototyping by SystemVerilog Exampls: Xilinx MicroBlaze MCS SoC Edition. Wiley
 
 ---
 
