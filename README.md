@@ -14,22 +14,30 @@ The documentation is linked here <?>. This documents the memory organization, re
 | SW IDE                    | Vitis IDE v1.0.0.2021     |
 | SW Language               | C++/C                     |
 
+| **External Devices**  | **Description** |
+|--                     |-- |
+| LCD                   | Adafruit – 2.8” TFT LCD with Touchscreen Breakout Board with MicroSD Socket – ILI9341   |
+| Camera                | VGA OV7670 Camera Module i2C 640x480   |
+| External Memory       | DDR2 SDRAM (Micron: MT47H64M16HR-25E). This is already embedded on the FPGA Development Board. |
+
 **Source File Navigation:**
 
 1. HW: It follows Vivado Hierarchy (structure).
     1. Source File : ./dev-soc/hw/dev_soc/dev_soc.srcs/sources_1
     2. Simulation File : ./dev-soc/hw/dev_soc/dev_soc.srcs/sim_1
+    3. User Constraint File: /dev-soc/hw/dev_soc/dev_soc.srcs/constrs_1/imports/digilent-xdc-master/Nexys-A7-50T-Master.xdc
+    4. DDR2 Pinout: ./dev-soc/ddr2_memory_pinout.ucf
 2. SW: ./dev-soc/sw/user_src/
 
 ## Table of Contents
 
 1. [Objective](#objective)
 2. [SoC Design Flow](#soc-design-flow)
-3. [Target](#target)
+3. [System Overview](#system-overview)
 4. [Project Status: Milestone + Demonstration](#project-status-milestone--demonstration)
     1. [Device Resource Utilization](#device-resource-utilization)
     2. [Design Timing Summary](#design-timing-summary)
-5. [External Devices](#external-devices)
+5. [Test Data Navigation](#test-data-navigation)
 6. [Acknowledgement](#acknowledgement)
 7. [Reference](#reference)
 
@@ -53,20 +61,13 @@ MicroBlaze (MCS) address space is partitioned into two main systems: [1] Memory-
 
 MMIO System consists of the standard IO peripherals.
 
-Video System is considered as separate system. This is because unlike the MMIO system which is control-dominated, video system is data-dominated. The user (SW) only needs to configure the video cores once, then the data streaming wll take over. The video streaming from the camera to the LCD is automatic via the handshaking mechanism among the FIFO's. This is shown in Figure 04.
+Video System is considered separately. This is because unlike the MMIO system which is control-dominated, video system is data-dominated. The user (SW) only needs to configure the video cores once, then the data streaming wll take over. The video streaming from the camera to the LCD is automatic via the handshaking mechanism. This is shown in Figure 04.
 
 *Figure 03: User Space Parition*
 ![Figure 03](/docs/diagram/user_space_partition.png "Figure 03: User space partition")
 
 *Figure 04: Video System*
 ![Figure 04](/docs/diagram/video_system.png "Figure 04: Video System")
-
-
-## Target
-
-1. MMIO System: IO Peripherals to communicate with the external devices
-2. Video System: Video streaming from a camera to a LCD
-3. Application System: Motion Detection Algorithm HW Implementation
 
 ## Project Status: Milestone + Demonstration
 
@@ -78,7 +79,7 @@ Video System is considered as separate system. This is because unlike the MMIO s
 | Video System      | Manage to stream the camera OV7670 to the LCD ILI9341. Supported camera colour format: RGB565, YUV422.  |Completed | ??        |
 | Pixel Conversion | To convert the luminosity, Y of YUV422 to RGB565 format. | Completed | ??  |
 | DDR2 SDRAM Interface  | User synchronous interface with the MIG memory interface for the external memory: DDR2 SDRAM. | Completed | NA (See the Test Data Section).   |
-| Motion Detection  | TBA       | Not Started   | NA    |
+| Motion Detection HW Implementation  | TBA       | Not Started   | NA    |
 
 ### Device Resource Utilization
 
@@ -99,15 +100,25 @@ Updated: June 03, 2023
 
 *Updated: June 03, 2023*
 
-![Figure 0?](/docs/diagram/timing_summary.png "Figure 0?: Design Timing Summary")
+![Figure 05](/docs/diagram/timing_summary.png "Figure 05: Design Timing Summary")
 
-## External Devices
+## Test Data Navigation
 
-| **External Devices**  | **Description** |
-|--                     |-- |
-| LCD                   | Adafruit – 2.8” TFT LCD with Touchscreen Breakout Board with MicroSD Socket – ILI9341   |
-| Camera                | VGA OV7670 Camera Module i2C 640x480   |
-| External Memory       | DDR2 SDRAM (Micron: MT47H64M16HR-25E) |
+Table ?? links the location of the test data of the major system blocks. Validation is conducted after the SW driver has been developed for its HW Core. Test data includes report, measurement data using logic analyser and/or video recording of the observation. 
+All the test data are stored under this parent directory: test-data < ?? >
+
+| **System Block Under Test**   | **Test Performed**    | **Test Data Relative Location (under the parent directory linked above)**     |
+|--                             |--                     |--                                                                             |
+| SPI Master Controller             | To test MOSI write data via logic analyser. | ./spi-core   |
+| i2C Master Controller             | To test i2C write protocol via logic analyser. | ./camera-ov7670-setup    |
+| LCD Display                       | To test the LCD Parallel 8080-I Interface via logic analyser. | ./mcu-8080-interface-display-controller | 
+| i2C master controller             | To test the I2C Communication with Camera OV7670. | ./i2c-core-with-camera-ov7670 |
+| LCD Display                       | To use LCD SW drivers to read from and write to LCD ILI9341.    |   ./lcd-ILI9341-sw-drivers    |
+| LCD Test Pattern Generator        | To display the LCD 8-colour bar generated from the HW core on the LCD ILI9341. | ./lcd-test-pattern-hw-generator |
+| DCMI Interface + HW Emulator      | To test the DCMI interface with a HW DCMI emulator. |   ./dcmi-interface-with-hw-emulator   |
+| DCMI Interface + Camera OV7670    | To test the DCMI interface with the Camera OV7670.  |   ./dcmi-interface-with-camera-ov7670 |
+| Pixel Colour Converter            | To test YUV422 camera OV7670 output to grayscale when displayed as RGB565 format on the LCD ILI9341.  |   ./pixel-converter-YUV422-grayscale      |
+| MIG DDR2 Interface                |   To test the interface with the external memory: DDR2 SDRAM. |   ./ddr2-sdram-mig    |
 
 ## Acknowledgement
 
