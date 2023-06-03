@@ -6,6 +6,7 @@ This is a toy SoC prototype with video streaming as the main application.
 The documentation is linked here <?>. This documents the memory organization, register map, register definition, construction, test results etc. This README is excerpted from this documentation.
 
 **Environment**
+??
 
 **Navigation**
 ??
@@ -47,15 +48,31 @@ Updated: June 03, 2023
 
 Updated: June 03, 2023
 
+| **Resource**  | **Utilization**   | **Available**     | **%** |
+|--             |--                 |--                 |--     |
+| LUT           | 4751              | 32600             | 14.57 |
+| LUTRAM        | 680               | 9600              | 7.08  |
+| FF            | 4212              | 65200             | 6.46  |
+| BRAM          | 33                | 75                | 44.00 |
+| IO            | 110               | 210               | 52.38 |
+| BUFG          | 6                 | 32                | 18.75 |
+| MMCM          | 2                 | 5                 | 40.00 |
+| PLL           | 1                 | 5                 | 20.00 |
+
 ### Design Timing Summary
 
 Updated: June 03, 2023
 
+?? insert image ??
+
 
 ## External Devices
 
-?? include the external memory; sdram;
-
+| **External Devices**  | **Description** |
+|--                     |-- |
+| LCD                   | Adafruit – 2.8” TFT LCD with Touchscreen Breakout Board with MicroSD Socket – ILI9341   |
+| Camera                | VGA OV7670 Camera Module i2C 640x480   |
+| External Memory       | DDR2 SDRAM (Micron: MT47H64M16HR-25E) |
 ## Acknowledgement
 
 This project is born out of the attempts at the exercises for [??], [??], [??]. The verification technique  employed is from [?].
