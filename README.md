@@ -21,6 +21,7 @@
 - [x] Add a SDRAM interface user logic for the MIG
 - [ ] Implement a known motion detection algorithm.
 - [ ] Add a debouncer module for the HW CPU Reset Button.
+- [ ] Optimization (performace, area)
 
 ### Application
 
@@ -29,9 +30,6 @@
 - [x] IP generate DDR memory interface for Frame Buffers?
 - [x] Camera OV7670 via i2C interface
 - [x] LCD ILI9341 Configuration Interface
-
-## Optimization
-- [ ] speed vs area?
 
 ## Extra (Nice to have)
 
