@@ -25,26 +25,42 @@ The documentation is linked here <?>. This documents the memory organization, re
 
 1. [Objective](#objective)
 2. [SoC Design Flow](#soc-design-flow)
-3. [Project Status: Milestone + Demonstration](#project-status-milestone--demonstration)
+3. [Target](#target)
+4. [Project Status: Milestone + Demonstration](#project-status-milestone--demonstration)
     1. [Device Resource Utilization](#device-resource-utilization)
     2. [Design Timing Summary](#design-timing-summary)
-4. [External Devices](#external-devices)
-5. [Acknowledgement](#acknowledgement)
-6. [Reference](#reference)
+5. [External Devices](#external-devices)
+6. [Acknowledgement](#acknowledgement)
+7. [Reference](#reference)
 
 ## Objective
 
-To gain a fundamental SoC design knowledge by kickstarting a prototype. The primary goal is to build the necessary IO peripherals, mainly around the IP-generated CPU: MicroBlaze Micro Controller System (MCS) to enable a video streaming from a camera to an LCD display. This is shown in Figure 01. The secondary goal is to implement a HW motion detection algorithm on top on the video system. This is shown in Figure ??
+To gain a fundamental SoC design knowledge by kickstarting a prototype. The primary goal is to build the necessary IO peripherals, mainly around the IP-generated CPU: MicroBlaze Micro Controller System (MCS) to enable a video streaming from a camera to an LCD display. This is shown in Figure 01. The secondary goal is to implement a HW motion detection algorithm on top on the video system. 
 
 *Figure 01: System Block Diagram*
-![Figure 01](/docs/diagram/system_block_diagram.png "Figure 01: System Block Diagram")
+![Figure 01](/docs/diagram/system_block.png "Figure 01: System Block Diagram")
 
 ## SoC Design Flow
 
 Given a specification, a partition is done between HW and SW. The HW design and SW design methodologies follow closely these tutorials: [1] Vivado Design Suite Tutorial and [2] Vitis Software Development Workflow, respectively. That said, the workflow is slightly modified due to different developing environments. The actual workflow  is shown in Figure ??.
 
 *Figure 0?: Design Flow*
-![Figure 0?](/docs/diagram/design_flow_diagram.png "Figure 0?: Design Flow")
+![Figure 0?](/docs/diagram/design_flow.png "Figure 0?: Design Flow")
+
+## System Overview
+
+MicroBlaze (MCS) address space is partitioned into two main systems: [1] Memory-mapped IO (MMIO) System and [2] Video System. This is shown in Figure ??. 
+
+MMIO System consists the standard IO peripherals.
+
+Video System is considered as separate system. This is because unlike the MMIO system which is control-dominated, video system is data-dominated. The user (SW) only needs to configure the video cores once, then the data streaming wll take over. The video streaming from the camera to the LCD is automatic via the handshaking mechanism among the FIFO's. This is shown in Figure ??
+
+*Figure 0?: User Space Parition*
+![Figure 0?](/docs/diagram/user_space_partition.png "Figure ??: User space partition")
+
+*Figure 0?: Video System*
+![Figure 0?](/docs/diagram/video_system.png "Figure ??: Video System")
+
 
 ## Target
 
@@ -85,7 +101,6 @@ Updated: June 03, 2023
 
 ![Figure 0?](/docs/diagram/timing_summary.png "Figure 0?: Design Timing Summary")
 
-
 ## External Devices
 
 | **External Devices**  | **Description** |
@@ -93,6 +108,7 @@ Updated: June 03, 2023
 | LCD                   | Adafruit – 2.8” TFT LCD with Touchscreen Breakout Board with MicroSD Socket – ILI9341   |
 | Camera                | VGA OV7670 Camera Module i2C 640x480   |
 | External Memory       | DDR2 SDRAM (Micron: MT47H64M16HR-25E) |
+
 ## Acknowledgement
 
 This project is born out of the attempts at the exercises for [4], [5], [6]. The verification technique  employed is from [4].
@@ -141,4 +157,3 @@ This project is born out of the attempts at the exercises for [4], [5], [6]. The
 ## Extra (Nice to have)
 
 - [ ] Add interrupt system and incorporate into the IO cores. To consider using IP or user-defined.
-
