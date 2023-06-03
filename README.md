@@ -5,6 +5,8 @@ This is a toy SoC prototype with video streaming as the main application.
 **Documentation:**
 The documentation is linked here <?>. This documents the memory organization, register map, register definition, construction, test results etc. This README is excerpted from this documentation.
 
+**Environment**
+
 **Navigation**
 ??
 
@@ -12,13 +14,12 @@ The documentation is linked here <?>. This documents the memory organization, re
 
 1. [Objective](#objective)
 2. [SoC Design Flow](#soc-design-flow)
-3. [Milestone + Demonstration](#milestone--demonstration)
+3. [Project Status: Milestone + Demonstration](#project-status-milestone--demonstration)
     1. [Device Resource Utilization](#device-resource-utilization)
     2. [Design Timing Summary](#design-timing-summary)
-4. [Environment](#environment)
-5. [External Devices](#external-devices)
-6. [Acknowledgement](#acknowledgement)
-7. [Reference](#reference)
+4. [External Devices](#external-devices)
+5. [Acknowledgement](#acknowledgement)
+6. [Reference](#reference)
 
 ## Objective
 
@@ -34,11 +35,11 @@ Given a specification, a partition is done between HW and SW. The HW design and 
 
 ## Target
 
-1. MMIO System: IO Peripherals to communicate with the external devices.
-2. Video System: Video streaming from the camera to the LCD.
+1. MMIO System: IO Peripherals to communicate with the external devices
+2. Video System: Video streaming from a camera to a LCD
 3. Application System: Motion Detection Algorithm HW Implementation
 
-## Milestone + Demonstration
+## Project Status: Milestone + Demonstration
 
 Updated: June 03, 2023
 
@@ -50,10 +51,10 @@ Updated: June 03, 2023
 
 Updated: June 03, 2023
 
-## Environment
 
 ## External Devices
 
+?? include the external memory; sdram;
 
 ## Acknowledgement
 
@@ -79,17 +80,17 @@ This project is born out of the attempts at the exercises for [??], [??], [??]. 
 - [x] LCD Display Parallel Interface
 - [x] Pixel Test HW generation for LCD Display
 - [x] Digital Camera Interface (DCMI)
-- [x] Video Streaming System integrating the camera and the LCD.
+- [x] Video Streaming System integrating the camera and the LCD
 - [x] Colour format conversion
-- [x] Configure IP-generated memory interface (MIG) with the external SDRAM
-- [x] Add a SDRAM interface user logic for the MIG
+- [x] Configure IP-generated memory interface (MIG) with the external DDR2 SDRAM.
+- [x] Add a synchronous interface user logic for the MIG.
 - [ ] Implement a known motion detection algorithm.
 - [ ] Add a debouncer module for the HW CPU Reset Button.
 - [ ] Optimization (performance, area)
 
 ### Application
 
-- [ ] Test SW Function for each IO cores
+- [x] Test SW Function for each core.
 - [x] IP generate Clock management circuit
 - [x] IP generate DDR memory interface for Frame Buffers?
 - [x] Camera OV7670 via i2C interface
@@ -97,12 +98,5 @@ This project is born out of the attempts at the exercises for [??], [??], [??]. 
 
 ## Extra (Nice to have)
 
-### General 
-
 - [ ] Add interrupt system and incorporate into the IO cores. To consider using IP or user-defined.
 
-### System Timer
-
-- [ ] Include extra control register to configure counter count range instead of using the full-64-bit range.
-- [ ] Include prescaler control to set the count frequency. *Not sure if it is a good idea.*
-- [ ] Include extra status register for System Timer to indicate whether the counter expires (overflow), and how many time it has expired, and the associated set/clear status register operations.
