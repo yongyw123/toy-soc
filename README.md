@@ -2,7 +2,7 @@
 
 This is a toy System on Chip (SoC) prototype with video streaming as the main application.
 
-**Documentation:** The documentation, titled "master_docs.docx" is linked here: <https://drive.google.com/drive/folders/1FAS5dOIlAdlUM4IH7u-qAvcwE-8EjuxC?usp=drive_link>. This documents the memory organization, register map, register definition, construction, test results etc. This README is excerpted from this documentation.
+**Documentation:** The documentation, titled "master_docs.docx" is linked [here](https://drive.google.com/drive/folders/1FAS5dOIlAdlUM4IH7u-qAvcwE-8EjuxC?usp=drive_link). This documents the memory organization, register map, register definition, construction, test results etc. This README is excerpted from this documentation.
 
 | **Environment**           |                           |
 |--                         |--                         |
