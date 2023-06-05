@@ -126,12 +126,12 @@ This project is born out of the attempts at the exercises for [4], [5], [6].
 
 ## Reference
 
-1. Xilinx, "Vivado Design Suite Tutorial: Embedded Processor Hardware Design (UG940)", version 2019.1, June 27, 2019.
-2. Xilinx, "Vitis Unified Software Platform Documentation: Embedded Software Development (UG1400)", version 2023.1, May 05, 2016.
-3. Digilent, "Nexys A7 Reference Manual", website, accessed 27 May 2023, Link: <https://digilent.com/reference/programmable-logic/nexys-a7/reference-manual>
-4. Donald Thomas, CreateSpace, “Logic Design and Verification Using SystemVerilog (Revised)”, 2016
-5. Joseph Yiu, Arm Education Media “System-on-Chip with Arm® Cortex®-M Processors: Reference Book”, 2019
-6. Pong P. Chu, Wiley, “FPGA Prototyping by SystemVerilog Examples: Xilinx MicroBlaze MCS SoC Edition”, 2018
+1. Xilinx. (2019, June 27). "Vivado Design Suite Tutorial: Embedded Processor Hardware Design (UG940)". version 2019.1.
+2. Xilinx. (2016, May 05). "Vitis Unified Software Platform Documentation: Embedded Software Development (UG1400)". version 2023.1.
+3. Digilent. "Nexys A7 Reference Manual". [Online]. Available: <https://digilent.com/reference/programmable-logic/nexys-a7/reference-manual>. Accessed 2023, 27 May.
+4. Donald Thomas. (2016). “Logic Design and Verification Using SystemVerilog (Revised)”. CreateSpace.
+5. Joseph Yiu. (2019). “System-on-Chip with Arm® Cortex®-M Processors: Reference Book”. Arm Education Media.
+6. Pong P. Chu. (2018). “FPGA Prototyping by SystemVerilog Examples: Xilinx MicroBlaze MCS SoC Edition”. Wiley.
 
 ---
 
