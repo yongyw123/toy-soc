@@ -102,7 +102,7 @@ The traffic controller is to facilitate the data flow. This is necessary mainly 
 |--     |--     |--     |
 | 1 | For each pixel x: $$M_{t-1}(x) < I_{t}(x) \implies M_{t}(x) = M_{t-1}(x) + 1$$ $$M_{t-1}(x) \ge I_{t}(x) \implies M_{t}(x) = M_{t-1}(x) - 1$$ |  ![Figure 06](/docs/diagram/motion-detection/pe01.png "Figure 06: PE 01") |
 | 2 | For each pixel x: $$Delta_{t}(x) = abs(M_{t}(x) - I_{t}(x))$$ |  ![Figure 07](/docs/diagram/motion-detection/pe02.png "Figure 07: PE 02") |
-| 3 | For each pixel, x such that $$Delta_{t}(x) \ne 0$$ we have: $$V_{t-1}(x) < N*Delta_{t}(x) \implies V_{t}(x) = V_{t-1}(x) + 1$$ $$V_{t-1}(x) \ge N*Delta_{t}(x) \implies V_{t}(x) = V_{t-1}(x) - 1$$ | ![Figure 08](/docs/diagram/motion-detection/pe03.png "Figure 08: PE 03") |
+| 3 | For each pixel, x such that $$Delta_{t}(x) \ne 0$$ we have: $$V_{t-1}(x) < N\cdot Delta_{t}(x) \implies V_{t}(x) = V_{t-1}(x) + 1$$ $$V_{t-1}(x) \ge N \cdot Delta_{t}(x) \implies V_{t}(x) = V_{t-1}(x) - 1$$ | ![Figure 08](/docs/diagram/motion-detection/pe03.png "Figure 08: PE 03") |
 | 4     | For each pixel x, $$Delta_{t}(x) < V_{t}(x) \implies D_{t}(x) = 1$$ $$Delta_{t}(x) \ge V_{t}(x) \implies D_{t}(x) = 0$$ | ![Figure 09](/docs/diagram/motion-detection/pe04.png "Figure 08: PE 04")    |
 
 ## Project Status: Milestone + Demonstration
