@@ -42,7 +42,7 @@ This is a toy System on Chip (SoC) prototype with video streaming as the main ap
 
 ## Objective
 
-To gain a fundamental SoC design knowledge by kickstarting a prototype. The primary goal is to build the necessary IO peripherals, mainly around the IP-generated CPU: MicroBlaze Micro Controller System (MCS) to enable a video streaming from a camera to an LCD display. This is shown in Figure 01. The secondary goal is to implement a HW motion detection algorithm on top on the video system. 
+To gain a fundamental SoC design knowledge by kickstarting a prototype. The primary goal is to build the necessary IO peripherals, mainly around the IP-generated CPU: MicroBlaze Micro Controller System (MCS) to enable a video streaming from a camera to an LCD display. This is shown in Figure 01. The secondary goal is to implement a HW motion detection algorithm on top on the video system.
 
 *Figure 01: System Block Diagram*
 ![Figure 01](/docs/diagram/system_block.png "Figure 01: System Block Diagram")
@@ -67,6 +67,43 @@ Video System is considered separately. This is because unlike the MMIO system wh
 
 *Figure 04: Video System*
 ![Figure 04](/docs/diagram/video_system.png "Figure 04: Video System")
+
+## Motion Detection Overview
+
+This section briefly discusses about the chosen algorithm and the HW implementation.
+
+### Background
+
+The chosen motion detection algorithm is based on this paper: [7] “A robust and computationally efficient motion detection algorithm based on Σ-Δ background estimation”. This algorithm is pixel-based. Using similar language and notation as in the paper, the relevant terms, variables and symbols are listed in Table ?? below. These shall be used for the rest of the document. Since the algorithm is pixel-based, it is implicit that each computation term (variables) listed below is indexed by time, t and at a given pixel, x.
+
+| **Variable**  | **Symbol**    | **Definition**    | **Range**     | **BitWidth**  |
+|--             |--             |--                 |--             |--             |
+| Input Frame   | $$I_{t}(x)$$  | Raw pixel from the camera. Pixel in grayscale. | [0, 255] | 8 |
+| Mean  | $$M_{t}(x)$$  | This is denoted as the first observation field in the paper | [0, 255] | 8 |
+| Delta | $$Delta_{t}(x)$$  | Absolute difference between I_{t}(x) and M_{t}(x) | [0, 255]  | 8 |
+| Variance  | $$V_{t}(x)$$  | This is denoted as the second observation field in the paper. | [0, 255]  | 8 |
+| Amplification Factor   | $$N$$     | This serves as a comparison threshold. Roughly speaking, the higher the value is, the higher delta is needed for the current pixel to be considered as more likely to moving. | Integer: > 0 | NA |
+| Final Detection Output | $$D_{t}(x)$$     | True if the current pixel is more likely to be moving; False otherwise. For convenience and display, a white pixel (0xFF) shall represent true; a black pixel (0x00) shall represent false.     | "Binary"  | 8 |
+
+### HW Implementation (Algorithm Mapping)
+
+Online (serial) processing method is employed where the incoming pixel from the camera is processed on-the-fly. The HW system diagram is shown in Figure 05 below. The system consists of two main blocks: (1) HW mapping of the motion detection algorithm; (2) Traffic Controller.
+
+The HW mapping is direct. This is tabulated in Table 14 where each processing element corresponds directly to a part of the algorithm.
+
+The traffic controller is to facilitate the data flow. This is necessary mainly because: (1) the video streaming system is handshaking-based, (2) the DDR2 interface only supports sequential transfer: one read/write transaction at time, (3) the motion detection is serial-processing based on one-pixel (8-bit) but the DDR2 transaction is 128-bit which hosts 8 computation terms corresponding to 8 pixels.
+
+*Figure 05: Motion Detection System Diagram*
+![Figure 05](/docs/diagram/motion-detection/motion_detection_system.png "Figure 05: Motion Detection System Diagram")
+
+*Table 01: HW Mapping of the Motion Detection Algorithm*
+
+| **#** | **Algorithm** *(For each frame, t)*   | **Processing Elements (PE) Corresponding to the Algorithm** |
+|--     |--     |--     |
+| 1 | For each pixel x: $$M_{t-1}(x) < I_{t}(x) \implies M_{t}(x) = M_{t-1}(x) + 1$$ $$M_{t-1}(x) \ge I_{t}(x) \implies M_{t}(x) = M_{t-1}(x) - 1$$ |  ![Figure 06](/docs/diagram/motion-detection/pe01.png "Figure 06: PE 01") |
+| 2 | For each pixel x: $$Delta_{t}(x) = abs(M_{t}(x) - I_{t}(x))$$ |  ![Figure 07](/docs/diagram/motion-detection/pe02.png "Figure 07: PE 02") |
+| 3 | For each pixel, x such that $$Delta_{t}(x) \ne 0$$ we have: $$V_{t-1}(x) < N*Delta_{t}(x) \implies V_{t}(x) = V_{t-1}(x) + 1$$ $$V_{t-1}(x) \ge N*Delta_{t}(x) \implies V_{t}(x) = V_{t-1}(x) - 1$$ | ![Figure 08](/docs/diagram/motion-detection/pe03.png "Figure 08: PE 03") |
+| 4     | For each pixel x, $$Delta_{t}(x) < V_{t}(x) \implies D_{t}(x) = 1$$ $$Delta_{t}(x) \ge V_{t}(x) \implies D_{t}(x) = 0$$ | ![Figure 09](/docs/diagram/motion-detection/pe04.png "Figure 08: PE 04")    |
 
 ## Project Status: Milestone + Demonstration
 
@@ -103,7 +140,7 @@ Updated: June 03, 2023
 
 ## Test Data Navigation
 
-Table 01 links the location of the test data of the major system blocks. Validation is conducted after the SW driver has been developed for its HW Core. Test data includes report, measurement data using logic analyser and/or video recording of the observation. 
+Table 01 links the location of the test data of the major system blocks. Validation is conducted after the SW driver has been developed for its HW Core. Test data includes report, measurement data using logic analyser and/or video recording of the observation.
 All the test data are stored under this parent directory: test-data <https://drive.google.com/drive/folders/1dAce-5lKH0lcdWMkTcalP11L70i5ODlV?usp=drive_link>
 
 *Table 01:*
@@ -111,7 +148,7 @@ All the test data are stored under this parent directory: test-data <https://dri
 |--                             |--                     |--                                                                             |
 | SPI Master Controller             | To test MOSI write data via logic analyser. | ./spi-core   |
 | i2C Master Controller             | To test i2C write protocol via logic analyser. | ./camera-ov7670-setup    |
-| LCD Display                       | To test the LCD Parallel 8080-I Interface via logic analyser. | ./mcu-8080-interface-display-controller | 
+| LCD Display                       | To test the LCD Parallel 8080-I Interface via logic analyser. | ./mcu-8080-interface-display-controller |
 | i2C master controller             | To test the I2C Communication with Camera OV7670. | ./i2c-core-with-camera-ov7670 |
 | LCD Display                       | To use LCD SW drivers to read from and write to LCD ILI9341.    |   ./lcd-ILI9341-sw-drivers    |
 | LCD Test Pattern Generator        | To display the LCD 8-colour bar generated from the HW core on the LCD ILI9341. | ./lcd-test-pattern-hw-generator |
@@ -122,7 +159,7 @@ All the test data are stored under this parent directory: test-data <https://dri
 
 ## Acknowledgement
 
-This project is born out of the attempts at the exercises for [4], [5], [6]. 
+This project is born out of the attempts at the exercises for [4], [5], [6].
 
 ## Reference
 
@@ -132,6 +169,7 @@ This project is born out of the attempts at the exercises for [4], [5], [6].
 4. Donald Thomas. (2016). “Logic Design and Verification Using SystemVerilog (Revised)”. CreateSpace.
 5. Joseph Yiu. (2019). “System-on-Chip with Arm® Cortex®-M Processors: Reference Book”. Arm Education Media.
 6. Pong P. Chu. (2018). “FPGA Prototyping by SystemVerilog Examples: Xilinx MicroBlaze MCS SoC Edition”. Wiley.
+7. A. Manzanera, J.C. Richefeu. (2004). “A robust and computationally efficient motion detection algorithm based on Σ-Δ background estimation”. [Online]. Available: <https://hal.science/hal-01222695/document>
 
 ---
 
