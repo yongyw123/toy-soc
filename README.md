@@ -33,12 +33,15 @@ This is a toy System on Chip (SoC) prototype with video streaming as the main ap
 1. [Objective](#objective)
 2. [SoC Design Flow](#soc-design-flow)
 3. [System Overview](#system-overview)
-4. [Project Status: Milestone + Demonstration](#project-status-milestone--demonstration)
+4. [Motion Detection Overview](#motion-detection-overview)
+    1. [Background](#background)
+    2. [HW Implementation (Algorithm Mapping)](#hw-implementation-algorithm-mapping)
+5. [Project Status: Milestone + Demonstration](#project-status-milestone--demonstration)
     1. [Device Resource Utilization](#device-resource-utilization)
     2. [Design Timing Summary](#design-timing-summary)
-5. [Test Data Navigation](#test-data-navigation)
-6. [Acknowledgement](#acknowledgement)
-7. [Reference](#reference)
+6. [Test Data Navigation](#test-data-navigation)
+7. [Acknowledgement](#acknowledgement)
+8. [Reference](#reference)
 
 ## Objective
 
