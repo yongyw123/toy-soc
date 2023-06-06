@@ -144,7 +144,7 @@ Updated: June 03, 2023
 ## Test Data Navigation
 
 Table 01 links the location of the test data of the major system blocks. Validation is conducted after the SW driver has been developed for its HW Core. Test data includes report, measurement data using logic analyser and/or video recording of the observation.
-All the test data are stored under this parent directory: test-data <https://drive.google.com/drive/folders/1dAce-5lKH0lcdWMkTcalP11L70i5ODlV?usp=drive_link>
+All the test data are stored under this parent directory: test-data <https://drive.google.com/drive/folders/1dAce-5lKH0lcdWMkTcalP11L70i5ODlV?usp=sharing>
 
 *Table 01:*
 | **System Block Under Test**   | **Test Performed**    | **Test Data Relative Location (under the parent directory linked above)**     |
